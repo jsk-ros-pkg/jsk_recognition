@@ -174,7 +174,7 @@ namespace jsk_pcl_ros
     tf::StampedTransform transform
       = lookupTransformWithDuration(tf_, sensor_frame_, msg->header.frame_id,
                                     ros::Time(0.0),
-                                    ros::Duration(0.0));
+                                    ros::Duration(1.0));
     tf::vectorTFToEigen(transform.getOrigin(), viewpoint_);
 
     if (!tracker_) {
@@ -287,13 +287,19 @@ namespace jsk_pcl_ros
         Polygon::Ptr polygon = Polygon::fromROSMsgPtr(latest_polygon_msg_->polygons[i].polygon);
         polygons_.push_back(polygon);
       }
-      // viewpoint
-      tf::StampedTransform transform
-        = lookupTransformWithDuration(tf_, sensor_frame_, msg->header.frame_id,
-                                      ros::Time(0.0),
-                                      ros::Duration(0.0));
-      tf::vectorTFToEigen(transform.getOrigin(), viewpoint_);
-      
+      try {
+        // viewpoint
+        tf::StampedTransform transform
+          = lookupTransformWithDuration(tf_, sensor_frame_, msg->header.frame_id,
+                                        ros::Time(0.0),
+                                        ros::Duration(1.0));
+        tf::vectorTFToEigen(transform.getOrigin(), viewpoint_);
+      }
+      catch (tf2::TransformException& e) {
+        NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+        return;
+      }
+
       ParticleCloud::Ptr particles = initParticles();
       tracker_.reset(new pcl::tracking::ROSCollaborativeParticleFilterTracker<pcl::PointXYZ, pcl::tracking::ParticleCuboid>);
       tracker_->setCustomSampleFunc(boost::bind(&PlaneSupportedCuboidEstimator::sample, this, _1));

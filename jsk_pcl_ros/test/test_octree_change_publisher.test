@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_octree_change_publisher.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_octree_change_publisher"
+        name="test_octree_change_publisher"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /pcl_nodelet/octree_change_detector/octree_change_result
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

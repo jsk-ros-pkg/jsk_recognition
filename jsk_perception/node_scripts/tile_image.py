@@ -10,7 +10,7 @@ from jsk_topic_tools import ConnectionBasedTransport
 import message_filters
 import rospy
 from sensor_msgs.msg import Image
-import pkg_resources
+import itertools, pkg_resources
 from distutils.version import StrictVersion
 from threading import Lock
 
@@ -74,16 +74,18 @@ class TileImages(ConnectionBasedTransport):
             self.sub_img_list = [rospy.Subscriber(topic, Image, self.simple_callback(topic), queue_size=1) for topic in self.input_topics]
             rospy.Timer(rospy.Duration(0.1), self.timer_callback)
         else:
+            queue_size = rospy.get_param('~queue_size', 10)
+            slop = rospy.get_param('~slop', 1)
             for i, input_topic in enumerate(self.input_topics):
                 sub_img = message_filters.Subscriber(input_topic, Image)
                 self.sub_img_list.append(sub_img)
             if self.approximate_sync:
-                async = message_filters.ApproximateTimeSynchronizer(
-                    self.sub_img_list, queue_size=10, slop=1)
-                async.registerCallback(self._apply)
+                sync = message_filters.ApproximateTimeSynchronizer(
+                    self.sub_img_list, queue_size=queue_size, slop=slop)
+                sync.registerCallback(self._apply)
             else:
                 sync = message_filters.TimeSynchronizer(
-                    self.sub_img_list, queue_size=10)
+                    self.sub_img_list, queue_size=queue_size)
                 sync.registerCallback(self._apply)
     def unsubscribe(self):
         for sub in self.sub_img_list:

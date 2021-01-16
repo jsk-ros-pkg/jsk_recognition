@@ -1,0 +1,35 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <group ns="checkerboard1">
+    <include file="$(find checkerboard_detector)/sample/sample_checkerboard_detector.launch">
+      <arg name="gui" value="false"/>
+      <arg name="CAMERA_FRAME" value="/camera1"/>
+      <arg name="TRANSFORM" value="5.526 6.230 1.627 0.747 0.387 -0.246 -0.482"/>
+    </include>
+  </group>
+
+  <group ns="checkerboard2">
+    <include file="$(find checkerboard_detector)/sample/sample_checkerboard_detector.launch">
+      <arg name="gui" value="false"/>
+      <arg name="CAMERA_FRAME" value="/camera2"/>
+      <arg name="TRANSFORM" value="4.526 6.230 1.627 0.747 0.387 -0.246 -0.482"/>
+    </include>
+  </group>
+
+  <rosparam>
+    frame_id: camera2
+  </rosparam>
+  <node name="objectdetection_transform_echo"
+        pkg="checkerboard_detector" type="objectdetection_transform_echo">
+    <remap from="detection1" to="checkerboard1/checkerboard_detector/output/ObjectDetection"/>
+    <remap from="detection2" to="checkerboard2/checkerboard_detector/output/ObjectDetection"/>
+    <remap from="pose" to="~output"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find checkerboard_detector)/sample/config/sample_objectdetection_transform_echo.rviz"/>
+  </group>
+</launch>

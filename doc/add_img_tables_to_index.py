@@ -13,7 +13,7 @@ Usage::
 
 import hashlib
 import os
-import sys
+import six
 
 
 __copyright__ = '2015, JSK Lab'
@@ -32,13 +32,19 @@ def rst_image_table_data(url_prefix, img_files):
                           for ext in ['.rst', '.md']]
         if not any(map(os.path.exists, doc_candidates)):
             continue
+        if hasattr(img_file, 'encode'):
+            label_name = hashlib.sha1(img_file.encode('utf-8')).hexdigest()[:8]
+        else:
+            label_name = hashlib.sha1(img_file).hexdigest()[:8]
         img_file = os.path.join(url_prefix, 'images', img_file)
-        label_name = hashlib.sha1(title).hexdigest()[:8]
-        labels.append('''\
-.. |{label}| image:: {img}
-   :scale: 100%
-   :align: middle
-   :target: {url}'''.format(label=label_name, img=img_file, url=os.path.join(url_prefix, title + '.html')))
+        labels.append(
+            '\n'
+            '.. |{label}| image:: {img}\n'
+            '   :scale: 100%\n'
+            '   :align: middle\n'
+            '   :target: {url}\n'.format(
+                label=label_name, img=img_file,
+                url=os.path.join(url_prefix, title + '.html')))
         blocks.append('|{label}|'.format(label=label_name))
     # pack blocks with blank text
     while len(blocks) % N_COLUMN != 0:
@@ -46,7 +52,7 @@ def rst_image_table_data(url_prefix, img_files):
     # generate table
     table = []
     table.append('+------------+------------+------------+')
-    for i in xrange(0, len(blocks), N_COLUMN):
+    for i in six.moves.range(0, len(blocks), N_COLUMN):
         table.append('| ' + ' | '.join(blocks[i:i+N_COLUMN]) + ' |')
         table.append('+------------+------------+------------+')
     return '\n\n'.join(labels), '\n'.join(table)
@@ -79,4 +85,4 @@ def main(exclude_patterns):
 
 
 if __name__ == '__main__':
-    main()
+    main(['_build', 'venv', 'README.md'])

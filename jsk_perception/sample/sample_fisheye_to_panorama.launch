@@ -1,0 +1,53 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/image/martin-espinoza-1148036-unsplash_640x480.jpg
+    </rosparam>
+  </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
+
+  <node name="fisheye_to_panorama_rectify"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_perception/FisheyeToPanorama">
+    <remap from="~input" to="$(arg INPUT_IMAGE)"/>
+    <rosparam>
+      use_panorama: false
+      simple_panorama: false
+      degree: 40.0
+      scale: 0.8
+    </rosparam>
+  </node>
+
+  <node name="fisheye_to_panorama"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_perception/FisheyeToPanorama">
+    <remap from="~input" to="$(arg INPUT_IMAGE)"/>
+    <rosparam>
+      use_panorama: true
+      simple_panorama: true
+      degree: 40.0
+      scale: 0.8
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="tile_image"
+          pkg="jsk_perception" type="tile_image.py">
+      <rosparam>
+        input_topics:
+          - /image_publisher/output
+          - /fisheye_to_panorama_rectify/output
+          - /fisheye_to_panorama/output
+          - /fisheye_to_panorama/output_bilinear
+      </rosparam>
+    </node>
+
+    <node name="image_view"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="tile_image/output"/>
+    </node>
+  </group>
+</launch>

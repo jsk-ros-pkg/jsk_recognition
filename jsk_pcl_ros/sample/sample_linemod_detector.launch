@@ -1,0 +1,22 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml"/>
+
+  <node name="linemod_detector"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/LINEMODDetector">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <rosparam subst_value="true">
+      template_file: $(find jsk_pcl_ros)/trained_data/linemod_template/kettle
+      gradient_magnitude_threshold: 10.0
+      detection_threshold: 0.75
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/linemod_detector.rviz"/>
+  </group>
+</launch>

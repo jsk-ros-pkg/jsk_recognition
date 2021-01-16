@@ -1,0 +1,25 @@
+<launch>
+
+  <include file="$(find checkerboard_detector)/sample/sample_checkerboard_detector.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_checkerboard_detector"
+        name="test_checkerboard_detector"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="60">
+    <rosparam>
+      topic_0: /checkerboard_detector/output/ObjectDetection
+      timeout_0: 60
+      topic_1: /checkerboard_detector/output/objectdetection_pose
+      timeout_1: 60
+      topic_2: /checkerboard_detector/output/corner_point
+      timeout_2: 60
+      topic_3: /checkerboard_detector/output/polygons
+      timeout_3: 60
+      topic_4: /checkerboard_detector/output/debug_image
+      timeout_4: 60
+    </rosparam>
+  </test>
+
+</launch>

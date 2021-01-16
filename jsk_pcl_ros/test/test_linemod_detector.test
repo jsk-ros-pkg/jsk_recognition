@@ -1,0 +1,23 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_linemod_detector.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_linemod_detector"
+        name="test_linemod_detector"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /linemod_detector/output
+      timeout_0: 30
+      topic_1: /linemod_detector/output/mask
+      timeout_1: 30
+      topic_2: /linemod_detector/output/pose
+      timeout_2: 30
+      topic_3: /linemod_detector/output/template
+      timeout_3: 30
+    </rosparam>
+  </test>
+
+</launch>

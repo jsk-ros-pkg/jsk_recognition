@@ -1,0 +1,29 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_morphological_operator.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_morphological_operator"
+        name="test_morphological_operator"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /erode_mask_image/output
+      timeout_0: 30
+      topic_1: /dilate_mask_image/output
+      timeout_1: 30
+      topic_2: /opening/output
+      timeout_2: 30
+      topic_3: /closing/output
+      timeout_3: 30
+      topic_4: /morphological_gradient/output
+      timeout_4: 30
+      topic_5: /top_hat/output
+      timeout_5: 30
+      topic_6: /black_hat/output
+      timeout_6: 30
+    </rosparam>
+  </test>
+
+</launch>

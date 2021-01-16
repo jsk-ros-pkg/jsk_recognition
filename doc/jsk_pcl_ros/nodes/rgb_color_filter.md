@@ -1,4 +1,7 @@
 # RGBColorFilter
+
+![](images/rgb_color_filter.png)
+
 Filter pointcloud based on RGB range.
 
 ## Subscribing Topic
@@ -16,6 +19,14 @@ Filter pointcloud based on RGB range.
   Filtered pointcloud.
 
 ## Parameters
+* `~keep_organized` (Bool, default: `False`)
+
+  Whether to publish organized point cloud if possible.
+
+* `~use_indices` (Bool, default: `False`)
+
+  If true, apply filter only in `~indices` region.
+
 * `~r_max` (Integer, default: `255`)
 * `~r_min` (Integer, default: `0`)
 * `~g_max` (Integer, default: `255`)
@@ -24,3 +35,9 @@ Filter pointcloud based on RGB range.
 * `~b_min` (Integer, default: `0`)
 
   Color range to filter.
+
+## Sample
+
+```bash
+roslaunch jsk_pcl_ros rgb_color_filter_sample.launch
+```

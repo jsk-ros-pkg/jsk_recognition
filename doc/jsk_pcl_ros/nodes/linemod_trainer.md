@@ -11,6 +11,7 @@ it will train the data and dump the templates into lmt file.
 * `~input` (`sensor_msgs/PointCloud2`)
 
   This pointcloud should be able to be converted into `pcl::PointXYZRGBA` data.
+
 * `~input/indices` (`pcl_msgs/PointIndices`)
 
   Indices to mask object in `~input` pointcloud.
@@ -31,13 +32,17 @@ it will train the data and dump the templates into lmt file.
 
   Start training and dump result into a file.
 
-* `~clear_data` (`std_srvs/Empty`)
+* `~clear` (`std_srvs/Empty`)
 
   Clear stored data.
+
 ## Parameters
 * `~output_file` (`String`, default: `template`)
 
    A file path to dump trained data.
+
+   e.g.) If this parameter is set to `/foo/bar`, then `/foo/bar.linemod`,
+   `/foo/bar.pcd` and `/foo/bar_poses.yaml` will be created.
 
 * `~sample_viewpoint` (`Bool`, default: `True`)
 
@@ -51,3 +56,13 @@ it will train the data and dump the templates into lmt file.
 * `~sample_viewpoint_radius_max` (`Double`, default: `0.8`)
 
   Viewpoint sampling parameters. Pose of model is sampled by golden ratio spatial technique.
+
+* `~n_points` (`Int`, default: `150`)
+
+  Number of viewpoint set.
+
+## Sample
+
+```bash
+roslaunch jsk_pcl_ros sample_linemod_trainer.launch
+```

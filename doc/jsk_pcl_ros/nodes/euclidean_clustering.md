@@ -12,7 +12,12 @@ tries to track the segment.
 ## Subscribing Topics
 * `~input` (`sensor_msgs/PointCloud2`):
 
-   input pointcloud.
+   input pointcloud. If `~multi` is `false`, this input is only enough.
+
+
+* `~input/cluster_indices` (`jsk_recognition_msgs/ClusterPointIndices`):
+
+   input indices. If `~multi` is `true`, synchronized `~input` and `~input/cluster_indices` are used.
 
 ## Publishing Topics
 * `~output` (`jsk_recognition_msgs/ClusterPointIndices`):
@@ -47,6 +52,40 @@ sensor_msgs/PointCloud2[] output
 * `~min_size` (Integer, default: `20`)
 
    The minimum number of the points of one cluster.
+
+* `~multi` (Boolean, default: `false`)
+
+   Flag of applying euclidean clustering for each pointcloud's indices(`~input/cluster_indices`'s cluster_indices).
+
+   If `~multi` is `true`, synchronized `~input` and `~input/cluster_indices` are used.
+
+* `~approximate_sync` (Boolean, default: `False`):
+
+   Policy of synchronization, if `false` it synchronizes exactly, else approximately.
+   This value is only valid in case of `~multi` is `true`.
+
+* `~queue_size` (Int, default: `20`):
+
+   Queue size of topic msgs for synchronization.
+
+* `~downsample_enable` (Boolean, default: `false`)
+
+   Flag of VoxelGrid downsampling. If `~downsample_enable` is `true`, `~input` is downsampled.
+
+* `~leaf_size` (Double, default: `0.01`)
+
+   Leaf size of voxel grid downsampling.
+   This value is only valid in case of `~downsample_enable` is `true`.
+
+* `~cluster_filter` (Int, default: `0`)
+
+   Specify cluster filtering methods.
+
+   0: Passthrough the all clustering result for each cluster.
+
+   1: Take a cluster which has the maximum size of those for each cluster.
+      The length of `~output`'s cluster_indices, `~cluster_num`, is length of `~input/cluster_indices`'s cluster_indices.
+
 
 ## Sample
 Plug the depth sensor which can be launched by openni.launch and run the below command.

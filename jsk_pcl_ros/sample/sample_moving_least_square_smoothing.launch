@@ -1,0 +1,23 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_room73b2_table.xml"/>
+
+  <node name="moving_least_square_smoothing"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/MovingLeastSquareSmoothing">
+    <remap from="~input" to="/camera/depth_registered/points"/>
+    <rosparam>
+      search_radius: 0.01
+      gauss_param_set: true
+      use_polynomial_fit: true
+      polynomial_order: 4
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/moving_least_square_smoothing.rviz"/>
+  </group>
+</launch>

@@ -36,6 +36,11 @@
 
 #include "opencv2/opencv.hpp"
 #include "cv_bridge/cv_bridge.h"
+#if ( CV_MAJOR_VERSION >= 4)
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui_c.h>
+#include <opencv2/calib3d/calib3d_c.h>
+#endif
 #include "sensor_msgs/image_encodings.h"
 #include "sensor_msgs/CameraInfo.h"
 #include "sensor_msgs/Image.h"
@@ -86,6 +91,7 @@ public:
     ros::Publisher _pubPoseStamped;
     ros::Publisher _pubCornerPoint;
     ros::Publisher _pubPolygonArray;
+    ros::Publisher _pubDebugImage;
     ros::ServiceServer _srvDetect;
     int message_throttle_;
     int message_throttle_counter_;
@@ -241,6 +247,8 @@ public:
                                                              connect_cb, connect_cb);
             _pubCornerPoint = _node.advertise<geometry_msgs::PointStamped>("corner_point", publish_queue_size, connect_cb, connect_cb);
             _pubPolygonArray = _node.advertise<jsk_recognition_msgs::PolygonArray>("polygons", publish_queue_size, connect_cb, connect_cb);
+            _pubDebugImage =
+                _node.advertise<sensor_msgs::Image>("debug_image", publish_queue_size, connect_cb, connect_cb);
         }
         else {
             _pubDetection =
@@ -249,6 +257,7 @@ public:
                 _node.advertise<geometry_msgs::PoseStamped> ("objectdetection_pose", publish_queue_size);
             _pubCornerPoint = _node.advertise<geometry_msgs::PointStamped>("corner_point", publish_queue_size);
             _pubPolygonArray = _node.advertise<jsk_recognition_msgs::PolygonArray>("polygons", publish_queue_size);
+            _pubDebugImage = _node.advertise<sensor_msgs::Image>("debug_image", publish_queue_size);
             subscribe();
         }
         //this->camInfoSubscriber = _node.subscribe("camera_info", 1, &CheckerboardDetector::caminfo_cb, this);
@@ -394,7 +403,8 @@ public:
     {
       boost::mutex::scoped_lock lock(this->mutex);
       if (_pubDetection.getNumSubscribers() == 0 && _pubCornerPoint.getNumSubscribers() == 0 &&
-          _pubPoseStamped.getNumSubscribers() == 0 && _pubPolygonArray.getNumSubscribers() == 0)
+          _pubPoseStamped.getNumSubscribers() == 0 && _pubPolygonArray.getNumSubscribers() == 0 &&
+          _pubDebugImage.getNumSubscribers() == 0)
         {
             unsubscribe();
         }
@@ -469,10 +479,8 @@ public:
         }
 
         cv::Mat frame;
-        
-        if( display ) {
-            cv::cvtColor(capture, frame, CV_GRAY2BGR);
-        }
+
+        cv::cvtColor(capture, frame, CV_GRAY2BGR);
 
         vector<posedetection_msgs::Object6DPose> vobjects;
 
@@ -585,74 +593,78 @@ public:
                      (float)(ros::Time::now() - lasttime).toSec());
         lasttime = ros::Time::now();
 
-        if( display ) {
-            // draw each found checkerboard
-            for(size_t i = 0; i < vobjects.size(); ++i) {
-                int itype = maptypes[vobjects[i].type];
-                CHECKERBOARD& cb = vcheckers[itype];
-                Transform tglobal;
-                tglobal.trans = Vector(vobjects[i].pose.position.x,vobjects[i].pose.position.y,vobjects[i].pose.position.z);
-                tglobal.rot = Vector(vobjects[i].pose.orientation.w,vobjects[i].pose.orientation.x,vobjects[i].pose.orientation.y, vobjects[i].pose.orientation.z);
-                Transform tlocal = tglobal * cb.tlocaltrans.inverse();
+        // draw each found checkerboard
+        for(size_t i = 0; i < vobjects.size(); ++i) {
+            int itype = maptypes[vobjects[i].type];
+            CHECKERBOARD& cb = vcheckers[itype];
+            Transform tglobal;
+            tglobal.trans = Vector(vobjects[i].pose.position.x,vobjects[i].pose.position.y,vobjects[i].pose.position.z);
+            tglobal.rot = Vector(vobjects[i].pose.orientation.w,vobjects[i].pose.orientation.x,vobjects[i].pose.orientation.y, vobjects[i].pose.orientation.z);
+            Transform tlocal = tglobal * cb.tlocaltrans.inverse();
 
-                // draw all the points
-                int csize0 = std::max(circle_size_, 6);
-                int cwidth0 = std::max(circle_size_/3, 2);
-                int csize1 = std::max((2*circle_size_)/3, 4);
-                int csize2 = std::max(circle_size_/4, 2);
-                int cwidth1 = std::max(circle_size_/2, 4);
-                int cwidth2 = std::max(circle_size_/2, 3);
+            // draw all the points
+            int csize0 = std::max(circle_size_, 6);
+            int cwidth0 = std::max(circle_size_/3, 2);
+            int csize1 = std::max((2*circle_size_)/3, 4);
+            int csize2 = std::max(circle_size_/4, 2);
+            int cwidth1 = std::max(circle_size_/2, 4);
+            int cwidth2 = std::max(circle_size_/2, 3);
 
-                for(size_t i = 0; i < cb.grid3d.size(); ++i) {
-                    Vector grid3d_vec(cb.grid3d[i].x, cb.grid3d[i].y, cb.grid3d[i].z);
-                    Vector p = tlocal * grid3d_vec;
-                    dReal fx = p.x*camInfoMsg.P[0] + p.y*camInfoMsg.P[1] + p.z*camInfoMsg.P[2] + camInfoMsg.P[3];
-                    dReal fy = p.x*camInfoMsg.P[4] + p.y*camInfoMsg.P[5] + p.z*camInfoMsg.P[6] + camInfoMsg.P[7];
-                    dReal fz = p.x*camInfoMsg.P[8] + p.y*camInfoMsg.P[9] + p.z*camInfoMsg.P[10] + camInfoMsg.P[11];
-                    int x = (int)(fx/fz);
-                    int y = (int)(fy/fz);
-                    cv::circle(frame, cv::Point(x,y), csize0, cv::Scalar(0, 255, 0), cwidth0);
-                    cv::circle(frame, cv::Point(x,y), csize1, cv::Scalar(64*itype,128,128), cwidth1);
-                    cv::circle(frame, cv::Point(x,y), csize2, cv::Scalar(0,   0, 0), cwidth0);
-                }
-
-                cv::Point X[4];
-
-                Vector vaxes[4];
-                vaxes[0] = Vector(0,0,0);
-                vaxes[1] = Vector(axis_size_,0,0);
-                vaxes[2] = Vector(0,axis_size_,0);
-                vaxes[3] = Vector(0,0,axis_size_);
-
-                for(int i = 0; i < 4; ++i) {
-                    Vector p = tglobal*vaxes[i];
-                    dReal fx = p.x*camInfoMsg.P[0] + p.y*camInfoMsg.P[1] + p.z*camInfoMsg.P[2] + camInfoMsg.P[3];
-                    dReal fy = p.x*camInfoMsg.P[4] + p.y*camInfoMsg.P[5] + p.z*camInfoMsg.P[6] + camInfoMsg.P[7];
-                    dReal fz = p.x*camInfoMsg.P[8] + p.y*camInfoMsg.P[9] + p.z*camInfoMsg.P[10] + camInfoMsg.P[11];
-                    X[i].x = (int)(fx/fz);
-                    X[i].y = (int)(fy/fz);
-                }
-
-                cv::circle(frame, X[0], cwidth2, cv::Scalar(255,255,128), cwidth2);
-
-                // draw three lines
-                cv::Scalar col0(255,0,(64*itype)%256); // B
-                cv::Scalar col1(0,255,(64*itype)%256); // G
-                cv::Scalar col2((64*itype)%256,(64*itype)%256,255); // R
-                int axis_width_ = floor(axis_size_ / 0.03);
-                cv::line(frame, X[0], X[3], col0, axis_width_);
-                cv::line(frame, X[0], X[2], col1, axis_width_);
-                cv::line(frame, X[0], X[1], col2, axis_width_);
-
-                // publish X[0]
-                geometry_msgs::PointStamped point_msg;
-                point_msg.header = imagemsg.header;
-                point_msg.point.x = X[0].x;
-                point_msg.point.y = X[0].y;
-                point_msg.point.z = vobjects[vobjects.size() - 1].pose.position.z;
-                _pubCornerPoint.publish(point_msg);
+            for(size_t i = 0; i < cb.grid3d.size(); ++i) {
+                Vector grid3d_vec(cb.grid3d[i].x, cb.grid3d[i].y, cb.grid3d[i].z);
+                Vector p = tlocal * grid3d_vec;
+                dReal fx = p.x*camInfoMsg.P[0] + p.y*camInfoMsg.P[1] + p.z*camInfoMsg.P[2] + camInfoMsg.P[3];
+                dReal fy = p.x*camInfoMsg.P[4] + p.y*camInfoMsg.P[5] + p.z*camInfoMsg.P[6] + camInfoMsg.P[7];
+                dReal fz = p.x*camInfoMsg.P[8] + p.y*camInfoMsg.P[9] + p.z*camInfoMsg.P[10] + camInfoMsg.P[11];
+                int x = (int)(fx/fz);
+                int y = (int)(fy/fz);
+                cv::circle(frame, cv::Point(x,y), csize0, cv::Scalar(0, 255, 0), cwidth0);
+                cv::circle(frame, cv::Point(x,y), csize1, cv::Scalar(64*itype,128,128), cwidth1);
+                cv::circle(frame, cv::Point(x,y), csize2, cv::Scalar(0,   0, 0), cwidth0);
             }
 
+            cv::Point X[4];
+
+            Vector vaxes[4];
+            vaxes[0] = Vector(0,0,0);
+            vaxes[1] = Vector(axis_size_,0,0);
+            vaxes[2] = Vector(0,axis_size_,0);
+            vaxes[3] = Vector(0,0,axis_size_);
+
+            for(int i = 0; i < 4; ++i) {
+                Vector p = tglobal*vaxes[i];
+                dReal fx = p.x*camInfoMsg.P[0] + p.y*camInfoMsg.P[1] + p.z*camInfoMsg.P[2] + camInfoMsg.P[3];
+                dReal fy = p.x*camInfoMsg.P[4] + p.y*camInfoMsg.P[5] + p.z*camInfoMsg.P[6] + camInfoMsg.P[7];
+                dReal fz = p.x*camInfoMsg.P[8] + p.y*camInfoMsg.P[9] + p.z*camInfoMsg.P[10] + camInfoMsg.P[11];
+                X[i].x = (int)(fx/fz);
+                X[i].y = (int)(fy/fz);
+            }
+
+            cv::circle(frame, X[0], cwidth2, cv::Scalar(255,255,128), cwidth2);
+
+            // draw three lines
+            cv::Scalar col0(255,0,(64*itype)%256); // B
+            cv::Scalar col1(0,255,(64*itype)%256); // G
+            cv::Scalar col2((64*itype)%256,(64*itype)%256,255); // R
+            int axis_width_ = floor(axis_size_ / 0.03);
+            cv::line(frame, X[0], X[3], col0, axis_width_);
+            cv::line(frame, X[0], X[2], col1, axis_width_);
+            cv::line(frame, X[0], X[1], col2, axis_width_);
+
+            // publish X[0]
+            geometry_msgs::PointStamped point_msg;
+            point_msg.header = imagemsg.header;
+            point_msg.point.x = X[0].x;
+            point_msg.point.y = X[0].y;
+            point_msg.point.z = vobjects[vobjects.size() - 1].pose.position.z;
+            _pubCornerPoint.publish(point_msg);
+        }
+
+        // publish debug image
+        _pubDebugImage.publish(
+          cv_bridge::CvImage(imagemsg.header, sensor_msgs::image_encodings::RGB8, frame).toImageMsg());
+
+        if( display ) {
             cv::imshow("Checkerboard Detector",frame);
             cv::waitKey(1);
         }

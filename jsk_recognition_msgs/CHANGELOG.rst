@@ -2,6 +2,50 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.15 (2020-10-10)
+-------------------
+
+1.2.14 (2020-10-09)
+-------------------
+
+1.2.13 (2020-10-08)
+-------------------
+
+1.2.12 (2020-10-03)
+-------------------
+
+1.2.11 (2020-10-01)
+-------------------
+* Convert audio data to spectrogram (`#2478 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2478>`_)
+
+  * divide program into audio_to_spectrum and spectrum_to_spectrogram
+
+* set chainer version less than 7.0.0 (`#2485 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2485>`_)
+
+  * relax test conditions
+
+* fix generate_readme.py and update readme (`#2442 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2442>`_)
+* Publish human skelton msgs in OpenPose node (`#2437 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2437>`_)
+
+  * fix typo: skelton -> skeleton
+  * add human skelton msgs
+
+* Add sample, test and doc (`#2440 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2440>`_)
+
+  * Wait at most ~timeout [sec] in plot_data_to_csv.test
+  * Merge branch 'master' into pointit
+  * Add test for save_mesh_server.py
+  * Add test for plot_data_to_csv.py
+  * Add sample for plot_data_to_csv.py
+  * Run mkdir if output directory does not exist
+  * Add test for people_pose_array_to_pose_array.py
+  * Add sample for people_pose_array_to_pose_array.py
+  * Add symbolic link to doc in jsk_recognition_msgs
+  * Add test for object_array_publisher.py
+  * Update sample for object_array_publisher.py not to depend on jsk_arc2017_common
+
+* Contributors: Kei Okada, Naoya Yamaguchi, Shingo Kitagawa, Yuki Furuta, Yuto Uchimi
+
 1.2.10 (2019-03-27)
 -------------------
 

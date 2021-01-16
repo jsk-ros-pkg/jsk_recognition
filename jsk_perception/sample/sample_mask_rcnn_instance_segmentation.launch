@@ -3,6 +3,11 @@
   <arg name="gui" default="true" />
   <arg name="gpu" default="0" />
 
+  <arg name="COCO" default="false" doc="true: COCO, false: VOC" />
+
+  <arg name="person_label" value="0" if="$(arg COCO)" />
+  <arg name="person_label" value="14" unless="$(arg COCO)" />
+
   <node name="image_publisher"
         pkg="jsk_perception" type="image_publisher.py"
         clear_params="true">
@@ -11,38 +16,14 @@
       rate: 30
     </rosparam>
   </node>
-  <arg name="INPUT_IMAGE" value="image_publisher/output" />
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
-  <node name="mask_rcnn_instance_segmentation"
-        pkg="jsk_perception" type="mask_rcnn_instance_segmentation.py"
-        clear_params="true">
-    <remap from="~input" to="$(arg INPUT_IMAGE)" />
-    <rosparam subst_value="true">
-      gpu: $(arg gpu)
-      pretrained_model: $(find jsk_perception)/trained_data/mask_rcnn_resnet50_voc_20180516.npz
-      fg_class_names:
-        - aeroplane
-        - bicycle
-        - bird
-        - boat
-        - bottle
-        - bus
-        - car
-        - cat
-        - chair
-        - cow
-        - diningtable
-        - dog
-        - horse
-        - motorbike
-        - person
-        - pottedplant
-        - sheep
-        - sofa
-        - train
-        - tvmonitor
-    </rosparam>
-  </node>
+  <include file="$(find jsk_perception)/launch/mask_rcnn_instance_segmentation.launch">
+    <arg name="INPUT_IMAGE" default="$(arg INPUT_IMAGE)" />
+    <arg name="gpu" value="$(arg gpu)" />
+    <arg name="gui" value="false" />
+    <arg name="COCO" value="$(arg COCO)" />
+  </include>
 
   <!-- use cluster_indices and labels -->
   <node name="image_cluster_indices_decomposer"
@@ -59,7 +40,7 @@
         clear_params="true">
     <remap from="~input" to="mask_rcnn_instance_segmentation/output/label_cls" />
     <rosparam subst_value="true">
-      label_value: 14
+      label_value: $(arg person_label)
     </rosparam>
   </node>
   <node name="apply_mask_image"

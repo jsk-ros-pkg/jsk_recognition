@@ -3,8 +3,30 @@
 
 #    See: https://arxiv.org/abs/1611.08050
 
+from __future__ import print_function
+
 import math
 
+import itertools, pkg_resources, sys
+from distutils.version import LooseVersion
+if LooseVersion(pkg_resources.get_distribution("chainer").version) >= LooseVersion('7.0.0') and \
+   sys.version_info.major == 2:
+   print('''Please install chainer <= 7.0.0:
+
+    sudo pip install chainer==6.7.0
+
+c.f https://github.com/jsk-ros-pkg/jsk_recognition/pull/2485
+''', file=sys.stderr)
+   sys.exit(1)
+if [p for p in list(itertools.chain(*[pkg_resources.find_distributions(_) for _ in sys.path])) if "cupy-" in p.project_name ] == []:
+   print('''Please install CuPy
+
+    sudo pip install cupy-cuda[your cuda version]
+i.e.
+    sudo pip install cupy-cuda91
+
+''', file=sys.stderr)
+   sys.exit(1)
 import chainer
 import chainer.functions as F
 from chainer import cuda
@@ -21,8 +43,11 @@ from jsk_topic_tools import ConnectionBasedTransport
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import Point
 from geometry_msgs.msg import Quaternion
+from jsk_recognition_msgs.msg import HumanSkeleton
+from jsk_recognition_msgs.msg import HumanSkeletonArray
 from jsk_recognition_msgs.msg import PeoplePose
 from jsk_recognition_msgs.msg import PeoplePoseArray
+from jsk_recognition_msgs.msg import Segment
 from sensor_msgs.msg import CameraInfo
 from sensor_msgs.msg import Image
 
@@ -136,6 +161,9 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         self.sub_info = None
         if self.with_depth is True:
             self.pose_2d_pub = self.advertise('~pose_2d', PeoplePoseArray, queue_size=1)
+            # visualization rviz plugin: https://github.com/jsk-ros-pkg/jsk_visualization/pull/740
+            self.skeleton_pub = self.advertise(
+                '~skeleton', HumanSkeletonArray, queue_size=1)
 
     def check_wh(self):
         if (self.width is None) != (self.height is None):
@@ -258,6 +286,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         people_pose_2d_msg = self._create_2d_people_pose_array_msgs(
             people_joint_positions,
             img_msg.header)
+        skeleton_msgs = HumanSkeletonArray(header=img_msg.header)
 
         # calculate xyz-position
         fx = camera_info_msg.K[0]
@@ -266,6 +295,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         cy = camera_info_msg.K[5]
         for person_joint_positions in people_joint_positions:
             pose_msg = PeoplePose()
+            skeleton_msg = HumanSkeleton(header=img_msg.header)
             for joint_pos in person_joint_positions:
                 if joint_pos['score'] < 0:
                     continue
@@ -284,8 +314,25 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
                                            orientation=Quaternion(w=1)))
             people_pose_msg.poses.append(pose_msg)
 
+            for i, conn in enumerate(self.limb_sequence):
+                j1_name = self.index2limbname[conn[0] - 1]
+                j2_name = self.index2limbname[conn[1] - 1]
+                if j1_name not in pose_msg.limb_names \
+                        or j2_name not in pose_msg.limb_names:
+                    continue
+                j1_index = pose_msg.limb_names.index(j1_name)
+                j2_index = pose_msg.limb_names.index(j2_name)
+                bone_name = '{}->{}'.format(j1_name, j2_name)
+                bone = Segment(
+                    start_point=pose_msg.poses[j1_index].position,
+                    end_point=pose_msg.poses[j2_index].position)
+                skeleton_msg.bones.append(bone)
+                skeleton_msg.bone_names.append(bone_name)
+            skeleton_msgs.skeletons.append(skeleton_msg)
+
         self.pose_2d_pub.publish(people_pose_2d_msg)
         self.pose_pub.publish(people_pose_msg)
+        self.skeleton_pub.publish(skeleton_msgs)
 
         if self.visualize:
             vis_img = self._draw_joints(img, people_joint_positions, all_peaks)
@@ -776,7 +823,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         left, right = cx - int(width / 2), cx + int(width / 2)
         top, bottom = cy - int(width / 2), cy + int(width / 2)
         imh, imw, imc = img.shape
-        cropped = img[max(0, top):min(imh, bottom), max(0, left):min(imw, right)]
+        cropped = img[max(0, top):max(min(imh, bottom), 0), max(0, left):max(min(imw, right), 0)]
         ch, cw = cropped.shape[:2]
         bx, by = max(0, -left), max(0, -top)
         padded = np.zeros((bottom - top, right - left, imc), dtype=np.uint8)

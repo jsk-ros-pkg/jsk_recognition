@@ -1,5 +1,5 @@
 # SphericalPointCloudSimulator
-![](images/spherical_pointcloud_simulator.h)
+![](images/spherical_pointcloud_simulator.png)
 
 Simulate a pointcloud which is acquired by spindle laser. Sensor model is
 spherical laser.

@@ -1,0 +1,22 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_room73b2_table.xml"/>
+
+  <node name="organized_pass_through"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/OrganizedPassThrough">
+    <remap from="~input" to="/camera/depth_registered/points"/>
+    <rosparam>
+      filter_field: 0
+      min_index: 220
+      max_index: 420
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/organized_pass_through.rviz"/>
+  </group>
+</launch>

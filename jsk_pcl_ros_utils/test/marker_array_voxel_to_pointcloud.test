@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_marker_array_voxel_to_pointcloud.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_marker_array_voxel_to_pointcloud"
+        name="test_marker_array_voxel_to_pointcloud"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /marker_array_voxel_to_pointcloud/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

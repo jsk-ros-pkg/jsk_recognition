@@ -1,10 +1,46 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
+import os
 import sys
+import yaml
 
+import itertools, pkg_resources
+from distutils.version import LooseVersion
+if LooseVersion(pkg_resources.get_distribution("chainer").version) >= LooseVersion('7.0.0') and \
+   sys.version_info.major == 2:
+   print('''Please install chainer <= 7.0.0:
+
+    sudo pip install chainer==6.7.0
+
+c.f https://github.com/jsk-ros-pkg/jsk_recognition/pull/2485
+''', file=sys.stderr)
+   sys.exit(1)
+if [p for p in list(itertools.chain(*[pkg_resources.find_distributions(_) for _ in sys.path])) if "cupy-" in p.project_name ] == []:
+   print('''Please install CuPy
+
+    sudo pip install cupy-cuda[your cuda version]
+i.e.
+    sudo pip install cupy-cuda91
+
+''', file=sys.stderr)
+   sys.exit(1)
 import chainer
+from chainercv.datasets.coco.coco_utils \
+    import coco_instance_segmentation_label_names
+try:
+    from chainercv.links import MaskRCNNFPNResNet101
+    from chainercv.links import MaskRCNNFPNResNet50
+except ImportError:
+    print('''If you want to use chainercv mask_rcnn, please upgrade chainercv
+
+    sudo pip install chainercv>=0.13.0
+
+''', file=sys.stdout)
+
+from chainercv.utils import mask_to_bbox
 import numpy as np
+import yaml
 
 try:
     import chainer_mask_rcnn
@@ -17,6 +53,8 @@ except ImportError:
     sys.exit(1)
 
 import cv_bridge
+from dynamic_reconfigure.server import Server
+from jsk_perception.cfg import MaskRCNNInstanceSegmentationConfig as Config
 from jsk_recognition_msgs.msg import ClusterPointIndices
 from jsk_recognition_msgs.msg import Label
 from jsk_recognition_msgs.msg import LabelArray
@@ -25,6 +63,7 @@ from jsk_recognition_msgs.msg import RectArray
 from jsk_recognition_msgs.msg import ClassificationResult
 from jsk_topic_tools import ConnectionBasedTransport
 from pcl_msgs.msg import PointIndices
+import rospkg
 import rospy
 from sensor_msgs.msg import Image
 
@@ -41,20 +80,70 @@ class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
         chainer.global_config.train = False
         chainer.global_config.enable_backprop = False
 
-        self.fg_class_names = rospy.get_param('~fg_class_names')
+        fg_class_names = rospy.get_param('~fg_class_names', None)
+        if isinstance(fg_class_names, str) and os.path.exists(fg_class_names):
+            rospy.loginfo('Loading class names from file: {}'.format(fg_class_names))
+            with open(fg_class_names, 'r') as f:
+                fg_class_names = yaml.load(f)
+        self.fg_class_names = fg_class_names
+
         pretrained_model = rospy.get_param('~pretrained_model')
         self.classifier_name = rospy.get_param(
             "~classifier_name", rospy.get_name())
+        self.model_name = rospy.get_param('~model_name', 'mask_rcnn_resnet50')
+        rospack = rospkg.RosPack()
 
-        n_fg_class = len(self.fg_class_names)
-        self.model = chainer_mask_rcnn.models.MaskRCNNResNet(
-            n_layers=50,
-            n_fg_class=n_fg_class,
-            pretrained_model=pretrained_model,
-        )
+        if self.model_name == 'mask_rcnn_resnet50':
+            if pretrained_model == 'coco':
+                pretrained_model = os.path.join(
+                    rospack.get_path('jsk_perception'),
+                    'trained_data/mask_rcnn_resnet50_coco_20180730.npz')
+                if self.fg_class_names is None:
+                    yaml_path = os.path.join(
+                        rospack.get_path('jsk_perception'),
+                        'sample/config/coco_class_names.yaml')
+                    with open(yaml_path) as yaml_f:
+                        self.fg_class_names = yaml.load(yaml_f)
+            elif pretrained_model == 'voc':
+                pretrained_model = os.path.join(
+                    rospack.get_path('jsk_perception'),
+                    'trained_data/mask_rcnn_resnet50_voc_20180516.npz')
+                if self.fg_class_names is None:
+                    yaml_path = os.path.join(
+                        rospack.get_path('jsk_perception'),
+                        'sample/config/voc_class_names.yaml')
+                    with open(yaml_path) as yaml_f:
+                        self.fg_class_names = yaml.load(yaml_f)
+
+            self.model = chainer_mask_rcnn.models.MaskRCNNResNet(
+                n_layers=50,
+                n_fg_class=len(self.fg_class_names),
+                pretrained_model=pretrained_model,
+                anchor_scales=rospy.get_param('~anchor_scales', [4, 8, 16, 32]),
+                min_size=rospy.get_param('~min_size', 600),
+                max_size=rospy.get_param('~max_size', 1000),
+            )
+        elif self.model_name == 'mask_rcnn_fpn_resnet50':
+            if pretrained_model == 'coco':
+                self.fg_class_names = coco_instance_segmentation_label_names
+            self.model = MaskRCNNFPNResNet50(
+                n_fg_class=len(self.fg_class_names),
+                pretrained_model=pretrained_model)
+            self.model.use_preset('visualize')
+        elif self.model_name == 'mask_rcnn_fpn_resnet101':
+            if pretrained_model == 'coco':
+                self.fg_class_names = coco_instance_segmentation_label_names
+            self.model = MaskRCNNFPNResNet101(
+                n_fg_class=len(self.fg_class_names),
+                pretrained_model=pretrained_model)
+            self.model.use_preset('visualize')
+        else:
+            rospy.logerr('Unsupported model_name: {}'.format(self.model_name))
         self.model.score_thresh = rospy.get_param('~score_thresh', 0.7)
         if self.gpu >= 0:
             self.model.to_gpu(self.gpu)
+
+        self.srv = Server(Config, self.config_callback)
 
         self.pub_indices = self.advertise(
             '~output/cluster_indices', ClusterPointIndices, queue_size=1)
@@ -80,19 +169,30 @@ class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
     def unsubscribe(self):
         self.sub.unregister()
 
+    def config_callback(self, config, level):
+        self.model.score_thresh = config.score_thresh
+        return config
+
     def callback(self, imgmsg):
         bridge = cv_bridge.CvBridge()
         img = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='rgb8')
-        img_chw = img.transpose(2, 0, 1)  # C, H, W
+        img_chw = img.transpose((2, 0, 1))  # C, H, W
 
         if self.gpu >= 0:
             chainer.cuda.get_device_from_id(self.gpu).use()
-        bboxes, masks, labels, scores = self.model.predict([img_chw])
-
-        bboxes = bboxes[0]
-        masks = masks[0]
-        labels = labels[0]
-        scores = scores[0]
+        if self.model_name == 'mask_rcnn_resnet50':
+            bboxes, masks, labels, scores = self.model.predict([img_chw])
+            bboxes = bboxes[0]
+            masks = masks[0]
+            labels = labels[0]
+            scores = scores[0]
+        else:
+            img_chw = img_chw.astype(np.float32)
+            masks, labels, scores = self.model.predict([img_chw])
+            masks = masks[0]
+            labels = labels[0]
+            scores = scores[0]
+            bboxes = mask_to_bbox(masks)
 
         msg_indices = ClusterPointIndices(header=imgmsg.header)
         msg_labels = LabelArray(header=imgmsg.header)

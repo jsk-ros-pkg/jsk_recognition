@@ -1,0 +1,24 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/image/martin-espinoza-1148036-unsplash_640x480.jpg
+      frame_id: fisheye
+      publish_info: false
+    </rosparam>
+  </node>
+
+  <node name="fisheye_sphere_publisher"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/FisheyeSpherePublisher">
+    <remap from="~input" to="image_publisher/output"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/fisheye_sphere_publisher.rviz"/>
+  </group>
+</launch>

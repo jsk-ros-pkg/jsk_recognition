@@ -31,6 +31,11 @@ You can see camera image with results in `image_view`
 
         Rectangles of detected objects
 
+    - `~output/cluster_indices` (`jsk_recognition_msgs/ClusterPointIndices`)
+
+        Image indices of each instance
+
+
 - Subscribing Topics:
 
     - `~input` (`sensor_msgs/Image`)

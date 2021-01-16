@@ -4,15 +4,15 @@
 
 This nodelet tracks the target pointcloud.
 
-##### Subscribing Topic
+## Subscribing Topic
 * `~input` (`sensor_msgs/PointCloud2`)
 
   Input pointcloud
 
 * `~input_change` (`sensor_msgs/PointCloud2`)
 
-  Input change pointcloud, which is only enabled when `~use_change_detection` is true.
-
+  Input change pointcloud, which is only enabled when `~use_change_detection` is true
+  and should be synchronized with `~input`.
 
 * `~renew_model` (`sensor_msgs/PointCloud2`)
 
@@ -21,13 +21,16 @@ This nodelet tracks the target pointcloud.
 * `~renew_model_with_marker` (`visualization_msgs/Marker`)
 
   Reference marker model to track. This will convert marker model to pointcloud.
-  You need to pass the marker whose type is TRIANGLE_LIST and it should have the color.
+  You need to pass the marker whose type is `TRIANGLE_LIST` and it should have the color.
+
+  This topic is subscribed only when `~align_box` is false.
 
 * `~renew_box` (`jsk_recognition_msgs/BoundingBox`)
 
-  Bounding box information to align reference pointcloud model. Only if availabel `~align_box` parameter is true.
+  Bounding box information to align reference pointcloud model.
+  Available only if `~align_box` parameter is true, and it should be synchronized with `~renew_model`.
 
-##### Publishing Topic
+## Publishing Topic
 * `~track_result` (`sensor_msgs/PointCloud2`)
 
   Reference pointcloud which is transformed by tracking result.
@@ -48,30 +51,50 @@ This nodelet tracks the target pointcloud.
 
   average computation time
 
+* `~output/rms_angle_error` (`std_msgs/Float32`)
+* `~output/rms_distance_error` (`std_msgs/Float32`)
+
+  Root mean squared error of angle/distance.
+
 * `~output/velocity` (`geometry_msgs/TwistStamped`)
 
   Velocity of object.
+
+* `~output/velocity_norm` (`std_msgs/Float32`)
+
+  Norm of velocity of object.
 
 * `~output/no_move` (`std_msgs/Bool`)
 * `~output/no_move_raw` (`std_msgs/Bool`)
 
   These topics will be true if object looks stable.
 
+* `~output/skipped` (`std_msgs/Bool`)
+
+  This topic is advertised but not published for now.
+
+* `~output/change_marker` (`visualization_msgs/MarkerArray`)
+
+  This topic is advertised only when `~use_change_detection` is true,
+  but not published for now.
+
 * `~output/tracker_status` (`jsk_recognition_msgs/TrackerStatus`)
 
   Current tracking status.
 
+  This topic is published only when `~use_change_detection` is true.
 
-##### Advertising Servicies
-* `~renew_model` (`jsk_pcl_ros/SetPointCloud2`)
+
+## Advertising Servicies
+* `~renew_model` (`jsk_recognition_msgs/SetPointCloud2`)
 
   Service interface to set reference pointcloud.
 
-##### Parameters
+## Parameters
 * `~thread_nr` (Integer, default: `cpu num`)
 
   The number of thread used in tracking
-* `~particle_num` (Integer, default: `~max_particle_num`)
+* `~particle_num` (Integer, default: `~max_particle_num - 1`)
 
   The number of initial particles
 * `~use_normal` (Boolean, default: `false`)
@@ -81,7 +104,7 @@ This nodelet tracks the target pointcloud.
 
   If it's true, tracker uses color information in HSV color space to
   evaluate likelihood.
-* `~track_target_name` (Boolean, default: `track_result`)
+* `~track_target_name` (String, default: `track_result`)
 
   The name of the target, it is used as frame_id of tf.
 * `~octree_resolution` (Double, default: `0.01`)
@@ -110,7 +133,7 @@ This nodelet tracks the target pointcloud.
 * `~resample_likelihood_thr` (Double, default: `0.0`)
 
   Threshold of likelihood to resample (re-initialize) all the particles.
-* `~delta` (Double, default: `0.09`)
+* `~delta` (Double, default: `0.99`)
 
   Delta value for KLD sampling.
 * `~epsilon` (Double, default: `0.2`)
@@ -124,12 +147,12 @@ This nodelet tracks the target pointcloud.
 * `~bin_size_yaw` (Double, default: `0.01`)
 
   Size of bin for KLD sampling. Larger value means smaller number of particles.
-* `~default_step_covariance_x` (Double, default: 0.00001)
-* `~default_step_covariance_y` (Double, default: 0.00001)
-* `~default_step_covariance_z` (Double, default: 0.00001)
-* `~default_step_covariance_roll` (Double, default: 0.00001)
-* `~default_step_covariance_pitch` (Double, default: 0.00001)
-* `~default_step_covariance_yaw` (Double, default: 0.00001)
+* `~default_step_covariance_x` (Double, default: `0.0001`)
+* `~default_step_covariance_y` (Double, default: `0.0001`)
+* `~default_step_covariance_z` (Double, default: `0.0001`)
+* `~default_step_covariance_roll` (Double, default: `0.004`)
+* `~default_step_covariance_pitch` (Double, default: `0.004`)
+* `~default_step_covariance_yaw` (Double, default: `0.004`)
 
   Covariance value of noise in resampling phase.
 
@@ -150,11 +173,15 @@ This nodelet tracks the target pointcloud.
 
 * `~enable_cache` (Boolean, default: `false`)
 
-  Enable caching of nearest-neighbor search
+  Enable caching of nearest-neighbor search.
+
+  At most one of `~enable_cache` and `~enable_organized` can be set to true.
 
 * `~enable_organized` (Boolean, default: `false`)
 
   Enable using Organized nearest-neighbor search
+
+  At most one of `~enable_cache` and `~enable_organized` can be set to true.
 
 * `~cache_size_x` (Double, default: `0.01`)
 * `~cache_size_y` (Double, default: `0.01`)
@@ -162,7 +189,9 @@ This nodelet tracks the target pointcloud.
 
   Resolution of cache voxel grid.
 
-* `~max_distance` (Double, default: `1.0`)
+  These parameters are enabled only when `~enable_cache` is true.
+
+* `~max_distance` (Double, default: `0.01`)
 
   Maximum distance between points to take into account when computing likelihood
 
@@ -180,16 +209,20 @@ This nodelet tracks the target pointcloud.
 
 ## Sample
 
-run the below command.
-
-```
-roslaunch jsk_pcl_ros tracking_groovy.launch # (When use groovy)
-roslaunch jsk_pcl_ros tracking_hydro.launch  #(When use hydro)
+```bash
+roslaunch jsk_pcl_ros sample_particle_filter_tracking.launch
 ```
 
-Push the "Select" button at the top bar , drag and surround the target poincloud which you want to track in the rectangle area.Then, finally, push the "SelectPointCloudPublishActoin" button at SelectPointCloudPublishAction Panel. The tracker will start tracking the target.
+... or you can visualize tracking status by using
+[tracking_info.py](tracking_info.md) and [tracker_status_info.py](tracker_status_info.md)
 
-tabletop_tracking.launch is specialized for tracking tabletop objects.
+```bash
+roslaunch jsk_pcl_ros sample_particle_filter_tracking_change_detection.launch
 ```
-roslaunch jsk_pcl_ros tabletop_tracking.launch
+
+... or you can try service API [renew_tracking.py](renew_tracking.md)
+to renew reference pointcloud instead of topic API.
+
+```bash
+roslaunch jsk_pcl_ros sample_particle_filter_tracking_service_renew.launch
 ```

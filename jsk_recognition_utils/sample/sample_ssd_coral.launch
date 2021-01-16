@@ -1,0 +1,16 @@
+<launch>
+  <arg name="INPUT_IMAGE" default="/kinect_head/rgb/image_rect_color" />
+  <arg name="model_file" default="$(find coral_usb)/models/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite"/>
+  <arg name="label_file" default="$(find coral_usb)/models/coco_labels.txt"/>
+
+  <node name="edgetpu_object_detector"
+        pkg="coral_usb" type="edgetpu_object_detector.py"
+        output="screen" respawn="true">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <rosparam subst_value="true" >
+      model_file: $(arg model_file)
+      label_file: $(arg label_file)
+    </rosparam>
+    <param name="score_thresh" value="0.2" />
+  </node>
+</launch>

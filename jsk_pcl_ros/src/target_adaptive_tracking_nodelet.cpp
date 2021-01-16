@@ -3,6 +3,7 @@
 
 #include <jsk_pcl_ros/target_adaptive_tracking.h>
 #include <map>
+#include <string>
 
 namespace jsk_pcl_ros 
 {
@@ -21,13 +22,16 @@ namespace jsk_pcl_ros
    void TargetAdaptiveTracking::onInit()
    {
       DiagnosticNodelet::onInit();
-      
-      srv_ = boost::shared_ptr<dynamic_reconfigure::Server<Config> >(
-         new dynamic_reconfigure::Server<Config>);
+
+      pnh_->param("use_tf", use_tf_, false);
+      pnh_->param("parent_frame_id", parent_frame_id_, std::string("/track_result"));
+      pnh_->param("child_frame_id", child_frame_id_, std::string("/camera_rgb_optical_frame"));
+
+      srv_ = boost::make_shared<dynamic_reconfigure::Server<Config> >(*pnh_);
       dynamic_reconfigure::Server<Config>::CallbackType f =
        boost::bind(&TargetAdaptiveTracking::configCallback, this, _1, _2);
       srv_->setCallback(f);
-      
+
       this->pub_cloud_ = advertise<sensor_msgs::PointCloud2>(
          *pnh_, "/target_adaptive_tracking/output/cloud", 1);
 
@@ -171,23 +175,20 @@ namespace jsk_pcl_ros
       
       pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
       pcl::fromROSMsg(*cloud_msg, *cloud);
-      bool use_tf = false;
       tf::TransformListener tf_listener;
       tf::StampedTransform transform;
       ros::Time now = ros::Time(0);
-      std::string child_frame = "/camera_rgb_optical_frame";
-      std::string parent_frame = "/track_result";
       Eigen::Affine3f transform_model = Eigen::Affine3f::Identity();
       tf::Transform update_transform;
-      if (use_tf) {
+      if (use_tf_) {
          bool wft_ok = tf_listener.waitForTransform(
-            child_frame, parent_frame, now, ros::Duration(2.0f));
+            child_frame_id_, parent_frame_id_, now, ros::Duration(2.0f));
          if (!wft_ok) {
             ROS_ERROR("CANNOT TRANSFORM SOURCE AND TARGET FRAMES");
             return;
          }
          tf_listener.lookupTransform(
-            child_frame, parent_frame, now, transform);
+            child_frame_id_, parent_frame_id_, now, transform);
          tf::Quaternion tf_quaternion =  transform.getRotation();
          transform_model = Eigen::Affine3f::Identity();
          transform_model.translation() <<
@@ -254,13 +255,13 @@ namespace jsk_pcl_ros
       geometry_msgs::PoseStamped update_pose;
       tf::poseTFToMsg(update_transform, update_pose.pose);
       update_pose.header.stamp = cloud_msg->header.stamp;
-      update_pose.header.frame_id = child_frame;
+      update_pose.header.frame_id = child_frame_id_;
       this->pub_pose_.publish(update_pose);
     
       sensor_msgs::PointCloud2 ros_cloud;
       pcl::toROSMsg(*cloud, ros_cloud);
       ros_cloud.header.stamp = cloud_msg->header.stamp;
-      ros_cloud.header.frame_id = child_frame;
+      ros_cloud.header.frame_id = child_frame_id_;
       this->pub_cloud_.publish(ros_cloud);
    }
 

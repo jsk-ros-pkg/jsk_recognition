@@ -1,0 +1,21 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_tilt_laser_listener.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_tilt_laser_listener"
+        name="test_tilt_laser_listener"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /tilt_laser_listener/output
+      timeout_0: 60
+      topic_1: /tilt_laser_listener/output_cloud
+      timeout_1: 60
+      topic_2: /tilt_laser_listener/output_velocity
+      timeout_2: 60
+    </rosparam>
+  </test>
+
+</launch>

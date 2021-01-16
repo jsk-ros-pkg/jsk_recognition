@@ -1,0 +1,20 @@
+<launch>
+  <arg name="output_path" value="$(env HOME)/.ros/jsk_pcl_ros_sample_linemod_template_kettle"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_linemod_trainer.launch">
+    <arg name="gui" value="false"/>
+    <arg name="output_path" value="$(arg output_path)"/>
+  </include>
+
+  <test test-name="test_linemod_trainer"
+        name="test_linemod_trainer"
+        pkg="jsk_pcl_ros" type="test_linemod_trainer.py"
+        time-limit="70" retry="3">
+    <rosparam subst_value="true">
+      linemod_path: $(arg output_path).linemod
+      pcd_path: $(arg output_path).pcd
+      yaml_path: $(arg output_path)_poses.yaml
+      timeout: 60.0
+    </rosparam>
+  </test>
+</launch>

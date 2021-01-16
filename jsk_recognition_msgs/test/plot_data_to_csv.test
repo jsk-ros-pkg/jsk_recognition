@@ -1,0 +1,17 @@
+<launch>
+  <arg name="csv_path" value="$(env HOME)/.ros/jsk_recognition_msgs/sample_plot_data_to_csv/output.csv"/>
+
+  <include file="$(find jsk_recognition_msgs)/sample/sample_plot_data_to_csv.launch">
+    <arg name="csv_path" value="$(arg csv_path)"/>
+  </include>
+
+  <test test-name="test_plot_data_to_csv"
+        name="test_plot_data_to_csv"
+        pkg="jsk_recognition_msgs" type="test_plot_data_to_csv.py"
+        time-limit="10" retry="3" >
+    <rosparam subst_value="true">
+      csv_path: $(arg csv_path)
+      timeout: 5.0
+    </rosparam>
+  </test>
+</launch>

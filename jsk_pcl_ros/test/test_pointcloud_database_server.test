@@ -1,13 +1,16 @@
 <launch>
   <include file="$(find jsk_pcl_ros)/sample/sample_pointcloud_database_server.launch">
+    <arg name="gui" value="false"/>
   </include>
 
   <test test-name="test_pointcloud_database_server"
       name="test_pointcloud_database_server"
       pkg="jsk_tools" type="test_topic_published.py">
     <rosparam>
-      topic_0: /pointcloud_database_server/output
+      topic_0: /pointcloud_database_server_array/output
       timeout_0: 100
+      topic_1: /pointcloud_database_server_single/cloud
+      timeout_1: 100
     </rosparam>
   </test>
 </launch>

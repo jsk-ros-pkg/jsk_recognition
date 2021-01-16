@@ -1,0 +1,37 @@
+<launch>
+
+  <arg name="gui" default="true" />
+  <arg name="gpu" default="0" />
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py"
+        clear_params="true">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/object_detection_example_2.jpg
+      rate: 30
+    </rosparam>
+  </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
+
+  <node name="ssd_73b2_kitchen"
+        pkg="jsk_perception" type="ssd_object_detector.py"
+        clear_params="true">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <rosparam command="load"
+              file="$(find jsk_perception)/trained_data/ssd512_73B2_kitchen_20191114_classnames.yaml" />
+    <rosparam subst_value="true">
+      gpu: $(arg gpu)
+      model: ssd512
+      model_path: $(find jsk_perception)/trained_data/ssd512_73B2_kitchen_20191114.npz
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view"
+          pkg="image_view" type="image_view"
+          clear_params="true">
+      <remap from="image" to="ssd_73b2_kitchen/output/image" />
+    </node>
+  </group>
+
+</launch>

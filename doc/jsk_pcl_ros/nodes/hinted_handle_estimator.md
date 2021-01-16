@@ -13,19 +13,23 @@ Detect a handle grasp pose from pointcloud and point as hint.
   3D Point (You can get from rviz "Publish Point" or image_view2)
 
 ## Publishing Topic
-* `handle_pose` (`geometry_msgs::PoseStamped`)
+* `~handle_pose` (`geometry_msgs/PoseStamped`)
 
   estimated handle pose
 
-* `handle_length` (`std_msgs::Float64`)
+* `~handle_length` (`std_msgs/Float64`)
 
-  estimated handle length
+  This topic is advertised but not published for now.
 
-* `debug_marker` (`visualization_msgs::Marker`)
+* `~handle` (`jsk_recognition_msgs/SimpleHandle`)
+
+  Estimated handle pose with handle width.
+
+* `~debug_marker` (`visualization_msgs/Marker`)
 
   the result of calculating handle direction
 
-* `debug_marker_array` (`visualization_msg::MarkerArray`)
+* `~debug_marker_array` (`visualization_msgs/MarkerArray`)
 
   estimated handle visualization
 
@@ -37,6 +41,10 @@ Detect a handle grasp pose from pointcloud and point as hint.
 * `~finger_d` (Float, default: `0.02`)
 * `~arm_l` (Float, default: `0.05`)
 * `~arm_w` (Float, default: `0.1`)
-* `~arm_d` (Float, default: `0.01`)
+* `~arm_d` (Float, default: `0.02`)
 
+## Sample
 
+```bash
+roslaunch jsk_pcl_ros sample_hinted_handle_estimator.launch
+```

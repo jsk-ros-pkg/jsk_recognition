@@ -16,7 +16,7 @@ from std_msgs.msg import ColorRGBA
 import math
 
 def usage():
-  print "Usage: ", sys.argv[0], "id frame_id radius [r, g, b]"
+  print("Usage: ", sys.argv[0], "id frame_id radius [r, g, b]")
   
 class Drawer3DCircle:
   RESOLUTION = 20

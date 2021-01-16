@@ -1,12 +1,14 @@
 <launch>
 
   <arg name="gui" default="true" />
+  <arg name="gpu" default="0"/>
 
   <include file="$(find jsk_perception)/sample/sample_fcn_object_segmentation.launch">
     <arg name="gui" value="false" />
+    <arg name="gpu" value="$(arg gpu)"/>
   </include>
 
-  <arg name="INPUT_IMAGE" value="image_publisher/output" />
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
   <arg name="INPUT_LABEL_PROBABILITY" value="fcn_object_segmentation/output/proba_image" />
 
   <node name="apply_context_to_label_probability"

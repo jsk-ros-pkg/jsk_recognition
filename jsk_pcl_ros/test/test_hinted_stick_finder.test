@@ -1,0 +1,25 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_hinted_stick_finder.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_hinted_stick_finder"
+        name="test_hinted_stick_finder"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /hinted_stick_finder/output/cylinder_pose
+      timeout_0: 30
+      topic_1: /hinted_stick_finder/output/inliers
+      timeout_1: 30
+      topic_2: /hinted_stick_finder/output/coefficients
+      timeout_2: 30
+      topic_3: /hinted_stick_finder/debug/line_filtered_indices
+      timeout_3: 30
+      topic_4: /hinted_stick_finder/debug/cylinder_marker
+      timeout_4: 30
+    </rosparam>
+  </test>
+
+</launch>

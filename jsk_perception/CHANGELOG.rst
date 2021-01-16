@@ -2,6 +2,370 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.15 (2020-10-10)
+-------------------
+* check if template/ direcotry exists, because this is auto-generated directory (`#2537 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2537>`_)
+
+  * install within roseus_FOUND
+  * check if template/ direcotry exists, because this is auto-generated directory
+
+* Contributors: Kei Okada
+
+1.2.14 (2020-10-09)
+-------------------
+* remove packages=['jsk_perceptoin'] (`#2536 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2536>`_)
+* fix
+
+```
+  + /usr/bin/env PYTHONPATH=/opt/ros/melodic/lib/python2.7/dist-packages:/tmp/jsk_recognition-release/obj-x86_64-linux-gnu/lib/python2.7/dist-packages:/opt/ros/melodic/lib/python2.7/dist-packages:/home/k-okada/pynaoqi/pynaoqi-python2.7-2.5.5.5-linux64/lib/python2.7/site-packages CATKIN_BINARY_DIR=/tmp/jsk_recognition-release/obj-x86_64-linux-gnu /usr/bin/python2 /tmp/jsk_recognition-release/setup.py egg_info --egg-base /tmp/jsk_recognition-release/obj-x86_64-linux-gnu build --build-base /tmp/jsk_recognition-release/obj-x86_64-linux-gnu install --root=/tmp/jsk_recognition-release/debian/ros-melodic-jsk-perception --install-layout=deb --prefix=/opt/ros/melodic --install-scripts=/opt/ros/melodic/bin
+  running egg_info
+  creating /tmp/jsk_recognition-release/obj-x86_64-linux-gnu/jsk_perception.egg-info
+  writing /tmp/jsk_recognition-release/obj-x86_64-linux-gnu/jsk_perception.egg-info/PKG-INFO
+  writing top-level names to /tmp/jsk_recognition-release/obj-x86_64-linux-gnu/jsk_perception.egg-info/top_level.txt
+  writing dependency_links to /tmp/jsk_recognition-release/obj-x86_64-linux-gnu/jsk_perception.egg-info/dependency_links.txt
+  writing manifest file '/tmp/jsk_recognition-release/obj-x86_64-linux-gnu/jsk_perception.egg-info/SOURCES.txt'
+  error: package directory 'jsk_perception' does not exist
+  CMake Error at catkin_generated/safe_execute_install.cmake:4 (message):
+  execute_process(/tmp/jsk_recognition-release/obj-x86_64-linux-gnu/catkin_generated/python_distutils_install.sh)
+  returned error code
+  Call Stack (most recent call first):
+  cmake_install.cmake:41 (include)
+  Makefile:97: recipe for target 'install' failed
+```
+
+* Contributors: Kei Okada
+
+1.2.13 (2020-10-08)
+-------------------
+* fix logic to check chainer version (`#2534 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2534>`_)
+
+  * add test to check `#2533 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2533>`_ regression
+
+* Contributors: Kei Okada
+
+1.2.12 (2020-10-03)
+-------------------
+* check if chainer is found before check version (`#2533 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2533>`_)
+
+  * fixes http://build.ros.org/job/Nbin_uF64__jsk_perception__ubuntu_focal_amd64__binary/1/console and http://build.ros.org/job/Mbin_uB64__jsk_perception__ubuntu_bionic_amd64__binary/91/console
+
+* Contributors: Kei Okada
+
+1.2.11 (2020-10-01)
+-------------------
+* Add FCN8sDepthPredictionConcatFirst model to fcn_depth_prediction.py (`#2481 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2481>`_)
+
+  * Update output file names
+  * Read dataset directory from argument
+  * Fix directory name of dataset extracted from tar ball
+  * Flatten images for network input
+  * Remove wrong transform of dataset from train_fcn_depth_prediction.py
+  * Add training script of FCNDepthPredictionConcatFirst model
+  * Move FCN8sDepthPrediction chainer models to jsk_recognition_utils
+  * Add install script of mirror dataset
+  * Fix typo of model path
+  * Use cv2 version of colormap JET
+  * Add trained model of FCN8sDepthPredictionConcatFirst
+  * Add FCN8sDepthPredictionConcatFirst model to fcn_depth_prediction.py
+
+* refactor sample launches in jsk_perception (`#2376 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2376>`_)
+* Add nose mask publisher (`#2347 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2347>`_)
+* [jsk_perception/people_pose_estimation_2d.py][jsk_perception/people_mask_publisher.py] Fix edge case bug (`#2465 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2465>`_)
+* Publish ClusterPointIndices in ssd_object_detector.py (`#2467 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2467>`_)
+
+  * add predict profilling message above cluster indices computation
+
+* fix travis - skip noetic test into two jobs, using BUILD_PKGS - skip catkin_python_setup for indigo (`#2522 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2522>`_)
+* Fix for  noetic / 20.04 (`#2507 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2507>`_)
+
+  * jsk_perception/scripts: respect ROS_PYTHON_VERSION
+  * support for opencv4 : jsk_perception
+  * remove signals from find_package(Boost)
+  * jsk_perception depends on roseus, but it sometimes hard to keep dependency
+  * fix for python3, use 2to3 -f print, 2to3 -f except
+  * upgrade package.xml to format=3, migrate to noetic with ROS_PYTHON_VERSION=2/3, use multiple ROS distro strategy http://wiki.ros.org/noetic/Migration
+
+* more fix for `#2500 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2500>`_ (`#2502 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2502>`_)
+
+  * fix print '' -> print('')
+
+* fix print syntax in train_ssd.py (`#2500 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2500>`_)
+
+  * fix print '' -> print('')
+
+* [jsk_perception] support image with alpha in image_publisher (`#2479 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2479>`_)
+
+  * fix image_publisher for loading grayscale image
+  * use cv2 default type
+  * add test for image with alpha channel
+  * add sample for alpha image
+  * fix for depth image
+  * support image with alpha in image_publisher
+
+* [jsk_perception] add program for training ssd with box annotation (`#2483 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2483>`_)
+* show what should we do, if we have error on 'import chainer' (`#2491 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2491>`_)
+
+  * use --clock for sample_image_cluster_indices_decomposer.launch, add --clock to sample_bounding_box_to_rect.launch does not work...
+  * print how to intall cupy
+  if you do not have cupy, it raises error
+  ```
+  [INFO] [1588763738.839739]: Read the image file: /home/k-okada/ws_recognition/src/jsk_recognition/jsk_perception/sample/object_detection_example_2.jpg
+  [INFO] [1588763739.625133]: Loaded 43 labels
+  Traceback (most recent call last):
+  File "/home/k-okada/ws_recognition/src/jsk_recognition/jsk_perception/node_scripts/ssd_object_detector.py", line 207, in <module>
+  ssd = SSDObjectDetector()
+  File "/opt/ros/melodic/lib/python2.7/dist-packages/jsk_topic_tools/transport.py", line 26, in __call\_\_
+  obj = type.__call_\_(cls, *args, **kwargs)
+  File "/home/k-okada/ws_recognition/src/jsk_recognition/jsk_perception/node_scripts/ssd_object_detector.py", line 71, in __init\_\_
+  chainer.cuda.get_device_from_id(self.gpu).use()
+  File "/usr/local/lib/python2.7/dist-packages/chainer/backends/cuda.py", line 275, in get_device_from_id
+  check_cuda_available()
+  File "/usr/local/lib/python2.7/dist-packages/chainer/backends/cuda.py", line 138, in check_cuda_available
+  raise RuntimeError(msg)
+  RuntimeError: CUDA environment is not correctly set up
+  (see https://github.com/chainer/chainer#installation).No module named cupy
+  ``
+  * show what should we do, if we have error on 'import chainer'
+  ```
+  Traceback (most recent call last):
+  File "/home/k-okada/ws_recognition/src/jsk_recognition/jsk_perception/node_scripts/ssd_object_detector.py", line 26, in <module>
+  import chainer
+  File "/usr/local/lib/python2.7/dist-packages/chainer/__init_\_.py", line 10, in <module>
+  from chainer import backends  # NOQA
+  File "/usr/local/lib/python2.7/dist-packages/chainer/backends/__init_\_.py", line 1, in <module>
+  from chainer.backends import cuda  # NOQA
+  File "/usr/local/lib/python2.7/dist-packages/chainer/backends/cuda.py", line 77
+  def shape(self) -> types.Shape:
+  ^
+  SyntaxError: invalid syntax
+  ```
+  c.f. https://github.com/jsk-ros-pkg/jsk_recognition/pull/2485
+
+* add more arg INPUT_IMAGE (`#2492 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2492>`_)
+
+  * arg name='INPUT_IMAGE' need to use default, instead of value, so that we can cheange the input name as ros args. 'value' is constant value and 'default' is default value, see http://wiki.ros.org/roslaunch/XML/arg
+
+* jsk_perception/train_ssd.py fix error when out_dir is set (`#2493 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2493>`_)
+
+* set chainer version less than 7.0.0 (`#2485 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2485>`_)
+
+  * split test_bing to test_bing_output and test_bing_objectness
+  * add time-limit to jsk_pcl_ros/test/test_linemod_trainer.test, jsk_perception/test/bing.test
+  * jsk_perception/package.xml: node_scripts/pointit.py imports tf2_geometry_msgs
+  * set time-limit=25 for timeout:30 tests
+  * relax test conditions
+  * set chainer version less than 7.0.0
+  * jsjk_perception/train_ssd.py fix error when out_dir is set
+
+* Fix test for consensus_tracking (`#2475 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2475>`_ from YutoUchimi/fix_consensus_tracking
+
+* Parameterize frames, transformation and interpolation in virtual_camera_mono (`#2470 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2470>`_)
+
+  * Change logger level of TransformException to WARN
+  * Add test for virtual_camera_mono
+  * Add sample for virtual_camera_mono
+  * Parameterize virtual_camera_mono
+
+* Convert audio data to spectrogram (`#2478 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2478>`_)
+
+  * add unit to axis
+  * remove unused files
+  * add node to visualize spectrum
+  * fix size of spectrogram
+  * fix typo in launch
+  * divide program into audio_to_spectrum and spectrum_to_spectrogram
+  * fix comment
+  * add test
+  * use rosbag with /audio of 300Hz
+  * use timer callback to publish spectrogram constantly
+  * update comments and name of parameter
+  * add sample program to convert audio message  to spectrogram
+
+* Add train script and sample for SSD (`#2471 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2471>`_)
+
+  * [jsk_perception] add program for training ssd with box annotation
+  * use cv2 for cv_resize_backend
+  * add classnames for ssd
+  * add trained model in install_trained_data.py
+
+* Add queue_size and slop param to TileImages (`#2453 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2453>`_)
+* Fix label_id division by 256 -> 255 (`#2455 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2455>`_)
+
+  * Fix label_id division by 256 -> 255
+    Since `len(colormap)` is `255`, % 256 is wrong since it can return 255
+    which raises IndexError.
+
+* fix generate_readme.py and update readme (`#2442 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2442>`_)
+* Publish human skelton msgs in OpenPose node (`#2437 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2437>`_)
+
+  * add lines considering shoulder when predicting face region
+  * add LIMB_PART param
+  * enable to create nose mask image
+  * [jsk_perception/node_scripts/people_pose_estimation_2d.py] fix edge case
+  * [jsk_perception/node_scripts/people_mask_publisher.py] fix edge case
+
+* Fix tile_image.py for Python3 (`#2452 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2452>`_)
+
+* Fix label_image_decomposer.py for Python3 (`#2454 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2454>`_)
+* Update to slic d77d6e8 (`#2450 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2450>`_)
+* mask_rcnn_instance_segmentation: support loading yaml from file (`#2413 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2413>`_)
+* pointit: add option '~use_arm' to select arm for pointing (`#2415 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2415>`_)
+* Add sample, test and doc (`#2440 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2440>`_)
+
+  * Fix condition of fatal message
+  * Keep backward compatibility for ~dist_threshold
+  * Add test for kalman-filtered-objectdetection-marker.l
+  * Add sample for kalman-filtered-objectdetection-marker.l
+  * Change permission of kalman-filtered-objectdetection-marker.l: 644->755
+  * Update sample for RobotToMaskImage
+  * Add sample for CollisionDetector
+  * Merge branch 'master' into kinfu-fix
+  * updae people_pose_estimation_2d.test
+  * add visualization link in commentout
+  * Add test for RobotToMaskImage
+  * Add minimal sample for RobotToMaskImage, which is only for testing
+  * Add test for SlidingWindowObjectDetector
+  * Add sample for SlidingWindowObjectDetector
+  * Support overriding parameters in manifest file
+  * Add sample for sliding_window_object_detector_trainer_node
+  * Add params for fg/bg training dataset image topics and output manifest file
+  * Add test for ColorHistogramLabelMatch
+  * Add sample for ColorHistogramLabelMatch
+  * Add test SingleChannelHistogram
+  * Add sample for SingleChannelHistogram
+  * Explicitly depend of topic_tools because sample_polygon_array_color_histogram.launch uses this
+  * Add test for PolygonArrayColorLikelihood
+  * Add sample for PolygonArrayColorLikelihood
+  * Suppress very long log of downloading pretrained weight in sample_deep_sort_tracker.launch
+  * Add test for PolygonArrayColorHistogram
+  * Add sample for PolygonArrayColorHistogram
+  * Support selecting histogram index by rosparam in unwrap_histogram_with_range_array.py
+  * Build SnakeSegmentation only when OpenCV<3
+  * Add test for UnapplyMaskImage
+  * Add sample for UnapplyMaskImage
+  * Add test for TabletopColorDifferenceLikelihood
+  * Add sample for TabletopColorDifferenceLikelihood
+  * Add test for SnakeSegmentation
+  * Add sample for SnakeSegmentation
+  * Add test for Skeletonization
+  * Add sample for Skeletonization
+  * Add test for SaliencyMapGenerator
+  * Add sample for SaliencyMapGenerator
+  * Add test for ROIToRect
+  * Add sample for ROIToRect
+  * Fix output polygon vertices for ROIToRect
+  * Add test for ROIToMaskImage
+  * Add sample for ROIToMaskImage
+  * Add test for RectToROI
+  * Add sample for RectToROI
+  * Add test for RectToMaskImage
+  * Fix ROSTimeMoveBackward before publishing output in sample_rect_to_mask_image.launch
+  * Fix point index for bottom right point of rectangle in rect_to_mask_image.cpp
+  * Add test for ProjectImagePoint
+  * Add sample for ProjectImagePoint
+  * Add test for PolygonToMaskImage
+  * Add sample for PolygonToMaskImage
+  * Add test for PolygonArrayToLabelImage
+  * Add sample for PolygonArrayToLabelImage
+  * Add test for MaskImageToROI
+  * Add sample for MaskImageToROI
+  * Add test for GrabCut
+  * Add sample for GrabCut
+  * Disable fast_rcnn.test
+  * Add test for FisheyeToPanorama
+  * Add sample for FisheyeToPanorama
+  * Add test for GaussianBlur
+  * Add sample for GaussianBlur
+  * Add test for YCCDecomposer
+  * Add sample for YCCDecomposer
+  * Add test for LabDecomposer
+  * Add sample for LabDecomposer
+  * Add test for RGBDecomposer
+  * Add sample for RGBDecomposer
+  * Add test for HSVDecomposer
+  * Add sample for HSVDecomposer
+  * Add test for morphological operators
+  * Add sample for morphlogical operators such as ErodeMaskImage, Opening, MorphlogicalGradient, TopHat
+  * Add test for pointit.py
+  * Add sample for pointit.py
+  * Remove unused import in pointit.py
+  * Remove unused computation in get_marker func in pointit.py
+  * Fix tf2 listener
+  * Fix return value in find_pose func in pointit.py
+  * Add test for unwrap_histogram_with_range_array.py
+  * Add sample for unwrap_histogram_with_range_array.py
+  * Add test for solidity_rag_merge.py
+  * Add sample for solidity_rag_merge.py
+  * Support networkX>=2 and scikit-image>=0.13 in solidity_rag_merge.py
+  * Add test for non_maximum_suppression.py
+  * Add sample for non_maximum_suppression.py
+  * Add ROS topic API for non_maximum_suppression.py
+  * pointit: add option '~use_arm' to select arm for pointing
+  * mask_rcnn_instance_segmentation: support loading yaml from file
+  * add jsk_perception/SubtractMaskImage
+  * fix typo in sample_face_pose_estimation.launch
+  * GPU -> gpu in face_pose_estimation.launch
+  * use args in sample launch: GPU -> gpu
+  * remove test_mode from sample_face_pose_estimation.launch
+  * remove test_mode in sample_ssd_object_detector.launch
+  * Do not use deprecated param in sample_pointit.launch
+  * Fix use of deprecated param ~dist_threshold
+
+* fixes scope bug on point_pose_extraction (`#2414 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2414>`_)
+* [jsk_perception] Add trained maskrcnn model for 73b2 kitchen (`#2423 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2423>`_)
+
+  * update kitchen pretrained model (`#9 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/9>`_)
+  * [jsk_perception] Add trained maskrcnn model for 73b2 kitchen
+  * add sample launch file using 73b2 kitchen model
+  * update kitchen pretrained model
+  * add sample launch for kitchen dataset
+
+* update to use jsk_travis 0.5.0 (`#2439 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2439>`_)
+  * skip deep_sort_tracker.test on indigo
+  https://travis-ci.org/jsk-ros-pkg/jsk_recognition/jobs/549216064#L8697-L8733
+  downloading SSD data(ssd300_voc0712_converted_2017_06_06.npz) failes with
+  ```
+  IOError: [Errno socket error] [Errno 1] _ssl.c:510: error:14077410:SSL routines:SSL23_GET_SERVER_HELLO:sslv3 alert handshake failure'
+  ```
+  do we need to update Python to 2.7.9? for indidgo ????
+  https://stackoverflow.com/questions/54413685/insecureplatform-warning
+
+
+  * Do not mix tab and space for indentation
+  * Add test for mask_rcnn_instance_segmentaion.py, but comment out testing because GPU required
+  * Add test for image_time_diff.py
+  * Add sample for image_time_diff.py
+  * Avoid crashing when ROS time moved backward in image_time_diff.py
+  * Fix AttributeError in image_time_diff.py
+  * Add test for fcn_depth_prediction, but do not run because unstable
+  * Add test for fast_rcnn.py
+  * Add test for binpack_rect_array.py
+  * Add sample for binpack_rect_array.py
+  * Add test for apply_context_to_label_probability
+  * Add gpu arg to sample_apply_context_to_label_probability.launch
+  * fix typo: skelton -> skeleton
+  * publish skelton in people_pose_estimation_2d
+
+* Add Mask R-CNN model trained with COCO dataset (~80 classes) (already included VOC model only detects ~20 classes) (`#2427 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2427>`_)
+* MaskImageToPointIndices: support multi channel mask image (`#2409 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2409>`_)
+
+  * fix mask rcnn 73b2 model classname typo (`#8 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/8>`_)
+
+* point_pose_extractor: fix bug on scope
+* point_pose_extractor: fill reliability
+
+* Add sample for MaskImageToPointIndices
+
+* add jsk_perception/SubtractMaskImage (`#2411 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2411>`_)
+
+  * Fix typo of main node name
+
+* Re-enable bing.test (`#2418 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2418>`_)
+
+  * Fix target name of bing for testing
+
+* Contributors: Fuki Furuta, Kei Okada, Kentaro Wada, Naoya Yamaguchi, Shingo Kitagawa, Yoshiki Obinata, Yuki Furuta, Yuto Uchimi, Iory Yanokura, Hideaki Ito, Taichi Higashide
+
 1.2.10 (2019-03-27)
 -------------------
 * Fix error on setting device number other than 0 on multiple gpu env. (`#2412 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2412>`_)

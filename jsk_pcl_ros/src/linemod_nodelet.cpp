@@ -57,6 +57,10 @@
 #include "jsk_recognition_utils/pcl_util.h"
 #include "jsk_recognition_utils/geo_util.h"
 
+#if ( CV_MAJOR_VERSION >= 4)
+#include <opencv2/imgproc/imgproc_c.h>
+#endif
+
 namespace jsk_pcl_ros
 {
   void LINEMODTrainer::onInit()
@@ -76,6 +80,7 @@ namespace jsk_pcl_ros
                 0.4);
     pnh_->param("sample_viewpoint_radius_max", sample_viewpoint_radius_max_,
                 0.8);
+    pnh_->param("n_points", n_points_, 150);
     if (!sample_viewpoint_) {
       sub_input_.subscribe(*pnh_, "input", 1);
       sub_indices_.subscribe(*pnh_, "input/indices", 1);
@@ -279,7 +284,7 @@ namespace jsk_pcl_ros
                                sample_viewpoint_radius_step_,
                                sample_viewpoint_radius_min_,
                                sample_viewpoint_radius_max_,
-                               150);
+                               n_points_);
     std::vector<Eigen::Affine3f> transforms;
     transforms.resize(sampler.sampleNum());
     for (size_t i = 0; i < sampler.sampleNum(); i++) {
@@ -360,6 +365,7 @@ namespace jsk_pcl_ros
     // pose yaml
     std::ofstream pose_file;
     const std::string pose_file_name = output_file_ + "_poses.yaml";
+    NODELET_INFO("writing to %s", pose_file_name.c_str());
     pose_file.open(pose_file_name.c_str(), std::ofstream::out);
     pose_file << "template_poses: [" << std::endl;
     for (size_t i = 0; i < pose_in_order_of_training.size(); i++) {
@@ -559,27 +565,13 @@ namespace jsk_pcl_ros
     pose_fin.open(pose_yaml.c_str(), std::ifstream::in);
     YAML::Parser parser(pose_fin);
     while (parser.GetNextDocument(doc)) {
-      const YAML::Node& template_pose_yaml = doc["template_poses"];
-      for (size_t i = 0; i < template_pose_yaml.size(); i++) {
-        const YAML::Node& pose = template_pose_yaml[i];
-        Eigen::Affine3f trans = jsk_recognition_utils::affineFromYAMLNode(pose);
-        template_poses_.push_back(trans);
-        // set template_bboxes
-        pcl::PointCloud<pcl::PointXYZRGBA> transformed_cloud;
-        pcl::transformPointCloud<pcl::PointXYZRGBA>(
-          *template_cloud_, transformed_cloud, trans);
-        // compute size of bounding box
-        Eigen::Vector4f minpt, maxpt;
-        pcl::getMinMax3D<pcl::PointXYZRGBA>(transformed_cloud, minpt, maxpt);
-        jsk_recognition_msgs::BoundingBox bbox = jsk_recognition_utils::boundingBoxFromPointCloud(transformed_cloud);
-        //ROS_INFO("bounding box size: [%f, %f, %f]", bbox.dimensions.x, bbox.dimensions.y, bbox.dimensions.z);
-        template_bboxes_.push_back(bbox);
-      }
+      setTemplate(doc);
     }
     pose_fin.close();
 #else
-     // yaml-cpp is greater than 0.5.0
-     doc = YAML::LoadFile(pose_yaml);
+    // yaml-cpp is greater than 0.5.0
+    doc = YAML::LoadFile(pose_yaml);
+    setTemplate(doc);
 #endif
 
     
@@ -607,7 +599,26 @@ namespace jsk_pcl_ros
   {
     sub_cloud_.shutdown();
   }
-  
+
+  void LINEMODDetector::setTemplate(YAML::Node doc)
+  {
+    const YAML::Node& template_pose_yaml = doc["template_poses"];
+    for (size_t i = 0; i < template_pose_yaml.size(); i++) {
+      const YAML::Node& pose = template_pose_yaml[i];
+      Eigen::Affine3f trans = jsk_recognition_utils::affineFromYAMLNode(pose);
+      template_poses_.push_back(trans);
+      // set template_bboxes
+      pcl::PointCloud<pcl::PointXYZRGBA> transformed_cloud;
+      pcl::transformPointCloud<pcl::PointXYZRGBA>(*template_cloud_, transformed_cloud, trans);
+      // compute size of bounding box
+      Eigen::Vector4f minpt, maxpt;
+      pcl::getMinMax3D<pcl::PointXYZRGBA>(transformed_cloud, minpt, maxpt);
+      jsk_recognition_msgs::BoundingBox bbox = jsk_recognition_utils::boundingBoxFromPointCloud(transformed_cloud);
+      //ROS_INFO("bounding box size: [%f, %f, %f]", bbox.dimensions.x, bbox.dimensions.y, bbox.dimensions.z);
+      template_bboxes_.push_back(bbox);
+    }
+  }
+
   void LINEMODDetector::configCallback(Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mutex_);
@@ -694,7 +705,7 @@ namespace jsk_pcl_ros
       computeCenterOfTemplate(
         cloud, linemod_template, linemod_detection, center);
       // publish mask image here
-      cv::Mat detect_mask = cv::Mat::zeros(cloud->width, cloud->height, CV_8UC1);
+      cv::Mat detect_mask = cv::Mat::zeros(cloud->height, cloud->width, CV_8UC1);
       int scaled_template_width
         = linemod_template.region.width * linemod_detection.scale;
       int scaled_template_height

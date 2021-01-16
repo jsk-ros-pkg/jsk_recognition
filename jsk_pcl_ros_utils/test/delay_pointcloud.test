@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_delay_pointcloud.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_delay_pointcloud"
+        name="test_delay_pointcloud"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /delay_pointcloud/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

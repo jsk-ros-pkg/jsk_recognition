@@ -1,0 +1,29 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/kiva_pod_mask.jpg
+      publish_info: true
+      encoding: mono8
+      frame_id: camera
+      fovx: 84.1
+      fovy: 53.8
+    </rosparam>
+  </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
+
+  <node name="mask_image_to_roi"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_perception/MaskImageToROI">
+    <remap from="~input" to="$(arg INPUT_IMAGE)"/>
+    <remap from="~input/camera_info" to="$(arg INPUT_IMAGE)/camera_info"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_perception)/sample/config/sample_mask_image_to_roi.rviz"/>
+  </group>
+</launch>

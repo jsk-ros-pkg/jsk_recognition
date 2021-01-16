@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_line_segment_collector.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_line_segment_collector"
+        name="test_line_segment_collector"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /line_segment_collector/output/cloud
+      timeout_0: 30
+      topic_1: /line_segment_collector/debug/connect_segments/inliers
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

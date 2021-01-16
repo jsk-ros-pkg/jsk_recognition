@@ -1,9 +1,33 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+
 import argparse
 import multiprocessing
 import os.path as osp
 
+import itertools, pkg_resources, sys
+from distutils.version import LooseVersion
+try:
+    chainer_version = pkg_resources.get_distribution(chainer).version
+except:
+    chainer_version = None
+if chainer_version and LooseVersion(chainer_version) >= LooseVersion('7.0.0') and \
+   sys.version_info.major == 2:
+   print('''Please install chainer <= 7.0.0:
+
+    sudo pip install chainer==6.7.0
+
+c.f https://github.com/jsk-ros-pkg/jsk_recognition/pull/2485
+''', file=sys.stderr)
+if [p for p in list(itertools.chain(*[pkg_resources.find_distributions(_) for _ in sys.path])) if "cupy-" in p.project_name ] == []:
+   print('''Please install CuPy
+
+    sudo pip install cupy-cuda[your cuda version]
+i.e.
+    sudo pip install cupy-cuda91
+
+''', file=sys.stderr)
 try:
     import chainer  # NOQA
     _chainer_available = True
@@ -35,6 +59,14 @@ def main():
         path='trained_data/drill_svm.xml',
         url='https://drive.google.com/uc?id=0B5hRAGKTOm_KWW11R0FTX0xjTDg',
         md5='762d0da4bcbf50e0e92939372988901a',
+        quiet=quiet,
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/svm_apc2016_objects.xml',
+        url='https://drive.google.com/uc?id=10JHFDfdxtAQxxtE1-GmTzkNTc8QBGq3x',
+        md5='1493f55104e7723512eaa67885c5a958',
         quiet=quiet,
     )
 
@@ -213,6 +245,12 @@ def main():
         url='https://drive.google.com/uc?id=15n00783FVwxrG9DRdBQOmi8xu1pz-FYl',
         md5='a585e4d41ed67d5052417ade6fb2d608',
     )
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/fcn8s_depth_prediction_concat_first_mirror.npz',
+        url='https://drive.google.com/uc?id=1vW2LT7drf_T9faQ_8DBz1UXqTg4cRLp4',
+        md5='33fd84c084b1c50cb718d81d5c59c6e9',
+    )
 
     # node_scripts/mask_rcnn_instance_segmentation.py
     download_data(
@@ -220,6 +258,41 @@ def main():
         path='trained_data/mask_rcnn_resnet50_voc_20180516.npz',
         url='https://drive.google.com/uc?id=1uv_jK-CAIJUXsRNmccFEISSKW4vXqI46',
         md5='47a507934b6bc20f0d9274825b734942',
+    )
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/mask_rcnn_resnet50_coco_20180730.npz',
+        url='https://drive.google.com/uc?id=1XC-Mx4HX0YBIy0Fbp59EjJFOF7a3XK0R',
+        md5='410b2aa065ebe6ca3607c98f3337ae49',
+    )
+
+    # node_scripts/mask_rcnn_instance_segmentation.py 73B2 kitchen
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/mask_rcnn_resnet50_73B2_kitchen_20190619.npz',
+        url='https://drive.google.com/uc?id=1ZK-6qGKb87MpXVo4aW8LEyx0OI3uBitt',
+        md5='ccefb23d17f057b25b16815fd88edb8f',
+    )
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/'
+        'mask_rcnn_resnet50_73B2_kitchen_20190619_classnames.yaml',
+        url='https://drive.google.com/uc?id=1BTnVD0vHcwFIqAKchIuDZ8LZmaNr4qr0',
+        md5='183631f938aef7786a1bcfd6343946bc',
+    )
+    # node_scripts/ssd_object_detector 73B2 kitchen
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/ssd512_73B2_kitchen_20191114.npz',
+        url='https://drive.google.com/uc?id=1nE7vWbjjrGRtpvtnUxzil4f2DsqTXjA8',
+        md5='650049ece249acae688547df316a3e26',
+    )
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/'
+        'ssd512_73B2_kitchen_20191114_classnames.yaml',
+        url='https://drive.google.com/uc?id=1QJa5WE5HD2XZZV5TsFehnKF8QTlS7fHI',
+        md5='f7905e49044a18c15ebdaf6dc15b446b',
     )
 
 

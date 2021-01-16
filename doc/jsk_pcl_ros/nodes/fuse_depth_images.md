@@ -3,8 +3,8 @@
 ![](images/fuse_depth_images.jpg)
 
 Do sensor fusions by multiple depth images ignoring nan region in each image.
-For transformation of depth from one to another, you can use `jsk_pcl/DepthImageCreator`.
-See `sample_fuse_depth_image.launch` for detail.
+For transformation of depth from one to another, you can use [jsk_pcl_ros/DepthImageCreator](./depth_image_creator.md).
+See [sample_fuse_images.launch](https://github.com/jsk-ros-pkg/jsk_recognition/blob/master/jsk_pcl_ros/sample/sample_fuse_images.launch) for detail.
 
 ## Subscribing Topic
 
@@ -31,7 +31,7 @@ See rosparam `~input_topics`.
 
 * `~approximate_sync` (Boolean, default: `False`):
 
-  Policy of synchronization, if `False` it synchornizes exactly, else approximately.
+  Policy of synchronization, if `False` it synchronizes exactly, else approximately.
 
 * `~queue_size` (Int, default: `100`):
 

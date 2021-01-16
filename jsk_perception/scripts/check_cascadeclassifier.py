@@ -6,7 +6,7 @@ import sys
 
 def main():
     if len(sys.argv) < 3:
-        print "Usage: check_cascadeclassifier.py cascade.xml [image_files ...]"
+        print("Usage: check_cascadeclassifier.py cascade.xml [image_files ...]")
         sys.exit(1)
     classifier_file = sys.argv[1]
     files = sys.argv[2:]
@@ -20,9 +20,9 @@ def main():
                     cv2.rectangle(img,(x,y),(x+w,y+h),(0,0,255),2)
                 cv2.imshow('img', img)
                 cv2.waitKey(100)
-        except KeyboardInterrupt, e:
+        except KeyboardInterrupt as e:
             raise e
-        except Exception, e:
+        except Exception as e:
             pass
 
 if __name__ == "__main__":

@@ -40,6 +40,7 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
 #include <message_filters/sync_policies/exact_time.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -52,6 +53,9 @@ namespace jsk_pcl_ros_utils
     typedef message_filters::sync_policies::ExactTime<
     sensor_msgs::PointCloud2,
     geometry_msgs::PoseStamped > SyncPolicy;
+    typedef message_filters::sync_policies::ApproximateTime<
+    sensor_msgs::PointCloud2,
+    geometry_msgs::PoseStamped > ApproximateSyncPolicy;
     PointCloudRelativeFromPoseStamped(): DiagnosticNodelet("PointCloudRelativeFromPoseStamped") {}
   protected:
     virtual void onInit();
@@ -64,6 +68,8 @@ namespace jsk_pcl_ros_utils
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_cloud_;
     message_filters::Subscriber<geometry_msgs::PoseStamped> sub_pose_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
+    boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> > async_;
+    bool approximate_sync_;
   private:
   };
 }

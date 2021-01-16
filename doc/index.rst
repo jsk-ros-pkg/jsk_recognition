@@ -21,8 +21,13 @@ The code is open source, and `available on github`_.
    install_realsense_camera
    install_xtion2
    install_ensenso
+   install_structure_core
+   install_elp_usb_4k
+   install_insta360_air
    install_chainer_gpu
+   install_pcl_from_source
    deep_learning_with_image_dataset/overview
+   contributions
 
 
 .. toctree::
@@ -34,5 +39,6 @@ The code is open source, and `available on github`_.
    jsk_perception/index
    jsk_pcl_ros/index
    jsk_pcl_ros_utils/index
+   jsk_recognition_msgs/index
    jsk_recognition_utils/index
    resized_image_transport/index

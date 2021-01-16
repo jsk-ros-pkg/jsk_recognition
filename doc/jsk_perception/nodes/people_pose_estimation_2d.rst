@@ -10,10 +10,10 @@ What is this?
 .. image:: ./images/hand_pose_estimation_2d.png
 
 Estimate people pose and hand pose in 2d.
-Please refer to `https://arxiv.org/abs/1611.08050`
+Please refer to `original paper <https://arxiv.org/abs/1611.08050>`_.
 
-In order to use this feature, you need to install `chainer`.
-To install chainer with GPU support, please refer to https://jsk-recognition.readthedocs.io/en/latest/install_chainer_gpu.html::
+In order to use this feature, you need to install `chainer <https://github.com/chainer/chainer>`_.
+To install chainer with GPU support, please refer to `this page <../../install_chainer_gpu.html>`_.
 
 Subscribing Topic
 -----------------
@@ -46,6 +46,12 @@ Publishing Topic
 * ``~pose2d`` (``jsk_recognition_msgs/PeoplePoseArray``)
 
   If ``with_depth`` is true, publish 2D joint position.
+
+* ``~skeleton`` (``jsk_recognition_msgs/HumanSkeletonArray``)
+
+  If ``with_depth`` is ``true``, publish 3D human skeletons.
+
+  Rviz visualization is available in `jsk-ros-pkg/jsk_visualization #740 <https://github.com/jsk-ros-pkg/jsk_visualization/pull/740>`_.
 
 Parameters
 ----------
@@ -132,4 +138,4 @@ Example
 
 .. code-block:: bash
 
-   roslaunch jsk_perception sample_people_pose_estimation_2d.launch GPU:=0
+   roslaunch jsk_perception sample_people_pose_estimation_2d.launch gpu:=0

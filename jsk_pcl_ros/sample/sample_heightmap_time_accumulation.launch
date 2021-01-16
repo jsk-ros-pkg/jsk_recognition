@@ -1,0 +1,88 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml"/>
+
+  <node name="laser_scan_assembler"
+        pkg="laser_assembler" type="laser_scan_assembler">
+    <remap from="scan" to="/tilt_scan"/>
+    <remap from="assemble_scans2" to="~assemble_scans2"/>
+    <rosparam>
+      fixed_frame: base_link
+      max_scans: 1  # Just convert LaserScan into PointCloud2
+    </rosparam>
+  </node>
+
+  <node name="sample_laser_scan_assembler_client"
+        pkg="jsk_pcl_ros" type="sample_laser_scan_assembler_client.py">
+    <remap from="~assemble_scans2" to="laser_scan_assembler/assemble_scans2"/>
+    <rosparam>
+      rate: 4.0
+    </rosparam>
+  </node>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="heightmap_converter"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/HeightmapConverter sample_manager">
+    <remap from="~input" to="sample_laser_scan_assembler_client/output"/>
+        <rosparam>
+      use_projected_center: true
+      fixed_frame_id: map
+      center_frame_id: base_link
+      projected_center_frame_id: heightmap_center
+      max_queue_size: 1
+      resolution_x: 400
+      resolution_y: 400
+      min_x: -5.0
+      max_x: 5.0
+      min_y: -5.0
+      max_y: 5.0
+    </rosparam>
+  </node>
+
+  <node name="heightmap_time_accumulation"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/HeightmapTimeAccumulation sample_manager">
+    <remap from="~input" to="heightmap_converter/output"/>
+    <remap from="~input/config" to="heightmap_converter/output/config"/>
+    <remap from="~input/prev_pointcloud" to="heightmap_to_pointcloud/output"/>
+    <rosparam>
+      fixed_frame_id: map
+      center_frame_id: heightmap_center
+    </rosparam>
+  </node>
+
+  <node name="heightmap_to_pointcloud"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/HeightmapToPointCloud sample_manager">
+    <remap from="~input" to="heightmap_time_accumulation/output"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="colorize_float_image_current_heightmap"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_perception/ColorizeFloatImage sample_manager">
+      <remap from="~input" to="heightmap_converter/output"/>
+      <rosparam>
+        channel: 0
+      </rosparam>
+    </node>
+
+    <node name="colorize_float_image_accumulated_heightmap"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_perception/ColorizeFloatImage sample_manager">
+      <remap from="~input" to="heightmap_time_accumulation/output"/>
+      <rosparam>
+        channel: 0
+      </rosparam>
+    </node>
+
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/heightmap_time_accumulation.rviz"/>
+  </group>
+</launch>

@@ -35,12 +35,17 @@
 
 #include "jsk_pcl_ros_utils/pointcloud_to_cluster_point_indices.h"
 
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
+
 namespace jsk_pcl_ros_utils
 {
   void PointCloudToClusterPointIndices::onInit()
   {
     DiagnosticNodelet::onInit();
     pub_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output", 1);
+    pnh_->param<bool>("skip_nan", skip_nan_, false);
     onInitPostProcess();
   }
 
@@ -59,10 +64,17 @@ namespace jsk_pcl_ros_utils
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     vital_checker_->poke();
+    pcl::PointCloud<pcl::PointXYZRGB> cloud;
+    pcl::fromROSMsg(*msg, cloud);
     int point_num = msg->width * msg->height;
     pcl_msgs::PointIndices indices;
     jsk_recognition_msgs::ClusterPointIndices cluster_indices;
     for (int i = 0; i < point_num; i++) {
+      if (skip_nan_ &&
+          (std::isnan(cloud.points[i].x) || std::isnan(cloud.points[i].y) || std::isnan(cloud.points[i].z)))
+      {
+        continue;
+      }
       indices.indices.push_back(i);
     }
     indices.header = msg->header;

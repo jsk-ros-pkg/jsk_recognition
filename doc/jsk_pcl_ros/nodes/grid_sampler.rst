@@ -8,7 +8,7 @@ GridSampler
 What is this?
 -------------
 
-Sample clusters of point cloud with grid size.
+Sample clusters from point cloud with grid size.
 
 
 Subscribing Topics
@@ -24,7 +24,7 @@ Publishing Topics
 
 - ``~output`` (``jsk_recognition_msgs/ClusterPointindices``)
 
-  Clusters of point indices which reprent each grid sample.
+  Clusters of point indices which represent each grid sample.
 
 
 Parameters
@@ -32,4 +32,16 @@ Parameters
 
 - ``~grid_size`` (``Double``, default: ``0.2``)
 
+  Grid size of each cluster in [m].
+
 - ``~min_indices`` (``Int``, default: ``0``)
+
+  Minimum number of point indices in each cluster.
+
+
+Sample
+------
+
+.. code-block:: bash
+
+  roslaunch jsk_pcl_ros sample_grid_sampler.launch

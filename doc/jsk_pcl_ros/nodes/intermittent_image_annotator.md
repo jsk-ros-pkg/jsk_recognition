@@ -35,7 +35,7 @@
 
   Publish ROI of specified region as `PosedCameraInfo`.
 
-* `~output/cloud` (`sensor_msgs/PointCloud`)
+* `~output/cloud` (`sensor_msgs/PointCloud2`)
 
   Pointcloud inside of ROI. pointcloud is stored when `~shutter` service is called and
   its timestamp will be updated according to the latest image.
@@ -43,6 +43,7 @@
 * `~output/marker` (`visualization_msgs/Marker`)
 
   Marker to visualize ROI (`~output/roi`).
+
 ## Parameters
 * `~fixed_frame_id` (`String`, default: `odom`)
 
@@ -51,6 +52,10 @@
 * `~max_image_buffer` (`Integer`, default: `5`)
 
   The maximum number of images to store in this nodelet.
+
+* `~rate` (`Float`, default: `1.0`)
+
+  Publishing rate of concatenated images in [Hz].
 
 * `~store_pointcloud` (`Boolean`, default: `false`)
 
@@ -69,3 +74,13 @@
 * `~clear` (`std_srvs/Empty`)
 
   Clear images stored in the nodelet.
+
+* `~request` (`std_srvs/Empty`)
+
+  Request publishing concatenated image to `~output`.
+
+## Sample
+
+```bash
+roslaunch jsk_pcl_ros sample_intermittent_image_annotator.launch
+```

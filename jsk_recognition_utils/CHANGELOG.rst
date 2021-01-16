@@ -2,6 +2,94 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.15 (2020-10-10)
+-------------------
+
+1.2.14 (2020-10-09)
+-------------------
+
+1.2.13 (2020-10-08)
+-------------------
+
+1.2.12 (2020-10-03)
+-------------------
+
+1.2.11 (2020-10-01)
+-------------------
+* Add ssd to bounding box sample (`#2513 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2513>`_)
+
+  * rename launch and rvizconfig
+  * rename to sample_table_rects_to_bounding_box.launch
+  * update rviz config
+  * refactor launch files
+  * add ssd output arg
+  * enabe to put out the bounding box
+  * try to make ssd to bbox sample
+
+* Include cython3 when searching (`#2531 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2531>`_)
+* [jsk_recognition_utils] add rect_array_to_cluster_point_indices.py (`#2511 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2511>`_)
+* [jsk_recognition_utils] remove unnecessary dynamic_reconfigure in rect_array_to_polygon_array.py (`#2510 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2510>`_)
+
+  * fix typo in rect_array_to_cluster_point_indices.py
+  * add test and sample for rect_array_to_cluster_point_indices
+  * add rect_array_to_cluster_point_indices.py
+  * remove unused dynamic_reconfigure in rect_array_to_polygon_array.py
+
+* Add FCN8sDepthPredictionConcatFirst model to fcn_depth_prediction.py (`#2481 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2481>`_)
+
+  * Remove unused import in depth_prediction dataset
+  * Rewrite data augmentation to remove dependency on imgaug
+  * Read dataset directory from argument
+  * Add loss computation
+  * Add weight initialization from VGG16
+  * Flatten images for network input
+  * Rewrite mvtk-dependent code
+  * Remove redundant visualization of DepthPredictionDataset
+  * Rosdep install imgaug
+  * Fix default root_dir of DepthPredictionDataset
+  * Move FCN8sDepthPrediction chainer models to jsk_recognition_utils
+  * Add DepthPredictionDataset
+
+* Fix for  noetic / 20.04 (`#2507 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2507>`_)
+
+  * jsk_recognition_utils/cv_utils.h fix for opencv4
+  * upgrade package.xml to format=3, migrate to noetic with ROS_PYTHON_VERSION=2/3, use multiple ROS distro strategy http://wiki.ros.org/noetic/Migration
+
+* [jsk_perception] add program for training ssd with box annotation (`#2483 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2483>`_)
+* set chainer version less than 7.0.0 (`#2485 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2485>`_)
+* [jsk_recognition_utils] Fix ear clipping triangulation to support concave polygon (`#2447 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2447>`_)
+
+  * Handle parallel line segments as well
+  * Check if line segment 'uw' completely lies inside the polygon for correcting isEar function
+  * Rename func: triangulate -> triangulateClockwiseVertices
+  * Add space in 'if' line for readable code
+  * Fix ear clipping to support concave polygon
+
+* Add train script and sample for SSD (`#2471 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2471>`_)
+* fix generate_readme.py and update readme (`#2442 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2442>`_)
+* Add sample, test and doc (`#2440 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2440>`_)
+
+  * Add dependency on image_view in jsk_recognition_utils/package.xml
+  * Add test for image_16uc1_to_32fc1.py
+  * Add sample for image_16uc1_to_32fc1.py
+  * Add test for rect_array_to_polygon_array.py
+  * Add sample for rect_array_to_polygon_array.py
+  * Fix output polygon vertices in rect_array_to_polygon_array.py
+  * Add test for add_cluster_indices.py
+  * Add sample for add_cluster_indices.py
+  * Add test for static_virtual_camera.py
+  * Add test for pose_array_to_pose.py
+  * Add sample for pose_array_to_pose.py
+  * Add test for polygon_array_to_polygon
+  * Add sample for polygon_array_to_polygon
+  * Add test for polygon_array_publisher
+  * Fix rviz config for sample_polygon_array_publisher.launch
+  * add label to bounding_box_publisher.py
+
+* [jsk_recognition_utils] Add label to bounding_box_publisher.py (`#2430 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2430>`_)
+
+* Contributors: Naoaki Kanazawa, Kei Okada, Peter Mitrano, Shingo Kitagawa, Yuki Furuta, Yuto Uchimi, Taichi Higashide
+
 1.2.10 (2019-03-27)
 -------------------
 * Add qtbase5-dev as a package.xml dependency for jsk_recognition_utils. (`#2417 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2417>`_)

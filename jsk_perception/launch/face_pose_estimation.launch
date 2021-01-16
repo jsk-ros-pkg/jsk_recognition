@@ -1,12 +1,8 @@
 <launch>
-  <arg name="test_mode" default="false" />
-  <arg name="gui" default="true" unless="$(arg test_mode)" />
-  <arg name="gui" default="false"    if="$(arg test_mode)" />
-  <arg name="GPU" default="0" unless="$(arg test_mode)"  />
-  <arg name="GPU" default="-1"    if="$(arg test_mode)" />
+  <arg name="gui" default="true" />
+  <arg name="gpu" default="-1" />
+  <arg name="launch_openni" default="true" />
   <arg name="model_path" default="auto" />
-  <arg name="launch_openni" default="true" unless="$(arg test_mode)"/>
-  <arg name="launch_openni" default="true"     if="$(arg test_mode)"/>
   <arg name="CAMERA_NS" default="camera" />
   <arg name="INPUT_IMAGE" default="/$(arg CAMERA_NS)/rgb/image_rect_color" />
   <arg name="INPUT_DEPTH_IMAGE" default="/$(arg CAMERA_NS)/depth_registered/image" />
@@ -25,7 +21,7 @@
     <remap from="~input/info" to="$(arg INPUT_CAMERA_INFO)" />
     <remap from="~input/depth" to="$(arg INPUT_DEPTH_IMAGE)" />
     <rosparam subst_value="true">
-      gpu: $(arg GPU)
+      gpu: $(arg gpu)
       model_file: $(find jsk_perception)/trained_data/pose_estimation_2d_chainermodel.pkl
       with_depth: true
       scales: [0.38]
@@ -40,9 +36,9 @@
     <remap from="~input/pose_2d" to="people_pose_estimation_2d/pose_2d" />
     <remap from="~input/pose" to="people_pose_estimation_2d/pose" />
     <rosparam subst_value="true">
-      gpu: $(arg GPU)
+      gpu: $(arg gpu)
+      model_path: $(arg model_path)
     </rosparam>
-    <param name="model_path" value="$(arg model_path)" unless="$(arg test_mode)" />
   </node>
 
   <node name="draw_rects"

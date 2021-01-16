@@ -17,111 +17,161 @@ Subscribing Topics
 
 - ``~input`` (``sensor_msgs/PointCloud2``)
 
-  Input point cloud.
+  Input organized point cloud.
 
 
 Publishing Topics
 -----------------
 
-- ``~output_nan_boundary_edge_indices``
-- ``~output_occluding_edge_indices``
-- ``~output_occluded_edge_indices``
-- ``~output_curvature_edge_indices``
-- ``~output_rgb_edge_indices``
-- ``~output_indices``
+- ``~output_normal`` (``sensor_msgs/PointCloud2``)
 
-  Output point indices.
+  Estimated normal of whole point cloud.
 
-- ``~output_normal``
-- ``~output_nan_boundary_edge``
-- ``~output_occluding_edge``
-- ``~output_occluded_edge``
-- ``~output_curvature_edge``
-- ``~output_rgb_edge``
-- ``~output``
+  Point type is ``pcl::Normal``.
 
-  Output point cloud.
+  This topic is published only when ``~publish_normal`` is ``true``.
 
-- ``~edge_image``
-- ``~hough_image``
+- ``~output_nan_boundary_edge_indices`` (``pcl_msgs/PointIndices``)
+- ``~output_occluding_edge_indices`` (``pcl_msgs/PointIndices``)
+- ``~output_occluded_edge_indices`` (``pcl_msgs/PointIndices``)
+- ``~output_curvature_edge_indices`` (``pcl_msgs/PointIndices``)
+- ``~output_rgb_edge_indices`` (``pcl_msgs/PointIndices``)
+- ``~output_indices`` (``pcl_msgs/PointIndices``)
+
+  Output edge indices.
+
+  ``~output_indices`` means all of the edge indices above.
+
+- ``~output_nan_boundary_edge`` (``sensor_msgs/PointCloud2``)
+- ``~output_occluding_edge`` (``sensor_msgs/PointCloud2``)
+- ``~output_occluded_edge`` (``sensor_msgs/PointCloud2``)
+- ``~output_curvature_edge`` (``sensor_msgs/PointCloud2``)
+- ``~output_rgb_edge`` (``sensor_msgs/PointCloud2``)
+- ``~output`` (``sensor_msgs/PointCloud2``)
+
+  Output point cloud of edge.
+
+  ``~output`` means all of the edge point cloud above.
+
+- ``~output_straight_edges_indices`` (``jsk_recognition_msgs/ClusterPointIndices``)
+
+  Cluster indices containing straight edges.
+
+  This topic is published only when ``~use_straightline_detection`` is ``true``.
+
+- ``~edge_image`` (``sensor_msgs/Image``)
+- ``~hough_image`` (``sensor_msgs/Image``)
 
   Debug image.
   Visualize the input and output image of ``cv::HoughLinesP``.
-.. image:: images/organized_edge_detector_hough_image.png
+
+  These topics are published only when ``~use_straightline_detection`` is ``true``
+  and ``~publish_debug_image`` is ``true``.
+
+  .. image:: images/organized_edge_detector_hough_image.png
 
 
 Parameters
 ----------
 
-- ``max_depth_change_factor``, (``Double``, default: ``0.02``)
+Parameters for estimating normal
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- ``~publish_normal`` (Boolean, default: ``false``)
+
+  Publish normal pointcloud or not.
+
+- ``~max_depth_change_factor``, (Double, default: ``0.02``)
 
   Max depth change factor.
 
-- ``normal_smoothing_size``, (``Double``, default: ``20.0``)
+- ``~normal_smoothing_size``, (Double, default: ``20.0``)
 
   Normal smoothing size parameter.
 
-- ``estimation_method``, (``Int``, default: ``0``)
+- ``~estimation_method``, (Int, default: ``1``)
 
   Estimation method.
 
-- ``depth_dependent_smoothing`` (Boolean, default: ``false``)
+  Choose from ``AVERAGE_3D_GRADIENT(1)``, ``COVARIANCE_MATRIX(1)`` and
+  ``AVERAGE_DEPTH_CHANGE(2)``.
+
+- ``~depth_dependent_smoothing`` (Boolean, default: ``false``)
 
   Use depth dependent smoothing.
 
-- ``border_policy_ignore`` (Boolean, default: ``true``)
+- ``~border_policy_ignore`` (Boolean, default: ``true``)
 
   Ignore border policy.
 
-- ``max_search_neighbors`` (Int, default: ``100``)
+Parameters for estimating edge
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  The maximum number of the neighbors used in edge detection.
+- ``~max_search_neighbors`` (Int, default: ``100``)
 
-- ``depth_discontinuation_threshold`` (Double, default: ``0.04``)
+  The maximum search distance for deciding occluding and occluded edges
 
-  Threshold about depth discontinuation used in edge detection.
+- ``~depth_discontinuation_threshold`` (Double, default: ``0.04``)
 
-- ``publish_normal`` (Boolean, default: ``false``)
+  Threshold about depth discontinuation between neighboring points in meters.
 
-  Publish normal pointcloud
+- ``~use_nan_boundary`` (Boolean, default: ``false``)
 
-- ``use_nan_boundary`` (Boolean, default: ``false``)
+  Add NAN Boundary Edge to estimating edge type
 
-  Detect NAN Boundary Edge
-- ``use_occluding`` (Boolean, ``true``)
+- ``~use_occluding`` (Boolean, default: ``true``)
 
-  Detect Occluding Edge
-- ``use_occluded`` (Boolean, ``true``)
+  Add Occluding Edge to estimating edge type
 
-  Detect Occluded Edge
-- ``use_curvature`` (Boolean, ``true``)
+- ``~use_occluded`` (Boolean, default: ``true``)
 
-  Detect Curvature Edge
-- ``use_rgb`` (Boolean, ``false``)
+  Add Occluded Edge to estimating edge type
 
-  Detect RGB Edge
-- ``use_straightline_detection`` (Boolean, ``true``)
+- ``~use_curvature`` (Boolean, default: ``true``)
 
-  Detect Straight Lines
-- ``rho`` (Double, 1, 50)
+  Add High Curvature Edge to estimating edge type
 
-  rho Used in Straight Lines Detection(in pixel)
-- ``theta`` (Double,  Default: ``1``)
+- ``~use_rgb`` (Boolean, default: ``false``)
 
-  The resolution of the parameter \theta in radians. We use 1 degree (CV_PI/180) Used in Straight Lines Detection.
+  Add RGB Canny Edge to estimating edge type
 
-- ``straightline_threshold`` (Int, default: 50)
+Parameters for estimating straight edge
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  The minimum number of intersections to 'detect' a line, Used in Straight Lines Detection
+- ``~use_straightline_detection`` (Boolean, default: ``true``)
 
-- ``min_line_length`` (Double, default: 50)
+  Estimate Straight Lines or not.
 
-  The minimum number of points that can form a line. Lines with less than this number of points are disregarded. Used in Straight Lines Detection.
+- ``~rho`` (Double, default: ``1``)
 
-- ``max_line_gap`` (Double, default: 10)
+  Distance resolution of the accumulator in pixels.
 
-  The maximum gap between two points to be considered in the same line. Used in Straight Lines Detection.
+- ``~theta`` (Double,  Default: ``1``)
 
-- ``publish_debug_image``, (Boolean, default: true)
+  Angle resolution of the accumulator in degrees.
+
+- ``~straightline_threshold`` (Int, default: ``50``)
+
+  The minimum number of intersections to 'detect' a line.
+
+- ``~min_line_length`` (Double, default: ``50``)
+
+  The minimum number of points that can form a line.
+
+  Lines with less than this number of points are disregarded.
+
+- ``~max_line_gap`` (Double, default: ``10``)
+
+  The maximum gap between two points to be considered in the same line.
+
+- ``~publish_debug_image`` (Boolean, default: ``true``)
 
   Publish Debug Images.
+
+
+Sample
+------
+
+.. code-block:: bash
+
+  roslaunch jsk_pcl_ros sample_organized_edge_detector.launch

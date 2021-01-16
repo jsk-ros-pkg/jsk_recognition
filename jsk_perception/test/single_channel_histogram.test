@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_single_channel_histogram.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_single_channel_histogram"
+        name="test_single_channel_histogram"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /single_channel_histogram/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

@@ -1,6 +1,6 @@
-<package>
+<package format="3">
   <name>imagesift</name>
-  <version>1.2.10</version>
+  <version>1.2.15</version>
   <description>
     For every image, computes its sift features and send a new message with the image, its intrinsic parameters, and the features.
     Parameters include:
@@ -12,9 +12,11 @@
 
   <url type="repository">http://github.com/jsk-ros-pkg/jsk_recognition</url>
   <url type="bugtracker">http://github.com/jsk-ros-pkg/jsk_recognition/issues</url>
-  <url type="website">http://jsk-docs.readthedocs.io/en/latest/jsk_recognition/doc/imagesift</url>
+  <url type="website">https://jsk-docs.readthedocs.io/projects/jsk_recognition/en/latest/imagesift</url>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend condition="$ROS_PYTHON_VERSION == 2">python-setuptools</buildtool_depend>
+  <buildtool_depend condition="$ROS_PYTHON_VERSION == 3">python3-setuptools</buildtool_depend>
 
   <build_depend>roscpp</build_depend>
   <build_depend>cmake_modules</build_depend>
@@ -27,15 +29,15 @@
   <build_depend>libsiftfast</build_depend>
   <build_depend>nodelet</build_depend>
   
-  <run_depend>roscpp</run_depend>
-  <run_depend>sensor_msgs</run_depend>
-  <run_depend>posedetection_msgs</run_depend>
-  <run_depend>image_transport</run_depend>
-  <run_depend>jsk_recognition_utils</run_depend>
-  <run_depend>cv_bridge</run_depend>
-  <run_depend>libsiftfast</run_depend>
-  <run_depend>nodelet</run_depend>
-  <run_depend version_gte="2.2.8">jsk_topic_tools</run_depend>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>posedetection_msgs</exec_depend>
+  <exec_depend>image_transport</exec_depend>
+  <exec_depend>jsk_recognition_utils</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>libsiftfast</exec_depend>
+  <exec_depend>nodelet</exec_depend>
+  <exec_depend version_gte="2.2.8">jsk_topic_tools</exec_depend>
 
   <test_depend>rostest</test_depend>
 

@@ -42,21 +42,32 @@ Convert pointcloud into range image and detect border
   Choose model type of range image by this topic. `planar`, `laser` or `sphere` is
   allowed.
 
-* `~angular_resolution` (Double, default: `-0.5`)
+* `~angular_resolution` (Double, default: `0.5`)
 
   Angular resolution of range image. Only does `laser` model use this parameter.
 
 * `~noise_level` (Double, default: `0.1`)
 
   Noise level of pointcloud. Only does `laser` model use this parameter.
+
 * `~min_range` (Double, default: `0.0`)
 
   Minimam distance to take into account range image. Only does `laser` model use this parameter.
+
 * `~border_size` (Integer, default: `0`)
 
   Border size to remove from range image.
+
 * `~max_angle_height` (Double, default: `2pi`)
 
   Maximum angle height of range image. Only does `laser` model use this parameter.
+
 * `~max_angle_width` (Double, default: `2pi`)
+
   Maximum angle width of range image. Only does `laser` model use this parameter.
+
+## Sample
+
+```bash
+roslaunch jsk_pcl_ros sample_border_estimator.launch
+```

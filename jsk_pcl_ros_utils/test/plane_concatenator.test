@@ -1,0 +1,21 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_plane_concatenator.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_plane_concatenator"
+        name="test_plane_concatenator"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /plane_concatenator/output/indices
+      timeout_0: 30
+      topic_1: /plane_concatenator/output/polygons
+      timeout_1: 30
+      topic_2: /plane_concatenator/output/coefficients
+      timeout_2: 30
+    </rosparam>
+  </test>
+
+</launch>

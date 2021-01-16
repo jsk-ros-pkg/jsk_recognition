@@ -1,17 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from distutils.version import LooseVersion
 import sys
 
+import matplotlib
+matplotlib.use('Agg')  # NOQA
+import matplotlib.pyplot as plt
+import networkx
 import numpy as np
 import scipy.ndimage as ndi
+import skimage
 from skimage.color import gray2rgb
 from skimage.color import label2rgb
-from skimage.future.graph import draw_rag
 from skimage.future.graph import merge_hierarchical
 from skimage.future.graph import RAG
 from skimage.future.graph.rag import _add_edge_filter
-from skimage.measure import regionprops
 from skimage.morphology.convex_hull import convex_hull_image
 from skimage.segmentation import slic
 from skimage.util import img_as_uint
@@ -22,6 +26,11 @@ from jsk_topic_tools import warn_no_remap
 import message_filters
 import rospy
 from sensor_msgs.msg import Image
+
+if LooseVersion(skimage.__version__) >= '0.13.0':
+    from skimage.future.graph import show_rag
+else:
+    from skimage.future.graph import draw_rag
 
 
 ###############################################################################
@@ -71,7 +80,11 @@ def rag_solidity(labels, connectivity=2):
                               'solidity': solidity,
                               'mask': mask})
 
-    for x, y, d in graph.edges_iter(data=True):
+    if LooseVersion(networkx.__version__) >= '2':
+        edges_iter = graph.edges(data=True)
+    else:
+        edges_iter = graph.edges_iter(data=True)
+    for x, y, d in edges_iter:
         new_mask = np.logical_or(graph.node[x]['mask'], graph.node[y]['mask'])
         new_solidity = 1. * new_mask.sum() / convex_hull_image(new_mask).sum()
         org_solidity = np.mean([graph.node[x]['solidity'],
@@ -95,7 +108,7 @@ def _solidity_weight_func(graph, src, dst, n):
     new_solidity2 = 1. * new_mask2.sum() / convex_hull_image(new_mask2).sum()
     weight1 = org_solidity / new_solidity1
     weight2 = org_solidity / new_solidity2
-    return min([weight1, weight2])
+    return {'weight': min([weight1, weight2])}
 
 
 def _solidity_merge_func(graph, src, dst):
@@ -116,7 +129,7 @@ def masked_slic(img, mask, n_segments, compactness):
     n_labels = len(np.unique(labels))
     try:
         mask = ndi.binary_closing(mask, structure=np.ones((3, 3)), iterations=1)
-    except IndexError, e:
+    except IndexError as e:
         rospy.logerr(e)
         return
     labels[mask == 0] = 0  # set bg_label
@@ -174,7 +187,6 @@ class SolidityRagMerge(ConnectionBasedTransport):
             img = gray2rgb(img)
         mask = bridge.imgmsg_to_cv2(maskmsg, desired_encoding='mono8')
         mask = mask.reshape(mask.shape[:2])
-        mask = gray2rgb(mask)
         # compute label
         roi = closed_mask_roi(mask)
         roi_labels = masked_slic(img=img[roi], mask=mask[roi],
@@ -193,8 +205,21 @@ class SolidityRagMerge(ConnectionBasedTransport):
         g = rag_solidity(labels, connectivity=2)
         if self.is_debugging:
             # publish debug rag drawn image
-            rag_img = draw_rag(labels, g, img)
-            rag_img = img_as_uint(rag_img)
+            if LooseVersion(skimage.__version__) >= '0.13.0':
+                fig, ax = plt.subplots(
+                    figsize=(img.shape[1] * 0.01, img.shape[0] * 0.01))
+                show_rag(labels, g, img, ax=ax)
+                ax.axis('off')
+                plt.subplots_adjust(0, 0, 1, 1)
+                fig.canvas.draw()
+                w, h = fig.canvas.get_width_height()
+                rag_img = np.fromstring(
+                    fig.canvas.tostring_rgb(), dtype=np.uint8)
+                rag_img.shape = (h, w, 3)
+                plt.close()
+            else:
+                rag_img = draw_rag(labels, g, img)
+                rag_img = img_as_uint(rag_img)
             rag_imgmsg = bridge.cv2_to_imgmsg(
                 rag_img.astype(np.uint8), encoding='rgb8')
             rag_imgmsg.header = imgmsg.header

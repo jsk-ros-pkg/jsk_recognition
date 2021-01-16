@@ -1,0 +1,10 @@
+<launch>
+  <include file="$(find jsk_recognition_utils)/sample/sample_bounding_box_array_publisher.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="display_bounding_box_array"
+        pkg="jsk_pcl_ros" type="display-bounding-box-array.l">
+    <remap from="/cluster_decomposer/boxes" to="bounding_box_array_publisher/output"/>
+  </node>
+</launch>

@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_parallel_edge_finder.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_parallel_edge_finder"
+        name="test_parallel_edge_finder"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /parallel_edge_finder/output_edges_groups
+      timeout_0: 30
+      topic_1: /parallel_edge_finder/output_clusters
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

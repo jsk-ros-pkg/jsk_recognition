@@ -1,0 +1,28 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_organized_multi_plane_segmentation.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="multi_plane_extraction"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/MultiPlaneExtraction sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <remap from="~indices" to="organized_multi_plane_segmentation/output_refined"/>
+    <remap from="~input_polygons" to="organized_multi_plane_segmentation/output_refined_polygon"/>
+    <remap from="~input_coefficients" to="organized_multi_plane_segmentation/output_refined_coefficients"/>
+    <rosparam>
+      use_indices: true
+      use_coefficients: true
+      min_height: 0.02
+      max_height: 0.5
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/multi_plane_extraction.rviz"/>
+  </group>
+</launch>

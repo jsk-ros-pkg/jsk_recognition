@@ -1,0 +1,27 @@
+<launch>
+
+  <include file="$(find checkerboard_detector)/sample/sample_objectdetection_tf_publisher.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <node name="tf_to_transform_map_to_checkerboard"
+        pkg="jsk_topic_tools" type="tf_to_transform.py">
+    <rosparam>
+      parent_frame_id: map
+      child_frame_id: checker7x6
+      rate: 10.0
+      duration: 1.0
+    </rosparam>
+  </node>
+
+  <test test-name="test_objectdetection_tf_publisher"
+        name="test_objectdetection_tf_publisher"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="15" retry="3">
+    <rosparam>
+      topic_0: /tf_to_transform_map_to_checkerboard/output
+      timeout_0: 10
+    </rosparam>
+  </test>
+
+</launch>

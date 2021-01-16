@@ -4,15 +4,22 @@
     <arg name="gui" value="false" />
   </include>
 
-  <test test-name="test_bing"
-        name="test_bing"
+  <test test-name="test_bing_output"
+        name="test_bing_output"
         pkg="jsk_tools" type="test_topic_published.py"
-        retry="6">
+        time-limit="45" retry="6">
     <rosparam>
       topic_0: /bing/output
       timeout_0: 30
-      topic_1: /bing/output/objectness
-      timeout_1: 30
+    </rosparam>
+  </test>
+  <test test-name="test_bing_objectness"
+        name="test_bing_objectness"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="45" retry="6">
+    <rosparam>
+      topic_0: /bing/output/objectness
+      timeout_0: 30
     </rosparam>
   </test>
 

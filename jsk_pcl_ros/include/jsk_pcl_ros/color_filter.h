@@ -72,9 +72,13 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<PCLIndicesMsg> sub_indices_;
     ros::Publisher pub_;
+    sensor_msgs::PointCloud2 color_space_msg_;
+    ros::Publisher color_space_pub_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     virtual void configCallback(Config &config, uint32_t level) = 0;
     virtual void updateCondition() = 0;
+    virtual void convertToColorSpace(float &x, float &y, float &z,
+                                     unsigned char r, unsigned char g, unsigned char b) = 0;
     virtual void filter(const sensor_msgs::PointCloud2ConstPtr &input);
     virtual void filter(const sensor_msgs::PointCloud2ConstPtr &input,
                         const PCLIndicesMsg::ConstPtr& indices);
@@ -94,6 +98,8 @@ namespace jsk_pcl_ros
     int r_min_, r_max_, b_min_, b_max_, g_min_, g_max_;
     virtual void configCallback(jsk_pcl_ros::RGBColorFilterConfig &config, uint32_t level);
     virtual void updateCondition();
+    virtual void convertToColorSpace(float &x, float &y, float &z,
+                                     unsigned char r, unsigned char g, unsigned char b);
   private:
     virtual void onInit();
   };
@@ -105,6 +111,8 @@ namespace jsk_pcl_ros
     int h_min_, h_max_, s_min_, s_max_, i_min_, i_max_;
     virtual void configCallback(jsk_pcl_ros::HSIColorFilterConfig &config, uint32_t level);
     virtual void updateCondition();
+    virtual void convertToColorSpace(float &x, float &y, float &z,
+                                     unsigned char r, unsigned char g, unsigned char b);
   private:
     virtual void onInit();
   };

@@ -1,0 +1,50 @@
+<launch>
+  <arg name="gui" default="true"/>
+  <arg name="gpu" default="-1" />
+  <arg name="publish_objects_tf" default="true" />
+  <arg name="launch_tracking" default="false" />
+  <arg name="manager" default="pr2_tabletop_object_detector_nodelet_manager"/>
+  <arg name="machine" default="localhost" />
+  <arg name="load_machine" default="true" />
+
+  <arg name="INPUT" default="/kinect_head/depth_registered/points" />
+  <arg name="INPUT_IMAGE" default="/kinect_head/rgb/image_rect_color" />
+  <arg name="CAMERA_FRAME_ID" default="/head_mount_kinect_rgb_optical_frame" />
+  <arg name="CAMERA_INFO" default="/kinect_head/rgb/camera_info" />
+  <arg name="OUTPUT_RECTS" default="/ssd_73b2_kitchen/output/rect" />
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml" />
+
+  <include file="$(find jsk_recognition_utils)/sample/sample_table_rects_to_bounding_box.launch">
+    <arg name="input" value="$(arg INPUT)" />
+    <arg name="camera_info" value="$(arg CAMERA_INFO)" />
+    <arg name="camera_frame_id" value="$(arg CAMERA_FRAME_ID)" />
+    <arg name="input_image" value="$(arg INPUT_IMAGE)" />
+    <arg name="output_rects" value="$(arg OUTPUT_RECTS)" />
+    <arg name="manager" value="$(arg manager)" />
+    <arg name="machine" value="$(arg machine)" />
+    <arg name="launch_openni" value="false" />
+    <arg name="launch_tracking" value="$(arg launch_tracking)" />
+    <arg name="launch_rviz" value="false" />
+    <arg name="publish_tf" value="$(arg publish_objects_tf)" />
+  </include>
+
+  
+  <node name="ssd_73b2_kitchen"
+        pkg="jsk_perception" type="ssd_object_detector.py"
+        clear_params="true">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <rosparam command="load"
+              file="$(find jsk_perception)/trained_data/ssd512_73B2_kitchen_20191114_classnames.yaml" />
+    <rosparam subst_value="true">
+      gpu: $(arg gpu)
+      model: ssd512
+      model_path: $(find jsk_perception)/trained_data/ssd512_73B2_kitchen_20191114.npz
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz" pkg="rviz" type="rviz"
+          args="-d $(find jsk_recognition_utils)/sample/config/sample_ssd_to_bounding_box_73b2_kitchen.rviz" />
+  </group>  
+</launch>

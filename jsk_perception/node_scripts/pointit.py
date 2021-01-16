@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # Author: Yuki Furuta <furushchev@jsk.imi.i.u-tokyo.ac.jp>
 
-import copy
 from jsk_topic_tools import ConnectionBasedTransport
 import message_filters as MF
 import numpy as np
@@ -10,7 +9,6 @@ import rospy
 import tf2_ros
 import tf2_geometry_msgs
 
-from geometry_msgs.msg import Point
 from geometry_msgs.msg import PoseStamped
 from jsk_recognition_msgs.msg import BoundingBoxArray
 from jsk_recognition_msgs.msg import ClassificationResult
@@ -36,6 +34,8 @@ def find_pose(limb, msg):
 def remove_slash(frame_id):
     if frame_id.startswith("/"):
         return frame_id[1:]
+    else:
+        return frame_id
 
 
 class PointIt(ConnectionBasedTransport):
@@ -49,8 +49,20 @@ class PointIt(ConnectionBasedTransport):
         self.objects = []
 
         # parameters
-        self.dist_threshold = rospy.get_param("~dist_threshold", 0.1)
+        if rospy.has_param("~dist_threshold"):
+            rospy.logwarn("Parameter ~dist_threshold is deprecated. "
+                          "Use ~max_dist_threshold instead.")
+            self.max_dist_threshold = rospy.get_param("~dist_threshold")
+        else:
+            self.max_dist_threshold = rospy.get_param(
+                "~max_dist_threshold", 0.1)
+
+        self.min_dist_threshold = rospy.get_param("~min_dist_threshold", 0.0)
         self.min_norm_threshold = rospy.get_param("~min_norm_threshold", 0.2)
+        self.use_arm = rospy.get_param("~use_arm", ["rarm", "larm"])
+
+        if "rarm" not in self.use_arm and "larm" not in self.use_arm:
+            rospy.logfatal("~use_arm must contain at least 'rarm' or 'larm'.")
 
         # tf listener
         use_tf2_buffer_client = rospy.get_param("~use_tf2_buffer_client", True)
@@ -61,6 +73,7 @@ class PointIt(ConnectionBasedTransport):
                 use_tf2_buffer_client = False
         if not use_tf2_buffer_client:
             self.tfl = tf2_ros.Buffer()
+            self.tf_listener = tf2_ros.TransformListener(self.tfl)
 
         # advertise
         self.pub_bbox = self.advertise("~output", BoundingBoxArray, queue_size=1)
@@ -135,25 +148,29 @@ class PointIt(ConnectionBasedTransport):
         out_markers = []
         for i, pose in enumerate(ppl_msg.poses):
             # for each person
-            rwrist = find_pose("RWrist", pose)
-            rfinger = find_pose(["RHand5", "RHand6", "RHand7", "RHand8"], pose)
-            if rwrist is not None and rfinger is not None:
-                rclosest, rdist = self.get_closest_bbox((rwrist, rfinger), objects)
-                if rdist is not None and rdist < self.dist_threshold:
-                    out_bboxes.append(rclosest)
-                rmarker = self.get_marker((rwrist, rfinger), frame_id)
-                rmarker.id = 2 * i
-                out_markers.append(rmarker)
+            if "rarm" in self.use_arm:
+                rwrist = find_pose("RWrist", pose)
+                rfinger = find_pose(["RHand5", "RHand6", "RHand7", "RHand8"], pose)
+                if rwrist is not None and rfinger is not None:
+                    rclosest, rdist = self.get_closest_bbox((rwrist, rfinger), objects)
+                    if rdist is not None and\
+                       self.min_dist_threshold <= rdist <= self.max_dist_threshold:
+                        out_bboxes.append(rclosest)
+                    rmarker = self.get_marker((rwrist, rfinger), frame_id)
+                    rmarker.id = 2 * i
+                    out_markers.append(rmarker)
 
-            lwrist = find_pose("LWrist", pose)
-            lfinger = find_pose(["LHand5", "LHand6", "LHand7", "LHand8"], pose)
-            if lwrist is not None and lfinger is not None:
-                lclosest, ldist = self.get_closest_bbox((lwrist, lfinger), objects)
-                if ldist is not None and ldist < self.dist_threshold:
-                    out_bboxes.append(lclosest)
-                lmarker = self.get_marker((lwrist, lfinger), frame_id)
-                lmarker.id = 2 * i + 1
-                out_markers.append(lmarker)
+            if "larm" in self.use_arm:
+                lwrist = find_pose("LWrist", pose)
+                lfinger = find_pose(["LHand5", "LHand6", "LHand7", "LHand8"], pose)
+                if lwrist is not None and lfinger is not None:
+                    lclosest, ldist = self.get_closest_bbox((lwrist, lfinger), objects)
+                    if ldist is not None and\
+                       self.min_dist_threshold <= ldist <= self.max_dist_threshold:
+                        out_bboxes.append(lclosest)
+                    lmarker = self.get_marker((lwrist, lfinger), frame_id)
+                    lmarker.id = 2 * i + 1
+                    out_markers.append(lmarker)
 
         # publish
         if out_bboxes:
@@ -165,18 +182,8 @@ class PointIt(ConnectionBasedTransport):
         if out_markers:
             self.pub_marker.publish(MarkerArray(markers=out_markers))
 
-    def get_marker(self, line_seg, frame_id, scale=0.3):
+    def get_marker(self, line_seg, frame_id):
         p0, p1 = line_seg
-        v = np.asarray([p1.position.x - p0.position.x,
-                        p1.position.y - p0.position.y,
-                        p1.position.z - p0.position.z])
-        vnorm = np.linalg.norm(v)
-        if vnorm > 0.0:
-            v /= np.linalg.norm(v)
-        p2 = copy.deepcopy(p0)
-        p2.position.x += scale * v[0]
-        p2.position.y += scale * v[1]
-        p2.position.z += scale * v[2]
         m = Marker()
         m.header.stamp = rospy.Time.now()
         m.header.frame_id = frame_id

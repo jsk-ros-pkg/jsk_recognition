@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 # Author: Furushchev <furushchev@jsk.imi.i.u-tokyo.ac.jp>
 
+from __future__ import print_function
+
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -19,11 +21,36 @@ from jsk_perception.cfg import SSDObjectDetectorConfig as Config
 from sensor_msgs.msg import Image
 from jsk_recognition_msgs.msg import Rect, RectArray
 from jsk_recognition_msgs.msg import ClassificationResult
+from jsk_recognition_msgs.msg import ClusterPointIndices
+from pcl_msgs.msg import PointIndices
 
+import itertools, pkg_resources, sys
+from distutils.version import LooseVersion
+if LooseVersion(pkg_resources.get_distribution("chainer").version) >= LooseVersion('7.0.0') and \
+   sys.version_info.major == 2:
+   print('''Please install chainer <= 7.0.0:
+
+    sudo pip install chainer==6.7.0
+
+c.f https://github.com/jsk-ros-pkg/jsk_recognition/pull/2485
+''', file=sys.stderr)
+   sys.exit(1)
+if [p for p in list(itertools.chain(*[pkg_resources.find_distributions(_) for _ in sys.path])) if "cupy-" in p.project_name ] == []:
+   print('''Please install CuPy
+
+    sudo pip install cupy-cuda[your cuda version]
+i.e.
+    sudo pip install cupy-cuda91
+
+''', file=sys.stderr)
+   #sys.exit(1)
 import chainer
 from chainercv.links import SSD300
 from chainercv.links import SSD512
 from chainercv.visualizations import vis_bbox
+
+
+chainer.config.cv_resize_backend = 'cv2'
 
 
 class SSDObjectDetector(ConnectionBasedTransport):
@@ -60,6 +87,8 @@ class SSDObjectDetector(ConnectionBasedTransport):
         self.srv = Server(Config, self.config_callback)
 
         # advertise
+        self.pub_indices = self.advertise("~output/cluster_indices", ClusterPointIndices,
+                                          queue_size=1)
         self.pub_rects = self.advertise("~output/rect", RectArray,
                                         queue_size=1)
         self.pub_class = self.advertise("~output/class", ClassificationResult,
@@ -125,6 +154,24 @@ class SSDObjectDetector(ConnectionBasedTransport):
             rospy.loginfo("%s: elapsed %f msec" % ("predict", (tcur-tprev)*1000))
             tprev = tcur
 
+        cluster_indices_msg = ClusterPointIndices(header=msg.header)
+        H = img.shape[1]
+        W = img.shape[2]
+        for bbox in bboxes:
+            ymin = max(0, int(np.floor(bbox[0])))
+            xmin = max(0, int(np.floor(bbox[1])))
+            ymax = min(H, int(np.ceil(bbox[2])))
+            xmax = min(W, int(np.ceil(bbox[3])))
+            indices = [range(W*y+xmin, W*y+xmax) for y in range(ymin, ymax)]
+            indices = np.array(indices, dtype=np.int32).flatten()
+            indices_msg = PointIndices(header=msg.header, indices=indices)
+            cluster_indices_msg.cluster_indices.append(indices_msg)
+
+        if self.profiling:
+            tcur = time.time()
+            rospy.loginfo("%s: elapsed %f msec" % ("make cluster_indices msg", (tcur-tprev)*1000))
+            tprev = tcur
+
         rect_msg = RectArray(header=msg.header)
         for bbox in bboxes:
             rect = Rect(x=bbox[1], y=bbox[0],
@@ -151,6 +198,7 @@ class SSDObjectDetector(ConnectionBasedTransport):
             rospy.loginfo("%s: elapsed %f msec" % ("make cls msg", (tcur-tprev)*1000))
             tprev = tcur
 
+        self.pub_indices.publish(cluster_indices_msg)
         self.pub_rects.publish(rect_msg)
         self.pub_class.publish(cls_msg)
 

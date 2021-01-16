@@ -1,0 +1,21 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_color_histogram_label_match.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_color_histogram_label_match"
+        name="test_color_histogram_label_match"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /color_histogram_label_match/output/extracted_region
+      timeout_0: 30
+      topic_1: /color_histogram_label_match/output/coefficient_image
+      timeout_1: 30
+      topic_2: /color_histogram_label_match/debug
+      timeout_2: 30
+    </rosparam>
+  </test>
+
+</launch>

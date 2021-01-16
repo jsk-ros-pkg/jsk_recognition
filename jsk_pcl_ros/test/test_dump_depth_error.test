@@ -1,0 +1,18 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_dump_depth_error.launch">
+    <arg name="gui" value="false"/>
+    <arg name="csv_path" default="$(env HOME)/.ros/jsk_pcl_ros_sample_dump_depth_error.csv"/>
+  </include>
+
+  <test test-name="test_dump_depth_error"
+        name="test_dump_depth_error"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /dump_depth_error/scatter
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

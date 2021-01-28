@@ -53,7 +53,12 @@ namespace imagesift
     void SiftNode::onInit()
     {
         DiagnosticNodelet::onInit();
+        // First positional argument is the transport type
+        std::string transport;
+        pnh_->param("image_transport", transport, std::string("raw"));
+        ROS_INFO_STREAM("Using transport \"" << transport << "\" for " << pnh_->getNamespace());
         _it.reset(new image_transport::ImageTransport(*nh_));
+        _hints = image_transport::TransportHints(transport, ros::TransportHints(), *pnh_);
 
         pnh_->param("use_mask", _useMask, false);
         
@@ -69,7 +74,7 @@ namespace imagesift
     void SiftNode::subscribe()
     {
         if (!_useMask) {
-            _subImage = _it->subscribe("image", 1, &SiftNode::imageCb, this);
+            _subImage = _it->subscribe(nh_->resolveName("image"), 1, &SiftNode::imageCb, this, _hints);
         }
         else {
             _subImageWithMask.subscribe(*nh_, "image", 1);

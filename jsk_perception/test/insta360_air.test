@@ -1,0 +1,29 @@
+<launch>
+
+  <node pkg="rosbag" type="play" name="rosbag_play"
+        args="$(find jsk_perception)/sample/data/insta360_air.bag --loop --clock" output="screen" />
+
+  <include file="$(find jsk_perception)/sample/sample_insta360_air.launch">
+    <arg name="publish_image" value="false" />
+    <arg name="rectification" value="false" />
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_insta360_air"
+        name="test_insta360_air"
+        pkg="jsk_tools" type="test_topic_published.py">
+    <rosparam>
+      topic_0: /insta360/vertical00/horizontal00/image_raw
+      timeout_0: 10
+      topic_1: /insta360/vertical00/horizontal01/image_raw
+      timeout_1: 10
+      <!-- We do not test for rectified images -->
+      <!-- because rectification process depends on jsk_interactive_marker/camera_info_publisher -->
+      <!-- topic_2: /insta360/vertical00/horizontal00/image_rect_color -->
+      <!-- timeout_2: 10 -->
+      <!-- topic_3: /insta360/vertical00/horizontal01/image_rect_color -->
+      <!-- timeout_3: 10 -->
+    </rosparam>
+  </test>
+
+</launch>

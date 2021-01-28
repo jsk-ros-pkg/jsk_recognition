@@ -65,6 +65,14 @@ def main():
         extract=False,
     )
 
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/insta360_air.bag.tgz',
+        url='https://drive.google.com/uc?id=1f99gIK92EsGvVI5ahHAV5g8xoEHyQhtv',
+        md5='762eb0591f0ab03718733596c8d01728',
+        extract=True,
+    )
+
 
 if __name__ == '__main__':
     main()

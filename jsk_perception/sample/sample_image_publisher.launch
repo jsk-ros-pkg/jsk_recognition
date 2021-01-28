@@ -112,40 +112,40 @@
           pkg="image_view" type="image_view">
       <remap from="image" to="raw_image_bgr/image_color" />
     </node>
-    <!-- <node name="image_view1" -->
-    <!--       pkg="image_view" type="image_view"> -->
-    <!--   <remap from="image" to="raw_image_rgb/image_color" /> -->
-    <!-- </node> -->
-    <!-- <node name="image_view2" -->
-    <!--       pkg="image_view" type="image_view"> -->
-    <!--   <remap from="image" to="mask_image/mask" /> -->
-    <!-- </node> -->
-    <!-- <node name="image_view3" -->
-    <!--       pkg="image_view" type="image_view"> -->
-    <!--   <remap from="image" to="depth_image_16uc1/image_depth" /> -->
-    <!-- </node> -->
-    <!-- <node name="image_view4" -->
-    <!--       pkg="image_view" type="image_view"> -->
-    <!--   <remap from="image" to="depth_image_32fc1/image_depth" /> -->
-    <!--   <rosparam> -->
-    <!--     do_dynamic_scaling: true -->
-    <!--   </rosparam> -->
-    <!-- </node> -->
-    <!-- <node name="image_view5" -->
-    <!--       pkg="image_view" type="image_view"> -->
-    <!--   <remap from="image" to="label_image/label" /> -->
-    <!--   <rosparam> -->
-    <!--     bg_label: 0 -->
-    <!--   </rosparam> -->
-    <!-- </node> -->
-    <!-- <node name="image_view6" -->
-    <!--       pkg="image_view" type="image_view"> -->
-    <!--   <remap from="image" to="raw_image_bgra/image_color" /> -->
-    <!-- </node> -->
-    <!-- <node name="image_view7" -->
-    <!--       pkg="image_view" type="image_view"> -->
-    <!--   <remap from="image" to="raw_image_rgba/image_color" /> -->
-    <!-- </node> -->
+    <node name="image_view1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="raw_image_rgb/image_color" />
+    </node>
+    <node name="image_view2"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="mask_image/mask" />
+    </node>
+    <node name="image_view3"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="depth_image_16uc1/image_depth" />
+    </node>
+    <node name="image_view4"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="depth_image_32fc1/image_depth" />
+      <rosparam>
+        do_dynamic_scaling: true
+      </rosparam>
+    </node>
+    <node name="image_view5"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="label_image/label" />
+      <rosparam>
+        bg_label: 0
+      </rosparam>
+    </node>
+    <node name="image_view6"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="raw_image_bgra/image_color" />
+    </node>
+    <node name="image_view7"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="raw_image_rgba/image_color" />
+    </node>
   </group>
 
 

@@ -88,6 +88,8 @@ namespace jsk_pcl_ros
       /* convert points */
       tf::StampedTransform ros_fixed_to_center;
       try {
+	tf_->waitForTransform(fixed_frame_id_, center_frame_id_,
+			     msg->header.stamp, ros::Duration(1.0));
         tf_->lookupTransform(fixed_frame_id_, center_frame_id_,
                              msg->header.stamp, ros_fixed_to_center);
       }
@@ -103,6 +105,8 @@ namespace jsk_pcl_ros
 
       tf::StampedTransform ros_msg_to_fixed;
       try {
+	tf_->waitForTransform(msg->header.frame_id, fixed_frame_id_,
+			     msg->header.stamp, ros::Duration(1.0));
         tf_->lookupTransform(msg->header.frame_id, fixed_frame_id_,
                              msg->header.stamp, ros_msg_to_fixed);
       }

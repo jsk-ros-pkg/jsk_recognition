@@ -1,6 +1,7 @@
 <launch>
 
   <arg name="gui" default="true" />
+  <arg name="image_transport" default="raw" />
 
   <node name="static_virtual_camera"
         pkg="jsk_recognition_utils" type="static_virtual_camera.py" />
@@ -13,6 +14,7 @@
         args="load imagesift/ImageSift nodelet_manager">
     <remap from="image" to="static_virtual_camera/image_color" />
     <remap from="camera_info" to="static_virtual_camera/camera_info" />
+    <param name="image_transport" value="$(arg image_transport)" />
   </node>
 
   <group if="$(arg gui)">
@@ -23,6 +25,7 @@
     <node name="feature0d_to_image"
           pkg="posedetection_msgs" type="feature0d_to_image">
       <remap from="image" to="static_virtual_camera/image_color" />
+      <param name="image_transport" value="$(arg image_transport)" />
     </node>
     <node name="imagefeature0d_view"
           pkg="image_view" type="image_view">

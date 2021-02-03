@@ -36,7 +36,6 @@
   <node name="multi_plane_estimate" pkg="nodelet" type="nodelet"
         args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg manager)"
         output="screen"
-        if="$(arg launch_manager)"
         machine="$(arg machine)">
     <remap from="~input" to="input_relay/output" />
     <rosparam>
@@ -55,9 +54,9 @@
         output="screen"
         machine="$(arg machine)">
     <remap from="~input" to="input_relay/output" />
-    <remap from="~indices" to="/multi_plane_estimate/output_refined" />
-    <remap from="~input_polygons" to="/multi_plane_estimate/output_refined_polygon" />
-    <remap from="~input_coefficients" to="/multi_plane_estimate/output_refined_coefficients" />
+    <remap from="~indices" to="multi_plane_estimate/output_refined" />
+    <remap from="~input_polygons" to="multi_plane_estimate/output_refined_polygon" />
+    <remap from="~input_coefficients" to="multi_plane_estimate/output_refined_coefficients" />
     <rosparam subst_value="true">
       use_sensor_frame: true
       sensor_frame: $(arg sensor_frame)
@@ -68,7 +67,7 @@
         args="load jsk_pcl/EuclideanClustering $(arg manager)"
         output="screen"
         machine="$(arg machine)">
-    <remap from="~input" to="/plane_extraction/output" />
+    <remap from="~input" to="plane_extraction/output" />
     <rosparam>
       tolerance: 0.02
       min_size: 100
@@ -85,11 +84,11 @@
         args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg manager)"
         output="screen"
         machine="$(arg machine)">
-    <remap from="~input" to="/plane_extraction/output" />
-    <remap from="~target" to="/euclidean_clustering/output_throttle" />
-    <remap from="~align_planes" to="/multi_plane_estimate/output_refined_polygon" />
+    <remap from="~input" to="plane_extraction/output" />
+    <remap from="~target" to="euclidean_clustering/output_throttle" />
+    <remap from="~align_planes" to="multi_plane_estimate/output_refined_polygon" />
     <remap from="~align_planes_coefficients"
-           to="/multi_plane_estimate/output_refined_coefficients" />
+           to="multi_plane_estimate/output_refined_coefficients" />
     <rosparam subst_value="true">
       align_boxes: true
       use_pca: true
@@ -108,10 +107,10 @@
         args="load jsk_pcl/SelectedClusterPublisher $(arg manager)"
         output="screen"
         machine="$(arg machine)">
-    <remap from="~input" to="/plane_extraction/output" />
-    <remap from="~indices" to="/euclidean_clustering/output" />
-    <remap from="~selected_index" to="/bounding_box_marker/selected_index" />
-    <remap from="~output" to="/selected_pointcloud" />
+    <remap from="~input" to="plane_extraction/output" />
+    <remap from="~indices" to="euclidean_clustering/output" />
+    <remap from="~selected_index" to="bounding_box_marker/selected_index" />
+    <remap from="~output" to="selected_pointcloud" />
   </node>
 
   <!-- tracking -->
@@ -158,7 +157,7 @@
           args="load jsk_pcl/OctreeVoxelGrid $(arg manager)"
           output="screen" clear_params="true"
           machine="$(arg machine)">
-      <remap from="~input" to="/selected_pointcloud" />
+      <remap from="~input" to="selected_pointcloud" />
       <param name="resolution" value="0.01" />
       <rosparam>
         point_type: xyzrgb

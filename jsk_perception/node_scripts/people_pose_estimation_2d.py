@@ -11,7 +11,7 @@ import itertools, pkg_resources, sys
 from distutils.version import LooseVersion
 if LooseVersion(pkg_resources.get_distribution("chainer").version) >= LooseVersion('7.0.0') and \
    sys.version_info.major == 2:
-   print('''Please install chainer <= 7.0.0:
+   print('''Please install chainer < 7.0.0:
 
     sudo pip install chainer==6.7.0
 

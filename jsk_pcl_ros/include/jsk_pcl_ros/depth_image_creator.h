@@ -96,6 +96,7 @@ namespace jsk_pcl_ros
     tf::StampedTransform fixed_transform;
     tf::TransformListener* tf_listener_;
     double scale_depth;
+    double tf_duration_;
     float fill_value;
     typedef pcl::PointXYZRGB Point;
     typedef pcl::PointCloud< Point > PointCloud;

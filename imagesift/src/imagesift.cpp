@@ -22,8 +22,12 @@
 #include <posedetection_msgs/Feature0DDetect.h>
 #include <image_transport/image_transport.h>
 #include <image_transport/subscriber_filter.h>
+#if ( CV_MAJOR_VERSION >= 4)
+#include <opencv2/highgui.hpp>
+#else
 #include <opencv/highgui.h>
 #include <opencv/cv.h>
+#endif
 
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
@@ -49,7 +53,12 @@ namespace imagesift
     void SiftNode::onInit()
     {
         DiagnosticNodelet::onInit();
+        // First positional argument is the transport type
+        std::string transport;
+        pnh_->param("image_transport", transport, std::string("raw"));
+        ROS_INFO_STREAM("Using transport \"" << transport << "\" for " << pnh_->getNamespace());
         _it.reset(new image_transport::ImageTransport(*nh_));
+        _hints = image_transport::TransportHints(transport, ros::TransportHints(), *pnh_);
 
         pnh_->param("use_mask", _useMask, false);
         
@@ -65,7 +74,7 @@ namespace imagesift
     void SiftNode::subscribe()
     {
         if (!_useMask) {
-            _subImage = _it->subscribe("image", 1, &SiftNode::imageCb, this);
+            _subImage = _it->subscribe(nh_->resolveName("image"), 1, &SiftNode::imageCb, this, _hints);
         }
         else {
             _subImageWithMask.subscribe(*nh_, "image", 1);

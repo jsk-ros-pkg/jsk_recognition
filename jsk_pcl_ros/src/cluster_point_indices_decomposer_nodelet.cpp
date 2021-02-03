@@ -134,21 +134,30 @@ namespace jsk_pcl_ros
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_target_.subscribe(*pnh_, "target", 1);
     if (align_boxes_ && align_boxes_with_plane_) {
-      sync_align_ = boost::make_shared<message_filters::Synchronizer<SyncAlignPolicy> >(queue_size_);
       sub_polygons_.subscribe(*pnh_, "align_planes", 1);
       sub_coefficients_.subscribe(*pnh_, "align_planes_coefficients", 1);
-      sync_align_->connectInput(sub_input_, sub_target_, sub_polygons_, sub_coefficients_);
-      sync_align_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2, _3, _4));
-    }
-    else if (use_async_) {
-      async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
-      async_->connectInput(sub_input_, sub_target_);
-      async_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2));
+      if (use_async_) {
+        async_align_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncAlignPolicy> >(queue_size_);
+        async_align_->connectInput(sub_input_, sub_target_, sub_polygons_, sub_coefficients_);
+        async_align_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2, _3, _4));
+      }
+      else {
+        sync_align_ = boost::make_shared<message_filters::Synchronizer<SyncAlignPolicy> >(queue_size_);
+        sync_align_->connectInput(sub_input_, sub_target_, sub_polygons_, sub_coefficients_);
+        sync_align_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2, _3, _4));
+      }
     }
     else {
-      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
-      sync_->connectInput(sub_input_, sub_target_);
-      sync_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2));
+      if (use_async_) {
+        async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
+        async_->connectInput(sub_input_, sub_target_);
+        async_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2));
+      }
+      else {
+        sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
+        sync_->connectInput(sub_input_, sub_target_);
+        sync_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2));
+      }
     }
   }
 
@@ -507,8 +516,40 @@ namespace jsk_pcl_ros
       }
     }
     else {
-      segmented_cloud_transformed = segmented_cloud;
-      is_center_valid = pcl::compute3DCentroid(*segmented_cloud_transformed, center) != 0;
+      if (use_pca_) {
+        if (segmented_cloud->points.size() >= 3) {
+          Eigen::Vector4f pca_centroid;
+          pcl::compute3DCentroid(*segmented_cloud, pca_centroid);
+          Eigen::Matrix3f covariance;
+          pcl::computeCovarianceMatrixNormalized(*segmented_cloud, pca_centroid, covariance);
+          Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eigen_solver(covariance, Eigen::ComputeEigenvectors);
+          Eigen::Matrix3f eigen_vectors_pca = eigen_solver.eigenvectors();
+          // This line is necessary for proper orientation in some cases. The numbers come out the same without it, but
+          // the signs are different and the box doesn't get correctly oriented in some cases.
+          eigen_vectors_pca.col(2) = eigen_vectors_pca.col(0).cross(eigen_vectors_pca.col(1));
+          // Rotate with respect to y-axis to make x-axis the first principal component
+          eigen_vectors_pca = eigen_vectors_pca * Eigen::AngleAxisf(M_PI / 2.0, Eigen::Vector3f::UnitY());
+          // Rotate around x
+          if (eigen_vectors_pca.col(2).dot(Eigen::Vector3f::UnitZ()) < 0) {
+            eigen_vectors_pca = eigen_vectors_pca * Eigen::AngleAxisf(M_PI, Eigen::Vector3f::UnitX());
+          }
+          // Transform the original cloud to the origin where the principal components correspond to the axes.
+          Eigen::Matrix4f projection_transform(Eigen::Matrix4f::Identity());
+          projection_transform.block<3,3>(0,0) = eigen_vectors_pca.transpose();
+          pcl::transformPointCloud(*segmented_cloud, *segmented_cloud_transformed, projection_transform);
+          m4.block<3, 3>(0, 0) = eigen_vectors_pca;
+          q = eigen_vectors_pca;
+          q.normalize();
+          is_center_valid = pcl::compute3DCentroid(*segmented_cloud_transformed, center) != 0;
+          center = m4 * center;
+        } else {
+          NODELET_ERROR("Too small indices for PCA computation");
+          segmented_cloud_transformed = segmented_cloud;
+        }
+      } else {
+        segmented_cloud_transformed = segmented_cloud;
+        is_center_valid = pcl::compute3DCentroid(*segmented_cloud_transformed, center) != 0;
+      }
     }
       
     // create a bounding box
@@ -532,10 +573,10 @@ namespace jsk_pcl_ros
       center_pose_msg.position.x = center[0];
       center_pose_msg.position.y = center[1];
       center_pose_msg.position.z = center[2];
-      center_pose_msg.orientation.x = 0;
-      center_pose_msg.orientation.y = 0;
-      center_pose_msg.orientation.z = 0;
-      center_pose_msg.orientation.w = 1;
+      center_pose_msg.orientation.x = q.x();
+      center_pose_msg.orientation.y = q.y();
+      center_pose_msg.orientation.z = q.z();
+      center_pose_msg.orientation.w = q.w();
     }
     else {
       // set invalid pose for invalid center

@@ -1,6 +1,6 @@
 <launch>
   <include file="$(find jsk_perception)/sample/sample_ssd_object_detector.launch">
-    <arg name="test_mode" value="true" />
+    <arg name="gui" value="false" />
   </include>
 
   <test test-name="test_ssd_object_detector"
@@ -13,6 +13,8 @@
       timeout_1: 120
       topic_2: /ssd_object_detector/output/rect
       timeout_2: 120
+      topic_3: /ssd_object_detector/output/cluster_indices
+      timeout_3: 120
     </rosparam>
   </test>
 

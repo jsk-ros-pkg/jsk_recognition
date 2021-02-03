@@ -1,0 +1,28 @@
+<launch>
+  <arg name="camera_name" />
+  <arg name="vendor" />
+  <arg name="product" />
+  <arg name="height" />
+  <arg name="width" />
+  <arg name="video_mode" />
+  <arg name="frame_rate" />
+  <arg name="gui" default="false" />
+
+  <group ns="$(arg camera_name)">
+    <node name="insta_camera_node" pkg="libuvc_camera" type="camera_node">
+      <param name="vendor" value="$(arg vendor)" />
+      <param name="product" value="$(arg product)" />
+      <param name="height" value="$(arg height)" />
+      <param name="width" value="$(arg width)" />
+      <param name="video_mode" value="$(arg video_mode)" />
+      <param name="frame_rate" value="$(arg frame_rate)" />
+      <param name="time_method" value="start" />
+      <param name="auto_exposure" value="1" />
+      <param name="auto_white_balance" value="true" />
+    </node>
+  </group>
+
+  <node name="$(anon image_view)" pkg="image_view" type="image_view"
+        args="image:=$(arg camera_name)/image_raw" if="$(arg gui)" />
+
+</launch>

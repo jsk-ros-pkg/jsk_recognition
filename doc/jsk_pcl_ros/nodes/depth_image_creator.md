@@ -44,16 +44,21 @@ Currently it supports `pcl::PointXYZ` and `pcl::PointXYZRGB` as the input.
    but fixed transformation is used according to `~rotation` and `translation`.
 * `~use_asynchronous` (Boolean, default: `False`)
 
-   Do not synchronize `~input` and `~info` if this parameter is set to `True`.
+  If this parameter is set to `True`, this node process incoming PointCloud regardless of the synchronization between `~input` and `~info`.
 * `~use_approximate` (Boolean, default: `False`)
 
    Synchronize `~input` and `~info` approximately if this parameter is set to `True`.
+   If this parameter is set to `False`, and the timestamps of the `~input` and `~info` are not strictly matched, the callback will not be processed.
+   (See http://wiki.ros.org/message_filters/ApproximateTime)
 * `~info_throttle` (Integer, default: `0`)
 
    The number of `~info` messages to skip to generate depth image.
-* `~max_queue_size` (integer, default: `3`):
+* `~max_queue_size` (integer, default: `100`):
 
    Queue length for synchronization of topics.
+   According to the message_filters synchronization policy, in case of `~input`(1Hz) and `~info`(30Hz) comes,
+   message_filters needs at least over 30 queue_size for searching a synchronized set of the two.
+   (You can also check like this `rosrun jsk_topic_tools is_synchronized --approximate-sync --queue-size 3 /kinect_head/depth_registered/camera_info /kinect_head/depth_registered/points`)
 
 * `~max_pub_queue_size` (integer, default: `~max_queue_size_`):
 
@@ -73,6 +78,10 @@ Currently it supports `pcl::PointXYZ` and `pcl::PointXYZRGB` as the input.
 * `~organize_cloud` (Boolean, default: `False`)
 
    Whether to organize `~output_cloud` or not.
+
+* `~tf_duration` (float, default: `0.001`):
+
+  TF Lookup transform duration. This value is only used when `use_fixed_transform` is `false`.
 
 ## Sample
 

@@ -10,6 +10,7 @@ from recommonmark.parser import CommonMarkParser
 
 
 extensions = [
+    'recommonmark',
     'sphinx_markdown_tables',
     'sphinx.ext.mathjax',
 ]
@@ -179,7 +180,7 @@ latex_elements = {
 
     # Additional stuff for the LaTeX preamble.
     'preamble': "".join((
-        '\usepackage[utf8]{inputenc}',
+        "\\usepackage[utf8]{inputenc}",
         # NO-BREAK SPACE
         '\DeclareUnicodeCharacter{00A0}{ }',
         # BOX DRAWINGS LIGHT VERTICAL AND RIGHT
@@ -196,7 +197,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'jsk_recognition.tex', u'jsk_recognition Documentation',
+  (master_doc, 'jsk_recognition.tex', u'jsk\_recognition Documentation',
    author, 'manual'),
 ]
 

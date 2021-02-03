@@ -20,6 +20,10 @@ It retrieves 3-D environment as pointcloud.
 
 [pointcloud_screenpoint_sample.launch](https://github.com/jsk-ros-pkg/jsk_recognition/blob/master/jsk_pcl_ros/sample/pointcloud_screenpoint_sample.launch) is a sample launch file.
 
+## Note
+
+This class inherits `jsk_topic_tools::ConnectionBasedNodelet`, which can start subscribing topics if published topics are subscribed by the other node.
+
 ## Subscribing Topics
 * `~points` (`sensor_msgs/PointCloud2`):
 

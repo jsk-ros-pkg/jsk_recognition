@@ -1,10 +1,11 @@
 <launch>
 
   <arg name="gui" default="true" />
-  <arg name="GPU" default="-1" />
+  <arg name="gpu" default="-1" />
   <arg name="INPUT_IMAGE" default="/camera/rgb/image_rect_color" />
   <arg name="INPUT_DEPTH_IMAGE" default="/camera/depth_registered/hw_registered/image_rect_raw" />
   <arg name="INPUT_CAMERA_INFO" default="/camera/rgb/camera_info" />
+  <arg name="LIMB_PART" default="RHand" />
 
   <include file="$(find jsk_perception)/sample/include/play_rosbag_people.xml" />
 
@@ -15,7 +16,7 @@
     <remap from="~input/info" to="$(arg INPUT_CAMERA_INFO)" />
     <remap from="~input/depth" to="$(arg INPUT_DEPTH_IMAGE)" />
     <rosparam subst_value="true">
-      gpu: $(arg GPU)
+      gpu: $(arg gpu)
       model_file: $(find jsk_perception)/trained_data/pose_estimation_2d_chainermodel.pkl
       hand:
         enable: true
@@ -31,10 +32,10 @@
         output="screen">
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <remap from="~input/pose" to="people_pose_estimation_2d/pose_2d" />
-    <rosparam>
+    <rosparam subst_value="true">
       queue_size: 50
       person_indices: 0
-      limb_part: RHand
+      limb_part: $(arg LIMB_PART)
     </rosparam>
   </node>
 

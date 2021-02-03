@@ -34,13 +34,18 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros
   posedetection_msgs
   roscpp
-  roseus
   rospack
   sensor_msgs
   std_msgs
   tf)
 
-find_package(Boost REQUIRED COMPONENTS filesystem system signals)
+find_package(roseus)
+
+if(NOT $ENV{ROS_DISTRO} STREQUAL "indigo") # on noetic it needs catkin_install_python to support Python3 and it does not work on indigo for some reason...
+  catkin_python_setup()
+endif()
+
+find_package(Boost REQUIRED COMPONENTS filesystem system)
 
 find_package(OpenCV REQUIRED)
 message("OPENCV ${OpenCV_VERSION} FOUND")
@@ -88,11 +93,11 @@ endif()
 # ------------------------------------------------------------------------------------
 
 # download and install learning datasets
-add_custom_target(${PROJECT_NAME}_install_learning_datasets ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_learning_datasets.py)
+add_custom_target(${PROJECT_NAME}_install_learning_datasets ALL COMMAND python$ENV{ROS_PYTHON_VERSION} ${PROJECT_SOURCE_DIR}/scripts/install_learning_datasets.py)
 # download and install sample data
-add_custom_target(${PROJECT_NAME}_install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
+add_custom_target(${PROJECT_NAME}_install_sample_data ALL COMMAND python$ENV{ROS_PYTHON_VERSION} ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
 # download and install trained data
-add_custom_target(${PROJECT_NAME}_install_trained_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_trained_data.py)
+add_custom_target(${PROJECT_NAME}_install_trained_data ALL COMMAND python$ENV{ROS_PYTHON_VERSION} ${PROJECT_SOURCE_DIR}/scripts/install_trained_data.py)
 
 # ------------------------------------------------------------------------------------
 # Catkin setup
@@ -330,6 +335,8 @@ jsk_add_node(src/oriented_gradient_node.cpp oriented_gradient_node
 jsk_add_node(src/sliding_window_object_detector_trainer_node.cpp sliding_window_object_detector_trainer_node
              DEPENDS ${PROJECT_NAME} LIBRARIES ${PROJECT_NAME})
 
+message(STATUS "check if ROSEUS found : ${roseus_FOUND}")
+if(roseus_FOUND)
 add_custom_command(
  OUTPUT ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng8.launch
  ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng2.launch
@@ -346,6 +353,16 @@ add_custom_target(eusmodel_template ALL DEPENDS
   ${PROJECT_SOURCE_DIR}/sample/rimokon-pose.launch ${PROJECT_SOURCE_DIR}/sample/milktea-box.launch
   ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng8.launch
   ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng2.launch)
+
+# install only template/ direcotry exists, because this is auto-generated directory
+install(DIRECTORY template
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  USE_SOURCE_PERMISSIONS
+  )
+
+else(roseus_FOUND)
+  message(WARNING "could not find 'roseus' so skip eusmodel_template_gen.l and pose_detector_auto_gen_sample.l")
+endif(roseus_FOUND)
 
 # ------------------------------------------------------------------------------------
 # Install
@@ -374,13 +391,31 @@ install(TARGETS
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(DIRECTORY config euslisp launch node_scripts plugins sample scripts template test
+install(DIRECTORY config euslisp launch node_scripts plugins sample test
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   USE_SOURCE_PERMISSIONS
 )
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
+
+if($ENV{ROS_DISTRO} STREQUAL "indigo") # on noetic it needs catkin_install_python to support Python3 and it does not work on indigo for some reason...
+install(DIRECTORY scripts
+   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+   USE_SOURCE_PERMISSIONS
+ )
+else()
+install(PROGRAMS scripts/setup_opencv_learning_data.sh
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/scripts/
+)
+
+file(GLOB SCRIPT_PROGRAMS scripts/*.py)
+catkin_install_python(
+  PROGRAMS ${SCRIPT_PROGRAMS}
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/scripts/
+)
+endif()
+
 
 # ------------------------------------------------------------------------------------
 # Test
@@ -392,7 +427,7 @@ if(CATKIN_ENABLE_TESTING)
   find_package(roslint REQUIRED)
   find_package(rostest REQUIRED)
   # install test data by a script
-  add_custom_target(${PROJECT_NAME}_install_test_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_test_data.py)
+  add_custom_target(${PROJECT_NAME}_install_test_data COMMAND python$ENV{ROS_PYTHON_VERSION} ${PROJECT_SOURCE_DIR}/scripts/install_test_data.py)
   if(TARGET tests)
     add_dependencies(tests ${PROJECT_NAME}_install_test_data)
   endif()
@@ -497,6 +532,7 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/solidity_rag_merge.test)
     jsk_add_rostest(test/speak_when_label_found.test)
     jsk_add_rostest(test/split_fore_background.test)
+    jsk_add_rostest(test/split_image.test)
     jsk_add_rostest(test/tabletop_color_difference_likelihood.test)
     jsk_add_rostest(test/tile_image.test)
     jsk_add_rostest(test/unapply_mask_image.test)

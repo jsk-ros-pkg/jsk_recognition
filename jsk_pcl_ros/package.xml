@@ -1,6 +1,6 @@
-<package>
+<package format="3">
   <name>jsk_pcl_ros</name>
-  <version>1.2.10</version>
+  <version>1.2.15</version>
   <description>ROS nodelets for pointcloud perception.</description>
   <maintainer email="youhei@jsk.t.u-tokyo.ac.jp">Youhei Kakiuchi</maintainer>
   <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
@@ -16,15 +16,17 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <!-- <run_depend>pcl</run_depend> -->
+  <!-- <exec_depend>pcl</exec_depend> -->
   <build_depend>cv_bridge</build_depend>
   <build_depend>image_geometry</build_depend>
+  <build_depend>image_transport</build_depend>
   <build_depend>interactive_markers</build_depend>
   <build_depend>jsk_data</build_depend>
   <build_depend>jsk_pcl_ros_utils</build_depend>
   <build_depend>jsk_recognition_utils</build_depend>
   <!-- <build_depend>jsk_rviz_plugins</build_depend> --> <!-- jsk_recognition should not depends on jsk_visualization -->
   <build_depend version_gte="2.2.7">jsk_topic_tools</build_depend>
+  <build_depend>kdl_parser</build_depend>
   <build_depend>laser_assembler</build_depend>
   <build_depend>moveit_ros_perception</build_depend>
   <build_depend>octomap_server</build_depend>
@@ -34,57 +36,58 @@
   <build_depend>tf_conversions</build_depend>
   <build_depend>yaml-cpp</build_depend>
 
-  <run_depend>boost</run_depend>
-  <run_depend>checkerboard_detector</run_depend>
-  <run_depend>cv_bridge</run_depend>
-  <run_depend>diagnostic_msgs</run_depend>
-  <run_depend>diagnostic_updater</run_depend>
-  <run_depend>dynamic_reconfigure</run_depend>
-  <run_depend>eigen_conversions</run_depend>
-  <run_depend>geometry_msgs</run_depend>
-  <run_depend>image_geometry</run_depend>
-  <run_depend>image_transport</run_depend>
-  <run_depend>image_view2</run_depend>
-  <run_depend>interactive_markers</run_depend>
-  <run_depend>jsk_data</run_depend>
-  <run_depend>jsk_footstep_msgs</run_depend>
-  <run_depend>jsk_interactive_marker</run_depend>
-  <run_depend>jsk_pcl_ros_utils</run_depend>
-  <!-- <run_depend>jsk_rviz_plugins</run_depend> --> <!-- jsk_recognition should not depends on jsk_visualization -->
-  <run_depend>jsk_recognition_msgs</run_depend>
-  <run_depend>jsk_recognition_utils</run_depend>
-  <run_depend version_gte="2.2.7">jsk_topic_tools</run_depend>
-  <run_depend>kdl_conversions</run_depend>
-  <run_depend>kdl_parser</run_depend>
-  <run_depend>laser_assembler</run_depend>
-  <run_depend>ml_classifiers</run_depend>
-  <run_depend>moveit_core</run_depend>
-  <run_depend>moveit_ros_perception</run_depend>
-  <run_depend>nav_msgs</run_depend>
-  <run_depend>nodelet</run_depend>
-  <run_depend>octomap</run_depend>
-  <run_depend>octomap_server</run_depend>
-  <run_depend>openni2_launch</run_depend>
-  <run_depend>openni_launch</run_depend>
-  <run_depend>pcl_conversions</run_depend>
-  <run_depend>pcl_msgs</run_depend>
-  <run_depend>pcl_ros</run_depend>
-  <run_depend>python-sklearn</run_depend>
-  <run_depend>resized_image_transport</run_depend>
-  <run_depend>robot_self_filter</run_depend>
-  <run_depend>rosboost_cfg</run_depend>
-  <run_depend>roscpp_tutorials</run_depend>
-  <run_depend>sensor_msgs</run_depend>
-  <run_depend>std_msgs</run_depend>
-  <run_depend>std_srvs</run_depend>
-  <run_depend>stereo_image_proc</run_depend>
-  <run_depend>stereo_msgs</run_depend>
-  <run_depend>tf2_ros</run_depend>
-  <run_depend>tf</run_depend>
-  <run_depend>tf_conversions</run_depend>
-  <run_depend>topic_tools</run_depend>
-  <run_depend>visualization_msgs</run_depend>
-  <run_depend>yaml-cpp</run_depend>
+  <exec_depend>boost</exec_depend>
+  <exec_depend>checkerboard_detector</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>diagnostic_msgs</exec_depend>
+  <exec_depend>diagnostic_updater</exec_depend>
+  <exec_depend>dynamic_reconfigure</exec_depend>
+  <exec_depend>eigen_conversions</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>image_geometry</exec_depend>
+  <exec_depend>image_transport</exec_depend>
+  <exec_depend>image_view2</exec_depend>
+  <exec_depend>interactive_markers</exec_depend>
+  <exec_depend>jsk_data</exec_depend>
+  <exec_depend>jsk_footstep_msgs</exec_depend>
+  <exec_depend>jsk_interactive_marker</exec_depend>
+  <exec_depend>jsk_pcl_ros_utils</exec_depend>
+  <!-- <exec_depend>jsk_rviz_plugins</exec_depend> --> <!-- jsk_recognition should not depends on jsk_visualization -->
+  <exec_depend>jsk_recognition_msgs</exec_depend>
+  <exec_depend>jsk_recognition_utils</exec_depend>
+  <exec_depend version_gte="2.2.7">jsk_topic_tools</exec_depend>
+  <exec_depend>kdl_conversions</exec_depend>
+  <exec_depend>kdl_parser</exec_depend>
+  <exec_depend>laser_assembler</exec_depend>
+  <exec_depend>ml_classifiers</exec_depend>
+  <exec_depend>moveit_core</exec_depend>
+  <exec_depend>moveit_ros_perception</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>nodelet</exec_depend>
+  <exec_depend>octomap</exec_depend>
+  <exec_depend>octomap_server</exec_depend>
+  <exec_depend>openni2_launch</exec_depend>
+  <exec_depend>openni_launch</exec_depend>
+  <exec_depend>pcl_conversions</exec_depend>
+  <exec_depend>pcl_msgs</exec_depend>
+  <exec_depend>pcl_ros</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-sklearn</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-sklearn</exec_depend>
+  <exec_depend>resized_image_transport</exec_depend>
+  <exec_depend>robot_self_filter</exec_depend>
+  <exec_depend>rosboost_cfg</exec_depend>
+  <exec_depend>roscpp_tutorials</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>std_srvs</exec_depend>
+  <exec_depend>stereo_image_proc</exec_depend>
+  <exec_depend>stereo_msgs</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>tf</exec_depend>
+  <exec_depend>tf_conversions</exec_depend>
+  <exec_depend>topic_tools</exec_depend>
+  <exec_depend>visualization_msgs</exec_depend>
+  <exec_depend>yaml-cpp</exec_depend>
 
   <test_depend>jsk_perception</test_depend>
   <test_depend>jsk_tools</test_depend>

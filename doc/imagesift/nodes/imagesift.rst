@@ -29,12 +29,22 @@ Publishing Topic
 
    This appears with both inputs ``image`` and ``camera_info``.
 
+Parameters
+----------
+
+- ``~image_transport`` (``String``, default: ``raw``)
+
+  Set `compressed` or `theora` to subscribe compressed images
 
 Run
 ---
 You can run executable like below::
 
     $ rosrun imagesift imagesift
+
+To subscribe compressed image, run executable like below::
+
+    $ rosrun imagesift imagesift _image_transport:=compressed
 
 
 Sample

@@ -1,0 +1,22 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_split_image.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_image_publisher"
+        name="test_image_publisher"
+        pkg="jsk_tools" type="test_topic_published.py">
+    <rosparam>
+      topic_0: /split_image/output/vertical00/horizontal00
+      timeout_0: 10
+      topic_1: /split_image/output/vertical00/horizontal01
+      timeout_1: 10
+      topic_2: /split_image/output/vertical01/horizontal00
+      timeout_0: 10
+      topic_3: /split_image/output/vertical01/horizontal01
+      timeout_0: 10
+    </rosparam>
+  </test>
+
+</launch>

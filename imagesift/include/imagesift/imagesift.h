@@ -70,6 +70,7 @@ namespace imagesift
     bool _useMask;
     boost::mutex _mutex;
     boost::shared_ptr<image_transport::ImageTransport> _it;
+    image_transport::TransportHints _hints;
     image_transport::Subscriber _subImage;
     // for useMask
     message_filters::Subscriber<sensor_msgs::Image> _subImageWithMask;

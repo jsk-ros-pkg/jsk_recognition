@@ -67,7 +67,7 @@ void jsk_pcl_ros::DepthImageCreator::onInit () {
 
   pnh_->param("info_throttle", info_throttle_, 0);
   info_counter_ = 0;
-  pnh_->param("max_queue_size", max_queue_size_, 3);
+  pnh_->param("max_queue_size", max_queue_size_, 100);
   // maybe below queue_size can always be 1,
   // but we set max_queue_size_ for backward compatibility.
   pnh_->param("max_pub_queue_size", max_pub_queue_size_, max_queue_size_);

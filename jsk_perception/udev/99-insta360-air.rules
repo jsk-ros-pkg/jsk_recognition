@@ -1,0 +1,5 @@
+# For /dev/video*
+KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", ATTR{index}=="0", ATTRS{idVendor}=="2e1a", ATTRS{idProduct}=="1000", MODE="0666", SYMLINK+="insta360"
+
+# For /dev/bus/usb/*
+SUBSYSTEMS=="usb", ENV{DEVTYPE}=="usb_device", ATTRS{idVendor}=="2e1a", ATTRS{idProduct}=="1000", MODE="0666"

@@ -82,6 +82,7 @@ namespace jsk_pcl_ros
     ros::Publisher pub_config_;
     ros::Subscriber sub_;
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
+    double duration_transform_timeout_;
     double min_x_;
     double max_x_;
     double min_y_;

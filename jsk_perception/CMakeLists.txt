@@ -353,6 +353,13 @@ add_custom_target(eusmodel_template ALL DEPENDS
   ${PROJECT_SOURCE_DIR}/sample/rimokon-pose.launch ${PROJECT_SOURCE_DIR}/sample/milktea-box.launch
   ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng8.launch
   ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng2.launch)
+
+# install only template/ direcotry exists, because this is auto-generated directory
+install(DIRECTORY template
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  USE_SOURCE_PERMISSIONS
+  )
+
 else(roseus_FOUND)
   message(WARNING "could not find 'roseus' so skip eusmodel_template_gen.l and pose_detector_auto_gen_sample.l")
 endif(roseus_FOUND)
@@ -384,7 +391,7 @@ install(TARGETS
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(DIRECTORY config euslisp launch node_scripts plugins sample template test
+install(DIRECTORY config euslisp launch node_scripts plugins sample test
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   USE_SOURCE_PERMISSIONS
 )
@@ -525,6 +532,7 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/solidity_rag_merge.test)
     jsk_add_rostest(test/speak_when_label_found.test)
     jsk_add_rostest(test/split_fore_background.test)
+    jsk_add_rostest(test/split_image.test)
     jsk_add_rostest(test/tabletop_color_difference_likelihood.test)
     jsk_add_rostest(test/tile_image.test)
     jsk_add_rostest(test/unapply_mask_image.test)

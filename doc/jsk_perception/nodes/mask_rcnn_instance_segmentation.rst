@@ -55,18 +55,27 @@ Parameters
 
   GPU id.
 
+* ``~model_name`` (String, ``mask_rcnn_resnet50``)
+
+  Model name.
+  ``mask_rcnn_resnet50``, ``mask_rcnn_fpn_resnet50`` and  ``mask_rcnn_fpn_resnet101`` are supported.
+
 * ``~score_thresh`` (Float, default: ``0.7``)
 
   Score threshold of detections.
 
-* ``~fg_class_names`` (List of String, required)
+* ``~fg_class_names`` (List of String, ``None``)
 
   Foreground class names that is used to identify number of class.
   It is also used for the ``name`` field of ``~output/labels``.
+  When ``pretrained_model: coco`` is set, default COCO ``pretrained_model`` and ``fg_class_names`` will be loaded.
+  When ``pretrained_model: voc`` is set, default VOC ``pretrained_model`` and ``fg_class_names`` will be loaded.
 
 * ``~pretrained_model`` (String, required)
 
   Pretrained model path.
+  When ``pretrained_model: coco`` is set, default COCO ``pretrained_model`` and ``fg_class_names`` will be loaded.
+  When ``pretrained_model: voc`` is set, default VOC ``pretrained_model`` and ``fg_class_names`` will be loaded.
 
 * ``~classifier_name`` (String, default: ``rospy.get_name()``)
 

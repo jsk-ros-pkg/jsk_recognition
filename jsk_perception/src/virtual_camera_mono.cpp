@@ -55,6 +55,7 @@ public:
 
     private_nh_.param("frame_id", trans_.frame_id_, std::string("/elevator_inside_panel"));
     private_nh_.param("child_frame_id", trans_.child_frame_id_, std::string("/virtual_camera_frame"));
+    ROS_INFO("VirutalCmaeraMono(%s) frame_id: %s, chid_frame_id: %s", ros::this_node::getName().c_str(), trans_.frame_id_.c_str(), trans_.child_frame_id_.c_str());
 
     std::vector<double> initial_pos, initial_rot;
     if (jsk_topic_tools::readVectorParameter(private_nh_, "initial_pos", initial_pos)) {
@@ -69,6 +70,8 @@ public:
     else {
       trans_.setRotation(tf::Quaternion(0.707, 0, 0, -0.707) * tf::Quaternion(0, 0.707, 0, -0.707));
     }
+    ROS_INFO("  initia_pos : %f %f %f", trans_.getOrigin().getX(), trans_.getOrigin().getY(), trans_.getOrigin().getZ());
+    ROS_INFO("  initia_rot : %f %f %f %f", trans_.getRotation().getX(), trans_.getRotation().getY(), trans_.getRotation().getZ(), trans_.getRotation().getW());
 
     poly_.header.frame_id = trans_.frame_id_;
     geometry_msgs::Point32 pt;

@@ -17,6 +17,10 @@ Filter pointcloud based on HSI range.
 
   Filtered pointcloud.
 
+* `~color_space` (`sensor_msgs/PointCloud2`)
+
+  Color space visualization for debugging
+
 ## Parameters
 * `~h_max` (Integer, default: `127`)
 * `~h_min` (Integer, default: `-128`)

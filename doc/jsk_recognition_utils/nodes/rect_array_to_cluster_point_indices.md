@@ -53,3 +53,28 @@ Convert `jsk_recognition_msgs/RectArray` to `jsk_recognition_msgs/ClusterPointIn
 ```bash
 roslaunch jsk_recognition_utils sample_rect_array_to_cluster_point_indices.launch
 ```
+
+
+## Sample with SSD object detector
+
+### SSD object detector with GPU or CPU
+
+![](images/ssd_rects.png)
+
+```bash
+# CPU
+roslaunch jsk_recognition_utils sample_ssd_to_bounding_box_73b2_kitchen.launch gpu:=-1
+# GPU
+roslaunch jsk_recognition_utils sample_ssd_to_bounding_box_73b2_kitchen.launch gpu:=0
+```
+
+### SSD object detector with TPU
+
+![](images/ssd_rects_coral.png)
+
+```bash
+roslaunch jsk_recognition_utils sample_ssd_to_bounding_box.launch gpu:=-1
+# coral ssd launch
+source ~/coral_ws/devel/setup.bash
+roslaunch jsk_recognition_utils sample_ssd_coral.launch
+```

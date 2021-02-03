@@ -134,21 +134,30 @@ namespace jsk_pcl_ros
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_target_.subscribe(*pnh_, "target", 1);
     if (align_boxes_ && align_boxes_with_plane_) {
-      sync_align_ = boost::make_shared<message_filters::Synchronizer<SyncAlignPolicy> >(queue_size_);
       sub_polygons_.subscribe(*pnh_, "align_planes", 1);
       sub_coefficients_.subscribe(*pnh_, "align_planes_coefficients", 1);
-      sync_align_->connectInput(sub_input_, sub_target_, sub_polygons_, sub_coefficients_);
-      sync_align_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2, _3, _4));
-    }
-    else if (use_async_) {
-      async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
-      async_->connectInput(sub_input_, sub_target_);
-      async_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2));
+      if (use_async_) {
+        async_align_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncAlignPolicy> >(queue_size_);
+        async_align_->connectInput(sub_input_, sub_target_, sub_polygons_, sub_coefficients_);
+        async_align_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2, _3, _4));
+      }
+      else {
+        sync_align_ = boost::make_shared<message_filters::Synchronizer<SyncAlignPolicy> >(queue_size_);
+        sync_align_->connectInput(sub_input_, sub_target_, sub_polygons_, sub_coefficients_);
+        sync_align_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2, _3, _4));
+      }
     }
     else {
-      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
-      sync_->connectInput(sub_input_, sub_target_);
-      sync_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2));
+      if (use_async_) {
+        async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
+        async_->connectInput(sub_input_, sub_target_);
+        async_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2));
+      }
+      else {
+        sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
+        sync_->connectInput(sub_input_, sub_target_);
+        sync_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2));
+      }
     }
   }
 

@@ -21,6 +21,8 @@ from jsk_perception.cfg import SSDObjectDetectorConfig as Config
 from sensor_msgs.msg import Image
 from jsk_recognition_msgs.msg import Rect, RectArray
 from jsk_recognition_msgs.msg import ClassificationResult
+from jsk_recognition_msgs.msg import Label
+from jsk_recognition_msgs.msg import LabelArray
 from jsk_recognition_msgs.msg import ClusterPointIndices
 from pcl_msgs.msg import PointIndices
 
@@ -86,6 +88,8 @@ class SSDObjectDetector(ConnectionBasedTransport):
         self.srv = Server(Config, self.config_callback)
 
         # advertise
+        self.pub_labels = self.advertise("~output/labels", LabelArray,
+                                         queue_size=1)
         self.pub_indices = self.advertise("~output/cluster_indices", ClusterPointIndices,
                                           queue_size=1)
         self.pub_rects = self.advertise("~output/rect", RectArray,
@@ -153,6 +157,15 @@ class SSDObjectDetector(ConnectionBasedTransport):
             rospy.loginfo("%s: elapsed %f msec" % ("predict", (tcur-tprev)*1000))
             tprev = tcur
 
+        labels_msg = LabelArray(header=msg.header)
+        for l in labels:
+            l_name = self.label_names[l]
+            labels_msg.labels.append(Label(id=l, name=l_name))
+
+        if self.profiling:
+            tcur = time.time()
+            rospy.loginfo("%s: elapsed %f msec" % ("make labels msg", (tcur-tprev)*1000))
+
         cluster_indices_msg = ClusterPointIndices(header=msg.header)
         H = img.shape[1]
         W = img.shape[2]
@@ -197,6 +210,7 @@ class SSDObjectDetector(ConnectionBasedTransport):
             rospy.loginfo("%s: elapsed %f msec" % ("make cls msg", (tcur-tprev)*1000))
             tprev = tcur
 
+        self.pub_labels.publish(labels_msg)
         self.pub_indices.publish(cluster_indices_msg)
         self.pub_rects.publish(rect_msg)
         self.pub_class.publish(cls_msg)

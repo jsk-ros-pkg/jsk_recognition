@@ -55,6 +55,10 @@ Convert a pointcloud(`sensor_msgs/PointCloud2`) into heightmap representation (`
 
   These parameters can be changed by `dynamic_reconfigure`.
 
+* `~duration_transform_timeout` (Double default: `1.0`)
+
+  duration of timeout for transform looking up of tf frames
+
 * `~initial_probability` (Double, default: `1.0`)
 
   Initial value to be set to Channel1 of heightmap image

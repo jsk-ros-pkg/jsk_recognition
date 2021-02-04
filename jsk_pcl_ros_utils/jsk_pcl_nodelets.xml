@@ -193,6 +193,12 @@
       Convert point cloud to mask image with skipping nan region of xyz.
     </description>
   </class>
+  <class name="jsk_pcl_utils/ClusterPointIndicesLabelFilter" type="jsk_pcl_ros_utils::ClusterPointIndicesLabelFilter"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Filter a given label id from a ClusterPointIndices topic.
+    </description>
+  </class>
   <class name="jsk_pcl_utils/ClusterPointIndicesToPointIndices" type="jsk_pcl_ros_utils::ClusterPointIndicesToPointIndices"
          base_class_type="nodelet::Nodelet">
     <description>

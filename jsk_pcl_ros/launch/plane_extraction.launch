@@ -1,0 +1,101 @@
+<launch>
+  <arg name="input_cloud"
+       default="/multisense_local/organized_image_points2_color" />
+  <arg name="transformed_cloud"
+       default="transform_org_cloud/output" />
+  <arg name="filtered_cloud"
+       default="extract_indices/output" />
+  <arg name="manager" default="plane_extraction_manager" />
+
+  <group ns="plane_extraction">
+    <node name="$(arg manager)"
+          pkg="nodelet" type="nodelet"
+          args="manager" output="screen" />
+
+    <node name="transform_org_cloud"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl_utils/TfTransformCloud $(arg manager)">
+      <remap from="~input" to="$(arg input_cloud)" />
+      <rosparam>
+        target_frame_id: odom
+      </rosparam>
+    </node>
+
+    <node name="bounding_box_array_publisher"
+          pkg="jsk_recognition_utils" type="bounding_box_array_publisher.py">
+      <rosparam>
+        frame_id: odom
+        boxes:
+        - position: [1, 0, 1.1]
+          dimension: [3, 1.5, 2]
+      </rosparam>
+    </node>
+
+    <node name="attention_clipper"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/AttentionClipper $(arg manager)">
+      <remap from="~input/points" to="$(arg transformed_cloud)" />
+      <remap from="~input/box_array" to="bounding_box_array_publisher/output" />
+      <rosparam>
+        use_multiple_attention: true
+      </rosparam>
+    </node>
+
+    <node name="extract_indices"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/ExtractIndices $(arg manager)">
+      <remap from="~input" to="$(arg transformed_cloud)" />
+      <remap from="~indices" to="attention_clipper/output/point_indices" />
+      <rosparam>
+        keep_organized: true
+      </rosparam>
+    </node>
+
+    <node name="plane_segmentation"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg manager)">
+      <remap from="~input" to="$(arg filtered_cloud)" />
+      <remap from="~output_refined" to="plane_cluster_indices" />
+      <remap from="~output_refined_polygon" to="plane_polygons" />
+      <remap from="~output_refined_coefficients" to="plane_coefficients" />
+
+      <param name="~min_size" value="500" />
+      <param name="~max_curvature" value="0.01" />
+      <param name="~distance_threshold" value="0.03" />
+      <param name="~angular_threshold" value="0.05" />
+      <param name="~connect_plane_angle_threshold" value="0.1" />
+    </node>
+
+    <node name="plane_normal_filter"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl_utils/PlaneRejector $(arg manager)">
+      <remap from="~input_polygons" to="plane_polygons" />
+      <remap from="~input_coefficients" to="plane_coefficients" />
+      <remap from="~input_inliers" to="plane_cluster_indices" />
+      <remap from="~output_polygons" to="filtered_plane_polygons" />
+      <remap from="~output_coefficients" to="filtered_plane_coefficients" />
+      <remap from="~output_inliers" to="filtered_plane_cluster_indices" />
+
+      <param name="~processing_frame_id" value="map" />
+      <param name="~use_inliers" value="true" />
+      <param name="~arrow_flip" value="false" />
+      <rosparam param="reference_axis">[0, 0, 1]</rosparam>
+      <rosparam>
+        angle: 0.0
+        angle_thrfd: 0.17
+      </rosparam>
+    </node>
+
+    <node name="plane_decomposer"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg manager)">
+      <remap from="~input" to="$(arg filtered_cloud)" />
+      <remap from="~target" to="filtered_plane_cluster_indices" />
+      <remap from="~negative_indices" to="not_plane_indices" />
+      <rosparam>
+        fill_boxes_label_with_nearest_plane_index: true
+      </rosparam>
+    </node>
+  </group>
+  <!-- end of plane_extraction namespace-->
+</launch>

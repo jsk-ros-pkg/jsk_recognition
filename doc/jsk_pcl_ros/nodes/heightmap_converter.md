@@ -46,6 +46,14 @@ Convert a pointcloud(`sensor_msgs/PointCloud2`) into heightmap representation (`
 
   These parameters can be changed by `dynamic_reconfigure`.
 
+* `~min_z` (Double, default: `-inf` )
+* `~max_z` (Double, default: `inf` )
+
+  Minimum and maximum value to specify z range to be considered.
+  Outside of this range will be ignored.
+
+  These parameters can be changed by `dynamic_reconfigure`.
+
 * `~min_x` (Double, default: `-2.0`)
 * `~max_x` (Double, default: `2.0`)
 * `~min_y` (Double, default: `-2.0`)

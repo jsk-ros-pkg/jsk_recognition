@@ -61,6 +61,7 @@ namespace jsk_pcl_ros
     pnh_->param("use_projected_center", use_projected_center_, false);
 
     pnh_->param("max_queue_size", max_queue_size_, 10);
+    pnh_->param("duration_transform_timeout", duration_transform_timeout_, 1.0);
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
 
     tf_ = TfListenerSingleton::getInstance();
@@ -88,6 +89,8 @@ namespace jsk_pcl_ros
       /* convert points */
       tf::StampedTransform ros_fixed_to_center;
       try {
+        tf_->waitForTransform(fixed_frame_id_, center_frame_id_,
+                              msg->header.stamp, ros::Duration(duration_transform_timeout_));
         tf_->lookupTransform(fixed_frame_id_, center_frame_id_,
                              msg->header.stamp, ros_fixed_to_center);
       }
@@ -103,6 +106,8 @@ namespace jsk_pcl_ros
 
       tf::StampedTransform ros_msg_to_fixed;
       try {
+        tf_->waitForTransform(msg->header.frame_id, fixed_frame_id_,
+                              msg->header.stamp, ros::Duration(duration_transform_timeout_));
         tf_->lookupTransform(msg->header.frame_id, fixed_frame_id_,
                              msg->header.stamp, ros_msg_to_fixed);
       }

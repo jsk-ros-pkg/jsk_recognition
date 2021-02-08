@@ -2,7 +2,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2015, JSK Lab
+ *  Copyright (c) 2014, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,67 +33,67 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-
-#ifndef IMAGESIFT_SIFT_NODE_H_
-#define IMAGESIFT_SIFT_NODE_H_
+#ifndef JSK_PCL_ROS_UTILS_CLUSTER_POINT_INDICES_LABEL_FILTER_H_
+#define JSK_PCL_ROS_UTILS_CLUSTER_POINT_INDICES_LABEL_FILTER_H_
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
-#include <ros/node_handle.h>
-#include <sensor_msgs/Image.h>
-#include <posedetection_msgs/ImageFeature0D.h>
-#include <posedetection_msgs/Feature0DDetect.h>
-#include <image_transport/image_transport.h>
-#include <image_transport/subscriber_filter.h>
-
-#include <boost/shared_ptr.hpp>
-#include <boost/thread/mutex.hpp>
-
-#include <cv_bridge/cv_bridge.h>
-#include <siftfast/siftfast.h>
-
 #include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
+#include <message_filters/sync_policies/approximate_time.h>
 
-namespace imagesift
+#include <jsk_recognition_msgs/ClusterPointIndices.h>
+#include <jsk_recognition_msgs/LabelArray.h>
+#include <dynamic_reconfigure/server.h>
+#include <jsk_pcl_ros_utils/ClusterPointIndicesLabelFilterConfig.h>
+
+namespace jsk_pcl_ros_utils
 {
-  class SiftNode: public jsk_topic_tools::DiagnosticNodelet
+
+  class ClusterPointIndicesLabelFilter: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
+    ClusterPointIndicesLabelFilter(): DiagnosticNodelet("ClusterPointIndicesLabelFilter")
+    {
+    }
+    ~ClusterPointIndicesLabelFilter()
+    {
+      sync_.reset();
+      srv_.reset();
+    }
     typedef message_filters::sync_policies::ExactTime<
-      sensor_msgs::Image,
-      sensor_msgs::Image > SyncPolicy;
-    ros::WallTime lasttime;
-    SiftNode(): DiagnosticNodelet("SiftNode") {}
+      jsk_recognition_msgs::ClusterPointIndices,
+      jsk_recognition_msgs::LabelArray> SyncPolicy;
+    typedef message_filters::sync_policies::ApproximateTime<
+      jsk_recognition_msgs::ClusterPointIndices,
+      jsk_recognition_msgs::LabelArray> ApproximateSyncPolicy;
+    typedef jsk_pcl_ros_utils::ClusterPointIndicesLabelFilterConfig Config;
   protected:
-    bool _bInfoInitialized;
-    bool _useMask;
-    boost::mutex _mutex;
-    boost::shared_ptr<image_transport::ImageTransport> _it;
-    image_transport::TransportHints _hints;
-    image_transport::Subscriber _subImage;
-    // for useMask
-    message_filters::Subscriber<sensor_msgs::Image> _subImageWithMask;
-    message_filters::Subscriber<sensor_msgs::Image> _subMask;
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > _sync;
-    ros::ServiceServer _srvDetect;
-    ros::Subscriber _subInfo;
-    ros::Publisher _pubFeatures;
-    ros::Publisher _pubSift;
-    posedetection_msgs::ImageFeature0D _sift_msg;
-
+    // methods
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    void infoCb(const sensor_msgs::CameraInfoConstPtr& msg_ptr);
-    bool detectCb(posedetection_msgs::Feature0DDetect::Request& req,
-                  posedetection_msgs::Feature0DDetect::Response& res);
-    bool detect(posedetection_msgs::Feature0D& features,
-                const sensor_msgs::Image& imagemsg,
-                const sensor_msgs::Image::ConstPtr& mask_ptr);
-    void imageCb(const sensor_msgs::ImageConstPtr& msg_ptr,
-                 const sensor_msgs::ImageConstPtr& mask_ptr);
-    void imageCb(const sensor_msgs::ImageConstPtr& msg_ptr);
+    virtual void configCallback(Config &config, uint32_t level);
+    virtual void filter(const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& cluster_msg,
+                        const jsk_recognition_msgs::LabelArray::ConstPtr& label_msg);
+
+    // ROS variables
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
+    boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> > async_;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+
+    ros::Publisher pub_;
+    message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_indices_;
+    message_filters::Subscriber<jsk_recognition_msgs::LabelArray> sub_labels_;
+
+    boost::mutex mutex_;
+
+    // parameters
+    bool approximate_sync_;
+    int label_value_;
+    int queue_size_;
+
   private:
   };
 }

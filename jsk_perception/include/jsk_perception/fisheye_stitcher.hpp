@@ -64,7 +64,7 @@ class FisheyeStitcher
 public:
     FisheyeStitcher(int width, int height, float in_fovd, 
                     bool enb_light_compen, bool enb_refine_align,
-                    std::string map_path);
+                    bool save_unwarped, std::string map_path);
     ~FisheyeStitcher();
     cv::Mat stitch(const cv::Mat& image1, const cv::Mat& image2);
 
@@ -112,6 +112,7 @@ private:
     bool m_enb_light_compen;
     bool m_disable_light_compen;
     bool m_enb_refine_align;
+    bool m_save_unwarped;
     std::string m_map_path;  // path of MLS grids
     cv::Mat m_map_x; // used in deformation
     cv::Mat m_map_y; // used in deformation

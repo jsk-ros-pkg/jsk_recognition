@@ -35,17 +35,17 @@ SOFTWARE.
 namespace stitcher
 {
 
-FisheyeStitcher::FisheyeStitcher(int width, int height, float in_fovd, 
+FisheyeStitcher::FisheyeStitcher(int width, int height, float in_fovd,
                                  bool enb_light_compen, bool enb_refine_align,
-                                 std::string map_path ) 
+                                 bool save_unwarped, std::string map_path )
 :   m_ws_org(width), m_hs_org(height), m_in_fovd(195.0f), m_inner_fovd(183.0f),
     m_enb_light_compen(enb_light_compen), m_enb_refine_align(enb_refine_align),
-    m_map_path(map_path)
-{ 
+    m_save_unwarped(save_unwarped), m_map_path(map_path)
+{
     CV_Assert( (width % 2 == 0) && (height % 2 == 0) );
 
     // Source images
-    m_ws = static_cast<int>(width / 2); // e.g. 1920 
+    m_ws = static_cast<int>(width / 2); // e.g. 1920
     m_hs = height; // e.g. 1920
     CV_Assert( (m_ws % 2 == 0) && (m_hs % 2 == 0) );
     m_ws2 = static_cast<int>(m_ws / 2);
@@ -66,7 +66,7 @@ FisheyeStitcher::~FisheyeStitcher()
 {
 }
 
-//! 
+//!
 //! @brief Fisheye Unwarping
 //!
 //!   Unwarp source fisheye -> 360x180 equirectangular
@@ -75,17 +75,17 @@ cv::Mat
 FisheyeStitcher::unwarp( const cv::Mat &src )
 {
     cv::Mat dst(src.size(), src.type());
-    remap(src, dst, m_map_x, m_map_y, cv::INTER_LINEAR, cv::BORDER_CONSTANT, 
+    remap(src, dst, m_map_x, m_map_y, cv::INTER_LINEAR, cv::BORDER_CONSTANT,
           cv::Scalar(0, 0, 0));
     return dst;
 
 }   // unwarp()
 
-//! 
+//!
 //! @brief Convert fisheye-vertical to equirectangular (reference: Panotool)
-//! 
-std::tuple<double, double>  
-FisheyeStitcher::fish2Eqt( const double x_dest, const double y_dest, 
+//!
+std::tuple<double, double>
+FisheyeStitcher::fish2Eqt( const double x_dest, const double y_dest,
                            const double W_rad )
 {
     double phi, theta, r, s;
@@ -117,13 +117,13 @@ FisheyeStitcher::fish2Eqt( const double x_dest, const double y_dest,
 
 }   // fish2Eqt()
 
-//! 
+//!
 //! @brief Map 2D fisheye image to 2D projected sphere
 //! @param  map_x map for x element.
 //! @param  map_y map for y element.
 //!
 //!    Update member grid maps m_map_x, m_map_y
-//! 
+//!
 void
 FisheyeStitcher::fish2Map()
 {
@@ -162,14 +162,14 @@ FisheyeStitcher::fish2Map()
 
 }   // fish2Map()
 
-//! 
+//!
 //! @brief Mask creation for cropping image data inside the FOVD circle
 //!
-//!     Update member m_cir_mask (circular mask), inner_cir_mask (circular 
+//!     Update member m_cir_mask (circular mask), inner_cir_mask (circular
 //!     mask for the inner circle).
-//! 
+//!
 void
-FisheyeStitcher::createMask() 
+FisheyeStitcher::createMask()
 {
     cv::Mat cir_mask_ = cv::Mat(m_hs, m_ws, CV_8UC3);
     cv::Mat inner_cir_mask_ = cv::Mat(m_hs, m_ws, CV_8UC3);
@@ -180,9 +180,9 @@ FisheyeStitcher::createMask()
     // Create Circular mask to crop the input W.R.T. FOVD
     int r1 = m_ws2;
     int r2 = m_ws2 - wShift * 2;
-    cv::circle(cir_mask_,       cv::Point(m_ws2, m_ws2), r1, 
+    cv::circle(cir_mask_,       cv::Point(m_ws2, m_ws2), r1,
                cv::Scalar(255, 255, 255), -1, 8, 0); // fill circle with 0xFF
-    cv::circle(inner_cir_mask_, cv::Point(m_ws2, m_ws2), r2, 
+    cv::circle(inner_cir_mask_, cv::Point(m_ws2, m_ws2), r2,
                cv::Scalar(255, 255, 255), -1, 8, 0); // fill circle with 0xFF
 
     cv::Mat cir_mask;
@@ -192,9 +192,9 @@ FisheyeStitcher::createMask()
     cir_mask.copyTo(m_cir_mask);
     inner_cir_mask.copyTo(m_inner_cir_mask);
 
-}   // createMask() 
+}   // createMask()
 
-//! 
+//!
 //! @brief  Rigid Moving Least Squares Interpolation
 //! @param  src  source image
 //! @param  return  deformed image
@@ -203,18 +203,18 @@ cv::Mat
 FisheyeStitcher::deform( const cv::Mat &src )
 {
     cv::Mat dst(src.size(), src.type());
-    cv::remap(src, dst, m_mls_map_x, m_mls_map_y, CV_INTER_LINEAR, 
+    cv::remap(src, dst, m_mls_map_x, m_mls_map_y, CV_INTER_LINEAR,
               cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
     return dst;
 
-}   // deform() 
+}   // deform()
 
-//! 
+//!
 //! @brief Fisheye Light Fall-off Compensation: Scale_Map Construction
 //! @param R_pf  everse profile model
 //!
 //!     Update member m_scale_map
-//! 
+//!
 void
 FisheyeStitcher::genScaleMap()
 {
@@ -250,7 +250,7 @@ FisheyeStitcher::genScaleMap()
     cv::pow(x_coor, 2.0, temp);
     R_pf = R_pf + P4_ * temp;
     R_pf = R_pf + P5_ * x_coor + P6_;
-    
+
     // PF_LUT
     cv::divide(1, R_pf, R_pf); //element-wise inverse
 
@@ -288,29 +288,29 @@ FisheyeStitcher::genScaleMap()
     cv::Mat scale_map_quad_1(scale_map_quad_4.size(), scale_map_quad_4.type());
     cv::Mat scale_map_quad_2(scale_map_quad_4.size(), scale_map_quad_4.type());
     cv::Mat scale_map_quad_3(scale_map_quad_4.size(), scale_map_quad_4.type());
-    // 
+    //
     cv::flip(scale_map_quad_4, scale_map_quad_1, 0); // quad I, up-down or around x-axis
     cv::flip(scale_map_quad_4, scale_map_quad_3, 1); // quad III, left-right or around y-axis
     cv::flip(scale_map_quad_1, scale_map_quad_2, 1); // quad II, up-down or around x-axis
-    // 
+    //
     cv::Mat quad_21, quad_34;
     cv::hconcat(scale_map_quad_2, scale_map_quad_1, quad_21);
     cv::hconcat(scale_map_quad_3, scale_map_quad_4, quad_34);
-    // 
+    //
     cv::Mat scale_map;
     cv::vconcat(quad_21, quad_34, scale_map);
 
     scale_map.copyTo(m_scale_map);
 
-}   // genScaleMap() 
+}   // genScaleMap()
 
-//! 
+//!
 //! @brief  Fisheye Light Fall-off Compensation
 //! @param  in_img  LFO-uncompensated image
 //! @param  return  LFO-compensated image
 //!
 cv::Mat
-FisheyeStitcher::compenLightFO( const cv::Mat &in_img ) 
+FisheyeStitcher::compenLightFO( const cv::Mat &in_img )
 {
     cv::Mat rgb_ch[3];
     cv::Mat rgb_ch_double[3];
@@ -329,15 +329,15 @@ FisheyeStitcher::compenLightFO( const cv::Mat &in_img )
     out_img_double.convertTo(out_img, CV_8U);
     return out_img;
 
-}   // compenLightFO() 
+}   // compenLightFO()
 
-//! 
+//!
 //! @brief Create binary mask for blending
-//! 
+//!
 //!     Update member masks.
 //!
 void
-FisheyeStitcher::createBlendMask() 
+FisheyeStitcher::createBlendMask()
 {
     cv::Mat inner_cir_mask_n;
     cv::Mat ring_mask, ring_mask_unwarped;
@@ -351,15 +351,15 @@ FisheyeStitcher::createBlendMask()
 
 #if MY_DEBUG
     std::cout << "Ws = " << m_ws << ", Hs = " << m_hs << "\n";
-    std::cout << "Wd = " << m_wd << ", Hd = " << m_hd << "\n"; 
+    std::cout << "Wd = " << m_wd << ", Hd = " << m_hd << "\n";
     cv::imwrite("m_cir_mask.jpg", m_cir_mask);
     cv::imwrite("ring_mask.jpg", ring_mask);
 #endif
-    
+
     cv::remap(ring_mask, ring_mask_unwarped, m_map_x, m_map_y, CV_INTER_LINEAR,
               cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
-    
-    cv::Mat mask_ = ring_mask_unwarped(cv::Rect(Wd2-Ws2, 0, m_ws, m_hd)); 
+
+    cv::Mat mask_ = ring_mask_unwarped(cv::Rect(Wd2-Ws2, 0, m_ws, m_hd));
     mask_.convertTo(mask_, CV_8UC3);
 
 #if MY_DEBUG
@@ -388,9 +388,9 @@ FisheyeStitcher::createBlendMask()
         for( cidx=0; cidx < W_; ++cidx )
         {
             if( (ridx < (static_cast<int>(H_/2)) ) &&
-                (cidx > first_zero_col - 1) && 
+                (cidx > first_zero_col - 1) &&
                 (cidx < W_ - first_zero_col + 1) )
-            { 
+            {
                 mask_.at<cv::Vec3b>(cv::Point(cidx,ridx)) = cv::Vec3b(0, 0, 0);
             }
         }
@@ -402,7 +402,7 @@ FisheyeStitcher::createBlendMask()
     {
         if( ridx > H_ - first_zero_row )
         {
-            m_blend_post.push_back( 0 ); 
+            m_blend_post.push_back( 0 );
             continue;
         }
         for( cidx=first_zero_col-10; cidx < W_/2+10; ++cidx )
@@ -411,9 +411,9 @@ FisheyeStitcher::createBlendMask()
             if( color == cv::Vec3b(0,0,0))
             {
                 m_blend_post.push_back( cidx - offset );
-                break; 
+                break;
             }
-        } 
+        }
     }
 
     // generate binary mask
@@ -429,11 +429,11 @@ FisheyeStitcher::createBlendMask()
 
 }   // createBlendMask()
 
-// 
+//
 // @brief Initialize common parameters for stitching
-// 
-void 
-FisheyeStitcher::init() 
+//
+void
+FisheyeStitcher::init()
 {
     //------------------------------------------------------------------------//
     // Create deformation maps                                                //
@@ -444,7 +444,7 @@ FisheyeStitcher::init()
     // Create Circular mask to Crop the input W.R.T FOVD                      //
     //------------------------------------------------------------------------//
     // (mask all data outside the FOVD circle)
-    createMask(); // update m_cir_mask, m_inner_cir_mask 
+    createMask(); // update m_cir_mask, m_inner_cir_mask
 
     //------------------------------------------------------------------------//
     // Creat masks that used in blending the deformed images                  //
@@ -470,7 +470,7 @@ FisheyeStitcher::init()
     }
     else
     {
-        CV_Error_(cv::Error::StsBadArg, 
+        CV_Error_(cv::Error::StsBadArg,
             ("Cannot open map file1: %s", m_map_path.c_str()));
     }
     mls_map_x.copyTo(m_mls_map_x);
@@ -479,16 +479,16 @@ FisheyeStitcher::init()
 }   // init()
 
 
-//! 
+//!
 //! @brief Adaptive Alignment: Norm XCorr
 //! @param  Ref  reference image
 //! @param  Tmpl  template image
-//! @param  return  matching location 
+//! @param  return  matching location
 //!
 cv::Point2f
-FisheyeStitcher::findMatchLoc( const cv::Mat &Ref, 
-                               const cv::Mat &Tmpl, 
-                               const std::string &img_window, 
+FisheyeStitcher::findMatchLoc( const cv::Mat &Ref,
+                               const cv::Mat &Tmpl,
+                               const std::string &img_window,
                                const bool disable_display )
 {
     cv::Point2f matchLoc;
@@ -526,8 +526,8 @@ FisheyeStitcher::findMatchLoc( const cv::Mat &Ref,
 
     if (!disable_display)
     {
-        cv::rectangle(img_display, matchLoc, 
-                      cv::Point(matchLoc.x + templ.cols, matchLoc.y + templ.rows), 
+        cv::rectangle(img_display, matchLoc,
+                      cv::Point(matchLoc.x + templ.cols, matchLoc.y + templ.rows),
                       cv::Scalar(0, 255, 0), 2, 8, 0);
         cv::Mat RefTemplCat;
         cv::hconcat(img_display, Tmpl, RefTemplCat);
@@ -537,19 +537,19 @@ FisheyeStitcher::findMatchLoc( const cv::Mat &Ref,
 
 }   // findMatchLoc()
 
-//! 
+//!
 //! @brief  Construct control points for affine2D
-//! @param  movingPoints  return match points of template on reference 
+//! @param  movingPoints  return match points of template on reference
 //! @param  fixedPoints   return match points of template on template
-//! 
-std::tuple<std::vector<cv::Point2f>, std::vector<cv::Point2f> > 
-FisheyeStitcher::createControlPoints( const cv::Point2f &matchLocLeft, 
-            const cv::Point2f &matchLocRight, const int row_start, 
-            const int row_end, const int p_wid, const int p_x1, 
+//!
+std::tuple<std::vector<cv::Point2f>, std::vector<cv::Point2f> >
+FisheyeStitcher::createControlPoints( const cv::Point2f &matchLocLeft,
+            const cv::Point2f &matchLocRight, const int row_start,
+            const int row_end, const int p_wid, const int p_x1,
             const int p_x2, const int p_x2_ref )
 {
-    std::vector<cv::Point2f> movingPoints; 
-    std::vector<cv::Point2f> fixedPoints; 
+    std::vector<cv::Point2f> movingPoints;
+    std::vector<cv::Point2f> fixedPoints;
 
     float x1 = matchLocLeft.x;
     float y1 = matchLocLeft.y;
@@ -588,13 +588,13 @@ FisheyeStitcher::createControlPoints( const cv::Point2f &matchLocLeft,
 
 }   // createControlPoints()
 
-//! 
+//!
 //! @brief  Ramp blending on the right patch
 //! @param  bg1  first patch
 //! @param  bg2  second patch
 //! @param  return  blended patch
-//! 
-cv::Mat 
+//!
+cv::Mat
 FisheyeStitcher::blendRight( const cv::Mat &bg1, const cv::Mat &bg2 )
 {
     int h = bg1.size().height;
@@ -607,9 +607,9 @@ FisheyeStitcher::blendRight( const cv::Mat &bg1, const cv::Mat &bg2 )
     bg2.convertTo(bg2_, CV_32F);
     //
     cv::Mat bgr_bg[3], bgr_bg1[3], bgr_bg2[3];   //destination array
-    split(bg1_, bgr_bg1); //split source  
-    split(bg2_, bgr_bg2); //split source  
-    // 
+    split(bg1_, bgr_bg1); //split source
+    split(bg2_, bgr_bg2); //split source
+    //
     bgr_bg[0] = cv::Mat::zeros(bgr_bg1[1].size(), CV_32F);
     bgr_bg[1] = cv::Mat::zeros(bgr_bg1[1].size(), CV_32F);
     bgr_bg[2] = cv::Mat::zeros(bgr_bg1[1].size(), CV_32F);
@@ -620,11 +620,11 @@ FisheyeStitcher::blendRight( const cv::Mat &bg1, const cv::Mat &bg2 )
         {
             alpha1 = static_cast<double>(c) / wdb;
             alpha2 = 1.0 - alpha1;
-            bgr_bg[0].at<float>(r, c) = alpha1*bgr_bg1[0].at<float>(r, c) + 
+            bgr_bg[0].at<float>(r, c) = alpha1*bgr_bg1[0].at<float>(r, c) +
                                             alpha2*bgr_bg2[0].at<float>(r, c);
-            bgr_bg[1].at<float>(r, c) = alpha1*bgr_bg1[1].at<float>(r, c) + 
+            bgr_bg[1].at<float>(r, c) = alpha1*bgr_bg1[1].at<float>(r, c) +
                                             alpha2*bgr_bg2[1].at<float>(r, c);
-            bgr_bg[2].at<float>(r, c) = alpha1*bgr_bg1[2].at<float>(r, c) + 
+            bgr_bg[2].at<float>(r, c) = alpha1*bgr_bg1[2].at<float>(r, c) +
                                             alpha2*bgr_bg2[2].at<float>(r, c);
         }
     }
@@ -635,13 +635,13 @@ FisheyeStitcher::blendRight( const cv::Mat &bg1, const cv::Mat &bg2 )
 
 }   // blendRight()
 
-//! 
+//!
 //! @brief  Ramp blending on the left patch
 //! @param  bg1  first patch
 //! @param  bg2  second patch
 //! @param  return  blended patch
-//! 
-cv::Mat 
+//!
+cv::Mat
 FisheyeStitcher::blendLeft( const cv::Mat &bg1, const cv::Mat &bg2 )
 {
     int h = bg1.size().height;
@@ -652,11 +652,11 @@ FisheyeStitcher::blendLeft( const cv::Mat &bg1, const cv::Mat &bg2 )
     cv::Mat bg1_, bg2_;
     bg1.convertTo(bg1_, CV_32F);
     bg2.convertTo(bg2_, CV_32F);
-    // 
+    //
     cv::Mat bgr_bg[3], bgr_bg1[3], bgr_bg2[3]; //destination array
-    split(bg1_, bgr_bg1); //split source  
-    split(bg2_, bgr_bg2); //split source  
-    // 
+    split(bg1_, bgr_bg1); //split source
+    split(bg2_, bgr_bg2); //split source
+    //
     bgr_bg[0] = cv::Mat::zeros(bgr_bg1[1].size(), CV_32F);
     bgr_bg[1] = cv::Mat::zeros(bgr_bg1[1].size(), CV_32F);
     bgr_bg[2] = cv::Mat::zeros(bgr_bg1[1].size(), CV_32F);
@@ -667,11 +667,11 @@ FisheyeStitcher::blendLeft( const cv::Mat &bg1, const cv::Mat &bg2 )
         {
             alpha1 = (wdb - c + 1) / wdb;
             alpha2 = 1.0 - alpha1;
-            bgr_bg[0].at<float>(r, c) = alpha1*bgr_bg1[0].at<float>(r, c) + 
+            bgr_bg[0].at<float>(r, c) = alpha1*bgr_bg1[0].at<float>(r, c) +
                                             alpha2*bgr_bg2[0].at<float>(r, c);
-            bgr_bg[1].at<float>(r, c) = alpha1*bgr_bg1[1].at<float>(r, c) + 
+            bgr_bg[1].at<float>(r, c) = alpha1*bgr_bg1[1].at<float>(r, c) +
                                             alpha2*bgr_bg2[1].at<float>(r, c);
-            bgr_bg[2].at<float>(r, c) = alpha1*bgr_bg1[2].at<float>(r, c) + 
+            bgr_bg[2].at<float>(r, c) = alpha1*bgr_bg1[2].at<float>(r, c) +
                                             alpha2*bgr_bg2[2].at<float>(r, c);
         }
     }
@@ -683,14 +683,14 @@ FisheyeStitcher::blendLeft( const cv::Mat &bg1, const cv::Mat &bg2 )
 }   // blendLeft()
 
 
-//! 
+//!
 //! @brief  Blending aligned images
 //! @param  left_img  left unwarped image
-//! @param  right_img_aligned  aligned right image 
+//! @param  right_img_aligned  aligned right image
 //! @param  return   blended image
-//! 
+//!
 cv::Mat
-FisheyeStitcher::blend( const cv::Mat &left_img, 
+FisheyeStitcher::blend( const cv::Mat &left_img,
                         const cv::Mat &right_img_aligned )
 {
 #if GEAR360_C200
@@ -701,7 +701,7 @@ FisheyeStitcher::blend( const cv::Mat &left_img,
     fs.release();
     // Mask
     cv::Mat mask = imread("./utils/mask_1920x1920_fovd_187.jpg", cv::IMREAD_COLOR);
-#else 
+#else
     // use `m_blend_post` instead of `post`
     // use `m_binary_mask` instead of `mask` from file
     cv::Mat mask = m_binary_mask;
@@ -723,7 +723,7 @@ FisheyeStitcher::blend( const cv::Mat &left_img,
 
     for (int r = 0; r < H; ++r)
     {
-#if GEAR360_C200 
+#if GEAR360_C200
         int p = post.at<float>(r, 0);
 #else
         int p = m_blend_post[r];
@@ -750,27 +750,27 @@ FisheyeStitcher::blend( const cv::Mat &left_img,
         bright.copyTo(rt_win_2);
     }
 
-#if MY_DEBUG
-    cv::imwrite("left_crop_blend.jpg", left_img_cr);
-    cv::imwrite("right_blend.jpg", right_img_aligned);
-#endif
+    if (m_save_unwarped) {
+      cv::imwrite("left_crop_blend.jpg", left_img_cr);
+      cv::imwrite("right_blend.jpg", right_img_aligned);
+    }
 
     //-----------------------------------------------------------------------//
     // Blending                                                              //
     //-----------------------------------------------------------------------//
-    cv::Mat mask_ = mask(cv::Rect(0, 0, mask.size().width, 
+    cv::Mat mask_ = mask(cv::Rect(0, 0, mask.size().width,
                                         mask.size().height - 2));
     cv::Mat mask_n;
     bitwise_not(mask_, mask_n);
     bitwise_and(left_img_cr, mask_, left_img_cr); // Left image
-    // 
+    //
     cv::Mat temp1 = left_img(cv::Rect(0, 0, (imW / 2 - Worg / 2), imH));
-    cv::Mat temp2 = left_img(cv::Rect((imW / 2 + Worg / 2), 0, 
+    cv::Mat temp2 = left_img(cv::Rect((imW / 2 + Worg / 2), 0,
                                       (imW / 2 - Worg / 2), imH));
     cv::Mat t;
     cv::hconcat(temp1, left_img_cr, t);
     cv::hconcat(t, temp2, left_img);
-    // 
+    //
     bitwise_and(right_img_aligned, mask_n, right_img_aligned); // Right image
     //
     cv::Mat pano;
@@ -785,11 +785,11 @@ FisheyeStitcher::blend( const cv::Mat &left_img,
 }   // blend()
 
 
-//! 
+//!
 //! @brief single frame stitching
 //! @param  in_img_L  left image
 //! @param  in_img_R  right image
-//! @param  return    stitched image 
+//! @param  return    stitched image
 //!
 cv::Mat
 FisheyeStitcher::stitch(const cv::Mat& in_img_L, const cv::Mat& in_img_R)
@@ -805,7 +805,7 @@ FisheyeStitcher::stitch(const cv::Mat& in_img_L, const cv::Mat& in_img_R)
 
     //------------------------------------------------------------------------//
     // Circular Crop                                                          //
-    //------------------------------------------------------------------------// 
+    //------------------------------------------------------------------------//
     cv::bitwise_and(in_img_L, m_cir_mask, in_img_L); // Left image
     cv::bitwise_and(in_img_R, m_cir_mask, in_img_R); // Right image
 
@@ -852,10 +852,10 @@ FisheyeStitcher::stitch(const cv::Mat& in_img_L, const cv::Mat& in_img_R)
     std::cout << "run-time (Unwarp) = " << runTime << " (sec)" << "\n";
 #endif
 
-#if MY_DEBUG
-    cv::imwrite("l.jpg", left_unwarped);
-    cv::imwrite("r.jpg", right_unwarped);
-#endif
+    if (m_save_unwarped) {
+      cv::imwrite("l.jpg", left_unwarped);
+      cv::imwrite("r.jpg", right_unwarped);
+    }
 
 #if PROFILING
     tickStart = static_cast<double>(cv::getTickCount());
@@ -865,14 +865,14 @@ FisheyeStitcher::stitch(const cv::Mat& in_img_L, const cv::Mat& in_img_R)
     // Rigid Moving Least Squares Deformation                                 //
     //------------------------------------------------------------------------//
     cv::Mat rightImg_crop, rightImg_mls_deformed;
-    rightImg_crop = right_unwarped(cv::Rect(int(m_wd / 2) - (W_in / 2), 0, 
+    rightImg_crop = right_unwarped(cv::Rect(int(m_wd / 2) - (W_in / 2), 0,
                                    W_in, m_hd - 2)); // notice on (Hd-2) --> become: (Hd)
     rightImg_mls_deformed = deform(rightImg_crop);
 
-#if MY_DEBUG
+    if (m_save_unwarped) {
     cv::imwrite("r_img_crop.jpg", rightImg_crop);
     cv::imwrite("r_mls_deformed.jpg",rightImg_mls_deformed);
-#endif
+    }
 
 #if PROFILING
     tickEnd = static_cast<double>(cv::getTickCount());
@@ -885,13 +885,13 @@ FisheyeStitcher::stitch(const cv::Mat& in_img_L, const cv::Mat& in_img_R)
     // Rearrange Image for Adaptive Alignment                                 //
     //------------------------------------------------------------------------//
     cv::Mat temp1 = left_unwarped(cv::Rect(0, 0, m_wd2, m_hd - 2));
-    cv::Mat temp2 = left_unwarped(cv::Rect(m_wd2, 0, m_wd2, 
+    cv::Mat temp2 = left_unwarped(cv::Rect(m_wd2, 0, m_wd2,
                                   m_hd - 2));
     cv::Mat left_unwarped_arr; // re-arranged left unwarped
     cv::hconcat(temp2, temp1, left_unwarped_arr);
     cv::Mat leftImg_crop;
-    leftImg_crop = left_unwarped_arr(cv::Rect(m_wd2 - (W_in / 2), 0, 
-                                     W_in, m_hd - 2)); 
+    leftImg_crop = left_unwarped_arr(cv::Rect(m_wd2 - (W_in / 2), 0,
+                                     W_in, m_hd - 2));
     uint16_t crop = static_cast<uint16_t>(0.5f * m_ws * (MAX_FOVD - 180.0) / MAX_FOVD); // half overlap region
 
     //------------------------------------------------------------------------//
@@ -905,19 +905,20 @@ FisheyeStitcher::stitch(const cv::Mat& in_img_L, const cv::Mat& in_img_R)
     uint16_t row_start = 590;
     uint16_t row_end   = 1320;
     uint16_t p_x2_ref  = m_ws - 2 * crop + 1;
-    // 
+    //
     cv::Mat Ref_1, Ref_2, Tmpl_1, Tmpl_2;
     Ref_1  = leftImg_crop(cv::Rect(0, row_start, p_x1_ref, row_end - row_start));
     Ref_2  = leftImg_crop(cv::Rect(p_x2_ref, row_start, m_ws - p_x2_ref, row_end - row_start));
     Tmpl_1 = rightImg_mls_deformed(cv::Rect(p_x1, row_start, p_wid, row_end - row_start));
     Tmpl_2 = rightImg_mls_deformed(cv::Rect(p_x2, row_start, p_wid, row_end - row_start));
 
-#if MY_DEBUG
-    cv::imwrite("./output/Ref_1.jpg", Ref_1);
-    cv::imwrite("./output/Ref_2.jpg", Ref_2);
-    cv::imwrite("./output/Tmpl_1.jpg", Tmpl_1);
-    cv::imwrite("./output/Tmpl_2.jpg", Tmpl_2);
-#endif 
+    if (m_save_unwarped) {
+      cv::imwrite("l_img_crop.jpg", leftImg_crop);
+      cv::imwrite("Ref_1.jpg", Ref_1);
+      cv::imwrite("Ref_2.jpg", Ref_2);
+      cv::imwrite("Tmpl_1.jpg", Tmpl_1);
+      cv::imwrite("Tmpl_2.jpg", Tmpl_2);
+    }
 
     //------------------------------------------------------------------------//
     // Adaptive Alignment (Norm XCorr)                                        //
@@ -945,20 +946,20 @@ FisheyeStitcher::stitch(const cv::Mat& in_img_L, const cv::Mat& in_img_R)
         matchLocRight = findMatchLoc(Ref_2, Tmpl_2, wname2, disable_display); // Right boundary
 
 #if MY_DEBUG
-        std::cout << "matchLocLeft(x=" << matchLocLeft.x 
-                  << ", y=" << matchLocLeft.y 
-                  << "), matchLocRight(x=" << matchLocRight.x 
+        std::cout << "matchLocLeft(x=" << matchLocLeft.x
+                  << ", y=" << matchLocLeft.y
+                  << "), matchLocRight(x=" << matchLocRight.x
                   << ", y=" << matchLocRight.y << ")\n";
 #endif
 
         //--------------------------------------------------------------------//
         // Construct control points                                           //
         //--------------------------------------------------------------------//
-        std::vector<cv::Point2f> movingPoints;  // matched points in Refs  
+        std::vector<cv::Point2f> movingPoints;  // matched points in Refs
         std::vector<cv::Point2f> fixedPoints;   // matched points in Templates
 
-        std::tie(movingPoints, fixedPoints) = 
-            createControlPoints(matchLocLeft, matchLocRight, row_start, row_end, 
+        std::tie(movingPoints, fixedPoints) =
+            createControlPoints(matchLocLeft, matchLocRight, row_start, row_end,
                                 p_wid, p_x1, p_x2, p_x2_ref);
 
 #if PROFILING
@@ -977,8 +978,8 @@ FisheyeStitcher::stitch(const cv::Mat& in_img_L, const cv::Mat& in_img_R)
         //--------------------------------------------------------------------//
         // Warp Image                                                         //
         //--------------------------------------------------------------------//
-        cv::warpPerspective(rightImg_mls_deformed, warpedRightImg, 
-                            tform_refine_mat, rightImg_mls_deformed.size(), 
+        cv::warpPerspective(rightImg_mls_deformed, warpedRightImg,
+                            tform_refine_mat, rightImg_mls_deformed.size(),
                             CV_INTER_LINEAR);
 
 #if PROFILING
@@ -1005,6 +1006,6 @@ FisheyeStitcher::stitch(const cv::Mat& in_img_L, const cv::Mat& in_img_R)
 
     return pano;
 
-}   // stitch() 
+}   // stitch()
 
 }   // namespace

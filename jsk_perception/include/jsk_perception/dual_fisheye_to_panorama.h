@@ -80,6 +80,7 @@ namespace jsk_perception
 
     bool   enb_lc_;
     bool   enb_ra_;
+    bool  save_unwarped_;
     float  fovd_;
     std::string mls_map_path_;
 

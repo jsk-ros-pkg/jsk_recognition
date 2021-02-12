@@ -52,10 +52,12 @@ namespace jsk_perception
     pnh_->param("light_compen", enb_lc_, false);
     pnh_->param("refine_align", enb_ra_, false);
     pnh_->param("fovd", fovd_, 195.0f);
+    pnh_->param("save_unwarped", save_unwarped_, false);
     pnh_->param("mls_map_path", mls_map_path_, std::string(""));
     ROS_INFO("light_compen : %s", enb_lc_?"true":"false");
     ROS_INFO("refine_align : %s", enb_ra_?"true":"false");
     ROS_INFO("fovd         : %7.3f", fovd_);
+    ROS_INFO("save_unwarped: %7.3f", save_unwarped_?"true":"false");
     ROS_INFO("mls_map_path : %s", mls_map_path_.c_str());
     pub_panorama_image_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
 
@@ -98,6 +100,7 @@ namespace jsk_perception
                                                     fovd_,
                                                     enb_lc_,
                                                     enb_ra_,
+                                                    save_unwarped_,
                                                     mls_map_path_));
       sticher_initialized_ = true;
     }

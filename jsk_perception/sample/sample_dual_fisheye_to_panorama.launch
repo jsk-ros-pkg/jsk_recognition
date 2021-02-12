@@ -1,7 +1,9 @@
 <launch>
   <arg name="gui" default="true"/>
 
-  <arg name="INPUT_IMAGE" default="/insta360/image_raw" />
+  <arg name="INPUT_IMAGE" default="/insta360/image_raw" doc="topic name of 360 camera image" />
+  <arg name="fovd" default="185.0" doc="Camera's Field of View [degree]" />
+  <arg name="save_unwarped" default="false" doc="Save unwarped fisheye images. This is useful to create MLS grids." />
 
   <node name="dual_fisheye_to_panorama"
         pkg="nodelet" type="nodelet"
@@ -9,7 +11,8 @@
     <remap from="~input" to="$(arg INPUT_IMAGE)"/>
     <param name="light_compen" value="false" />
     <param name="refine_align" value="false" />
-    <param name="fovd" value="185.0" />
+    <param name="fovd" value="$(arg fovd)" />
+    <param name="save_unwarped" value="$(arg save_unwarped)" />
     <param name="mls_map_path" value="$(find jsk_perception)/config/fisheye_stitcher_grid_xd_yd_3840x1920.yml.gz" />
   </node>
 

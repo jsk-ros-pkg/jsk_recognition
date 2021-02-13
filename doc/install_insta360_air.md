@@ -32,7 +32,7 @@ This section describes how to update the panorama parameter for generating a pan
 roslaunch jsk_perception sample_insta360_air.launch use_usb_cam:=true save_unwarp:=true
 ```
 
-2. Annotate the corresponding points of the left and right images. We use [labelme](https://github.com/wkentaro/labelme) as a GUI tool. `$HOME/.ros/l_img_crop.json` and `$HOME/.ros/r_img_crop.json` should be outputted.
+2. Annotate the corresponding points of the left and right images. We use [labelme](https://github.com/wkentaro/labelme) as a GUI tool. When annotating, it is easier to start with `l_img_crop.jpg`, which has a narrow angle of view than `r_img_crop.jpg`. `$HOME/.ros/l_img_crop.json` and `$HOME/.ros/r_img_crop.json` should be outputted.
 ```bash
 sudo pip install labelme==4.5.7
 labelme $HOME/.ros/l_img_crop.jpg
@@ -48,7 +48,7 @@ labelme $HOME/.ros/r_img_crop.jpg
 rosrun jsk_perception create_mls_correspondence.py
 ```
 
-4. Run `mls_rigid_example2.m` to generate the MLS grids file. matlab can be installed from the University of Tokyo license. You also need to install the image processing toolbox and the parallel computing toolbox.
+4. Run `mls_rigid_example2.m` to generate the MLS grids file. matlab can be installed from [the University of Tokyo license](https://jp.mathworks.com/academia/tah-portal/university-of-tokyo-40790257.html). You also need to install the image processing toolbox and the parallel computing toolbox.
 Please check the [official wiki](https://github.com/drNoob13/fisheyeStitcher/wiki/How-to-create-the-MLS-%5BX,Y%5D-grids)
 
 5. Convert the MLS grid file to a yaml file so that OpenCV can read it.

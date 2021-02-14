@@ -10,7 +10,8 @@ import scipy.io
 def main():
     home_dir = os.environ['HOME']
     mls = scipy.io.loadmat(os.path.join(home_dir, '.ros/XY_MLS_Grid_example2.mat'))
-    with open(os.path.join(home_dir, '.ros/fisheye_stitcher_grid_xd_yd_3840x1920.yml'), 'w') as f:
+    yml_path = os.path.join(home_dir, '.ros/fisheye_stitcher_grid_xd_yd_3840x1920.yml')
+    with open(yml_path, 'w') as f:
         f.write('%YAML:1.0\n')
         for label in ['Xd', 'Yd']:
             rows = mls[label].shape[0]
@@ -28,6 +29,7 @@ def main():
                         f.write('\n            ')
                 else:
                     f.write(' ]\n')
+    print('{} is exported.'.format(yml_path))
 
 
 if __name__ == '__main__':

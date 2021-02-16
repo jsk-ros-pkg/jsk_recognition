@@ -10,6 +10,7 @@
   <arg name="height" default="1504" />
   <arg name="video_mode" default="mjpeg" />
   <arg name="frame_rate" default="30" />
+  <arg name="brightness" default="0" />
   <arg name="create_panorama" default="true" />
   <arg name="refine_align" default="false" />
   <arg name="save_unwarped" default="false" />
@@ -27,6 +28,7 @@
       <arg name="width" value="$(arg width)" />
       <arg name="video_mode" value="$(arg video_mode)" />
       <arg name="frame_rate" value="$(arg frame_rate)" />
+      <arg name="brightness" value="$(arg brightness)" /> <!-- -32768 ~ 32767 -->
       <arg name="gui" value="$(arg gui)" />
     </include>
     <!-- For kinetic or older -->
@@ -37,6 +39,7 @@
       <arg name="width" value="$(arg width)" />
       <arg name="video_mode" value="$(arg video_mode)" />
       <arg name="frame_rate" value="$(arg frame_rate)" />
+      <arg name="brightness" value="$(arg brightness)" /> <!-- 0 ~ 255 -->
       <arg name="gui" value="$(arg gui)" />
     </include>
   </group>

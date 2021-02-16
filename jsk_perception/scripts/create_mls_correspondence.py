@@ -12,8 +12,8 @@ def main():
         l_json_load = json.load(f)
     with open(os.path.join(home_dir, '.ros/r_img_crop.json'), 'r') as f:
         r_json_load = json.load(f)
-    fixedPoints = l_json_load['shapes'][0]['points']
-    movingPoints = r_json_load['shapes'][0]['points']
+    fixedPoints = r_json_load['shapes'][0]['points']
+    movingPoints = l_json_load['shapes'][0]['points']
     if len(fixedPoints) != len(movingPoints):
         print('[error] The number of points in both images is different.')
         exit()

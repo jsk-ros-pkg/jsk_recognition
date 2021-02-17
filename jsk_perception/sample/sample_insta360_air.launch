@@ -12,6 +12,7 @@
   <arg name="frame_rate" default="30" />
   <arg name="refine_align" default="false" />
   <arg name="save_unwarped" default="false" />
+  <arg name="mls_map_path" default="$(find jsk_perception)/config/fisheye_stitcher_grid_xd_yd_3840x1920.yml.gz" />
   <arg name="gui" default="true" />
 
   <!-- Publish camera image -->
@@ -54,7 +55,7 @@
     <arg name="fovd" value="210" />
     <arg name="refine_align" value="$(arg refine_align)" />
     <arg name="save_unwarped" value="$(arg save_unwarped)" />
-    <arg name="mls_map_path" value="$(find jsk_perception)/config/fisheye_stitcher_grid_xd_yd_3840x1920.yml.gz" />
+    <arg name="mls_map_path" value="$(arg mls_map_path)" />
   </include>
 
   <group if="$(arg gui)">

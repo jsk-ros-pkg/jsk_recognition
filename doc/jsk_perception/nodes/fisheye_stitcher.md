@@ -43,7 +43,7 @@ roslaunch jsk_perception sample_dual_fisheye_to_panorama.launch
 ```
 
 ## Update panorama parameter
-This section describes how to update the panorama parameter for generating a panorama image. Note that different cameras require different parameters, even if they are of the same type.
+This section describes how to update the panorama parameter for generating a panorama image. Note that different cameras basically require different parameters, even if they are of the same type. However, if you're lucky, you can use the parameters of another camera, so you can try that first.
 
 Here is an example using insta360.
 

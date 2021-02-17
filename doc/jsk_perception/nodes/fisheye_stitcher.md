@@ -36,10 +36,12 @@ This is ROS wrapper of [drNoob13/fisheyeStitcher](https://github.com/drNoob13/fi
   Path to .yml.gz file which contains MLS grids information. How to generate this file is explained below.
 
 ## Sample
+Before running the sample, please `catkin build jsk_perception`.
 
 ```bash
+rosrun jsk_perception install_sample_data.py
 rosbag play $(rospack find jsk_perception)/sample/data/insta360_air.bag --loop --clock
-roslaunch jsk_perception sample_dual_fisheye_to_panorama.launch
+roslaunch jsk_perception sample_dual_fisheye_to_panorama.launch mls_map_path:=$(rospack find jsk_perception)/sample/data/fisheye_stitcher_grid_xd_yd_3840x1920_fetch15.yml.gz
 ```
 
 ## Update panorama parameter

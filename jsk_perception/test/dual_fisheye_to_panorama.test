@@ -1,0 +1,22 @@
+<launch>
+
+  <arg name="gui" default="false"/>
+
+  <node pkg="rosbag" type="play" name="rosbag_play"
+        args="$(find jsk_perception)/sample/data/insta360_air.bag --loop --clock" output="screen" />
+
+  <include file="$(find jsk_perception)/sample/sample_dual_fisheye_to_panorama.launch">
+    <arg name="gui" value="$(arg gui)" />
+  </include>
+
+  <test test-name="test_dual_fisheye_to_panorama"
+        name="test_dusl_fisheye_to_panorama"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_1: /dual_fisheye_to_panorama/output
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

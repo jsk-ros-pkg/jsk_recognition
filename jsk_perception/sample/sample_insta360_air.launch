@@ -10,12 +10,10 @@
   <arg name="height" default="1504" />
   <arg name="video_mode" default="mjpeg" />
   <arg name="frame_rate" default="30" />
+  <arg name="refine_align" default="false" />
+  <arg name="save_unwarped" default="false" />
+  <arg name="mls_map_path" default="$(find jsk_perception)/config/fisheye_stitcher_grid_xd_yd_3840x1920.yml.gz" />
   <arg name="gui" default="true" />
-  <!-- Rectify settings -->
-  <arg name="calibration" default="false" />
-  <arg name="rectification" default="false" />
-  <arg name="yaml_filename00" default="$(find jsk_perception)/sample/config/insta360_air.yaml" />
-  <arg name="yaml_filename01" default="$(find jsk_perception)/sample/config/insta360_air.yaml" />
 
   <!-- Publish camera image -->
   <group if="$(arg publish_image)">
@@ -51,49 +49,20 @@
     </rosparam>
   </node>
 
-  <!-- Relay fisheye images -->
-  <node pkg="topic_tools" name="relay00" type="relay"
-        args="/split_image/output/vertical00/horizontal00 /insta360/vertical00/horizontal00/image_raw" />
-  <node pkg="topic_tools" name="relay01" type="relay"
-        args="/split_image/output/vertical00/horizontal01 /insta360/vertical00/horizontal01/image_raw" />
+  <include file="$(find jsk_perception)/sample/sample_dual_fisheye_to_panorama.launch">
+    <arg name="gui" value="false" />
+    <arg name="INPUT_IMAGE" value="/insta360/image_raw" />
+    <arg name="fovd" value="210" />
+    <arg name="refine_align" value="$(arg refine_align)" />
+    <arg name="save_unwarped" value="$(arg save_unwarped)" />
+    <arg name="mls_map_path" value="$(arg mls_map_path)" />
+  </include>
 
-  <!-- When rectification -->
-  <group if="$(arg rectification)">
-    <!-- Publish camera info to match the fisheye images -->
-    <node pkg="jsk_interactive_marker" name="camera_info_publisher_00" type="camera_info_publisher" output="screen">
-      <remap from="~input" to="/insta360/vertical00/horizontal00/image_raw" />
-      <remap from="~camera_info" to="insta360/vertical00/horizontal00/camera_info" />
-      <rosparam subst_value="true">
-        yaml_filename: $(arg yaml_filename00)
-        sync_image: true
-      </rosparam>
+  <group if="$(arg gui)">
+    <node name="image_view"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="dual_fisheye_to_panorama/output"/>
     </node>
-    <node pkg="jsk_interactive_marker" name="camera_info_publisher_01" type="camera_info_publisher" output="screen">
-      <remap from="~input" to="/insta360/vertical00/horizontal01/image_raw" />
-      <remap from="~camera_info" to="insta360/vertical00/horizontal01/camera_info" />
-      <rosparam subst_value="true">
-        yaml_filename: $(arg yaml_filename01)
-        sync_image: true
-      </rosparam>
-    </node>
-    <!-- rectify fisheys image -->
-    <node ns="/insta360/vertical00/horizontal00" pkg="image_proc" name="image_proc00" type="image_proc" />
-    <node ns="/insta360/vertical00/horizontal01" pkg="image_proc" name="image_proc01" type="image_proc" />
-    <!-- View rectified images -->
-    <group if="$(arg gui)">
-      <node pkg="image_view" name="image_view_insta360_rectified_00" type="image_view"
-            args="image:=/insta360/vertical00/horizontal00/image_rect_color" />
-      <node pkg="image_view" name="image_view_insta360_rectified_01" type="image_view"
-            args="image:=/insta360/vertical00/horizontal01/image_rect_color" />
-    </group>
-  </group>
-
-  <!-- When calibration -->
-  <group if="$(arg calibration)">
-    <node pkg="camera_calibration" name="cameracalibrator_00" type="cameracalibrator.py"
-          args="--size 6x5 --square 0.030 image:=/insta360/vertical00/horizontal00/image_raw" />
-    <node pkg="camera_calibration" name="cameracalibrator_01" type="cameracalibrator.py"
-          args="--size 6x5 --square 0.030 image:=/insta360/vertical00/horizontal01/image_raw" />
   </group>
 
 </launch>

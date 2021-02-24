@@ -19,8 +19,4 @@ sudo service udev restart
 roslaunch jsk_perception sample_insta360_air.launch
 # For kinetic or lower
 roslaunch jsk_perception sample_insta360_air.launch use_usb_cam:=true
-# With rectified image
-roslaunch jsk_perception sample_insta360_air.launch rectification:=true
-# Calibration
-roslaunch jsk_perception sample_insta360_air.launch gui:=false calibration:=true
 ```

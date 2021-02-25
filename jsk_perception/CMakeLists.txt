@@ -231,9 +231,7 @@ jsk_add_nodelet(src/color_histogram.cpp "jsk_perception/ColorHistogram" "color_h
 jsk_add_nodelet(src/background_substraction_nodelet.cpp "jsk_perception/BackgroundSubstraction" "background_substraction")
 jsk_add_nodelet(src/fisheye_to_panorama.cpp "jsk_perception/FisheyeToPanorama" "fisheye_to_panorama")
 # See https://github.com/drNoob13/fisheyeStitcher#pre-requisite
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++17" COMPILER_SUPPORTS_CXX17)
-if(COMPILER_SUPPORTS_CXX17 AND
+if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_GREATER "7.0" AND # >= 7.1
    "${OpenCV_VERSION}" VERSION_GREATER "2.9.9" AND # >= 3.0.0
    "${CMAKE_MAJOR_VERSION}" VERSION_GREATER "2") # >= 3
   jsk_add_nodelet(src/dual_fisheye_to_panorama.cpp "jsk_perception/DualFisheyeToPanorama" "dual_fisheye_to_panorama")

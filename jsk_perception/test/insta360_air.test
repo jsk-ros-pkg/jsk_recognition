@@ -5,6 +5,7 @@
 
   <include file="$(find jsk_perception)/sample/sample_insta360_air.launch">
     <arg name="publish_image" value="false" />
+    <arg name="create_panorama" value="false" />
     <arg name="gui" value="false" />
   </include>
 
@@ -16,14 +17,6 @@
       timeout_0: 10
       topic_1: /split_image/output/vertical00/horizontal01
       timeout_1: 10
-      topic_2: /dual_fisheye_to_panorama/output
-      timeout_2: 30
-      <!-- We do not test for rectified images -->
-      <!-- because rectification process depends on jsk_interactive_marker/camera_info_publisher -->
-      <!-- topic_2: /insta360/vertical00/horizontal00/image_rect_color -->
-      <!-- timeout_2: 10 -->
-      <!-- topic_3: /insta360/vertical00/horizontal01/image_rect_color -->
-      <!-- timeout_3: 10 -->
     </rosparam>
   </test>
 

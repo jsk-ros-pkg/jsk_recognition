@@ -10,6 +10,7 @@
   <arg name="height" default="1504" />
   <arg name="video_mode" default="mjpeg" />
   <arg name="frame_rate" default="30" />
+  <arg name="create_panorama" default="true" />
   <arg name="refine_align" default="false" />
   <arg name="save_unwarped" default="false" />
   <arg name="mls_map_path" default="$(find jsk_perception)/config/fisheye_stitcher_grid_xd_yd_3840x1920.yml.gz" />
@@ -49,7 +50,8 @@
     </rosparam>
   </node>
 
-  <include file="$(find jsk_perception)/sample/sample_dual_fisheye_to_panorama.launch">
+  <include if="$(arg create_panorama)"
+	   file="$(find jsk_perception)/sample/sample_dual_fisheye_to_panorama.launch">
     <arg name="gui" value="false" />
     <arg name="INPUT_IMAGE" value="/insta360/image_raw" />
     <arg name="fovd" value="210" />

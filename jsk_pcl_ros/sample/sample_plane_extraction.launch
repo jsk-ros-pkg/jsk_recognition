@@ -1,0 +1,22 @@
+<launch>
+  <arg name="input_cloud"
+       default="/multisense_local/organized_image_points2_color" />
+  <arg name="transformed_cloud"
+       default="transform_org_cloud/output" />
+  <arg name="filtered_cloud"
+       default="extract_indices/output" />
+  <arg name="manager" default="plane_extraction_manager" />
+
+  <arg name="rosbag_arg" default="$(find jsk_pcl_ros)/sample/data/plane_extraction.bag --clock --loop"/>
+  <rosparam param="/use_sim_time">true</rosparam>
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(arg rosbag_arg)" />
+
+  <include file="$(find jsk_pcl_ros)/launch/plane_extraction.launch">
+  </include>
+  
+  <node name="rviz"
+        pkg="rviz" type="rviz"
+        args="-d $(find jsk_pcl_ros)/sample/rviz/plane_extraction.rviz"/>
+</launch>

@@ -222,6 +222,7 @@ namespace jsk_pcl_ros
       std_msgs::ColorRGBA color = jsk_topic_tools::colorCategory20(i);
       color.a = 1.0;
       marker.colors.push_back(color);
+      marker.colors.push_back(color);
     }
 
     jsk_recognition_msgs::ModelCoefficientsArray ros_coefficients;

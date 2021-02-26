@@ -133,6 +133,12 @@ def main():
         md5='17ae9636f42403a20bf1b936c03bb35c',
         extract=False,
     )
+    download_data(
+        path='sample/data/plane_extraction.bag',
+        url='https://drive.google.com/uc?id=1doj3XMY0KYVAkIubmsi5-Oec4y0vvVP2',
+        md5='dddd2c6d7738ac19536a032aed8f9967',
+    )
+
 
 
 if __name__ == '__main__':

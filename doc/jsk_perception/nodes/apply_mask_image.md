@@ -9,6 +9,8 @@ Apply mask image to original image and visualize it. It's a utlity to visualize 
   Original image.
 * `~input/mask` (`sensor_msgs/Image`)
 
+* `~input/camera_info` (`sensor_msgs/CameraInfo`, optional)
+
   Mask image.
 ## Publishing Topic
 * `~output` (`sensor_msgs/Image`)
@@ -18,6 +20,10 @@ Apply mask image to original image and visualize it. It's a utlity to visualize 
 * `~output/mask` (`sensor_msgs/Image`)
 
   Clipped mask image. The image is clipped by bounding box of mask image.
+
+* `~output/camera_info` (`sensor_msgs/CameraInfo`)
+
+  camra_info whose roi is bounding box of mask image.
 
 ## Parameters
 * `~approximate_sync` (Bool, default: `false`)
@@ -49,6 +55,10 @@ Apply mask image to original image and visualize it. It's a utlity to visualize 
 * `~mask_black_to_transparent` (Bool, default: `false`)
 
   Change black region of mask image to transparent and publish RGBA8 image as `~output` if its' true.
+
+* `~use_rectified_image` (Bool, default: `true`)
+
+  Set camera_info.roi.do_rectify of the output to true if it's true.
 
 ## Sample
 

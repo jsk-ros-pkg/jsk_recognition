@@ -1,4 +1,7 @@
 <launch>
+
+  <!-- insta360 air settings -->
+  <arg name="publish_image" default="true" />
   <arg name="use_usb_cam" default="false" />
   <arg name="camera_name" default="insta360" />
   <arg name="vendor" default="0x2e1a" />
@@ -7,28 +10,61 @@
   <arg name="height" default="1504" />
   <arg name="video_mode" default="mjpeg" />
   <arg name="frame_rate" default="30" />
+  <arg name="create_panorama" default="true" />
+  <arg name="refine_align" default="false" />
+  <arg name="save_unwarped" default="false" />
+  <arg name="mls_map_path" default="$(find jsk_perception)/config/fisheye_stitcher_grid_xd_yd_3840x1920.yml.gz" />
   <arg name="gui" default="true" />
 
-  <include unless="$(arg use_usb_cam)" file="$(find jsk_perception)/launch/libuvc_camera.launch">
-    <arg name="camera_name" value="$(arg camera_name)" />
-    <arg name="vendor" value="$(arg vendor)" />
-    <arg name="product" value="$(arg product)" />
-    <arg name="height" value="$(arg height)" />
-    <arg name="width" value="$(arg width)" />
-    <arg name="video_mode" value="$(arg video_mode)" />
-    <arg name="frame_rate" value="$(arg frame_rate)" />
-    <arg name="gui" value="$(arg gui)" />
+  <!-- Publish camera image -->
+  <group if="$(arg publish_image)">
+    <!-- For melodic or newer -->
+    <include unless="$(arg use_usb_cam)" file="$(find jsk_perception)/launch/libuvc_camera.launch">
+      <arg name="camera_name" value="$(arg camera_name)" />
+      <arg name="vendor" value="$(arg vendor)" />
+      <arg name="product" value="$(arg product)" />
+      <arg name="height" value="$(arg height)" />
+      <arg name="width" value="$(arg width)" />
+      <arg name="video_mode" value="$(arg video_mode)" />
+      <arg name="frame_rate" value="$(arg frame_rate)" />
+      <arg name="gui" value="$(arg gui)" />
+    </include>
+    <!-- For kinetic or older -->
+    <include if="$(arg use_usb_cam)" file="$(find jsk_perception)/launch/usb_cam.launch">
+      <arg name="camera_name" value="$(arg camera_name)" />
+      <arg name="video_device" value="/dev/insta360" />
+      <arg name="height" value="$(arg height)" />
+      <arg name="width" value="$(arg width)" />
+      <arg name="video_mode" value="$(arg video_mode)" />
+      <arg name="frame_rate" value="$(arg frame_rate)" />
+      <arg name="gui" value="$(arg gui)" />
+    </include>
+  </group>
+
+  <!-- Split insta360 air image into 2 fisheye image -->
+  <node pkg="jsk_perception" name="split_image" type="split_image.py" output="screen">
+    <remap from="~input" to="/insta360/image_raw" />
+    <rosparam>
+      vertical_parts: 1
+      horizontal_parts: 2
+    </rosparam>
+  </node>
+
+  <include if="$(arg create_panorama)"
+	   file="$(find jsk_perception)/sample/sample_dual_fisheye_to_panorama.launch">
+    <arg name="gui" value="false" />
+    <arg name="INPUT_IMAGE" value="/insta360/image_raw" />
+    <arg name="fovd" value="210" />
+    <arg name="refine_align" value="$(arg refine_align)" />
+    <arg name="save_unwarped" value="$(arg save_unwarped)" />
+    <arg name="mls_map_path" value="$(arg mls_map_path)" />
   </include>
 
-  <!-- For indigo or older -->
-  <include if="$(arg use_usb_cam)" file="$(find jsk_perception)/launch/usb_cam.launch">
-    <arg name="camera_name" value="$(arg camera_name)" />
-    <arg name="video_device" value="/dev/insta360" />
-    <arg name="height" value="$(arg height)" />
-    <arg name="width" value="$(arg width)" />
-    <arg name="video_mode" value="$(arg video_mode)" />
-    <arg name="frame_rate" value="$(arg frame_rate)" />
-    <arg name="gui" value="$(arg gui)" />
-  </include>
+  <group if="$(arg gui)">
+    <node name="image_view"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="dual_fisheye_to_panorama/output"/>
+    </node>
+  </group>
 
 </launch>

@@ -5,6 +5,7 @@
   <arg name="width" />
   <arg name="video_mode" />
   <arg name="frame_rate" />
+  <arg name="brightness" />
   <arg name="gui" default="false" />
 
   <node pkg="usb_cam" type="usb_cam_node" name="$(arg camera_name)">
@@ -14,6 +15,7 @@
       image_width: $(arg width)
       pixel_format: $(arg video_mode)
       framerate: $(arg frame_rate)
+      brightness: $(arg brightness)
     </rosparam>
   </node>
 

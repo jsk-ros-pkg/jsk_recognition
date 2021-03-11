@@ -34,6 +34,7 @@ add_message_files(
   ModelCoefficientsArray.msg
   Object.msg
   ObjectArray.msg
+  PanoramaInfo.msg
   ParallelEdgeArray.msg
   ParallelEdge.msg
   PlotData.msg

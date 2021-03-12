@@ -40,7 +40,7 @@
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
-#include <sensor_msgs/PanoramaInfo.h>
+#include <jsk_recognition_msgs/PanoramaInfo.h>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
@@ -80,7 +80,7 @@ namespace jsk_perception
     ros::Publisher pub_panorama_image_;
     ros::Publisher pub_panorama_info_;
 
-    sensor_msgs::PanoramaInfo msg_panorama_info_;
+    jsk_recognition_msgs::PanoramaInfo msg_panorama_info_;
 
     bool   enb_lc_;
     bool   enb_ra_;

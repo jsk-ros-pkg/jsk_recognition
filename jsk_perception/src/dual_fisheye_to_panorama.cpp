@@ -38,7 +38,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
-#include <jsk_recognition_msgs/PanoramaInfo.h>
+#include <sensor_msgs/PanoramaInfo.h>
 #include <algorithm>
 #include <math.h>
 #include <boost/assign.hpp>
@@ -61,7 +61,7 @@ namespace jsk_perception
     ROS_INFO("save_unwarped: %7.3f", save_unwarped_?"true":"false");
     ROS_INFO("mls_map_path : %s", mls_map_path_.c_str());
     pub_panorama_image_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
-    pub_panorama_info_ = advertise<jsk_recognition_msgs::PanoramaInfo>(*pnh_, "panorama_info", 1);
+    pub_panorama_info_ = advertise<sensor_msgs::PanoramaInfo>(*pnh_, "panorama_info", 1);
 
     sticher_initialized_ = false;
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);

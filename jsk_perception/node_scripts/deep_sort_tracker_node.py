@@ -88,7 +88,7 @@ class DeepSortTrackerNode(object):
         scores = []
         rects = []
 
-        if len( rects_msg.rects ) != len( class_msg.label_proba ):
+        if len(rects_msg.rects) != len(class_msg.label_proba):
             rospy.logwarn('The sizes of RectArray and LabelArray does not match. Skipping...')
             return
 

@@ -12,7 +12,7 @@
     pkg="rosbag"
     name="rosbag_play"
     type="play"
-    args="$(find jsk_perception)/sample/data/20210315_1915.bag --clock --loop" />
+    args="$(find jsk_perception)/sample/data/sample_rect_array_in_panorama_to_bounding_box_array.bag --clock --loop" />
   <node
     pkg="image_transport"
     type="republish"

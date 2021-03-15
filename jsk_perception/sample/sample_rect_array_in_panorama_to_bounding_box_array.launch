@@ -1,0 +1,70 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <arg name="INPUT_PANORAMA_IMAGE" default="/dual_fisheye_to_panorama/output/quater" />
+  <arg name="INPUT_PANORAMA_INFO" default="/dual_fisheye_to_panorama/panorama_info" />
+  <arg name="INPUT_CLASS" default="/edgetpu_panorama_object_detector/output/class" />
+  <arg name="INPUT_RECTS" default="/edgetpu_panorama_object_detector/output/rects" />
+
+  <param name="/use_sim_time" value="true" />
+  <node
+    pkg="rosbag"
+    name="rosbag_play"
+    type="play"
+    args="$(find jsk_perception)/sample/data/20210315_1915.bag --clock --loop" />
+  <node
+    pkg="image_transport"
+    type="republish"
+    name="panorama_decompress"
+    args="compressed in:=/dual_fisheye_to_panorama/output raw out:=/dual_fisheye_to_panorama/output"
+    />
+  <node
+    pkg="nodelet"
+    type="nodelet"
+    name="panorama_image_resize"
+    args="standalone image_proc/resize">
+    <param name="scale_height" value="0.5" />
+    <param name="scale_width" value="0.5" />
+    <remap from="image" to="/dual_fisheye_to_panorama/output" />
+    <remap from="~image" to="/dual_fisheye_to_panorama/output/quater" />
+  </node>
+
+  <!-- visualize output of object detector -->
+  <node
+    pkg="jsk_perception"
+    type="draw_rects"
+    name="draw_rects"
+    >
+    <remap from="~input" to="$(arg INPUT_PANORAMA_IMAGE)" />
+    <remap from="~input/rects" to="$(arg INPUT_RECTS)" />
+    <remap from="~input/class" to="$(arg INPUT_CLASS)" />
+  </node>
+
+  <!-- rect_array_in_panorama_to_bounding_box_array -->
+  <node
+    pkg="jsk_perception"
+    type="rect_array_in_panorama_to_bounding_box_array.py"
+    name="rect_array_in_panorama_to_bounding_box_array"
+    >
+    <remap from="~panorama_image" to="$(arg INPUT_PANORAMA_IMAGE)" />
+    <remap from="~panorama_info" to="$(arg INPUT_PANORAMA_INFO)" />
+    <remap from="~input_class" to="$(arg INPUT_CLASS)" />
+    <remap from="~input_rects" to="$(arg INPUT_RECTS)" />
+    <rosparam>
+        frame_fixed: "camera"
+        dimensions_labels:
+            person: [0.5, 0.5, 1.5]
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node
+      pkg="rviz"
+      type="rviz"
+      name="$(anon rviz)"
+      args="-d $(find jsk_perception)/sample/config/sample_rect_array_in_panorama_to_bounding_box_array.rviz"
+    />
+  </group>
+
+</launch>

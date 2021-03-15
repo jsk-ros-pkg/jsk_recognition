@@ -18,7 +18,7 @@ import threading
 from sound_play.libsoundplay import SoundClient
 
 from sensor_msgs.msg import Image, PanoramaInfo
-from jsk_recognition_msgs.msg import RectArray
+from jsk_recognition_msgs.msg import RectArray, ClassificationResult
 from jsk_recognition_msgs.msg import BoundingBox, BoundingBoxArray
 from geometry_msgs.msg import Twist, PointStamped, PoseStamped
 
@@ -164,7 +164,7 @@ class RectArrayInPanoramaToBoundingBoxArray(object):
             msg_bbox.dimensions.x = self._dimensions_labels[label_name][0]
             msg_bbox.dimensions.y = self._dimensions_labels[label_name][1]
             msg_bbox.dimensions.z = self._dimensions_labels[label_name][2]
-            msg_bbox.dimensions.label = label_id
+            msg_bbox.label = label_id
 
             msg_bbox_array.boxes.append(msg_bbox)
 

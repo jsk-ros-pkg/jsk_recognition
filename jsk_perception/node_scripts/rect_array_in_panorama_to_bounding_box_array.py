@@ -30,8 +30,7 @@ def transformPanoramaPoint(x,
                            theta_max,
                            phi_min,
                            phi_max):
-    phi = phi_max + \
-            1.0 * (phi_min - phi_max) * x / image_width
+    phi = phi_max + 1.0 * (phi_min - phi_max) * x / image_width
     theta = theta_min + 1.0 * (theta_max - theta_min) * y / image_height
     return (theta, phi)
 
@@ -101,7 +100,8 @@ class RectArrayInPanoramaToBoundingBoxArray(object):
         time_current = msg_rects.header.stamp
 
         msg_bbox_array = BoundingBoxArray()
-        msg_bbox_array.header = msg_rects.header
+        msg_bbox_array.header.frame_id = self._frame_fixed
+        msg_bbox_array.header.stamp = msg_rects.header.stamp
 
         try:
             pykdl_transform_fixed_to_panorama = tf2_geometry_msgs.transform_to_kdl(

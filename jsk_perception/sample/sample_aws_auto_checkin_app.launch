@@ -1,0 +1,36 @@
+<launch>
+  <arg name="use_window" default="true" />
+
+  <include file="$(find jsk_perception)/sample/include/play_rosbag_people.xml" />
+
+  <!-- face_detection.cpp -->
+  <include file="$(find opencv_apps)/launch/face_detection.launch" >
+    <arg name="debug_view" value="$(arg use_window)" />
+    <arg name="image" value="/camera/rgb/image_raw" />
+  </include>
+
+  <node name="transfrom_to_face_roi"
+        pkg="topic_tools" type="transform"
+        output="log"
+        args="/face_detection/faces /camera/rgb/face_roi
+              sensor_msgs/CameraInfo
+              'sensor_msgs.msg.CameraInfo(header=m.header,
+              roi=sensor_msgs.msg.RegionOfInterest(
+              x_offset=m.faces[0].face.x-m.faces[0].face.width/2,
+              y_offset=m.faces[0].face.y-m.faces[0].face.height/2,
+              width=m.faces[0].face.width,height=m.faces[0].face.height))'
+              --import sensor_msgs std_msgs opencv_apps" />
+
+  <node name="aws_auto_checkin_app"
+        pkg="jsk_perception" type="aws_auto_checkin_app.py"
+        output="screen"
+        clear_params="true" >
+    <remap from="image" to="/camera/rgb/image_raw" />
+    <remap from="face_roi" to="/camera/rgb/face_roi" />
+    <rosparam subst_value="true">
+      use_window: $(arg use_window)
+      env_path: /tmp/env.json
+    </rosparam>
+  </node>
+
+</launch>

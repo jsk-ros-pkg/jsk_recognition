@@ -16,9 +16,9 @@
               sensor_msgs/CameraInfo
               'sensor_msgs.msg.CameraInfo(header=m.header,
               roi=sensor_msgs.msg.RegionOfInterest(
-              x_offset=m.faces[0].face.x-m.faces[0].face.width/2,
-              y_offset=m.faces[0].face.y-m.faces[0].face.height/2,
-              width=m.faces[0].face.width,height=m.faces[0].face.height))'
+              x_offset=m.faces[0].face.x-m.faces[0].face.width,
+              y_offset=m.faces[0].face.y-m.faces[0].face.height,
+              width=m.faces[0].face.width*2,height=m.faces[0].face.height*2))'
               --import sensor_msgs std_msgs opencv_apps" />
 
   <node name="aws_auto_checkin_app"

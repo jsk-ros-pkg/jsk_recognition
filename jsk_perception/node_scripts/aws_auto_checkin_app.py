@@ -12,7 +12,7 @@
 import rospy
 
 import message_filters
-from sensor_msgs.msg import CompressedImage, CameraInfo
+from sensor_msgs.msg import CompressedImage
 from opencv_apps.msg import FaceArrayStamped, Face, Rect
 
 import numpy as np
@@ -72,7 +72,7 @@ class AutoCheckIn(object):
         self.image_sub = message_filters.Subscriber('{}/compressed'.format(rospy.resolve_name('image')), CompressedImage)
         # we wan to use RegionOfInterest, but it message_filters requires
         # header information, so use CameraInfo
-        self.roi_sub = message_filters.Subscriber('face_roi', CameraInfo)
+        self.roi_sub = message_filters.Subscriber('face_roi', FaceArrayStamped)
         self.ts = message_filters.ApproximateTimeSynchronizer([self.image_sub, self.roi_sub], 10, 1, allow_headerless = True)
         self.ts.registerCallback(self.callback)
         rospy.loginfo("Waiting for {} and {}".format(self.image_sub.name, self.roi_sub.name))
@@ -127,24 +127,31 @@ class AutoCheckIn(object):
         if image.format != "rgb8; jpeg compressed bgr8":
             img = img[:, :, ::-1]
 
-        tx = roi.roi.x_offset
-        ty = roi.roi.y_offset
-        w =  roi.roi.width
-        h =  roi.roi.height
-
-        ret = self.findface(img[ty:ty+h,tx:tx+w])
-        if ret != None:
-            faces = FaceArrayStamped()
-            faces.header = image.header
-            faces.faces = [Face(face=Rect(tx + w/2, ty + h/2, w, h),
-                                label=ret['name'],
-                                confidence=ret['similarity'])]
-            self.name_pub.publish(faces)
-
         if self.use_window:
             img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             img_gray = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2BGR)
-            img_gray[ty:ty+h,tx:tx+w] = img[ty:ty+h,tx:tx+w]
+
+        faces = FaceArrayStamped()
+        faces.header = image.header
+        faces.faces = []
+        for face in roi.faces:
+            cx = int(face.face.x)
+            cy = int(face.face.y)
+            w =  int(face.face.width)
+            h =  int(face.face.height)
+
+            ret = self.findface(img[cy-h/2:cy+h/2,cx-w/2:cx+w/2])
+            if ret != None:
+                faces.faces.append(Face(face=Rect(cx, cy, w, h),
+                                        label=ret['name'],
+                                        confidence=ret['similarity']))
+
+            if self.use_window: # copy colored face rectangle to img_gray
+                img_gray[cy-h/2:cy+h/2,cx-h/2:cx+w/2] = img[cy-h/2:cy+h/2,cx-w/2:cx+w/2]
+
+        self.name_pub.publish(faces)
+
+        if self.use_window:
             cv2.imshow(image._connection_header['topic'], img_gray)
             cv2.waitKey(1)
 

@@ -18,22 +18,22 @@ Subscribing Topic
 
   Raw image.
 
-* ``~face_roi`` (``sensor_msgs/CameraInfo``)
+* ``~face_roi`` (``opencv_apps/FaceArrayStamped``)
 
   Rectangles on the face of input image. Use ROI value.
   ```
-        msg.roi.x_offset : X coordinates of the left top of the face image in the ~image input
-        msg.roi.y_offset : Y coordinates of the left top of the face image in the ~image input
-        msg.roi.width    : Width of the face image
-        msg.roi.height   : Height of the face iamge
+        msg.faces[].face.x      : X coordinates of the center of the face image in the ~image input
+        msg.faces[].face.y      : Y coordinates of the center of the face image in the ~image input
+        msg.faces[].face.width  : Width of the face image
+        msg.faces[].face.height : Height of the face iamge
   ```
 
 Publishing Topic
 ----------------
 
-* ``~face_name`` (``jsk_recognition_msgs/FaceArrayStamped``)
+* ``~face_name`` (``opencv_apps/FaceArrayStamped``)
 
-  Recognized face name.
+  Publish recognized face name as well as face image. The face.{x,y,width,height} corresponds to input `face_roi`, that means x, y is the center of face rectangle.
 
 Parameters
 ----------

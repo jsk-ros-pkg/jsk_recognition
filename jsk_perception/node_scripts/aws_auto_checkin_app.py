@@ -49,7 +49,8 @@ class AutoCheckIn(object):
             with open(env_path) as env_json:
                 env = json.load(env_json)
         except IOError:
-            print('Cannot open "{}".\nCopy "default.env.json" file as a new file called "env.json" and edit parameters in it.'.format(env_path))
+            rospy.logerr('Cannot open "{}".\nCopy "default.env.json" file as a new file called "env.json" and edit parameters in it.'.format(env_path))
+            raise
 
         try:
             self.API_ENDPOINT = env['ApiEndpoint']

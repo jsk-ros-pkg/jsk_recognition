@@ -136,10 +136,14 @@ class AutoCheckIn(object):
         faces.header = image.header
         faces.faces = []
         for face in roi.faces:
-            cx = int(face.face.x)
-            cy = int(face.face.y)
-            w =  int(face.face.width)
-            h =  int(face.face.height)
+            try:
+                cx = int(face.face.x)
+                cy = int(face.face.y)
+                w =  int(face.face.width)
+                h =  int(face.face.height)
+            except Exception as e:
+                rospy.logerr(e)
+                return
 
             ret = self.findface(img[cy-h/2:cy+h/2,cx-w/2:cx+w/2])
             if ret != None:

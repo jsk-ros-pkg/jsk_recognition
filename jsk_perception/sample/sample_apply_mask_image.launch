@@ -10,6 +10,7 @@
       publish_info: false
     </rosparam>
   </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <node name="mask_publisher"
         pkg="jsk_perception" type="image_publisher.py">
@@ -19,12 +20,13 @@
       publish_info: false
     </rosparam>
   </node>
+  <arg name="MASK_IMAGE" default="mask_publisher/output" />
 
   <node name="apply_mask_image"
         pkg="nodelet" type="nodelet"
         args="standalone jsk_perception/ApplyMaskImage">
-    <remap from="~input" to="image_publisher/output" />
-    <remap from="~input/mask" to="mask_publisher/output" />
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~input/mask" to="$(arg MASK_IMAGE)" />
     <rosparam>
       approximate_sync: true
     </rosparam>
@@ -33,11 +35,11 @@
   <group if="$(arg gui)">
     <node name="image_view0"
           pkg="image_view" type="image_view">
-      <remap from="image" to="image_publisher/output" />
+      <remap from="image" to="$(arg INPUT_IMAGE)" />
     </node>
     <node name="image_view1"
           pkg="image_view" type="image_view">
-      <remap from="image" to="mask_publisher/output" />
+      <remap from="image" to="$(arg MASK_IMAGE)" />
     </node>
     <node name="image_view2"
           pkg="image_view" type="image_view">

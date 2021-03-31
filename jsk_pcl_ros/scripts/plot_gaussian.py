@@ -7,7 +7,7 @@ import math
 import sys
 
 if len(sys.argv) != 3:
-    print "plot_gaussian.py mean variance"
+    print("plot_gaussian.py mean variance")
     sys.exit(1)
 mean = float(sys.argv[1])
 variance = float(sys.argv[2])

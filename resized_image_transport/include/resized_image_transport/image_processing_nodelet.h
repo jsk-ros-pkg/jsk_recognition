@@ -13,6 +13,9 @@
 #include <cv_bridge/cv_bridge.h>
 #include <std_srvs/Empty.h>
 #include <std_msgs/Empty.h>
+#if ( CV_MAJOR_VERSION >= 4)
+#include <opencv2/imgproc/imgproc_c.h>
+#endif
 
 #include <boost/thread/mutex.hpp>
 #include <boost/foreach.hpp>

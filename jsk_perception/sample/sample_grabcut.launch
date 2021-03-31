@@ -8,6 +8,7 @@
       publish_info: false
     </rosparam>
   </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <node name="sample_manager"
         pkg="nodelet" type="nodelet"
@@ -17,7 +18,7 @@
   <node name="mask_image_generator_foreground"
         pkg="nodelet" type="nodelet"
         args="load jsk_perception/MaskImageGenerator /sample_manager">
-    <remap from="~input" to="image_publisher/output"/>
+    <remap from="~input" to="$(arg INPUT_IMAGE)"/>
     <rosparam>
       offset_x: 290
       offset_y: 50
@@ -29,7 +30,7 @@
   <node name="mask_image_generator_background"
         pkg="nodelet" type="nodelet"
         args="load jsk_perception/MaskImageGenerator /sample_manager">
-    <remap from="~input" to="image_publisher/output"/>
+    <remap from="~input" to="$(arg INPUT_IMAGE)"/>
     <rosparam>
       offset_x: 400
       offset_y: 300
@@ -41,7 +42,7 @@
   <node name="grabcut"
         pkg="nodelet" type="nodelet"
         args="load jsk_perception/GrabCut /sample_manager">
-    <remap from="~input" to="image_publisher/output"/>
+    <remap from="~input" to="$(arg INPUT_IMAGE)"/>
     <remap from="~input/foreground" to="mask_image_generator_foreground/output"/>
     <remap from="~input/background" to="mask_image_generator_background/output"/>
     <rosparam>
@@ -53,7 +54,7 @@
     <node name="apply_mask_image_input_foreground"
           pkg="nodelet" type="nodelet"
           args="load jsk_perception/ApplyMaskImage /sample_manager">
-      <remap from="~input" to="image_publisher/output"/>
+      <remap from="~input" to="$(arg INPUT_IMAGE)"/>
       <remap from="~input/mask" to="mask_image_generator_foreground/output"/>
       <rosparam>
         clip: false
@@ -63,7 +64,7 @@
     <node name="apply_mask_image_input_background"
           pkg="nodelet" type="nodelet"
           args="load jsk_perception/ApplyMaskImage /sample_manager">
-      <remap from="~input" to="image_publisher/output"/>
+      <remap from="~input" to="$(arg INPUT_IMAGE)"/>
       <remap from="~input/mask" to="mask_image_generator_background/output"/>
       <rosparam>
         clip: false

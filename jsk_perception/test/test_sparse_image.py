@@ -25,8 +25,8 @@ class EdgeImagePublisher(object):
         try:
             self.edgemsg.header.stamp = rospy.Time.now()
             self.pub.publish(self.edgemsg)
-        except CvBridgeError, e:
-            print e
+        except CvBridgeError as e:
+            print(e)
 
     def _check_img_msg_diff(self, msg1, msg2):
         cnt = 0

@@ -133,15 +133,30 @@ And then, please build old realsense-ros from source.
 Sample Launch
 -------------
 
-You can launch a realsense driver launch and see images or point cloud from a device.
-
-- for D400 Series or L515
+You can launch a realsense driver for D400 Series and see images or point cloud from a device.
 
 .. code-block:: bash
 
-    roslaunch realsense2_camera rs_camera.launch
+    roslaunch realsense2_camera demo_pointcloud.launch
 
-- for legacy version
+    rviz -d $(find realsense2_camera)/rviz/pointcloud.rviz
+
+
+If you use L515, please run below commands (be careful that L515 RGB does not support 4:3 images such as 640x480)
+
+.. code-block:: bash
+
+    roslaunch realsense2_camera rs_rgbd.launch color_width:=1280 color_height:=720 depth_width:=1024 depth_height:=768
+
+
+If you use T265, you can launch a demo launch with
+
+.. code-block:: bash
+
+    roslaunch realsense2_camera demo_t265.launch
+
+
+For legacy devices
 
 .. code-block:: bash
 
@@ -153,13 +168,6 @@ You can launch a realsense driver launch and see images or point cloud from a de
 
   # another terminal
   rosrun rviz rviz
-
-
-If you use T265, you can launch a driver launch with
-
-.. code-block:: bash
-
-    roslaunch realsense2_camera rs_t265.launch
 
 
 Video

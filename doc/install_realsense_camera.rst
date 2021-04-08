@@ -5,23 +5,32 @@ Install RealSense camera
 -- Intel Realsense SDK 2.0 (librealsense): https://github.com/IntelRealSense/librealsense
 -- ROS Wrapper for Intel® RealSense™ Devices (realsense-ros): https://github.com/IntelRealSense/realsense-ros
 
-
 - Data Sheet of RealSense Products
 -- T265: https://www.intelrealsense.com/wp-content/uploads/2019/09/Intel_RealSense_Tracking_Camera_Datasheet_Rev004_release.pdf
 -- D400 Series: https://www.intelrealsense.com/wp-content/uploads/2020/06/Intel-RealSense-D400-Series-Datasheet-June-2020.pdf
 -- SR300: https://software.intel.com/sites/default/files/managed/0c/ec/realsense-sr300-product-datasheet-rev-1-0.pdf
 
-- Legacy Devices
--- If you use Legacy Devices (F200, R200, LR200 and ZR300), please use `old librealsense <https://github.com/IntelRealSense/librealsense/tree/v1.12.1>`_._
--- Data Sheet R200: https://software.intel.com/sites/default/files/managed/d7/a9/realsense-camera-r200-product-datasheet.pdf
+You need to install Intel® RealSense™ SDK 2.0 (`librealsense2`) and ROS Wrapper for Intel® RealSense™ Devices (`realsense-ros`).
 
-Installation of librealsense
-----------------------------
+And there are 3 ways to install librealsense.
 
-- Ubuntu 16.04 and 18.04
+- Method 1: Install deb packages of `librealsense2` from Intel Repository and build `realsense-ros` from source.
+- Method 2: Install deb packages of `librealsense2` from ROS Repository and install deb packages of `realsense-ros` from ROS Repository.
+- Method 3: Build `librealsense2` and `realsense-ros` from source.
 
-Intel® RealSense™ SDK 2.0 can be installed with apt for ubuntu 16.04 and 18.04.
-Please see `this page <https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md>`_ for more details.
+Basically method 1 is most stable. Please consider which case you use depend on your use case.
+
+If you want to use 14.04 or older ubuntu versions, Intel® RealSense™ SDK 2.0 is not released as deb packages. So you need to build them from source.
+In addition, librealsense works stably on 4.4.xx kernels. So you may need to upgrade your ubuntu kernel
+Please see `this page <https://github.com/IntelRealSense/librealsense/blob/master/doc/installation.md>`_ for more details about manual installation.
+
+And if you want to use legacy devices like (F200, R200, LR200 and ZR300), please use `old librealsense <https://github.com/IntelRealSense/librealsense/tree/v1.12.1>`_._
+
+Method 1: Install `librealsense2` from Intel repo and build realsense-ros from source
+----------------------------------------------------------------------------------
+
+Intel® RealSense™ SDK 2.0 is released as deb packages. So you can install it with `apt` command.
+Please see `this page <https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md>`_ and `this page <https://github.com/IntelRealSense/realsense-ros#method-2-the-realsense-distribution>`_ for more details.
 
 .. code-block:: bash
 
@@ -30,7 +39,39 @@ Please see `this page <https://github.com/IntelRealSense/librealsense/blob/maste
   sudo apt update
   sudo apt-get install librealsense2-dkms librealsense2-utils librealsense2-dev librealsense2-dbg
 
-- Ubuntu 14.04
+and please build realsense-ros from source
+
+.. code-block:: bash
+
+  mkdir -p ~/catkin_ws/src
+  cd catkin_ws/
+  catkin init
+  cd src/
+  git clone https://github.com/IntelRealSense/realsense-ros.git
+  catkin build
+
+
+Method 2: Install `librealsense2` and `realsense-ros` from ROS Repository
+---------------------------------------------------------------------
+
+librealsense2 and realsense-ros are also released as debian packages from ROS repository.
+Please see `this page <https://github.com/IntelRealSense/realsense-ros#method-1-the-ros-distribution>`_ for more details.
+
+.. code-block:: bash
+
+  sudo apt install ros-$ROS_DISTRO-librealsense2 ros-$ROS_DISTRO-realsense2-camera ros-$ROS_DISTRO-realsense2-description
+
+And these packages lack `a udev file <https://github.com/IntelRealSense/librealsense/blob/master/config/99-realsense-libusb.rules>`_ for realsense devices. So you need to install it manually.
+Please see `this issue <https://github.com/IntelRealSense/realsense-ros/issues/1426>`_ for more details about this issue.
+
+.. code-block:: bash
+
+  wget https://github.com/IntelRealSense/librealsense/raw/master/config/99-realsense-libusb.rules
+  sudo cp 99-realsense-libusb.rules /etc/udev/rules.d/
+
+
+Installation of librealsense for ubuntu 14.04 or older (Old documentation)
+--------------------------------------------------------------------------
 
 librealsense 2.0 or above is not distributed with debian package for ubuntu 14.04. so you have to build librealsense from source.
 In addition, librealsense works stably on 4.4.xx kernels. So you need to upgrade your ubuntu kernel
@@ -76,20 +117,7 @@ Please see `this page <https://github.com/IntelRealSense/librealsense/blob/maste
   #
   # modprobe: ERROR: could not insert 'uvcvideo'
 
-
-Installation of realsense-ros
------
-
-- Ubuntu 16.04 and 18.04
-
-realsense-ros is available as a debian package. please see `this page <https://github.com/IntelRealSense/realsense-ros>`_ for more details.
-
-.. code-block:: bash
-
-  sudo apt install ros-$ROS_DISTRO-realsense2-camera ros-$ROS_DISTRO-realsense2-description
-
-
-- Ubuntu 14.04
+And then, please build old realsense-ros from source.
 
 .. code-block:: bash
 
@@ -101,20 +129,17 @@ realsense-ros is available as a debian package. please see `this page <https://g
   rosdep install --skip-keys=librealsense --ignore-src --from-path -i src -y -r
   catkin build
 
+
 Sample Launch
 -------------
 
-- for D400 Series
+You can launch a realsense driver launch and see images or point cloud from a device.
+
+- for D400 Series or L515
 
 .. code-block:: bash
 
     roslaunch realsense2_camera rs_camera.launch
-
-- for T265
-
-.. code-block:: bash
-
-    roslaunch realsense2_camera rs_t265.launch
 
 - for legacy version
 
@@ -128,6 +153,13 @@ Sample Launch
 
   # another terminal
   rosrun rviz rviz
+
+
+If you use T265, you can launch a driver launch with
+
+.. code-block:: bash
+
+    roslaunch realsense2_camera rs_t265.launch
 
 
 Video

@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="device" default="0" /> <!-- 0: cpu; 1: gpu -->
+
+  <param name="/use_sim_time" value="true" />
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_perception)/sample/data/2016-10-15-23-21-42_moving_bottle.bag --clock --loop">
+  </node>
+
+  <node name="topic_transforms"
+        pkg="topic_tools" type="transform"
+        args="/camera/rgb/image_rect_color/screenrectangle /init_rect jsk_recognition_msgs/RectArray 'jsk_recognition_msgs.msg.RectArray(header=m.header, rects=[jsk_recognition_msgs.msg.Rect(x=m.polygon.points[0].x, y =m.polygon.points[0].y, width=m.polygon.points[1].x-m.polygon.points[0].x, height=m.polygon.points[1].y-m.polygon.points[0].y)])' --import jsk_recognition_msgs">
+  </node>
+
+  <include file="$(find jsk_perception)/launch/trtr_tracker.launch">
+    <arg name="image_topic" value="/camera/rgb/image_rect_color" />
+    <arg name="init_rect_topic" value="/init_rect" />
+    <arg name="device" value="$(arg device)"/>
+  </include>
+
+  <node name="image_view" pkg="image_view" type="image_view">
+    <remap from="image" to="/trtr_tracker/output/vis" />
+  </node>
+
+</launch>

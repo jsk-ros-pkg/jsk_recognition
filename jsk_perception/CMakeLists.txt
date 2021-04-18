@@ -520,6 +520,13 @@ install(TARGETS
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+# external library (ONNXRT)
+if(ONNXRT_FOUND)
+  get_filename_component(ONNXRT_LIBRARY_REALPATH "${ONNXRT_LIBRARY}" REALPATH)
+  install(FILES ${ONNXRT_LIBRARY_REALPATH}
+    DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
+endif()
+
 install(DIRECTORY config euslisp launch node_scripts plugins sample test
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   USE_SOURCE_PERMISSIONS
@@ -538,7 +545,7 @@ install(PROGRAMS scripts/setup_opencv_learning_data.sh
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/scripts/
 )
 
-file(GLOB SCRIPT_PROGRAMS scripts/*.py)
+file(GLOB SCRIPT_PROGRAMS scripts/*.py scripts/*.sh)
 catkin_install_python(
   PROGRAMS ${SCRIPT_PROGRAMS}
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/scripts/

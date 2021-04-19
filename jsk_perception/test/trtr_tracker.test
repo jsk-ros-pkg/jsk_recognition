@@ -5,8 +5,10 @@
   <arg name="gt_file" default="$(find jsk_perception)/test_data/KiteSurf/groundtruth_rect.txt" />
 
   <include file="$(find jsk_perception)/launch/trtr_tracker.launch">
-    <arg name="image_topic" value="/benchmark_test/test_img" />
-    <arg name="init_rect_topic" value="/benchmark_test/init_rect" />
+    <arg name="input_image_topic" value="/benchmark_test/test_img" />
+    <arg name="input_rect_topic" value="/benchmark_test/init_rect" />
+    <arg name="output_image_topic" value="/trtr/output_image" />
+    <arg name="output_rect_topic" value="/trtr/output_rect" />
     <arg name="device" value="$(arg device)"/>
   </include>
 
@@ -17,11 +19,11 @@
       gt_file: $(arg gt_file)
       iou_thresh: 0.7
     </rosparam>
-    <remap from = "~output_rect" to = "/trtr_tracker/output/rect" />
+    <remap from = "~output_rect" to = "/trtr/output_rect" />
   </test>
 
   <node name="image_view" pkg="image_view" type="image_view" unless = "$(arg headless)">
-    <remap from="image" to="/trtr_tracker/output/vis" />
+    <remap from="image" to="/trtr/output_image" />
   </node>
 
 </launch>

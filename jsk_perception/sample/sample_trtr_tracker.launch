@@ -14,13 +14,14 @@
   </node>
 
   <include file="$(find jsk_perception)/launch/trtr_tracker.launch">
-    <arg name="image_topic" value="/camera/rgb/image_rect_color" />
-    <arg name="init_rect_topic" value="/init_rect" />
+    <arg name="input_image_topic" value="/camera/rgb/image_rect_color" />
+    <arg name="input_rect_topic" value="/init_rect" />
+    <arg name="output_image_topic" value="/trtr/output_image" />
     <arg name="device" value="$(arg device)"/>
   </include>
 
   <node name="image_view" pkg="image_view" type="image_view">
-    <remap from="image" to="/trtr_tracker/output/vis" />
+    <remap from="image" to="/trtr/output_image" />
   </node>
 
 </launch>

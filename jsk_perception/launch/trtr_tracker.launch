@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="image_topic" default="image" />
-  <arg name="init_rect_topic" default="rect" />
+  <arg name="input_image_topic" default="trtr/input_image" />
+  <arg name="input_rect_topic" default="trtr/input_rect" />
+  <arg name="output_image_topic" default="trtr/output_image" />
+  <arg name="output_rect_topic" default="trtr/output/rect" />
 
   <arg name="device" default="1" /> <!-- 0: cpu; 1: gpu -->
   <arg name="fp16" default="True" />
@@ -17,8 +19,10 @@
 
   <node pkg="nodelet" type="nodelet" name="trtr_tracker"
         args="standalone jsk_perception/TrTrTrackerRos tracker_nodelet" output="screen">
-    <remap from="~input" to="$(arg image_topic)" />
-    <remap from="~input/rect" to="$(arg init_rect_topic)" />
+    <remap from="~input" to="$(arg input_image_topic)" />
+    <remap from="~input/rect" to="$(arg input_rect_topic)" />
+    <remap from="~output/vis" to="$(arg output_image_topic)" />
+    <remap from="~output/rect" to="$(arg output_rect_topic)" />
     <param name="encoder_model_file" value="$(arg encoder_model_file)"/>
     <param name="decoder_model_file" value="$(arg decoder_model_file)"/>
     <param name="device" value="$(arg device)" />

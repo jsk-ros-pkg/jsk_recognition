@@ -100,13 +100,12 @@ class TSMActionRecognitionNode(object):
         super(TSMActionRecognitionNode, self).__init__()
         self.bridge = CvBridge()
 
-        model = MobileNetV2(n_class=27)
+        self.class_names = rospy.get_param('~class_names')
+        model = MobileNetV2(n_class=len(self.class_names))
         pretrained_model = rospy.get_param('~pretrained_model')
         model.load_state_dict(torch.load(pretrained_model))
         model.eval()
         self.model = model
-
-        self.class_names = rospy.get_param('~class_names', None)
 
         self.transform = get_transform()
 

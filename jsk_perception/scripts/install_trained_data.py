@@ -295,6 +295,20 @@ def main():
         md5='f7905e49044a18c15ebdaf6dc15b446b',
     )
 
+    # node_scripts/tsm_action_recognition_node.py
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/tsm-action-recognition-for-jester.pth',
+        url='https://drive.google.com/uc?id=1kj0wAW5jQoHrCOnJHLrX4X-crwkoBGJK',
+        md5='83f12f6d71245637db3ad89feee140e0',
+    )
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/tsm_action_recognition_jester_classnames.yaml',
+        url='https://drive.google.com/uc?id=1e-kGHcToYYeprgEYTMh6JThOMaC4OMBd',
+        md5='764bb8edaf7eb0c0a8b94d735bce161b',
+    )
+
 
 if __name__ == '__main__':
     main()

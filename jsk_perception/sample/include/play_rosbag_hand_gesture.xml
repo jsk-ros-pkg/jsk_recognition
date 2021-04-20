@@ -1,0 +1,19 @@
+<launch>
+
+  <param name="/use_sim_time" value="true" />
+
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_perception)/sample/data/2021-04-20-20-48-47_hand_gesture.bag --loop --clock">
+  </node>
+
+  <group ns="usb_cam_node" >
+    <node name="republish"
+          pkg="image_transport" type="republish"
+          args="compressed raw">
+      <remap from="in" to="image_raw"/>
+      <remap from="out" to="image_raw"/>
+    </node>
+  </group>
+
+</launch>

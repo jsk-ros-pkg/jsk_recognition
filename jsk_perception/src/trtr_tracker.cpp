@@ -321,6 +321,7 @@ void Base::track(const cv::Mat& img)
 
   // 2. lpf for size
   float lpf = best_score * size_lpf_factor_;
+  if (size_lpf_factor_ == 0) lpf = 1.0;
   float w = w_ * (1 - lpf) + target_wh[0] * lpf;
   float h = h_ * (1 - lpf) + target_wh[1] * lpf;
 

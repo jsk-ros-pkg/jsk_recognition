@@ -75,6 +75,16 @@ following the [installation tutorial](https://developer.nvidia.com/tensorrt-gett
   Whether to use approximate for input topics.
 
 
+* `~cosine_window_factor` (Double, default: `0.4`)
+
+  Cosine window is applied to the raw heatmap to suppress the large displacement. The detail can be found in [here](https://openaccess.thecvf.com/content_cvpr_2018/papers/Li_High_Performance_Visual_CVPR_2018_paper.pdf). `cosine_window_factor` is the weight of cosine window: `post_heatmap = (1 - cosine_window_factor) * raw_heatmap + cosine_window_factor * cosine_window`.
+
+* `~size_lpf_factor` (Double, default: `0.8`)
+
+  Low-pass-filter to suppress the large change in the target bouding box size and ratio: `bbox_size(t) = (1 - size_lpf_factor) * bbox_size(t-1) + size_lpf_factor * raw_bbox_size(t)`
+ If `size_lpf_factor == 0`, no lpf is applied, thus, `bbox_size(t) = raw_bbox_size(t)`
+
+
 ## Sample
 
 ```bash

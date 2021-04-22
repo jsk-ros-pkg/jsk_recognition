@@ -1,5 +1,5 @@
 # TrTr (Tracker with Transformer)
-![](images/trtr_petbottle_track_result.gif) ![](images/trtr_kitesurf_track_result.gif)
+![](images/trtr_petbottle_track_result.gif) ![](images/trtr_kitesurf_track_result.gif) ![](images/insta360_air_human_track_4x.gif)
 
 
 **TrTr** (Tracker with Transformer)  is a visual tracker method based on Transformer attention mechanism.

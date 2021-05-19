@@ -30,6 +30,17 @@ Publishing Topic
 
   Float image which describes objectness.
 
+Parameters
+----------
+
+* ``~score_threshold`` (Double, default: ``0.0``)
+
+  Score threshold for objecness values. Max value is ``1.0``.
+
+* ``~max_num`` (Int, default: ``-1.0``)
+
+  Maximum number of returning bounding boxes. ``-1.0`` means returning all bounding boxes.
+
 
 Sample
 ------

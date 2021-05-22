@@ -49,35 +49,35 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
     ]
     # The order of keypoints is predefined in SRHandNet model
     # Following the order of cooresponding 21-channel feature maps
-    index2handname = ["wrist",
-                      "thumb_mcp",
-                      "thumb_pip",
-                      "thumb_dip",
-                      "thumb_tip",
-                      "index_mcp",
-                      "index_pip",
-                      "index_dip",
-                      "index_tip",
-                      "middle_mcp",
-                      "middle_pip",
-                      "middle_dip",
-                      "middle_tip",
-                      "ring_mcp",
-                      "ring_pip",
-                      "ring_dip",
-                      "ring_tip",
-                      "little_mcp",
-                      "little_pip",
-                      "little_dip",
-                      "little_tip"]
+    INDEX2FINGERNAME = ["wrist",
+                        "thumb_mcp",
+                        "thumb_pip",
+                        "thumb_dip",
+                        "thumb_tip",
+                        "index_mcp",
+                        "index_pip",
+                        "index_dip",
+                        "index_tip",
+                        "middle_mcp",
+                        "middle_pip",
+                        "middle_dip",
+                        "middle_tip",
+                        "ring_mcp",
+                        "ring_pip",
+                        "ring_dip",
+                        "ring_tip",
+                        "little_mcp",
+                        "little_pip",
+                        "little_dip",
+                        "little_tip"]
 
     def __init__(self):
         super(self.__class__, self).__init__()
         self.backend = rospy.get_param('~backend', 'torch')
         self.gpu = rospy.get_param('~gpu', 0)  # -1 is cpu mode
         #default tensor size
-        self.train_image_height = rospy.get_param('~height', 256)
-        self.train_image_width  = rospy.get_param('~width',  256)
+        self.TRAIN_IMAGE_HEIGHT = 256
+        self.TRAIN_IMAGE_WIDTH  = 256
         self.label_bbox_min  = rospy.get_param('~thre1', 0.3)
         self.label_hand_min = rospy.get_param('~thre2', 0.2)
         # detection fail if more than ~thre3 keypoints missed
@@ -106,12 +106,9 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
         #    https://www.yangangwang.com/papers/WANG-SRH-2019-07.html
         # or using _get_srhand_pretrained_model() from:
         #    https://drive.google.com/uc?id=16Jg8HhaFaThzFSbWbEixMLE3SAnOzvzL
-        '''
+        print('Loading model')
         model_file = rospy.get_param('~model_file', \
                                      self._get_srhand_pretrained_model())
-        '''
-        print('Loading model')
-        model_file = rospy.get_param('~model_file')
         
         if self.gpu >= 0 and torch.cuda.is_available():
             self.model = torch.jit.load(model_file, \
@@ -145,32 +142,43 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
     def _cb(self, img_msg):
         br = cv_bridge.CvBridge()
         img = br.imgmsg_to_cv2(img_msg, desired_encoding='rgb8')
-        hands_joint_positions = self.hand_pose_estimate(img)
+        hands_points, hands_point_scores, hands_score = \
+                                          self.hand_pose_estimate(img)
 
         hand_pose_msg = self._create_2d_hand_pose_array_msgs(
-            hands_joint_positions,
+            hands_points,
+            hands_point_scores,
+            hands_score,
             img_msg.header)
 
         self.hand_pose_pub.publish(hand_pose_msg)
 
     # create hand_pose_msg consists of 
+    #        hand_score got from bounding box feature map
     #        21 keypoint positions(set to 0,0,0 if not detected)
     #        corresponding joint names
+    #        corresponding scores got from feature map
     # for each detected hand 
-    def _create_2d_hand_pose_array_msgs(self, hands_joint_positions, header):
+    def _create_2d_hand_pose_array_msgs(self, hands_points, \
+                                        hands_point_scores, \
+                                        hands_score, \
+                                        header):
         hand_pose_msg = HandPoseArray(header=header)
-        for hand_joint_positions in hands_joint_positions:
+        for hand_points, point_scores, hand_score in \
+              zip(hands_points, hands_point_scores, hands_score):
             pose_msg = HandPose()
-            index = -1
-            for joint_pos in hand_joint_positions:
-                index += 1
-                pose_msg.hand_names.append(self.index2handname[index])
+            pose_msg.hand_score = hand_score
+            for index, joint_pos in enumerate(hand_points):
+                pose_msg.finger_names.append(self.INDEX2FINGERNAME[index])
+                pose_msg.point_scores.append(point_scores[index])
                 if (len(joint_pos) == 2):
                     pose_msg.poses.append(Pose(position=Point(x=joint_pos[0],
                                                               y=joint_pos[1],
-                                                              z=0)))
+                                                              z=0.)))
                 else:
-                    pose_msg.poses.append(Pose(position=Point(x=0, y=0, z=0)))
+                    pose_msg.poses.append(Pose(position=Point(x=0., \
+                                                              y=0., \
+                                                              z=0.)))
             hand_pose_msg.poses.append(pose_msg)
         return hand_pose_msg
 
@@ -180,19 +188,20 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
         raise ValueError('Unsupported backend: {0}'.format(self.backend))
 
     def _hand_pose_estimate_torch_backend(self, frame):
-        many_keypoints, hand_rects = self.pyramid_inference(frame)
+        hands_points, hands_rect, hands_point_scores, hands_score = \
+                                  self.pyramid_inference(frame)
 
         if self.visualize:
             br = cv_bridge.CvBridge()
-            vis_img = self._draw_joints(frame, many_keypoints, hand_rects)
+            vis_img = self._draw_joints(frame, hands_points, hands_rect)
             vis_msg = br.cv2_to_imgmsg(vis_img, encoding='rgb8')
             self.image_pub.publish(vis_msg)
 
-        return many_keypoints
+        return hands_points, hands_point_scores, hands_score
 
-    def _draw_joints(self, frame, many_keypoints, hand_rects):
-        for rect_idx, points in enumerate(many_keypoints):
-            rect = hand_rects[rect_idx]
+    def _draw_joints(self, frame, hands_points, hands_rect):
+        for rect_idx, points in enumerate(hands_points):
+            rect = hands_rect[rect_idx]
             if rect is None:
                 continue
             #bounding boxes
@@ -215,7 +224,7 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
                                          points[cnt+1], (0, 255, 0), 2)
 
             per = f'{int(2100-missing*100)//21}% '
-            text_pos = hand_rects[rect_idx][0:2]
+            text_pos = hands_rect[rect_idx][0:2]
             text_pos = (text_pos[0], text_pos[1]+5)
             cv2.putText(frame, per, text_pos, 1, 3, (0, 0, 255), 3)
         return frame
@@ -230,10 +239,10 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
     
     # resize src_img to fit the size of tensor
     def transform_net_input(self, tensor, src_img, \
-                            hand_rect=None, tensor_idx=0):
+                            hands_rect=None, tensor_idx=0):
         img = src_img.copy()
-        if hand_rect is not None:
-            l, t, r, b = hand_rect[tensor_idx]
+        if hands_rect is not None:
+            l, t, r, b = hands_rect[tensor_idx]
             img = img[t:b,l:r]
 
         rows, cols = len(img), len(img[0])
@@ -267,12 +276,12 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
     
     def detect_bbox(self, input_image):
         if self.gpu >= 0 and torch.cuda.is_available():
-            tensor = torch.zeros([1, 3, self.train_image_height, \
-                                        self.train_image_width], \
+            tensor = torch.zeros([1, 3, self.TRAIN_IMAGE_HEIGHT, \
+                                        self.TRAIN_IMAGE_WIDTH], \
                                  device=torch.device('cuda'))
         else:
-             tensor = torch.zeros([1, 3, self.train_image_height, \
-                                        self.train_image_width], \
+             tensor = torch.zeros([1, 3, self.TRAIN_IMAGE_HEIGHT, \
+                                         self.TRAIN_IMAGE_WIDTH], \
                                  device=torch.device('cpu'))           
         rows, cols, _ = input_image.shape
         # transform the input data
@@ -285,7 +294,7 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
         #     centre position of bounding box
         #     width of bounding box
         #     height of bounding box
-        ratio_net_downsample = self.train_image_height / float(heatmap.shape[2])
+        ratio_net_downsample = self.TRAIN_IMAGE_HEIGHT / float(heatmap.shape[2])
         rect_map_idx = heatmap.shape[1] - 3
         rectmap = []
         for i in range(3):
@@ -293,8 +302,8 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
 
         # centre position of bounding boxes
         locations = self.nmslocation(rectmap[0], self.label_bbox_min)
-        hand_rect = []
-
+        hands_rect = []
+        hands_score = []
         for loc_val, points in locations:
             pos_x, pos_y = points
             ratio_width = ratio_height = pixelcount = 0
@@ -313,9 +322,9 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
                 pos_x *= ratio  # row
                 pos_y *= ratio  # column
 
-                rect_w = ratio_width  * self.train_image_width \
+                rect_w = ratio_width  * self.TRAIN_IMAGE_WIDTH \
                                       / ratio_input_to_net
-                rect_h = ratio_height * self.train_image_height \
+                rect_h = ratio_height * self.TRAIN_IMAGE_HEIGHT \
                                       / ratio_input_to_net
                 # left-top corner position
                 l_t = (max(int(pos_x - rect_h/2), 0), \
@@ -324,72 +333,79 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
                 r_b = (min(int(pos_x + rect_h/2), rows - 1), \
                        min(int(pos_y + rect_w/2), cols - 1))
 
-                hand_rect.append((l_t[1], l_t[0], r_b[1], r_b[0]))
+                hands_rect.append((l_t[1], l_t[0], r_b[1], r_b[0]))
+                hands_score.append(loc_val)
+        return hands_rect, hands_score
 
-        return hand_rect
+    def detect_hand(self, input_image, hands_rect):
+        if len(hands_rect) == 0:
+            return [], []
 
-    def detect_hand(self, input_image, hand_rect):
-        if len(hand_rect) == 0:
-            return []
-
-        ratio_input_to_net = [None]*len(hand_rect)
+        ratio_input_to_net = [None]*len(hands_rect)
 
         if self.gpu >= 0 and torch.cuda.is_available():
-            tensor = torch.zeros([len(hand_rect), 3, self.train_image_height, \
-                                                     self.train_image_width], \
+            tensor = torch.zeros([len(hands_rect), 3, self.TRAIN_IMAGE_HEIGHT, \
+                                                      self.TRAIN_IMAGE_WIDTH], \
                                  device=torch.device('cuda'))
         else:
-            tensor = torch.zeros([len(hand_rect), 3, self.train_image_height, \
-                                                     self.train_image_width], \
+            tensor = torch.zeros([len(hands_rect), 3, self.TRAIN_IMAGE_HEIGHT, \
+                                                      self.TRAIN_IMAGE_WIDTH], \
                                  device=torch.device('cpu')) 
         
         # extract RoI of the input_image and resize to fit the tensor size
-        for i in range(len(hand_rect)):
+        for i in range(len(hands_rect)):
             ratio_input_to_net[i] = self.transform_net_input(tensor, \
-                                             input_image, hand_rect, i)
+                                             input_image, hands_rect, i)
 
         with torch.no_grad():
             heatmaps = self.model.forward(tensor)[3]
 
-        ratio_net_downsample = self.train_image_height / heatmaps.size()[2]
+        ratio_net_downsample = self.TRAIN_IMAGE_HEIGHT / heatmaps.size()[2]
 
         # joint position 
-        hand_points = []
-        for rect_idx in range(len(hand_rect)):
-            total_points = [[] for i in range(21)]
-            x, y, _, _ = hand_rect[rect_idx]
+        hands_points = []
+        hands_point_scores = []
+        for rect_idx in range(len(hands_rect)):
+            hand_points  = [[] for i in range(21)]
+            point_scores = [0. for i in range(21)]
+            x, y, _, _ = hands_rect[rect_idx]
             ratio = ratio_net_downsample / ratio_input_to_net[rect_idx]
             for i in range(21):
                 heatmap = heatmaps[rect_idx][i].cpu().detach().numpy()
                 points = self.nmslocation(heatmap, self.label_hand_min)
                 if len(points):
-                    _, point = points[0]
-                    total_points[i] = (int(point[1]*ratio)+x, \
-                                       int(point[0]*ratio)+y)
-            hand_points.append(total_points)
-        return hand_points
+                    score, point = points[0]
+                    hand_points[i] = (int(point[1]*ratio)+x, \
+                                      int(point[0]*ratio)+y)
+                    point_scores[i] = score
+            hands_points.append(hand_points)
+            hands_point_scores.append(point_scores)
+        return hands_points, hands_point_scores
 
     def pyramid_inference(self, input_image):
         # Full Cycle Detection
         # Region of Interest
-        hand_rects = self.detect_bbox(input_image)
+        hands_rect, hands_score = self.detect_bbox(input_image)
 
-        if len(hand_rects) == 0:
-            return [], []
+        if len(hands_rect) == 0:
+            return [], [], [], []
 
         # joints detection
-        many_keypoints = self.detect_hand(input_image, hand_rects)
+        hands_points, hands_point_scores = self.detect_hand(input_image, \
+                                                            hands_rect)
 
-        for i in range(len(hand_rects)-1, -1, -1):
+        for i in range(len(hands_rect)-1, -1, -1):
             missing_points = 0
             for j in range(21):
-                if len(many_keypoints[i][j]) != 2:
+                if len(hands_points[i][j]) != 2:
                     missing_points += 1
             if missing_points > self.missing_point:
-                hand_rects.pop(i)
-                many_keypoints.pop(i)
+                hands_rect.pop(i)
+                hands_score.pop(i)
+                hands_points.pop(i)
+                hands_point_scores.pop(i)
 
-        return many_keypoints, hand_rects
+        return hands_points, hands_rect, hands_point_scores, hands_score
 
 
 if __name__ == '__main__':

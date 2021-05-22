@@ -74,7 +74,7 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
     def __init__(self):
         super(self.__class__, self).__init__()
         self.backend = rospy.get_param('~backend', 'torch')
-        self.gpu = rospy.get_param('~gpu', 0)  # -1 is cpu mode
+        self.gpu = rospy.get_param('~gpu', -1)  # -1 is cpu mode
         #default tensor size
         self.TRAIN_IMAGE_HEIGHT = 256
         self.TRAIN_IMAGE_WIDTH  = 256
@@ -85,7 +85,7 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
         # model loading
         self._load_model()
         # image subscribe
-        self.subscribe()
+        # self.subscribe()
         # topic advertise
         self.image_pub = self.advertise('~output', Image, queue_size=1)
         self.hand_pose_pub = self.advertise('~pose', HandPoseArray, \

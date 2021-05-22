@@ -173,6 +173,7 @@ namespace jsk_pcl_ros
     bool force_to_flip_z_axis_;
     bool publish_clouds_;
     bool publish_tf_;
+    bool _publish_tf_;
     bool align_boxes_;
     bool align_boxes_with_plane_;
     std::string target_frame_id_;

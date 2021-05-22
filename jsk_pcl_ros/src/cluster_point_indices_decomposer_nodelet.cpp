@@ -427,7 +427,9 @@ namespace jsk_pcl_ros
    jsk_recognition_msgs::BoundingBox& bounding_box)
   {
     bounding_box.header = header;
+    _publish_tf_ = publish_tf_;
     if (segmented_cloud->points.size() == 0) {
+      _publish_tf_ = false;
       NODELET_WARN("segmented cloud size is zero");
       return true;
     }
@@ -709,7 +711,9 @@ namespace jsk_pcl_ros
       pcl_msgs::PointIndices out_indices_msg;
       out_indices_msg.header = input->header;
       out_indices_msg.indices = *(converted_indices[argsort[i]]);
-      out_cluster_indices.cluster_indices.push_back(out_indices_msg);
+      if (_publish_tf_) {
+        out_cluster_indices.cluster_indices.push_back(out_indices_msg);
+      }
 
       pcl::PointIndices::Ptr segmented_indices (new pcl::PointIndices);
       extract.setIndices(converted_indices[argsort[i]]);
@@ -758,10 +762,10 @@ namespace jsk_pcl_ros
       else {
         target_frame = input->header.frame_id;
       }
-      center_pose_array.poses.push_back(pose_msg);
-      bounding_box.header.frame_id = target_frame;
-      bounding_box_array.boxes.push_back(bounding_box);
-      if (publish_tf_) {
+      if (_publish_tf_) {
+        center_pose_array.poses.push_back(pose_msg);
+        bounding_box.header.frame_id = target_frame;
+        bounding_box_array.boxes.push_back(bounding_box);
         tf::Transform transform;
         transform.setOrigin(tf::Vector3(pose_msg.position.x, pose_msg.position.y, pose_msg.position.z));
         transform.setRotation(tf::createIdentityQuaternion());

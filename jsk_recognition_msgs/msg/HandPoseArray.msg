@@ -1,2 +1,2 @@
 Header header
-HandPose[] poses
+jsk_recognition_msgs/HandPose[] poses

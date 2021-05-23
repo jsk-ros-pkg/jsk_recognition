@@ -9,6 +9,7 @@
 #
 # Code Reference
 #   https://github.com/agrajak/SRHandNet-demo
+from __future__ import print_function
 
 import pkg_resources, sys
 from distutils.version import LooseVersion

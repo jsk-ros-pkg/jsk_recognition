@@ -112,6 +112,7 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
         self.image_pub = self.advertise('~output', Image, queue_size=1)
         self.hand_pose_pub = self.advertise(
             '~pose', HandPoseArray, queue_size=1)
+        self.bridge = cv_bridge.CvBridge()
 
     @property
     def visualize(self):
@@ -166,8 +167,8 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
             sub.unregister()
 
     def _cb(self, img_msg):
-        br = cv_bridge.CvBridge()
-        img = br.imgmsg_to_cv2(img_msg, desired_encoding='rgb8')
+        img = self.bridge.imgmsg_to_cv2(
+            img_msg, desired_encoding='rgb8')
         hands_points, hands_point_scores, hands_score = \
             self.hand_pose_estimate(img)
 
@@ -219,9 +220,8 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
             self.pyramid_inference(frame)
 
         if self.visualize:
-            br = cv_bridge.CvBridge()
             vis_img = self._draw_joints(frame, hands_points, hands_rect)
-            vis_msg = br.cv2_to_imgmsg(vis_img, encoding='rgb8')
+            vis_msg = self.bridge.cv2_to_imgmsg(vis_img, encoding='rgb8')
             self.image_pub.publish(vis_msg)
 
         return hands_points, hands_point_scores, hands_score

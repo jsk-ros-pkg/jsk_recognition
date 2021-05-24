@@ -424,12 +424,12 @@ namespace jsk_pcl_ros
    const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
    const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients,
    geometry_msgs::Pose& center_pose_msg,
-   jsk_recognition_msgs::BoundingBox& bounding_box)
+   jsk_recognition_msgs::BoundingBox& bounding_box,
+   bool& publish_tf)
   {
     bounding_box.header = header;
-    _publish_tf_ = publish_tf_;
     if (segmented_cloud->points.size() == 0) {
-      _publish_tf_ = false;
+      publish_tf = false;
       NODELET_WARN("segmented cloud size is zero");
       return true;
     }
@@ -703,6 +703,7 @@ namespace jsk_pcl_ros
     geometry_msgs::PoseArray center_pose_array;
     center_pose_array.header = input->header;
     out_cluster_indices.header = input->header;
+    bool publish_tf = publish_tf_;
     for (size_t i = 0; i < argsort.size(); i++)
     {
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
@@ -711,7 +712,7 @@ namespace jsk_pcl_ros
       pcl_msgs::PointIndices out_indices_msg;
       out_indices_msg.header = input->header;
       out_indices_msg.indices = *(converted_indices[argsort[i]]);
-      if (_publish_tf_) {
+      if (publish_tf) {
         out_cluster_indices.cluster_indices.push_back(out_indices_msg);
       }
 
@@ -751,7 +752,7 @@ namespace jsk_pcl_ros
       }
 
       bool successp = computeCenterAndBoundingBox(
-        segmented_cloud, input->header, planes, coefficients, pose_msg, bounding_box);
+        segmented_cloud, input->header, planes, coefficients, pose_msg, bounding_box, publish_tf);
       if (!successp) {
         return;
       }
@@ -762,7 +763,7 @@ namespace jsk_pcl_ros
       else {
         target_frame = input->header.frame_id;
       }
-      if (_publish_tf_) {
+      if (publish_tf) {
         center_pose_array.poses.push_back(pose_msg);
         bounding_box.header.frame_id = target_frame;
         bounding_box_array.boxes.push_back(bounding_box);

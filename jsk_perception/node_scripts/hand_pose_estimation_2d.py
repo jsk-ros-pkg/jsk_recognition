@@ -224,7 +224,7 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
                         cv2.line(frame, points[cnt], \
                                          points[cnt+1], (0, 255, 0), 2)
 
-            per = f'{int(2100-missing*100)//21}% '
+            per = '{}%'.format(int(2100-missing*100)//21)
             text_pos = hands_rect[rect_idx][0:2]
             text_pos = (text_pos[0], text_pos[1]+5)
             cv2.putText(frame, per, text_pos, 1, 3, (0, 0, 255), 3)

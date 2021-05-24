@@ -10,7 +10,7 @@ What is this?
 Estimate hand pose in 2d.
 Please refer to `original paper <https://www.yangangwang.com/papers/WANG-SRH-2019-07.html>`_.
 
-In order to use this feature, you need to install `pytorch <https://pytorch.org/get-started/locally/>`_(pytorch >= 1.4.0 is recommended).
+In order to use this feature, you need to install `pytorch <https://pytorch.org/get-started/locally/>`_ (pytorch >= 1.4.0 is recommended).
 
 
 Subscribing Topic

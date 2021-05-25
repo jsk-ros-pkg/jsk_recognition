@@ -276,7 +276,7 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
             l, t, r, b = hands_rect[tensor_idx]
             img = img[t:b, l:r]
 
-        rows, cols = len(img), len(img[0])
+        rows, cols = img.shape[:2]
         ratio = min(tensor.shape[2] / rows, tensor.shape[3] / cols)
         mat = np.array([[ratio, 0, 0], [0, ratio, 0]], dtype=np.float32)
 

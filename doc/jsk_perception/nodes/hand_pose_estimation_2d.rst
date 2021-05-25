@@ -24,13 +24,13 @@ Subscribing Topic
 Publishing Topic
 ----------------
 
-* ``~output`` (``sensor_msgs/Image``)
+* ``~output/pose`` (``jsk_recognition_msgs/HandPoseArray``)
 
-  Detected hand pose image.
+  Detected hand keypoints 2D positions and scores in image.
 
-* ``~pose`` (``jsk_recognition_msgs/HandPoseArray``)
+* ``~output/vis`` (``sensor_msgs/Image``)
 
-  Publish hand keypoints 2D positions and scores in image.
+  Visualization image of detected hand poses.
 
 
 Parameters

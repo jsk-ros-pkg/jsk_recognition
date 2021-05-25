@@ -168,7 +168,7 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
 
     def _cb(self, img_msg):
         img = self.bridge.imgmsg_to_cv2(
-            img_msg, desired_encoding='rgb8')
+            img_msg, desired_encoding='bgr8')
         hands_points, hands_point_scores, hands_score = \
             self.hand_pose_estimate(img)
 
@@ -210,9 +210,9 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
             hand_pose_msg.poses.append(pose_msg)
         return hand_pose_msg
 
-    def hand_pose_estimate(self, rgb):
+    def hand_pose_estimate(self, bgr):
         if self.backend == 'torch':
-            return self._hand_pose_estimate_torch_backend(rgb)
+            return self._hand_pose_estimate_torch_backend(bgr)
         raise ValueError('Unsupported backend: {0}'.format(self.backend))
 
     def _hand_pose_estimate_torch_backend(self, frame):
@@ -221,7 +221,7 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
 
         if self.visualize:
             vis_img = self._draw_joints(frame, hands_points, hands_rect)
-            vis_msg = self.bridge.cv2_to_imgmsg(vis_img, encoding='rgb8')
+            vis_msg = self.bridge.cv2_to_imgmsg(vis_img, encoding='bgr8')
             self.image_pub.publish(vis_msg)
 
         return hands_points, hands_point_scores, hands_score
@@ -283,22 +283,22 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
             borderValue=(128, 128, 128))
 
         dst = dst / 255. - 0.5
-        r, g, b = cv2.split(dst)
+        b, g, r = cv2.split(dst)
 
         if self.gpu >= 0 and torch.cuda.is_available():
             tensor[tensor_idx][0] = torch.tensor(
-                r, device=torch.device('cuda')).float()
+                b, device=torch.device('cuda')).float()
             tensor[tensor_idx][1] = torch.tensor(
                 g, device=torch.device('cuda')).float()
             tensor[tensor_idx][2] = torch.tensor(
-                b, device=torch.device('cuda')).float()
+                r, device=torch.device('cuda')).float()
         else:
             tensor[tensor_idx][0] = torch.tensor(
-                r, device=torch.device('cpu')).float()
+                b, device=torch.device('cpu')).float()
             tensor[tensor_idx][1] = torch.tensor(
                 g, device=torch.device('cpu')).float()
             tensor[tensor_idx][2] = torch.tensor(
-                b, device=torch.device('cpu')).float()
+                r, device=torch.device('cpu')).float()
         return ratio
 
     def detect_bbox(self, input_image):

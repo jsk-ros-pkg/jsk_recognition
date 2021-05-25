@@ -109,9 +109,10 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
         # image subscribe
         # self.subscribe()
         # topic advertise
-        self.image_pub = self.advertise('~output', Image, queue_size=1)
+        self.image_pub = self.advertise(
+            '~output/vis', Image, queue_size=1)
         self.hand_pose_pub = self.advertise(
-            '~pose', HandPoseArray, queue_size=1)
+            '~output/pose', HandPoseArray, queue_size=1)
         self.bridge = cv_bridge.CvBridge()
 
     @property

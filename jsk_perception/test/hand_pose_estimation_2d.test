@@ -9,9 +9,9 @@
         pkg="jsk_tools" type="test_topic_published.py"
         retry="3">
     <rosparam>
-      topic_0: /hand_pose_estimation_2d/output
+      topic_0: /hand_pose_estimation_2d/output/vis
       timeout_0: 60
-      topic_1: /hand_pose_estimation_2d/pose
+      topic_1: /hand_pose_estimation_2d/output/pose
       timeout_1: 60
     </rosparam>
   </test>

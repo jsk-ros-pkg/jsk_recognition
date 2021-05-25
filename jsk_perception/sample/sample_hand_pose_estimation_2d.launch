@@ -2,7 +2,7 @@
 
   <arg name="gui" default="true" />
   <arg name="gpu" default="-1" />
-  <arg name="INPUT_IMAGE" default="/hand_pose_estimation_2d/input" />
+  <arg name="INPUT_IMAGE" default="/usb_cam/image_raw" />
 
   <include file="$(find jsk_perception)/sample/include/play_rosbag_hand.xml" />
 

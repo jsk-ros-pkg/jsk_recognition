@@ -101,7 +101,7 @@ def main():
         pkg_name=PKG,
         path='sample/data/hand_pose_estimation_2d.bag',
         url='https://drive.google.com/uc?id=1yJ2IYNmSO-0n0pE_Rs6FCgDQ8EKiCndr',
-        md5='67bbc8ccff8b1054a9754a68b7733340',
+        md5='362df96e8eaacaa82faa05ecebcd2166',
         extract=False,
     )
 

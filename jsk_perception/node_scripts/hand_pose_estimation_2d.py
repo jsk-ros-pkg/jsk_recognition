@@ -130,8 +130,9 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
         # or using _get_srhand_pretrained_model() from:
         #    https://drive.google.com/uc?id=16Jg8HhaFaThzFSbWbEixMLE3SAnOzvzL
         rospy.loginfo('Loading model')
-        model_file = rospy.get_param(
-            '~model_file', self._get_srhand_pretrained_model())
+        model_file = rospy.get_param('~model_file', None)
+        if not model_file:
+            model_file = self._get_srhand_pretrained_model()
 
         if self.gpu >= 0 and torch.cuda.is_available():
             self.model = torch.jit.load(

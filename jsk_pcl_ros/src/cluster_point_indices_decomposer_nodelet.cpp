@@ -703,7 +703,6 @@ namespace jsk_pcl_ros
     geometry_msgs::PoseArray center_pose_array;
     center_pose_array.header = input->header;
     out_cluster_indices.header = input->header;
-    bool publish_tf = publish_tf_;
     for (size_t i = 0; i < argsort.size(); i++)
     {
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
@@ -712,9 +711,7 @@ namespace jsk_pcl_ros
       pcl_msgs::PointIndices out_indices_msg;
       out_indices_msg.header = input->header;
       out_indices_msg.indices = *(converted_indices[argsort[i]]);
-      if (publish_tf) {
-        out_cluster_indices.cluster_indices.push_back(out_indices_msg);
-      }
+      out_cluster_indices.cluster_indices.push_back(out_indices_msg);
 
       pcl::PointIndices::Ptr segmented_indices (new pcl::PointIndices);
       extract.setIndices(converted_indices[argsort[i]]);
@@ -751,6 +748,7 @@ namespace jsk_pcl_ros
         pcl::removeNaNFromPointCloud(*segmented_cloud, *segmented_cloud, nan_indices);
       }
 
+      bool publish_tf = publish_tf_;
       bool successp = computeCenterAndBoundingBox(
         segmented_cloud, input->header, planes, coefficients, pose_msg, bounding_box, publish_tf);
       if (!successp) {
@@ -763,10 +761,10 @@ namespace jsk_pcl_ros
       else {
         target_frame = input->header.frame_id;
       }
+      center_pose_array.poses.push_back(pose_msg);
+      bounding_box.header.frame_id = target_frame;
+      bounding_box_array.boxes.push_back(bounding_box);
       if (publish_tf) {
-        center_pose_array.poses.push_back(pose_msg);
-        bounding_box.header.frame_id = target_frame;
-        bounding_box_array.boxes.push_back(bounding_box);
         tf::Transform transform;
         transform.setOrigin(tf::Vector3(pose_msg.position.x, pose_msg.position.y, pose_msg.position.z));
         transform.setRotation(tf::createIdentityQuaternion());

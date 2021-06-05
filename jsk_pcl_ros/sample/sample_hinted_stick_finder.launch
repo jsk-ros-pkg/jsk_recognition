@@ -1,0 +1,54 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml"/>
+
+  <node name="polygon_publisher"
+        pkg="rostopic" type="rostopic"
+        args="pub -r 30 -s /polygon_publisher/output geometry_msgs/PolygonStamped
+              '{header: {stamp: now, frame_id: right_hand_camera_rgb_optical_frame},
+                polygon: {points: [{x: 280, y: 170},
+                                   {x: 280, y: 220},
+                                   {x: 281, y: 220},
+                                   {x: 281, y: 170}]}}'"/>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="hinted_stick_finder"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/HintedStickFinder sample_manager">
+    <remap from="~input" to="/right_hand_camera/depth_registered/points"/>
+    <remap from="~input/camera_info" to="/right_hand_camera/rgb/camera_info"/>
+    <remap from="~input/hint/line" to="polygon_publisher/output"/>
+    <rosparam>
+      not_synchronize: true
+      min_radius: 0.03
+      max_radius: 0.1
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rect_to_mask_image"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_perception/RectToMaskImage sample_manager">
+      <remap from="~input" to="polygon_publisher/output"/>
+      <remap from="~input/camera_info" to="/right_hand_camera/rgb/camera_info"/>
+    </node>
+
+    <node name="extract_indices_stick"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/ExtractIndices sample_manager">
+      <remap from="~input" to="/right_hand_camera/depth_registered/points"/>
+      <remap from="~indices" to="hinted_stick_finder/output/inliers"/>
+      <rosparam>
+        keep_organized: true
+      </rosparam>
+    </node>
+
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/hinted_stick_finder.rviz"/>
+  </group>
+</launch>

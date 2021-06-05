@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_polygon_points_sampler.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_polygon_points_sampler"
+        name="test_polygon_points_sampler"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /polygon_points_sampler/output
+      timeout_0: 30
+      topic_1: /polygon_points_sampler/output_xyz
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

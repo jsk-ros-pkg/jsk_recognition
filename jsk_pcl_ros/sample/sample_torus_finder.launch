@@ -1,0 +1,27 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="pcd_to_pointcloud"
+        pkg="pcl_ros" type="pcd_to_pointcloud"
+        args="$(find jsk_pcl_ros)/sample/data/torus.pcd 0.1">
+    <remap from="cloud_pcd" to="~output"/>
+  </node>>
+
+  <node name="torus_finder"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/TorusFinder">
+    <remap from="~input" to="pcd_to_pointcloud/output"/>
+    <rosparam>
+      min_radius: 2.0
+      max_radius: 4.0
+      use_hint: false
+      outlier_threshold: 0.02
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/torus_finder.rviz"/>
+  </group>
+</launch>

@@ -1,4 +1,4 @@
-#!/usr/bin/env runeus
+#!/usr/bin/env roseus
 
 (defvar *topic-name* "/cluster_decomposer/boxes")
 (defvar *bounding-box-list* nil)

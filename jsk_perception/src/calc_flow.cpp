@@ -10,8 +10,12 @@
 #include <image_transport/image_transport.h>
 #include <image_transport/subscriber_filter.h>
 
-#include <cv.hpp>
 #include <cv_bridge/cv_bridge.h>
+#if ( CV_MAJOR_VERSION >= 4)
+#include <opencv2/opencv.hpp>
+#else
+#include <cv.hpp>
+#endif
 
 #include <stdlib.h>
 
@@ -63,7 +67,7 @@ public:
     cv::Mat nextImg(img->height, img->width, CV_8UC1);
     //memcpy(nextImg->data, ipl_->imageData, img->height*img->width);
     cv_ptr->image.copyTo(nextImg);
-    
+
     cv::calcOpticalFlowFarneback(prevImg, nextImg, flow,
                                  0.5, 3, 15, 3, 5, 1.2, 0 );
                                  // 0.5, 2,

@@ -1,0 +1,26 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="static_tf_publisher"
+        pkg="tf" type="static_transform_publisher"
+        args="0 0 1.5 0 0 0 /map /imu_link 10"/>
+
+  <node name="imu_publisher"
+        pkg="rostopic" type="rostopic"
+        args="pub -r 1 -s /imu_publisher/output sensor_msgs/Imu
+              '{header: {stamp: now, frame_id: imu_link},
+              linear_acceleration: {x: 0.214, y: 0.058, z: -9.795}}'"/>
+
+  <node name="calculate_polygon_from_imu"
+        pkg="jsk_pcl_ros" type="calculate_polygon_from_imu.py">
+    <remap from="imu_data" to="imu_publisher/output"/>
+    <remap from="polygon_array" to="~output/polygon_array"/>
+    <remap from="model_coefficients_array" to="~output/model_coefficients_array"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/calculate_polygon_from_imu.rviz"/>
+  </group>
+</launch>

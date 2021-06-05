@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_feature_registration.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_feature_registration"
+        name="test_feature_registration"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /feature_registration/output
+      timeout_0: 60
+      topic_1: /feature_registration/output/cloud
+      timeout_1: 60
+    </rosparam>
+  </test>
+
+</launch>

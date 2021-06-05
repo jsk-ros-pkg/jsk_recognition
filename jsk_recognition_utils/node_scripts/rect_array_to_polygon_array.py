@@ -35,9 +35,13 @@ class RectArrayToPolygonArray(ConnectionBasedTransport):
             poly_msg = PolygonStamped()
             poly_msg.header = msg.header
             pt0 = Point32(x=rect.x, y=rect.y)
-            pt1 = Point32(x=rect.x + rect.width, y=rect.y + rect.height)
+            pt1 = Point32(x=rect.x, y=rect.y + rect.height)
+            pt2 = Point32(x=rect.x + rect.width, y=rect.y + rect.height)
+            pt3 = Point32(x=rect.x + rect.width, y=rect.y)
             poly_msg.polygon.points.append(pt0)
             poly_msg.polygon.points.append(pt1)
+            poly_msg.polygon.points.append(pt2)
+            poly_msg.polygon.points.append(pt3)
             polys_msg.polygons.append(poly_msg)
         self.pub.publish(polys_msg)
 

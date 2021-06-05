@@ -1,0 +1,27 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_icp_registration.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="sample_pose_publisher"
+        pkg="rostopic" type="rostopic"
+        args="pub -r 10 -s /sample_pose_publisher/output geometry_msgs/PoseStamped
+              '{header: {stamp: now, frame_id: map},
+                pose: {position: {x: 0.05}, orientation: {w: 1.0}}}'"/>
+
+  <node name="in_hand_recognition_manager"
+        pkg="jsk_pcl_ros" type="in_hand_recognition_manager.py">
+    <!-- teacher pose -->
+    <remap from="~input" to="icp_registration/output_pose"/>
+    <!-- diff pose -->
+    <remap from="~input/result" to="sample_pose_publisher/output"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/in_hand_recognition_manager.rviz"/>
+  </group>
+</launch>

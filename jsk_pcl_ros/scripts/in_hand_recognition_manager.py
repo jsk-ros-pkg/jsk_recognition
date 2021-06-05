@@ -50,14 +50,13 @@ def pose_diff_cb(pose_stamped):
     global teacher_pose_stamped, renew_flag
     # add diff and pub
     if (not teacher_pose_stamped):
-        rospy.info ("teacher is empty")
+        rospy.loginfo("teacher is empty")
         return
-    # DummyArrayPub.publish(PointsArray()) # register empty clouds to stop recognition
     try:
         teacher_pose_stamped.header.stamp = rospy.Time(0)
         teacher_pose_stamped_recog_frame = listener.transformPose(pose_stamped.header.frame_id, teacher_pose_stamped)
-    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException, tf.Exception), e:
-        print "tf error: %s" % e
+    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException, tf.Exception) as e:
+        print("tf error: %s" % e)
         return
     teacher_pose_mat = (get_mat_from_pose(teacher_pose_stamped_recog_frame.pose))
     diff_pose_mat = (get_mat_from_pose(pose_stamped.pose))
@@ -71,8 +70,8 @@ def pose_diff_cb(pose_stamped):
         try:
             new_pose_stamped.header.stamp = rospy.Time(0)
             new_pose_stamped_for_renew = listener.transformPose(teacher_pose_stamped.header.frame_id, new_pose_stamped)
-        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException, tf.Exception), e:
-            print "tf error: %s" % e
+        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException, tf.Exception) as e:
+            print("tf error: %s" % e)
             return
         pose_teacher_cb(new_pose_stamped_for_renew)
         renew_flag = False
@@ -82,10 +81,10 @@ def renew_cb(req):
     return srv.EmptyResponse()
 if __name__ == "__main__":
     rospy.init_node("in_hand_recognition_manager")
-    InputPosePub = rospy.Publisher("~output/recognition", PoseStamped)
-    OutputPosePub = rospy.Publisher("~output", PoseStamped)
+    InputPosePub = rospy.Publisher(
+        "~output/recognition", PoseStamped, queue_size=1)
+    OutputPosePub = rospy.Publisher("~output", PoseStamped, queue_size=1)
     listener = tf.TransformListener()
-    DummyArrayPub = rospy.Publisher("~dummy_array", PointsArray)
     rospy.Subscriber("~input", PoseStamped, pose_teacher_cb)
     rospy.Subscriber("~input/result", PoseStamped, pose_diff_cb)
     rospy.Service("~renew", srv.Empty, renew_cb)

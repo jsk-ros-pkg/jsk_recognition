@@ -35,9 +35,15 @@
 
 #include <ros/ros.h>
 #include <rospack/rospack.h>
-#include <opencv/highgui.h>
 #include <cv_bridge/cv_bridge.h>
+#if ( CV_MAJOR_VERSION >= 4)
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui_c.h>
+#include <opencv2/calib3d/calib3d_c.h>
+#else
+#include <opencv/highgui.h>
 #include <opencv/cv.hpp>
+#endif
 #include <posedetection_msgs/Feature0DDetect.h>
 #include <posedetection_msgs/ImageFeature0D.h>
 #include <posedetection_msgs/ObjectDetection.h>
@@ -470,6 +476,8 @@ public:
     if (err_sum > err_thr){
       ROS_INFO("          err_sum:%f > err_thr:%f return-from estimate-od", err_sum, err_thr);
       err_success = false;
+    } else {
+      o6p->reliability = 1.0 - (err_sum / err_thr);
     }
     // draw lines around the detected object
     for (int j = 0; j < corners2d_mat_trans.cols; j++){
@@ -860,8 +868,10 @@ public:
                               (_viewer ? type : ""), _autosize);
       _templates.push_back(tmplt);
       if( _viewer )
+      {
         cv::namedWindow(type, _autosize ? CV_WINDOW_AUTOSIZE : 0);
-      cvSetMouseCallback (type.c_str(), &cvmousecb, static_cast<void *>(_templates.back()));
+        cvSetMouseCallback (type.c_str(), &cvmousecb, static_cast<void *>(_templates.back()));
+      }
     }
     return true;
   }

@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_snake_segmentation.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_snake_segmentation"
+        name="test_snake_segmentation"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /snake_segmentation/debug
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

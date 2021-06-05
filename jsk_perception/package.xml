@@ -1,4 +1,4 @@
-<package>
+<package format="3">
   <name>jsk_perception</name>
   <version>1.2.10</version>
 
@@ -12,7 +12,7 @@
 
   <url type="repository">http://github.com/jsk-ros-pkg/jsk_recognition</url>
   <url type="bugtracker">http://github.com/jsk-ros-pkg/jsk_recognition/issues</url>
-  <url type="website">http://jsk-docs.readthedocs.io/en/latest/jsk_recognition/doc/jsk_perception</url>
+  <url type="website">https://jsk-docs.readthedocs.io/projects/jsk_recognition/en/latest/jsk_perception</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
@@ -49,57 +49,64 @@
   <!-- ALPHABETICAL ORDER -->
 
   <!-- ALPHABETICAL ORDER -->
-  <run_depend>angles</run_depend>
-  <run_depend>cv_bridge</run_depend>
-  <run_depend>dynamic_reconfigure</run_depend>
-  <run_depend>eigen</run_depend>
-  <run_depend>geometry_msgs</run_depend>
-  <run_depend>image_geometry</run_depend>
-  <run_depend>image_transport</run_depend>
-  <run_depend>image_view</run_depend>
-  <run_depend>image_view2</run_depend>
-  <run_depend>imagesift</run_depend>
-  <run_depend>jsk_data</run_depend>
-  <run_depend>jsk_gui_msgs</run_depend>
-  <run_depend>jsk_recognition_msgs</run_depend>
-  <run_depend>jsk_recognition_utils</run_depend>
-  <run_depend>jsk_rqt_plugins</run_depend>
-  <run_depend>jsk_topic_tools</run_depend>
-  <run_depend>libcmt</run_depend>
-  <run_depend>message_runtime</run_depend>
-  <run_depend>mk</run_depend>
-  <run_depend>ml_classifiers</run_depend>
-  <run_depend>nodelet</run_depend>
-  <run_depend>opencv_apps</run_depend>
-  <run_depend>openni2_launch</run_depend>
-  <run_depend>pcl_ros</run_depend>
-  <run_depend>posedetection_msgs</run_depend>
+  <exec_depend>angles</exec_depend>
+  <exec_depend>checkerboard_detector</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>dynamic_reconfigure</exec_depend>
+  <exec_depend>eigen</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>image_geometry</exec_depend>
+  <exec_depend>image_transport</exec_depend>
+  <exec_depend>image_view</exec_depend>
+  <exec_depend>image_view2</exec_depend>
+  <exec_depend>imagesift</exec_depend>
+  <exec_depend>jsk_data</exec_depend>
+  <exec_depend>jsk_gui_msgs</exec_depend>
+  <exec_depend>jsk_recognition_msgs</exec_depend>
+  <exec_depend>jsk_recognition_utils</exec_depend>
+  <exec_depend>jsk_rqt_plugins</exec_depend>
+  <exec_depend>jsk_topic_tools</exec_depend>
+  <exec_depend>libcmt</exec_depend>
+  <exec_depend>message_runtime</exec_depend>
+  <exec_depend>mk</exec_depend>
+  <exec_depend>ml_classifiers</exec_depend>
+  <exec_depend>nodelet</exec_depend>
+  <exec_depend>opencv_apps</exec_depend>
+  <exec_depend>openni2_launch</exec_depend>
+  <exec_depend>pcl_ros</exec_depend>
+  <exec_depend>posedetection_msgs</exec_depend>
   <!-- install chainer {{ -->
-  <run_depend>python-h5py</run_depend>
-  <run_depend>python-chainer-pip</run_depend>
-  <run_depend>python-chainercv-pip</run_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-h5py</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-h5py</exec_depend>
+  <exec_depend version_lt="7.0.0">python-chainer-pip</exec_depend>
+  <!-- python-cahiner-pip depends: [cython, python-numpy] in rosdep/python.yaml, which is not installable on python3 environment -->
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-chainercv-pip</exec_depend>
   <!-- }} install chainer -->
-  <run_depend>python-dlib</run_depend>  <!-- pip -->
+  <exec_depend>python-dlib</exec_depend>  <!-- pip -->
   <!-- install fcn {{ -->
-  <run_depend>leveldb</run_depend>
-  <run_depend>python-fcn-pip</run_depend>  <!-- pip -->
+  <exec_depend>leveldb</exec_depend>
+  <exec_depend>python-fcn-pip</exec_depend>  <!-- pip -->
   <!-- }} install fcn -->
-  <run_depend>python-sklearn</run_depend>
-  <run_depend>python-yaml</run_depend>
-  <run_depend>rosbag</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>roseus</run_depend>
-  <run_depend>rospack</run_depend>
-  <run_depend>rospy</run_depend>
-  <run_depend>rostopic</run_depend>
-  <run_depend>rqt_gui</run_depend>
-  <run_depend>rviz</run_depend>
-  <run_depend>sensor_msgs</run_depend>
-  <run_depend>sound_play</run_depend>
-  <run_depend>std_msgs</run_depend>
-  <run_depend>tf</run_depend>
-  <run_depend>robot_self_filter</run_depend>
-  <run_depend>yaml-cpp</run_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-sklearn</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-sklearn</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-yaml</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-yaml</exec_depend>
+  <exec_depend>rosbag</exec_depend>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>roseus</exec_depend>
+  <exec_depend>rospack</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>rostopic</exec_depend>
+  <exec_depend>rqt_gui</exec_depend>
+  <exec_depend>rviz</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>sound_play</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>tf</exec_depend>
+  <exec_depend>tf2_geometry_msgs</exec_depend>
+  <exec_depend>topic_tools</exec_depend>
+  <exec_depend>robot_self_filter</exec_depend>
+  <exec_depend>yaml-cpp</exec_depend>
   <!-- ALPHABETICAL ORDER -->
 
   <!-- ALPHABETICAL ORDER -->

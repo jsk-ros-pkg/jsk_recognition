@@ -1,0 +1,33 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_icp_registration.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="pointcloud_localization"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/PointCloudLocalization icp_manager">
+    <remap from="~input" to="subsample_input/output"/>
+    <remap from="~icp_align" to="icp_registration/icp_align"/>
+    <rosparam>
+      global_frame: map
+      initialize_from_tf: false
+      clip_unseen_pointcloud: false
+    </rosparam>
+  </node>
+
+  <node name="sample_pointcloud_localization_client"
+        pkg="jsk_pcl_ros" type="sample_pointcloud_localization_client.py">
+    <remap from="~localize" to="pointcloud_localization/localize"/>
+    <rosparam>
+      request_rate: 1.0
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/pointcloud_localization.rviz"/>
+  </group>
+</launch>

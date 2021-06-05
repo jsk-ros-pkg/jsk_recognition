@@ -20,3 +20,9 @@
 
   Gaussian kernel standard deviation in X or Y direction.
 
+
+## Sample
+
+```bash
+roslaunch jsk_perception sample_gaussian_blur.launch
+```

@@ -54,6 +54,9 @@ namespace jsk_pcl_ros_utils
     
     ros::Subscriber sub_;
     ros::Publisher pub_;
+
+    bool skip_nan_;
+
   private:
   };
 

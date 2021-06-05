@@ -1,0 +1,20 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_polygon_array_unwrapper.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="polygon_array_wrapper"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/PolygonArrayWrapper">
+    <remap from="~input_polygon" to="polygon_array_unwrapper/output_polygon"/>
+    <remap from="~input_coefficients" to="polygon_array_unwrapper/output_coefficients"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_polygon_array_wrapper.rviz"/>
+  </group>
+</launch>

@@ -1,0 +1,35 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_organized_multi_plane_segmentation.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_organized_multi_plane_segmentation"
+        name="test_organized_multi_plane_segmentation"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /organized_multi_plane_segmentation/output_nonconnected
+      timeout_0: 30
+      topic_1: /organized_multi_plane_segmentation/output_nonconnected_polygon
+      timeout_1: 30
+      topic_2: /organized_multi_plane_segmentation/output_nonconnected_coefficients
+      timeout_2: 30
+      topic_3: /organized_multi_plane_segmentation/output
+      timeout_3: 30
+      topic_4: /organized_multi_plane_segmentation/output_polygon
+      timeout_4: 30
+      topic_5: /organized_multi_plane_segmentation/output_coefficients
+      timeout_5: 30
+      topic_6: /organized_multi_plane_segmentation/output_refined
+      timeout_6: 30
+      topic_7: /organized_multi_plane_segmentation/output_refined_polygon
+      timeout_7: 30
+      topic_8: /organized_multi_plane_segmentation/output_refined_coefficients
+      timeout_8: 30
+      topic_9: /organized_multi_plane_segmentation/output_normal
+      timeout_9: 30
+    </rosparam>
+  </test>
+
+</launch>

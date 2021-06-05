@@ -1,0 +1,26 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_normal_concatenater.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="static_tf_publisher"
+        pkg="tf" type="static_transform_publisher"
+        args="0 0 1.0 0 0 0 /right_hand_camera_rgb_optical_frame /dummy_frame 10"/>
+
+  <node name="normal_flip_to_frame"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/NormalFlipToFrame">
+    <remap from="~input" to="normal_concatenater/output"/>
+    <rosparam>
+      frame_id: dummy_frame
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_normal_flip_to_frame.rviz"/>
+  </group>
+</launch>

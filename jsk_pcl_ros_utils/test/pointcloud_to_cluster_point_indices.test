@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_pointcloud_to_cluster_point_indices.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_pointcloud_to_cluster_point_indices"
+        name="test_pointcloud_to_cluster_point_indices"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /pointcloud_to_cluster_point_indices/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

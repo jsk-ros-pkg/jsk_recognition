@@ -1,0 +1,31 @@
+<launch>
+  <arg name="gui" default="true" />
+  <arg name="camera" value="/right_hand_camera" />
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml" />
+
+  <node name="pointcloud_to_mask_image" pkg="jsk_pcl_ros_utils" type="pointcloud_to_mask_image">
+    <param name="~z_near" value="0" />
+    <param name="~z_far" value="1" />
+    <remap from="~input" to="$(arg camera)/depth_registered/points" />
+    <remap from="~input/depth" to="$(arg camera)/depth/image_rect" />
+  </node>
+
+  <node name="mask_image_filter" pkg="jsk_pcl_ros" type="mask_image_filter">
+    <param name="~negative" value="false" />
+    <remap from="~input" to="$(arg camera)/depth_registered/points" />
+    <remap from="~input/mask" to="/pointcloud_to_mask_image/output" />
+    <remap from="~input/camera_info" to="$(arg camera)/depth_registered/camera_info" />
+    </node>
+
+  <node name="extract_indices" pkg="jsk_pcl_ros" type="extract_indices">
+    <remap from="~input" to="$(arg camera)/depth_registered/points" />
+    <remap from="~indices" to="/mask_image_filter/output" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz" pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/sample_mask_image_filter.rviz">
+    </node>
+  </group>
+</launch>

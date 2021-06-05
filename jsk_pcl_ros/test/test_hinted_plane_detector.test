@@ -1,0 +1,39 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_hinted_plane_detector.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_hinted_plane_detector"
+        name="test_hinted_plane_detector"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /hinted_plane_detector/output/polygon
+      timeout_0: 30
+      topic_1: /hinted_plane_detector/output/polygon_array
+      timeout_1: 30
+      topic_2: /hinted_plane_detector/output/inliers
+      timeout_2: 30
+      topic_3: /hinted_plane_detector/output/coefficients
+      timeout_3: 30
+      topic_4: /hinted_plane_detector/output/hint/polygon
+      timeout_4: 30
+      topic_5: /hinted_plane_detector/output/hint/polygon_array
+      timeout_5: 30
+      topic_6: /hinted_plane_detector/output/hint/inliers
+      timeout_6: 30
+      topic_7: /hinted_plane_detector/output/hint/coefficients
+      timeout_7: 30
+      topic_8: /hinted_plane_detector/output/hint_filtered_indices
+      timeout_8: 30
+      topic_9: /hinted_plane_detector/output/plane_filtered_indices
+      timeout_9: 30
+      topic_10: /hinted_plane_detector/output/euclidean_filtered_indices
+      timeout_10: 30
+      topic_11: /hinted_plane_detector/output/density_filtered_indices
+      timeout_11: 30
+    </rosparam>
+  </test>
+
+</launch>

@@ -40,7 +40,7 @@ def label2rgb(lbl, img=None, label_names=None, alpha=0.3, bg_label=0):
 
     lbl_viz = np.zeros((lbl.shape[0], lbl.shape[1], 3), dtype=np.uint8)
     fg_mask = lbl != bg_label
-    lbl_viz[fg_mask] = cmap[lbl[fg_mask] % 256]
+    lbl_viz[fg_mask] = cmap[lbl[fg_mask] % 255]
     lbl_viz[~fg_mask] = bg_color
 
     if img is not None:
@@ -133,12 +133,12 @@ class LabelImageDecomposer(ConnectionBasedTransport):
         if use_async:
             slop = rospy.get_param('~slop', 0.1)
             rospy.loginfo('~slop: {}'.format(slop))
-            async = message_filters.ApproximateTimeSynchronizer(
+            sync = message_filters.ApproximateTimeSynchronizer(
                 [self.sub_label, self.sub_img],
                 queue_size=queue_size, slop=slop)
-            async.registerCallback(self._apply)
+            sync.registerCallback(self._apply)
             if self._publish_tile:
-                async.registerCallback(self._apply_tile)
+                sync.registerCallback(self._apply_tile)
         else:
             sync = message_filters.TimeSynchronizer(
                 [self.sub_label, self.sub_img], queue_size=queue_size)

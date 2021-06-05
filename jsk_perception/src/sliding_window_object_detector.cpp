@@ -5,6 +5,9 @@
 #include <jsk_topic_tools/log_utils.h>
 #include <jsk_recognition_msgs/Rect.h>
 #include <jsk_perception/NonMaximumSuppression.h>
+#if ( CV_MAJOR_VERSION >= 4)
+#include <opencv2/imgproc/imgproc_c.h>
+#endif
 
 namespace jsk_perception
 {
@@ -23,6 +26,7 @@ namespace jsk_perception
       
       pnh_->getParam("run_type", this->run_type_);
       pnh_->getParam("trainer_manifest", this->trainer_manifest_filename_);
+      pnh_->param<bool>("override_manifest", this->override_manifest_, false);
 
       ROS_INFO("RUN TYPE: %s", run_type_.c_str());
       ROS_INFO("LOADED TRAINER MANIFEST: %s", trainer_manifest_filename_.c_str());
@@ -352,8 +356,7 @@ namespace jsk_perception
       cv::FileNode n = fs["TrainerInfo"];
       std::string ttype = n["trainer_type"];
       std::string tpath = n["trainer_path"];
-      this->model_name_ = tpath;   // classifier path
-    
+
       n = fs["FeatureInfo"];       // features used
       int hog = static_cast<int>(n["HOG"]);
       int lbp = static_cast<int>(n["LBP"]);
@@ -361,17 +364,29 @@ namespace jsk_perception
       n = fs["SlidingWindowInfo"];  // window size
       int sw_x = static_cast<int>(n["swindow_x"]);
       int sw_y = static_cast<int>(n["swindow_y"]);
-      this->swindow_x = sw_x;
-      this->swindow_y = sw_y;
-    
+
       n = fs["TrainingDatasetDirectoryInfo"];
       std::string pfile = n["object_dataset_filename"];
       std::string nfile = n["nonobject_dataset_filename"];
       std::string dataset_path = n["dataset_path"];
+
+      if (this->override_manifest_)
+      {
+        pnh_->param<std::string>("trainer_path", tpath, tpath);
+        pnh_->param<int>("swindow_x", sw_x, sw_x);
+        pnh_->param<int>("swindow_y", sw_y, sw_y);
+        pnh_->param<std::string>("object_dataset_filename", pfile, pfile);
+        pnh_->param<std::string>("nonobject_dataset_filename", nfile, nfile);
+        pnh_->param<std::string>("dataset_path", dataset_path, dataset_path);
+      }
+
+      this->model_name_ = tpath;   // classifier path
+      this->swindow_x = sw_x;
+      this->swindow_y = sw_y;
       this->object_dataset_filename_ = pfile;  // object dataset
       this->nonobject_dataset_filename_ = nfile;
       this->ndataset_path_ = dataset_path + nfile;  // ~/.ros/dir/negative/x.bag
-   }
+}
 
    void SlidingWindowObjectDetector::setBoundingBoxLabel(
       cv::Mat& im, cv::Rect_<int> rect, const std::string label)

@@ -64,3 +64,14 @@ How to install OpenNI2?
     git clone https://github.com/ros-drivers/openni2_camera.git
     catkin build -iv
 
+How to generate doc on local machine
+------------------------------------
+
+.. code:: bash
+	  
+   roscd jsk_recognition
+   cd ../doc
+   source setup.sh
+   make html
+
+Then you can see doc with ``_build/html/index.html``

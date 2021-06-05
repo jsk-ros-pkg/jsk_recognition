@@ -95,6 +95,9 @@ namespace jsk_perception
       
       std::string model_name_;
       std::string dataset_path_;
+
+      bool override_manifest_;
+
 #if CV_MAJOR_VERSION >= 3 // http://answers.opencv.org/question/46770/cvknearest-missing-in-300-cvmlknearest-abstract/
       cv::Ptr<cv::ml::SVM> supportVectorMachine_;
 #else

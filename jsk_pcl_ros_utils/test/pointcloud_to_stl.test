@@ -1,0 +1,17 @@
+<launch>
+  <arg name="filename" value="$(env HOME)/.ros/jsk_pcl_ros_utils_sample_pointcloud_to_stl_arc2017_4objects.stl"/>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_pointcloud_to_stl.launch">
+    <arg name="gui" value="false"/>
+    <arg name="filename" value="$(arg filename)"/>
+  </include>
+
+  <test test-name="test_pointcloud_to_stl"
+        name="test_pointcloud_to_stl"
+        pkg="jsk_pcl_ros_utils" type="test_pointcloud_to_stl.py">
+    <rosparam subst_value="true">
+      stl_path: $(arg filename)
+      timeout: 30.0
+    </rosparam>
+  </test>
+</launch>

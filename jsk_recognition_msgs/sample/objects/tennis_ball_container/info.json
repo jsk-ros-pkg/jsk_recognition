@@ -1,0 +1,11 @@
+{
+    "name": "tennis_ball_container", 
+    "dimensions": [
+        0.077, 
+        0.218, 
+        0.077
+    ], 
+    "weight": 0.228, 
+    "type": "cylinder", 
+    "description": "Head to the court with these Wilson Championship Tennis Balls. They are designed for excellent performance on both indoor and clay courts. Constructed from Dura-weave felt, they are extremely durable and made to endure even the most rigorous games."
+}

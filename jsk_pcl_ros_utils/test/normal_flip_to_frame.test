@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_normal_flip_to_frame.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_normal_flip_to_frame"
+        name="test_normal_flip_to_frame"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /normal_flip_to_frame/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

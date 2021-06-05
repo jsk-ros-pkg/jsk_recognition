@@ -38,6 +38,9 @@
 #include <jsk_topic_tools/log_utils.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
+#if ( CV_MAJOR_VERSION >= 4)
+#include <opencv2/imgproc/imgproc_c.h>
+#endif
 
 namespace jsk_perception
 {
@@ -72,7 +75,7 @@ namespace jsk_perception
                                           camera_info_->width,
                                           CV_8UC1);
       geometry_msgs::Point32 P0 = rect_msg->polygon.points[0];
-      geometry_msgs::Point32 P1 = rect_msg->polygon.points[1];
+      geometry_msgs::Point32 P1 = rect_msg->polygon.points[2];
       double min_x = std::max(std::min(P0.x, P1.x), 0.0f);
       double max_x = std::max(P0.x, P1.x);
       double min_y = std::max(std::min(P0.y, P1.y), 0.0f);

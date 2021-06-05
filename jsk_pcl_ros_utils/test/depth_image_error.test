@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_depth_image_error.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_depth_image_error"
+        name="test_depth_image_error"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="35" retry="3">
+    <rosparam>
+      topic_0: /depth_image_error/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

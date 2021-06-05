@@ -29,9 +29,21 @@
 
 #include <boost/thread/mutex.hpp>
 
+#include "cv_bridge/cv_bridge.h"
+#if ( CV_MAJOR_VERSION >= 4)
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui_c.h>
+#include <opencv2/imgproc/types_c.h>
+#include <opencv2/imgproc/imgproc_c.h>
+#include <opencv2/calib3d/calib3d_c.h>
+#undef CV_RGB
+#define CV_RGB( r, g, b )  cvScalar( (b), (g), (r), 0 )
+#define CvPoint2D32f cv::Point2f
+#define CvSize cv::Size
+#else
 #include "opencv/cv.hpp"
 #include "opencv/highgui.h"
-#include "cv_bridge/cv_bridge.h"
+#endif
 #include "sensor_msgs/image_encodings.h"
 #include "sensor_msgs/Image.h"
 #include "math.h"
@@ -147,7 +159,11 @@ private:
             return;
         }
 
+#if ( CV_MAJOR_VERSION >= 4)
+        IplImage imggray = cvIplImage(_cvbridge->image);
+#else
         IplImage imggray = _cvbridge->image;
+#endif
         IplImage *pimggray = &imggray;
         if( display ) {
             // copy the raw image
@@ -163,14 +179,23 @@ private:
 
         int ncorners;
         _checkerboard.corners.resize(_checkerboard.grid3d.size()+64);
+#if ( CV_MAJOR_VERSION >= 4)
+        int allfound = cv::findChessboardCorners( cv::cvarrToMat(pimggray), _checkerboard.griddims, _checkerboard.corners, CV_CALIB_CB_ADAPTIVE_THRESH );
+#else
         int allfound = cvFindChessboardCorners( pimggray, _checkerboard.griddims, &_checkerboard.corners[0],
                                                 &ncorners, CV_CALIB_CB_ADAPTIVE_THRESH );
+#endif
         _checkerboard.corners.resize(ncorners);        
         
         if(allfound && ncorners == (int)_checkerboard.grid3d.size()) {
         
+#if ( CV_MAJOR_VERSION >= 4)
+            cornerSubPix(cv::cvarrToMat(pimggray), _checkerboard.corners, cvSize(5,5),cvSize(-1,-1),
+			 cvTermCriteria(CV_TERMCRIT_ITER,20,1e-2));
+#else
             cvFindCornerSubPix(pimggray, &_checkerboard.corners[0], _checkerboard.corners.size(), cvSize(5,5),cvSize(-1,-1),
                                cvTermCriteria(CV_TERMCRIT_ITER,20,1e-2));
+#endif
         }
         else
             _checkerboard.corners.resize(0);
@@ -213,10 +238,25 @@ private:
                 CvMat* rotation_vectors = cvCreateMat(_vNumPointsPerImage.size(),3,CV_32FC1);
                 CvMat* translation_vectors = cvCreateMat(_vNumPointsPerImage.size(),3,CV_32FC1);
                 
+#if ( CV_MAJOR_VERSION >= 4)
+		// FIX ME need to copy object_points to objectPoint
+		std::vector<std::vector<cv::Point3f> > objectPoints;
+		std::vector<std::vector<cv::Point2f> > imagePoints;
+		std::vector<cv::Mat> rvecs;
+		std::vector<cv::Mat> tvecs;
+		cv::Mat stdDeviationsIntrinsics, stdDeviationsExtrinsics, perViewErrors;
+		cv::calibrateCamera(objectPoints, imagePoints,
+				    cv::Size(frame->width,frame->height),
+				    cv::cvarrToMat(_intrinsic_matrix),
+				    cv::cvarrToMat(_distortion_coeffs),
+				    rvecs, tvecs,
+				    stdDeviationsIntrinsics, stdDeviationsExtrinsics, perViewErrors); //rotation_vectors, translation_vectors,
+#else
                 cvCalibrateCamera2(&object_points, &image_points,
                                    &point_counts, cvSize(frame->width,frame->height),
                                    _intrinsic_matrix, _distortion_coeffs,
                                    rotation_vectors, translation_vectors, 0);
+#endif
 
                 double err = 0;
                 int off = 0;
@@ -227,8 +267,17 @@ private:
                     cvInitMatHeader(&rotation_vector, 3, 1, CV_32FC1, &rotation_vectors->data.fl[3*i]);
                     cvInitMatHeader(&translation_vector, 3, 1, CV_32FC1, &translation_vectors->data.fl[3*i]);
                     CvMat* new_image_points = cvCreateMat(_vNumPointsPerImage[i], 2, CV_32FC1);
+#if ( CV_MAJOR_VERSION >= 4)
+		    cv::projectPoints(cv::cvarrToMat(&cur_object_points),
+				      cv::cvarrToMat(&rotation_vector),
+				      cv::cvarrToMat(&translation_vector),
+				      cv::cvarrToMat(&_intrinsic_matrix),
+				      cv::cvarrToMat(&_distortion_coeffs),
+				      cv::cvarrToMat(&new_image_points));
+#else
                     cvProjectPoints2(&cur_object_points, &rotation_vector, &translation_vector, _intrinsic_matrix,
                                      _distortion_coeffs, new_image_points);
+#endif
 
                     for(int j = 0; j < _vNumPointsPerImage[i]; ++j)
                         err += SQR(new_image_points->data.fl[2*j]-_vAllPoints[off+j].x) + SQR(new_image_points->data.fl[2*j+1]-_vAllPoints[off+j].y);
@@ -257,10 +306,15 @@ private:
                 if( _pUndistortionMapY == NULL )
                     _pUndistortionMapY = cvCreateImage( cvSize(frame->width, frame->height), IPL_DEPTH_32F, 1);
 
-#ifdef HAVE_CV_UNDISTORT_RECTIFY_MAP // for newer opencv versions, *have* to use cvInitUndistortRectifyMap
+#if defined(HAVE_CV_UNDISTORT_RECTIFY_MAP) || ( CV_MAJOR_VERSION >= 4) // for newer opencv versions, *have* to use cvInitUndistortRectifyMap
                 float feye[9] = {1,0,0,0,1,0,0,0,1};
                 CvMat eye = cvMat(3,3,CV_32FC1, feye);
+#if CV_MAJOR_VERSION >= 4
+		cv::Size size;
+		cv::initUndistortRectifyMap(cv::cvarrToMat(&_intrinsic_matrix),cv::cvarrToMat(&_distortion_coeffs),cv::cvarrToMat(&eye),cv::cvarrToMat(&_intrinsic_matrix),size,CV_32FC1,cv::cvarrToMat(_pUndistortionMapX),cv::cvarrToMat(_pUndistortionMapY));
+#else
                 cvInitUndistortRectifyMap(_intrinsic_matrix,_distortion_coeffs,&eye,_intrinsic_matrix,_pUndistortionMapX, _pUndistortionMapY);
+#endif
 #else
                 cvInitUndistortMap( _intrinsic_matrix, _distortion_coeffs, _pUndistortionMapX, _pUndistortionMapY );
 #endif
@@ -280,14 +334,25 @@ private:
 
                 int ncorners;
                 vector<CvPoint2D32f> corners(_checkerboard.grid3d.size()+64);
+#if ( CV_MAJOR_VERSION >= 4)
+                int allfound = cv::findChessboardCorners( cv::cvarrToMat(pimggray_undist),
+							  _checkerboard.griddims, corners,
+							  CV_CALIB_CB_ADAPTIVE_THRESH );
+#else
                 int allfound = cvFindChessboardCorners( pimggray_undist, _checkerboard.griddims, &corners[0],
                                                         &ncorners, CV_CALIB_CB_ADAPTIVE_THRESH );
+#endif
                 corners.resize(ncorners);
         
                 if(allfound && ncorners == (int)_checkerboard.grid3d.size()) {
                     //cvCvtColor(pimggray,frame,CV_GRAY2RGB);
+#if ( CV_MAJOR_VERSION >= 4)
+		  cornerSubPix(cv::cvarrToMat(pimggray_undist), corners, cvSize(5,5),cvSize(-1,-1),
+                                       cvTermCriteria(CV_TERMCRIT_ITER,20,1e-2));
+#else
                     cvFindCornerSubPix(pimggray_undist, &corners[0], corners.size(), cvSize(5,5),cvSize(-1,-1),
                                        cvTermCriteria(CV_TERMCRIT_ITER,20,1e-2));
+#endif
 
 
                     RaveTransform<float> tlocal = FindTransformation(corners, _checkerboard.grid3d);
@@ -326,8 +391,11 @@ private:
             }
 
             if(allfound && ncorners == (int)_checkerboard.grid3d.size())
+#if ( CV_MAJOR_VERSION >= 4)
+	      cv::drawChessboardCorners(cv::cvarrToMat(frame), _checkerboard.griddims, _checkerboard.corners, 1);
+#else
                 cvDrawChessboardCorners(frame, _checkerboard.griddims, &_checkerboard.corners[0], _checkerboard.corners.size(), 1);
-            
+#endif
             cvShowImage("Checkerboard Detector",frame);
         }
     }
@@ -354,7 +422,11 @@ private:
         CvMat img_points;
         cvInitMatHeader(&img_points, 1,imgpts.size(), CV_32FC2, const_cast<CvPoint2D32f*>(&imgpts[0]));
     
+#if CV_MAJOR_VERSION >= 4
+	cv::solvePnP(cv::cvarrToMat(objpoints), cv::cvarrToMat(&img_points), cv::cvarrToMat(_intrinsic_matrix), cv::cvarrToMat(&kcmat), cv::cvarrToMat(&R3), cv::cvarrToMat(&T3), true, cv::SOLVEPNP_ITERATIVE);
+#else
         cvFindExtrinsicCameraParams2(objpoints, &img_points, _intrinsic_matrix, &kcmat, &R3, &T3);
+#endif
         cvReleaseMat(&objpoints);
         
         double fang = sqrt(fR3[0]*fR3[0] + fR3[1]*fR3[1] + fR3[2]*fR3[2]);

@@ -127,7 +127,7 @@ namespace jsk_pcl_ros
     const pcl::PointCloud<pcl::tracking::ParticleCuboid>& particles,
     const std_msgs::Header& header)
   {
-    if (pub_box_array_.getNumSubscribers() > 0) {
+    if (pub_pose_array_.getNumSubscribers() > 0) {
       jsk_recognition_msgs::WeightedPoseArray weighted_pose_array;
       weighted_pose_array.header = header;
       weighted_pose_array.poses.header = header;

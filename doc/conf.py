@@ -10,6 +10,7 @@ from recommonmark.parser import CommonMarkParser
 
 
 extensions = [
+    'sphinx_markdown_tables',
     'sphinx.ext.mathjax',
 ]
 
@@ -178,7 +179,7 @@ latex_elements = {
 
     # Additional stuff for the LaTeX preamble.
     'preamble': "".join((
-        '\usepackage[utf8]{inputenc}',
+        "\\usepackage[utf8]{inputenc}",
         # NO-BREAK SPACE
         '\DeclareUnicodeCharacter{00A0}{ }',
         # BOX DRAWINGS LIGHT VERTICAL AND RIGHT

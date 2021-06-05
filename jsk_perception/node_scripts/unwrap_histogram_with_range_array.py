@@ -12,14 +12,15 @@ import rospy
 class HistogramWithRangeArrayUnwrapper(ConnectionBasedTransport):
     def __init__(self):
         super(HistogramWithRangeArrayUnwrapper, self).__init__()
+        self.index = rospy.get_param('~index', 0)
         self._pub = self.advertise("~output", HistogramWithRange, queue_size=1)
     def subscribe(self):
         self._sub = rospy.Subscriber("~input", HistogramWithRangeArray, self.callback)
     def unsubscribe(self):
         self._sub.unregister()
     def callback(self, msg):
-        if len(msg.histograms) > 0:
-            self._pub.publish(msg.histograms[0])
+        if len(msg.histograms) > self.index:
+            self._pub.publish(msg.histograms[self.index])
 
 if __name__ == "__main__":
     rospy.init_node("unwrap_histogram_with_range_array")

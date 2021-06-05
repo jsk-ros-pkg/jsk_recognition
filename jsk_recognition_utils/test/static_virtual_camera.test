@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_recognition_utils)/sample/sample_static_virtual_camera.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_static_virtual_camera"
+        name="test_static_virtual_camera"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="60" retry="3">
+    <rosparam>
+      topic_0: /static_virtual_camera/image_color
+      timeout_0: 60
+      topic_1: /static_virtual_camera/camera_info
+      timeout_1: 60
+    </rosparam>
+  </test>
+
+</launch>

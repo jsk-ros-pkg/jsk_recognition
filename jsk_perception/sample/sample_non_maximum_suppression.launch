@@ -1,0 +1,39 @@
+<launch>
+  <arg name="gui" default="true"/>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
+
+  <include file="$(find jsk_perception)/sample/sample_selective_search.launch">
+    <arg name="gui" value="false"/>
+    <arg name="INPUT_IMAGE" default="$(arg INPUT_IMAGE)" />
+  </include>
+
+  <node name="non_maximum_suppression"
+        pkg="jsk_perception" type="non_maximum_suppression.py">
+    <remap from="~input" to="selective_search/output"/>
+    <rosparam>
+      threshold: 0.0
+    </rosparam>
+  </node>
+
+  <node name="draw_rects_nms"
+        pkg="jsk_perception" type="draw_rects">
+    <remap from="~input" to="$(arg INPUT_IMAGE)"/>
+    <remap from="~input/rects" to="non_maximum_suppression/output"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="tile_image"
+          pkg="jsk_perception" type="tile_image.py">
+      <rosparam>
+        input_topics:
+          - draw_rects/output
+          - draw_rects_nms/output
+      </rosparam>
+    </node>
+
+    <node name="image_view"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="tile_image/output"/>
+    </node>
+  </group>
+</launch>

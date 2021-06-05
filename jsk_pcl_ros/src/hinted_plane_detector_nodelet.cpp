@@ -211,7 +211,7 @@ namespace jsk_pcl_ros {
     const jsk_recognition_utils::ConvexPolygon::Ptr hint_convex,
     pcl::PointIndices& output)
   {
-    if (enable_density_filtering_) {
+    if (enable_euclidean_filtering_) {
       pcl::EuclideanClusterExtraction<pcl::PointNormal> ec;
       ec.setClusterTolerance(euclidean_clustering_filter_tolerance_);
       pcl::search::KdTree<pcl::PointNormal>::Ptr tree

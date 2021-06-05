@@ -80,6 +80,7 @@ namespace jsk_pcl_ros_utils
     ////////////////////////////////////////////////////////
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     bool approximate_sync_;
+    int queue_size_;
     int extract_num_;
     boost::mutex mutex_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;

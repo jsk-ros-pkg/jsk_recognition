@@ -1,0 +1,19 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml"/>
+
+  <node name="pointcloud_xyzrgb_to_xyz"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/PointCloudXYZRGBToXYZ">
+    <remap from="~input" to="/right_hand_camera/depth_registered/points"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_pointcloud_xyzrgb_to_xyz.rviz"/>
+  </group>
+
+</launch>

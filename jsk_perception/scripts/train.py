@@ -10,6 +10,9 @@ import os
 import sys
 import yaml
 
+import cv2
+
+cv2.setNumThreads(0)
 # chainer
 import chainer
 from chainer import serializers
@@ -42,7 +45,6 @@ class SSDDataset(chainer.dataset.DatasetMixin):
             if os.path.splitext(name)[1] != '.jpg':
                 continue
             self.img_filenames.append(os.path.join(base_dir, name))
-        print("------!")
 
     def __len__(self):
         return len(self.img_filenames)
@@ -152,13 +154,13 @@ if __name__ == '__main__':
     p.add_argument("--val", help="path to validation dataset directory. If this argument is not specified, train dataset is used with ratio train:val = 8:2.", default=None)
     p.add_argument("--base-model", help="base model name", default="voc0712")
     p.add_argument("--batchsize", "-b", type=int, default=16)
-    p.add_argument("--iteration", type=int, default=120000)
+    p.add_argument("--iteration", type=int, default=20000)
     p.add_argument("--gpu", "-g", type=int, default=-1)  # use CPU by default
     p.add_argument("--out", "-o", type=str, default="results")
     p.add_argument("--resume", type=str, default="")
     p.add_argument("--lr", type=float, default=1e-4)
     p.add_argument("--val-iter", type=int, default=100)
-    p.add_argument("--log-iter", type=int, default=10)
+    p.add_argument("--log-iter", type=int, default=1)
     p.add_argument("--model-iter", type=int, default=200)
 
     args = p.parse_args()
@@ -196,10 +198,9 @@ if __name__ == '__main__':
 
     train = TransformDataset(
         train, Transform(model.coder, model.insize, model.mean))
-    train_iter = chainer.iterators.MultiprocessIterator(
+    train_iter = chainer.iterators.MultithreadIterator(
         train, args.batchsize)
 
-    print("test")
     test_iter = chainer.iterators.SerialIterator(
         test, args.batchsize,
         repeat=False, shuffle=False)
@@ -217,7 +218,7 @@ if __name__ == '__main__':
         train_iter, optimizer, device=args.gpu)
     trainer = training.Trainer(
         updater, (args.iteration, "iteration"), args.out)
-    print("aaa")
+
     val_interval = args.val_iter, "iteration"
     trainer.extend(
         DetectionVOCEvaluator(
@@ -235,16 +236,12 @@ if __name__ == '__main__':
         trigger=log_interval)
     trainer.extend(extensions.ProgressBar(update_interval=10))
 
-    print("bbb")
-
     trainer.extend(extensions.snapshot(), trigger=val_interval)
     trainer.extend(
         extensions.snapshot_object(model, 'model_iter_{.updater.iteration}'),
         trigger=(args.model_iter, 'iteration'))
 
-    print("ccc")
     if args.resume:
         serializers.load_npz(args.resume, trainer)
 
     trainer.run()
-    print("ddd")

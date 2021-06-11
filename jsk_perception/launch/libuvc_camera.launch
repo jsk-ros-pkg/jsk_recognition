@@ -6,6 +6,7 @@
   <arg name="width" />
   <arg name="video_mode" />
   <arg name="frame_rate" />
+  <arg name="brightness" />
   <arg name="gui" default="false" />
 
   <group ns="$(arg camera_name)">
@@ -16,6 +17,7 @@
       <param name="width" value="$(arg width)" />
       <param name="video_mode" value="$(arg video_mode)" />
       <param name="frame_rate" value="$(arg frame_rate)" />
+      <param name="brightness" value="$(arg brightness)" />
       <param name="time_method" value="start" />
       <param name="auto_exposure" value="1" />
       <param name="auto_white_balance" value="true" />

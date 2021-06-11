@@ -65,6 +65,38 @@ def main():
         extract=False,
     )
 
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/insta360_air.bag.tgz',
+        url='https://drive.google.com/uc?id=1f99gIK92EsGvVI5ahHAV5g8xoEHyQhtv',
+        md5='762eb0591f0ab03718733596c8d01728',
+        extract=True,
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/fisheye_stitcher_grid_xd_yd_3840x1920_fetch15.yml.gz',
+        url='https://drive.google.com/uc?id=1WKnd-gDgp3GCWOAPtwg1lkrPqBiIyB_l',
+        md5='edf9b561446db316925a110841e9a918',
+        extract=False,
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/fisheye_stitcher_grid_xd_yd_3840x1920_fetch1075.yml.gz',
+        url='https://drive.google.com/uc?id=1SZwyUT14uEDuKvBzv6K0iOcYJoIIbaI0',
+        md5='762f88556a8e43551aef261e25e2468b',
+        extract=False,
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/fisheye_stitcher_grid_xd_yd_3840x1920_oem.yml.gz',
+        url='https://drive.google.com/uc?id=1VFK46da5CMIYaUaDw5DVy2ZQOTrOn-dO',
+        md5='2c16173cb823a1d77c14a2272e224e00',
+        extract=False,
+    )
+
 
 if __name__ == '__main__':
     main()

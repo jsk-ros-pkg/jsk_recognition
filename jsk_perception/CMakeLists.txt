@@ -128,6 +128,7 @@ generate_dynamic_reconfigure_options(
   cfg/BackgroundSubstraction.cfg
   cfg/GrabCut.cfg
   cfg/Fisheye.cfg
+  cfg/DualFisheye.cfg
   cfg/SlidingWindowObjectDetector.cfg
   cfg/ImagePublisher.cfg
   cfg/ExtractImageChannel.cfg
@@ -229,6 +230,12 @@ jsk_add_nodelet(src/sparse_image_decoder.cpp "jsk_perception/SparseImageDecoder"
 jsk_add_nodelet(src/color_histogram.cpp "jsk_perception/ColorHistogram" "color_histogram")
 jsk_add_nodelet(src/background_substraction_nodelet.cpp "jsk_perception/BackgroundSubstraction" "background_substraction")
 jsk_add_nodelet(src/fisheye_to_panorama.cpp "jsk_perception/FisheyeToPanorama" "fisheye_to_panorama")
+# See https://github.com/drNoob13/fisheyeStitcher#pre-requisite
+if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_GREATER "7.0" AND # >= 7.1
+   "${OpenCV_VERSION}" VERSION_GREATER "2.9.9" AND # >= 3.0.0
+   "${CMAKE_MAJOR_VERSION}" VERSION_GREATER "2") # >= 3
+  jsk_add_nodelet(src/dual_fisheye_to_panorama.cpp "jsk_perception/DualFisheyeToPanorama" "dual_fisheye_to_panorama")
+endif()
 jsk_add_nodelet(src/grabcut_nodelet.cpp "jsk_perception/GrabCut" "grabcut")
 jsk_add_nodelet(src/slic_superpixels.cpp "jsk_perception/SLICSuperPixels" "slic_super_pixels")
 jsk_add_nodelet(src/rgb_decomposer.cpp "jsk_perception/RGBDecomposer" "rgb_decomposer")
@@ -294,10 +301,19 @@ if(robot_self_filter_FOUND)
 endif()
 
 # compiling jsk_perception library for nodelet
-add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
-  slic/slic.cpp
-  src/histogram_of_oriented_gradients.cpp
-  )
+if(TARGET JSK_NODELET_${PROJECT_NAME}_dual_fisheye_to_panorama)
+  add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
+    slic/slic.cpp
+    src/histogram_of_oriented_gradients.cpp
+    include/jsk_perception/fisheye_stitcher.cpp
+    )
+else()
+  add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
+    slic/slic.cpp
+    src/histogram_of_oriented_gradients.cpp
+    )
+endif()
+
 
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${libcmt_LIBRARIES} yaml-cpp)
 if(robot_self_filter_FOUND)
@@ -480,6 +496,9 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/filter_mask_image_with_size.test)
     jsk_add_rostest(test/fisheye_ray.test)
     jsk_add_rostest(test/fisheye_to_panorama.test)
+    if(TARGET JSK_NODELET_${PROJECT_NAME}_dual_fisheye_to_panorama)
+      jsk_add_rostest(test/dual_fisheye_to_panorama.test)
+    endif()
     jsk_add_rostest(test/flow_velocity_thresholding.test)
     jsk_add_rostest(test/gaussian_blur.test)
     jsk_add_rostest(test/grabcut.test)
@@ -488,6 +507,7 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/image_publisher.test)
     jsk_add_rostest(test/image_time_diff.test)
     jsk_add_rostest(test/image_to_label.test)
+    add_rostest(test/insta360_air.test)
     jsk_add_rostest(test/kalman_filtered_objectdetection_marker.test)
     jsk_add_rostest(test/kmeans.test)
     jsk_add_rostest(test/lab_decomposer.test)
@@ -532,6 +552,7 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/solidity_rag_merge.test)
     jsk_add_rostest(test/speak_when_label_found.test)
     jsk_add_rostest(test/split_fore_background.test)
+    jsk_add_rostest(test/split_image.test)
     jsk_add_rostest(test/tabletop_color_difference_likelihood.test)
     jsk_add_rostest(test/tile_image.test)
     jsk_add_rostest(test/unapply_mask_image.test)

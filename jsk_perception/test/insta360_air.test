@@ -1,0 +1,23 @@
+<launch>
+
+  <node pkg="rosbag" type="play" name="rosbag_play"
+        args="$(find jsk_perception)/sample/data/insta360_air.bag --loop --clock" output="screen" />
+
+  <include file="$(find jsk_perception)/sample/sample_insta360_air.launch">
+    <arg name="publish_image" value="false" />
+    <arg name="create_panorama" value="false" />
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_insta360_air"
+        name="test_insta360_air"
+        pkg="jsk_tools" type="test_topic_published.py">
+    <rosparam>
+      topic_0: /split_image/output/vertical00/horizontal00
+      timeout_0: 10
+      topic_1: /split_image/output/vertical00/horizontal01
+      timeout_1: 10
+    </rosparam>
+  </test>
+
+</launch>

@@ -79,6 +79,7 @@ generate_dynamic_reconfigure_options(
   cfg/BoundingBoxArrayToBoundingBox.cfg
   cfg/CloudOnPlane.cfg
   cfg/ClusterPointIndicesToPointIndices.cfg
+  cfg/ClusterPointIndicesLabelFilter.cfg
   cfg/ColorizeDistanceFromPlane.cfg
   cfg/DelayPointCloud.cfg
   cfg/MaskImageToDepthConsideredMaskImage.cfg
@@ -155,6 +156,8 @@ jsk_pcl_util_nodelet(src/planar_pointcloud_simulator_nodelet.cpp
   "jsk_pcl_utils/PlanarPointCloudSimulator" "planar_pointcloud_simulator")
 jsk_pcl_util_nodelet(src/plane_rejector_nodelet.cpp
   "jsk_pcl_utils/PlaneRejector" "plane_rejector")
+jsk_pcl_util_nodelet(src/cluster_point_indices_label_filter_nodelet.cpp
+  "jsk_pcl_utils/ClusterPointIndicesLabelFilter" "cluster_point_indices_label_filter")
 if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
   jsk_pcl_util_nodelet(src/cluster_point_indices_to_point_indices_nodelet.cpp
     "jsk_pcl_utils/ClusterPointIndicesToPointIndices" "cluster_point_indices_to_point_indices")
@@ -267,6 +270,7 @@ if (CATKIN_ENABLE_TESTING)
     roslaunch_add_file_check(test/add_point_indices.test)
     add_rostest(test/cloud_on_plane.test)
     add_rostest(test/cloud_on_plane_info.test)
+    add_rostest(test/cluster_point_indices_label_filter.test)
     add_rostest(test/cluster_point_indices_to_point_indices.test)
     add_rostest(test/colorize_distance_from_plane.test)
     add_rostest(test/colorize_height_2d_mapping.test)
@@ -316,6 +320,7 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/tf_transform_cloud.test)
     add_rostest(test/transform_pointcloud_in_bounding_box.test)
     add_rostest(test/centroid_publisher.test)
+    add_rostest(test/xyz_to_screenpoint.test)
     roslaunch_add_file_check(test/subtract_point_indices.test)
   endif()
 endif()

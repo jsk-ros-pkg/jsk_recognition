@@ -1,0 +1,23 @@
+<launch>
+  <arg name="camera_name" default="elp_usb_4k" />
+  <arg name="vendor" default="0x32e4" />
+  <arg name="product" default="0x0317"/>
+  <arg name="width" default="3840" />
+  <arg name="height" default="2160" />
+  <arg name="video_mode" default="mjpeg" />
+  <arg name="frame_rate" default="30" />
+  <arg name="brightness" default="0" />
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_perception)/launch/libuvc_camera.launch">
+    <arg name="camera_name" value="$(arg camera_name)" />
+    <arg name="vendor" value="$(arg vendor)" />
+    <arg name="product" value="$(arg product)" />
+    <arg name="height" value="$(arg height)" />
+    <arg name="width" value="$(arg width)" />
+    <arg name="video_mode" value="$(arg video_mode)" />
+    <arg name="frame_rate" value="$(arg frame_rate)" />
+    <arg name="brightness" value="$(arg brightness)" />
+    <arg name="gui" value="$(arg gui)" />
+  </include>
+</launch>

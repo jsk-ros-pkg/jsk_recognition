@@ -1,0 +1,16 @@
+<launch>
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_xyz_to_screenpoint.launch">
+  </include>
+
+  <test test-name="test_xyz_to_screenpoint"
+        name="test_xyz_to_screenpoint"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /xyz_to_screenpoint/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>
+    

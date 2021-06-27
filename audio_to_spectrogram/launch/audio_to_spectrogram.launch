@@ -28,7 +28,7 @@
   </node>
 
   <!-- convert audio topic to spectrum topic -->
-  <node pkg="audio_to_spectrogram" type="audio_to_spectrum.py" name="audio_to_spectrum" respawn="true">
+  <node pkg="audio_to_spectrogram" type="audio_to_spectrum.py" name="audio_to_spectrum" respawn="true" >
     <remap from="~audio" to="$(arg audio_topic)" />
     <rosparam subst_value="true">
       n_channel: $(arg n_channel)
@@ -42,7 +42,7 @@
   </node>
 
   <!-- convert spectrum topic to spectrogram topic -->
-  <node pkg="audio_to_spectrogram" type="spectrum_to_spectrogram.py" name="spectrum_to_spectrogram" respawn="true">
+  <node pkg="audio_to_spectrogram" type="spectrum_to_spectrogram.py" name="spectrum_to_spectrogram" respawn="true" >
     <remap from="~spectrum" to="/audio_to_spectrum/spectrum_filtered" />
     <rosparam subst_value="true">
       image_height: 300

@@ -118,6 +118,7 @@
   <exec_depend>octomap_ros</exec_depend>
   <exec_depend>openni2_launch</exec_depend>
   <exec_depend>rosbag</exec_depend>
+  <test_depend>jsk_perception</test_depend>
   <test_depend>jsk_tools</test_depend>
   <test_depend>roslaunch</test_depend>
   <test_depend>rostest</test_depend>

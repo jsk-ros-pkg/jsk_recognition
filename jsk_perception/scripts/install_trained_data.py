@@ -143,8 +143,8 @@ def main():
     download_data(
         pkg_name=PKG,
         path='trained_data/fcn8s_voc.npz',
-        url = 'https://drive.google.com/uc?id=0B9P1L--7Wd2vWG5MeUEwWmxudU0',
-        md5 = '75128c0e175767fc82a7d4f1e21f4009',
+        url='https://drive.google.com/uc?id=1l3mhrD4GEnS7NJld0Ba41kXLETgFfsfu',
+        md5='75128c0e175767fc82a7d4f1e21f4009',
     )
 
     # node_scripts/vgg16_object_recognition.py
@@ -228,13 +228,13 @@ def main():
     download_data(
         pkg_name=PKG,
         path='trained_data/resnet_lsvrc2012_mean.npy',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vTDV3ZzUyTlBFZE0',
+        url='https://drive.google.com/uc?id=18gXkkbkTZnw1UDSQcgI0zUoXv2Cj_3Kf',
         md5='00431426c4fab22985885da0e2ff31b8',
     )
     download_data(
         pkg_name=PKG,
         path='trained_data/resnet152_from_caffe.npz',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vQVBodlFsMnpGbkU',
+        url='https://drive.google.com/uc?id=1WQFpSzrk6jLlf_kFX0IPlN7K-P3IUFW0',
         md5='77fe66a229a2444688a21e3b63fa0661',
     )
 

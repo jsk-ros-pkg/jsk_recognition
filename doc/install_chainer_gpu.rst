@@ -1,16 +1,34 @@
-Install Chainer with GPU Support
-================================
+Install Chainer/PyTorch with GPU Support
+========================================
 
-This documentation describes how to install Chainer with GPU suppport.
+This documentation describes how to install Chainer/PyTorch with GPU suppport.
 
 
 Requirements
 ------------
 
 - Nvidia GPU (ex. K80, TitanX, GTX 1080Ti).
-- Ubuntu (ex. 14.04, 16.04).
+- Ubuntu (ex. 14.04, 16.04, 18.04).
 
   You can check whether your PC has a GPU by ``lspci | grep -i nvidia``.
+
+Version Compatibilities
+-----------------------
+
+Ubuntu 18.04 provies CUDA 9.1 from https://packages.ubuntu.com/bionic/nvidia-cuda-dev
+
+- Chainer
+
+  - chainer == 6.7.0 (last version supoprting python2. See https://github.com/chainer/chainer/releases/tag/v6.7.0)
+  - cupy >=6.7.0,<7.0.0 (chainer v6.7.0 requires cupy/cudnn for hardware acceleration support https://docs.chainer.org/en/v6.7.0/install.html)
+  - cuDNN < 8 (cupy 6.7.0 requires cuDNN v5000= and <=v7999)
+  - CUDA 10.2 (cuDNN v7.6.5 requires CUDA 10.2 https://developer.nvidia.com/rdp/cudnn-archive)
+
+- PyTorch
+
+  - pytorch >= 1.4.0 (hand_pose_estimation_2d)
+  - CUDA >= 9.2 (Minimum required version for PyTorch https://pytorch.org/get-started/previous-versions/#v140)
+  - Driver Version >= 396.26 (From CUDA Toolkit and Corresponding Driver Versions in https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html)
 
 Install CUDA
 ------------
@@ -29,6 +47,26 @@ Install CUDA
     # Excute 1-3 and then, change step 4 as follows:
     sudo apt install cuda-9-2
 
+    # If you'd like to use CUDA10.2 on Ubuntu 18.04.
+    # goto https://developer.nvidia.com/cuda-10.2-download-archive
+    # Choose the green buttons on the web page like x86_64 -> Ubuntu -> version -> deb (network).
+    # Excute all steps, but change the last step as follows:
+    sudo apt install cuda-10-2
+
+- If you install CUDA from nvidia, Make sure to uninstall CUDA tools from packages.ubuntu.com
+
+    sudo apt remove nvidia-cuda-toolkit
+    sudo apt-remove nvidia-cuda-dev
+
+- Also set environment variables to ~/.bashrc
+
+    # set PATH for cuda 10.0 installation
+    if [ -d "/usr/local/cuda-10.2/bin/" ]; then
+        export PATH=/usr/local/cuda-10.2/bin${PATH:+:${PATH}}
+        export LD_LIBRARY_PATH=/usr/local/cuda-10.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+        export CFLAGS=-I/usr/local/cuda-10.2/include
+    fi
+
 - After rebooting, you can see the memory usage of your GPU by ``nvidia-smi``
 
 Install CUDNN
@@ -45,6 +83,9 @@ Install CUDNN
    sudo dpkg -i libcudnn7_7.3.1.20-1+cuda9.2_amd64.deb
    # Download cuDNN v7.3.1 Developer Library for Ubuntu16.04 (Deb)
    sudo dpkg -i libcudnn7-dev_7.3.1.20-1+cuda9.2_amd64.deb
+   # Download cuDNN v7.6.5 Developer Library for Ubuntu18.04 (Deb)
+   sudo dpkg -i libcudnn7_7.6.5.32-1+cuda10.2_amd64.deb
+   sudo dpkg -i libcudnn7-dev_7.6.5.32-1+cuda10.2_amd64.deb
 
 Install Chainer
 ---------------
@@ -80,7 +121,7 @@ Install Cupy
     pip install -vvv cupy --no-cache-dir
 
 
-Try Samples
+Try Chainer Samples
 -----------
 
 You can try to run samples to check if the installation succeeded::
@@ -88,6 +129,13 @@ You can try to run samples to check if the installation succeeded::
     roslaunch jsk_perception sample_fcn_object_segmentation.launch gpu:=0
     roslaunch jsk_perception sample_people_pose_estimation_2d.launch GPU:=0
     roslaunch jsk_perception sample_regional_feature_based_object_recognition.launch GPU:=0
+
+Try PyTorch Samples
+-----------
+
+You can try to run samples to check if the installation succeeded::
+
+    roslaunch jsk_perception sample_hand_pose_estimation_2d.launch gpu:=0
 
 Trouble Shooting
 ----------------

@@ -17,10 +17,12 @@ import pkg_resources
 import sys
 
 if LooseVersion(pkg_resources.get_distribution("torch").version) \
-       < LooseVersion('1.4.0'):
-    print('''torch >= 1.4.0 is recommended:
-
-    sudo pip install torch==1.4.0 torchvision==0.5.0
+       < LooseVersion('1.1.0'):
+    print('''torch >= 1.1.0 is required:
+    Download wheel file from https://download.pytorch.org/whl/cu90/torch_stable.html (melodic)
+    and install with pip as follow:
+    pip install --user torch-1.1.0-cp27-cp27mu-linux_x86_64.whl
+    pip install --user torchvision-0.3.0-cp27-cp27mu-manylinux1_x86_64.whl
 
 ''', file=sys.stderr)
     sys.exit(1)

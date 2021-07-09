@@ -16,7 +16,7 @@ if LooseVersion(pkg_resources.get_distribution("chainer").version) >= LooseVersi
 c.f https://github.com/jsk-ros-pkg/jsk_recognition/pull/2485
 ''', file=sys.stderr)
     sys.exit(1)
-if [p for p in list(itertools.chain(*[pkg_resources.find_distributions(_) for _ in sys.path])) if "cupy-" in p.project_name] == []:
+if [p for p in list(itertools.chain(*[pkg_resources.find_distributions(_) for _ in sys.path])) if "cupy-" in p.project_name or "cupy" == p.project_name] == []:
     print('''Please install CuPy
 
     sudo pip install cupy-cuda[your cuda version]

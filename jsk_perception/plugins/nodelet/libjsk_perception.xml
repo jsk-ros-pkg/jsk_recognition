@@ -282,4 +282,9 @@
          type="jsk_perception::DrawRects"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_perception/TrTrTrackerRos"
+         type="jsk_perception::TrTrTrackerRos"
+         base_class_type="nodelet::Nodelet">
+  </class>
+
 </library>

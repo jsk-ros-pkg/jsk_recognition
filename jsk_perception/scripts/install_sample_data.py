@@ -36,6 +36,18 @@ def main():
         extract=True,
     )
 
+    # sample/sample_tsm_action_recognition.launch
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/2021-04-20-20-48-47_hand_gesture.bag',
+        url='https://drive.google.com/uc?id=1yg0Pj2_s-KxxydqGvttEPxdZ9OIZh2d-',
+        md5='1f8156a3340874b167ffcb3f980ba5ad',
+        extract=False,
+        compressed_bags=[
+            'sample/data/2021-04-20-20-48-47_hand_gesture.bag',
+        ],
+    )
+
     # sample/sample_regional_feature_based_object_recognition.launch
     download_data(
         pkg_name=PKG,

@@ -191,7 +191,34 @@ namespace jsk_recognition_utils
      * @brief
      * Compute a point on normal from alpha parameter.
      */
-    virtual void point(double alpha, Eigen::Vector3f& ouptut);
+    virtual void point(double alpha, Eigen::Vector3f& ouptut) const;
+
+    /**
+     * @brief
+     * Compute a pair of nearest points between two lines and assign it to output1 and output2.
+     * the line and the other mustn't be parallel.
+     */
+    virtual void nearestPoints(const Line& other, Eigen::Vector3f& output1, Eigen::Vector3f& output2) const;
+
+    /**
+     * @brief
+     * Compute a common perpendicular.
+     * the line and the other mustn't be parallel.
+     */
+    virtual Line::Ptr commonPerpendicular(const Line& other) const;
+
+    /**
+     * @brief
+     * Compute intersection. the line and the other must intersect.
+     */
+    virtual Eigen::Vector3f intersection(const Line& other) const;
+
+    /**
+     * @brief
+     * Compute intersection and assign it to output. the line and the other must intersect.
+     */
+    virtual void intersection(const Line& other, Eigen::Vector3f& output) const;
+
   protected:
     Eigen::Vector3f direction_;
     Eigen::Vector3f origin_;

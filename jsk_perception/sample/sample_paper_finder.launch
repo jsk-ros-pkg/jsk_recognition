@@ -1,0 +1,39 @@
+<launch>
+
+  <arg name="gui" default="true"/>
+  <arg name="input_image" default="/d435/color/image_raw" />
+  <arg name="input_camera_info" default="/d435/color/camera_info" />
+  <arg name="input_depth_image" default="/d435/aligned_depth_to_color/image_raw" />
+
+  <include file="$(find jsk_perception)/sample/include/play_d435_floor.xml"/>
+
+  <node name="paper_finder"
+        pkg="jsk_perception" type="paper_finder.py"
+        output="screen" >
+    <remap from="~input" to="$(arg input_image)" />
+    <remap from="~input/depth" to="$(arg input_depth_image)" />
+    <remap from="~input/camera_info" to="$(arg input_camera_info)" />
+    <rosparam>
+      with_depth: true
+      approximate_sync: true
+      length_tolerance: 0.1
+    </rosparam>
+  </node>
+
+  <group ns="paper_finder" >
+    <node name="republish"
+          pkg="image_transport" type="republish"
+          args="raw compressed">
+      <remap from="in" to="output/viz" />
+      <remap from="out" to="output/viz" />
+    </node>
+  </group>
+
+  <group if="$(arg gui)" >
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_perception)/sample/config/paper_finder.rviz">
+    </node>
+  </group>
+
+</launch>

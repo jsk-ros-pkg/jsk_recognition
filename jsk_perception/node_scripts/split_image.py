@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import copy
 import cv_bridge
 import rospy
+import threading
 from sensor_msgs.msg import Image
 from jsk_topic_tools import ConnectionBasedTransport
 
@@ -24,6 +26,10 @@ class SplitImage(ConnectionBasedTransport):
                         queue_size=10))
             self.pubs.append(pubs)
         self.bridge = cv_bridge.CvBridge()
+        rate = rospy.get_param('~rate', 30.0)
+        rospy.Timer(rospy.Duration(1.0 / rate), self._timer_cb)
+        self.msg = None
+        self.lock = threading.Lock()
 
     def subscribe(self):
         self.sub = rospy.Subscriber('~input', Image, self._split_cb)
@@ -32,7 +38,15 @@ class SplitImage(ConnectionBasedTransport):
         self.sub.unregister()
 
     def _split_cb(self, msg):
-        img = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+        with self.lock:
+            self.msg = msg
+
+    def _timer_cb(self, event):
+        with self.lock:
+            if self.msg is None:
+                return
+            header = copy.deepcopy(self.msg.header)
+            img = self.bridge.imgmsg_to_cv2(self.msg)
         height, width, _ = img.shape
         for v in range(self.vertical_parts):
             for h in range(self.horizontal_parts):
@@ -40,8 +54,9 @@ class SplitImage(ConnectionBasedTransport):
                 h_pixels = float(width) / self.horizontal_parts
                 split_img = img[int(v*v_pixels):int((v+1)*v_pixels),
                                 int(h*h_pixels):int((h+1)*h_pixels)]
-                pub_msg = self.bridge.cv2_to_imgmsg(split_img, encoding='bgr8')
-                pub_msg.header = msg.header
+                pub_msg = self.bridge.cv2_to_imgmsg(split_img,
+                                                    encoding=self.msg.encoding)
+                pub_msg.header = header
                 self.pubs[v][h].publish(pub_msg)
 
 

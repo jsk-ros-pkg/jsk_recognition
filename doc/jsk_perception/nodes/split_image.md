@@ -27,6 +27,10 @@ Split the input image at equal intervals vertically and horizontally.
 
     The number of parts the input image is split horizontally.
 
+* `~rate` (int, default: 30.0)
+
+    The rate to publish splited images.
+
 ## Sample
 ```bash
 roslaunch jsk_perception sample_split_image.launch

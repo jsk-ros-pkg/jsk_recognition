@@ -59,6 +59,8 @@ namespace jsk_perception
     ros::Publisher pub_rects_;
     ros::Publisher pub_objectness_;
     cv::saliency::ObjectnessBING *binger_;
+    double score_threshold_;
+    int max_num_;
   private:
 
   };

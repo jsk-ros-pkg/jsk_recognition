@@ -146,6 +146,8 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
             self.model = torch.jit.load(
                 model_file, map_location=torch.device('cpu'))
             rospy.loginfo('Finished loading SRHandNet model to cpu')
+            if self.gpu >= 0:
+                rospy.loginfo('You need to check version match between PyTorch and CUDA. See https://jsk-docs.readthedocs.io/projects/jsk_recognition/en/latest/install_chainer_gpu.html and https://github.com/jsk-ros-pkg/jsk_recognition/pull/2601#issuecomment-876405219 for more info')
         self.model.eval()
 
     def _get_srhand_pretrained_model(self):

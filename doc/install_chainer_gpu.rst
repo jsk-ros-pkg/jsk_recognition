@@ -85,12 +85,11 @@ Install CUDA
     sudo apt install cuda-9-2
 ```
 
-- Ubuntu 18.04 : You can use CUDA 9.2 by deafult
+- Ubuntu 18.04 : You can use CUDA 9.1 by deafult
 
   ```bash
-  sudo apt remove nvidia-cuda-toolkit
-  sudo apt remove nvidia-cuda-dev
-  ```
+  sudo apt install nvidia-cuda-toolkit
+  sudo apt install nvidia-cuda-dev
 
 - (Experimental) Ubuntu 18.04 : CUDA 10.2 is the latest version which supports `jsk_perception`. Download deb file from https://developer.nvidia.com/cuda-downloads?target_os=Linux::
 

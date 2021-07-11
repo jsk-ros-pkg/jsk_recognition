@@ -72,6 +72,8 @@ add_message_files(
   SegmentArray.msg
   PeoplePose.msg
   PeoplePoseArray.msg
+  HandPose.msg
+  HandPoseArray.msg
   )
 
 # TODO(wkentaro): Most of srv files are duplicated in jsk_pcl_ros,

@@ -135,6 +135,7 @@ generate_dynamic_reconfigure_options(
   cfg/PrimitiveShapeClassifier.cfg
   cfg/Kinfu.cfg
   cfg/PointcloudScreenpoint.cfg
+  cfg/OrganizedStatisticalOutlierRemoval.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -377,6 +378,8 @@ jsk_pcl_nodelet(src/voxel_grid_large_scale_nodelet.cpp
   "jsk_pcl/VoxelGridLargeScale" "voxel_grid_large_scale")
 jsk_pcl_nodelet(src/ppf_registration_nodelet.cpp
   "jsk_pcl/PPFRegistration" "ppf_registration")
+jsk_pcl_nodelet(src/organized_statistical_outlier_removal_nodelet.cpp
+  "jsk_pcl/OrganizedStatisticalOutlierRemoval" "organized_statistical_outlier_removal")
 
 # kinfu.h uses jsk_rviz_plugins/OverlayText.h, but jsk_recognition should not depends on jsk_visualization
 find_package(jsk_rviz_plugins QUIET)
@@ -622,6 +625,7 @@ if (CATKIN_ENABLE_TESTING)
     endif()
     add_rostest(test/test_voxel_grid_downsample.test)
     add_rostest(test/test_voxel_grid_large_scale.test)
+    add_rostest(test/test_organized_statistical_outlier_removal.test)
   endif()
   roslaunch_add_file_check(launch/openni_local.launch)
   roslaunch_add_file_check(launch/openni2_local.launch)

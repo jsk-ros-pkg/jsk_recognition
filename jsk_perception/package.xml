@@ -81,7 +81,7 @@
   <exec_depend version_lt="7.0.0">python-chainer-pip</exec_depend>
   <!-- python-cahiner-pip depends: [cython, python-numpy] in rosdep/python.yaml, which is not installable on python3 environment -->
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-chainercv-pip</exec_depend>
-  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-chainercv-mask-rcnn-pip</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-chainer-mask-rcnn-pip</exec_depend>
   <!-- }} install chainer -->
   <exec_depend>python-dlib</exec_depend>  <!-- pip -->
   <!-- install fcn {{ -->

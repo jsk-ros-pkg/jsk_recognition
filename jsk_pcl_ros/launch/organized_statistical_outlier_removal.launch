@@ -1,0 +1,89 @@
+<launch>
+  <arg name="MANAGER" />
+  <arg name="INPUT_CLOUD" />
+  <arg name="INPUT_MASK" />
+
+  <arg name="launch_manager" default="false" />
+
+  <node pkg="nodelet" type="nodelet" name="$(arg MANAGER)"
+        args="manager" output="screen" if="$(arg launch_manager)" />
+
+  <node name="mask_image_to_indices"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/MaskImageToPointIndices $(arg MANAGER)">
+    <remap from="~input" to="$(arg INPUT_MASK)" />
+  </node>
+  <node name="extract_indices_target"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ExtractIndices $(arg MANAGER)">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <remap from="~indices" to="mask_image_to_indices/output" />
+    <rosparam subst_value="true">
+      keep_organized: true
+      approximate_sync: true
+      queue_size: 100
+    </rosparam>
+  </node>
+  <node name="statistical_outlier_removal"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/OrganizedStatisticalOutlierRemoval $(arg MANAGER)">
+    <remap from="~input" to="extract_indices_target/output" />
+    <rosparam>
+      mean_k: 100
+      stddev: 1.5
+      keep_organized: true
+    </rosparam>
+  </node>
+  <node name="resize_points_publisher_target"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ResizePointsPublisher">
+    <remap from="~input" to="statistical_outlier_removal/output" />
+    <rosparam>
+      step_x: 2
+      step_y: 2
+    </rosparam>
+  </node>
+  <node name="euclidean_clustering"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/EuclideanClustering $(arg MANAGER)">
+    <remap from="~input" to="resize_points_publisher_target/output" />  <!-- depth timestamp -->
+    <rosparam>
+      min_size: 10
+      max_size: 100000
+      tolerance: 0.02
+    </rosparam>
+  </node>
+
+  <node name="segmentation_decomposer"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)">
+    <remap from="~input" to="resize_points_publisher_target/output" />
+    <remap from="~target" to="euclidean_clustering/output" />
+    <rosparam>
+      approximate_sync: false
+      queue_size: 100
+      sort_by: -cloud_size
+      align_boxes: true
+      align_boxes_with_plane: false
+      use_pca: true
+      target_frame_id: base
+    </rosparam>
+  </node>
+
+  <node name="poses_to_pose_target0"
+        pkg="jsk_recognition_utils" type="pose_array_to_pose.py">
+    <remap from="~input" to="segmentation_decomposer/centroid_pose_array" />
+    <rosparam>
+      index: 0
+    </rosparam>
+  </node>
+  <node name="bboxes_to_bbox_target0"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/BoundingBoxArrayToBoundingBox $(arg MANAGER)">
+    <remap from="~input" to="segmentation_decomposer/boxes" />
+    <rosparam>
+      index: 0
+    </rosparam>
+  </node>
+
+</launch>

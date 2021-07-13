@@ -38,6 +38,10 @@ model = None
 set_param = None
 MODELS = ["linear", "quadratic", "quadratic-uv", "quadratic-uv-abs", "quadratic-uv-quadratic", "quadratic-uv-quadratic-abs"]
 
+# use raw_input for python2 c.f. https://stackoverflow.com/questions/5868506/backwards-compatible-input-calls-in-python
+if hasattr(__builtins__, 'raw_input'):
+    input = raw_input
+
 def query_yes_no(question, default=None):
     """Ask a yes/no question via raw_input() and return their answer.
 
@@ -61,7 +65,7 @@ def query_yes_no(question, default=None):
 
     while True:
         sys.stdout.write(question + prompt)
-        choice = raw_input().lower()
+        choice = input().lower()
         if default is not None and choice == '':
             return valid[default]
         elif choice in valid:

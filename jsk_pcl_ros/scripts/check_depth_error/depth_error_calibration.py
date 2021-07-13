@@ -164,7 +164,7 @@ def processData(x, y, u, v, cu, cv, fit = True):
     uu = int(u/10)
     vv = int(v/10)
     with lock:
-        if value_cache.has_key((uu, vv)):
+        if (uu, vv) in value_cache:
             zs = value_cache[(uu, vv)]
             for z in zs:
                 if abs(z - y) < eps_z:
@@ -351,7 +351,7 @@ def generateFrequencyMap():
         max_color = np.uint8([0, 0, 255])
         uu = u
         vv = v
-        if frequency.has_key((uu, vv)):
+        if (uu, vv) in frequency:
             frequency[(uu, vv)] = frequency[(uu, vv)] + len(value_cache[(u, v)])
         else:
             frequency[(uu, vv)] = len(value_cache[(u, v)])

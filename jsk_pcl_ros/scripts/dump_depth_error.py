@@ -12,7 +12,7 @@ data = PlotData()
 
 def callback(msg):
     bin_index = int(msg.true_depth / grid)
-    if not bins.has_key(bin_index):
+    if bin_index not in bins:
         bins[bin_index] = []
     err = msg.true_depth - msg.observed_depth
     bins[bin_index].append((msg, err))

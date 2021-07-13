@@ -494,10 +494,10 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
             vec = chainer.cuda.to_gpu(vec)
         norm = xp.sqrt(xp.sum(vec ** 2, axis=1)) + eps
         vec = vec / norm[:, None]
-        start_end = zip(np.round(np.mgrid[np.vstack(target_candidates_A)[:, 1].reshape(-1, 1):np.vstack(target_candidates_B)[:, 1].reshape(-1, 1):(mid_num * 1j)]).astype(np.int32),
+        start_end = list(zip(np.round(np.mgrid[np.vstack(target_candidates_A)[:, 1].reshape(-1, 1):np.vstack(target_candidates_B)[:, 1].reshape(-1, 1):(mid_num * 1j)]).astype(np.int32),
                         np.round(np.mgrid[np.vstack(target_candidates_A)[:, 0].reshape(-1, 1):np.vstack(
                             target_candidates_B)[:, 0].reshape(-1, 1):(mid_num * 1j)]).astype(np.int32),
-                        np.concatenate([[[index] * mid_num for i in range(len(c))] for index, c in zip(target_indices, target_candidates_B)]),)
+                        np.concatenate([[[index] * mid_num for i in range(len(c))] for index, c in zip(target_indices, target_candidates_B)]),))
 
         v = score_mid[np.concatenate(
             start_end, axis=1).tolist()].reshape(-1, mid_num, 2)

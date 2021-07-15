@@ -17,7 +17,8 @@ import threading
 
 from sound_play.libsoundplay import SoundClient
 
-from sensor_msgs.msg import Image, PanoramaInfo
+from sensor_msgs.msg import Image
+from jsk_recognition_msgs.msg import PanoramaInfo
 from jsk_recognition_msgs.msg import RectArray, ClassificationResult
 from jsk_recognition_msgs.msg import BoundingBox, BoundingBoxArray
 from geometry_msgs.msg import Twist, PointStamped, PoseStamped

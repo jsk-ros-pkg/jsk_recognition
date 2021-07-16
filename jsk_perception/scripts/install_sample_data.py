@@ -97,6 +97,14 @@ def main():
         extract=False,
     )
 
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/sample_rect_array_in_panorama_to_bounding_box_array.bag',
+        url='https://drive.google.com/uc?id=1f613TsYuPk1DWuGuUfkJVBbPv2-4Io69',
+        md5='04ba99ee993860634c0064d167b5cbe5',
+        extract=False,
+    )
+
 
 if __name__ == '__main__':
     main()

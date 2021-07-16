@@ -38,6 +38,10 @@ import posedetection_msgs.msg
 import posedetection_msgs.srv
 from posedetectiondb.srv import *
 
+# use raw_input for python2 c.f. https://stackoverflow.com/questions/5868506/backwards-compatible-input-calls-in-python
+if hasattr(__builtins__, 'raw_input'):
+    input = raw_input
+
 class detection_error(Exception):
     def __init__(self,parameter=''):
         self.parameter = parameter
@@ -410,7 +414,7 @@ class ROSPlanarPoseProcessor(metaclass.AutoReloader):
                         N = len(res.features.positions)/2
                         positions = reshape(res.features.positions,(N,2))
                         descriptors = reshape(res.features.descriptors,(N,res.features.descriptor_dim))
-                        texturedims_s = raw_input('creating template '+self.templateppfilename + ' enter the texture dimensions (2 values): ')
+                        texturedims_s = input('creating template '+self.templateppfilename + ' enter the texture dimensions (2 values): ')
                         texturedims=[float(f) for f in texturedims_s.split()]
                         points3d=c_[positions[:,0]*texturedims[0]/width,positions[:,1]*texturedims[1]/height,zeros(len(positions))]
                         self.Itemplate = array(cv_texture)

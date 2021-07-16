@@ -15,7 +15,7 @@ if __name__ == "__main__":
     for csv_file in csv_files:
         with open(csv_file) as f:
             reader = csv.reader(f)
-            (true_depths, observed_depths) = zip(*[(float(row[0]), float(row[1])) for row in reader])
+            (true_depths, observed_depths) = list(zip(*[(float(row[0]), float(row[1])) for row in reader]))
             errs = [a - b for (a, b) in zip(true_depths, observed_depths)]
             true_mean = np.mean(true_depths)
             observed_mean = np.mean(observed_depths)

@@ -12,6 +12,10 @@
   <arg name="frame_rate" default="30" />
   <arg name="brightness" default="128" />
   <arg name="create_panorama" default="true" />
+  <arg name="throttle" default="false" />
+  <arg if="$(arg throttle)" name="dual_fisheye_image" default="/insta360/throttled/image_raw" />
+  <arg unless="$(arg throttle)" name="dual_fisheye_image" default="/insta360/image_raw" />
+  <arg name="throttled_rate" default="1.0" />
   <arg name="refine_align" default="false" />
   <arg name="save_unwarped" default="false" />
   <arg name="mls_map_path" default="$(find jsk_perception)/config/fisheye_stitcher_grid_xd_yd_3840x1920.yml.gz" />
@@ -53,10 +57,37 @@
     </rosparam>
   </node>
 
+  <group ns="insta360" if="$(arg throttle)">
+    <node name="throttle_camera_info"
+          pkg="nodelet" type="nodelet"
+          args="standalone jsk_topic_tools/LightweightThrottle"
+          respawn="true">
+      <remap from="~input" to="camera_info"/>
+      <remap from="~output" to="throttled/camera_info" />
+      <param name="update_rate" value="$(arg throttled_rate)" />
+    </node>
+    <node name="throttle_rgb"
+          pkg="nodelet" type="nodelet"
+          args="standalone jsk_topic_tools/LightweightThrottle"
+          respawn="true">
+      <remap from="~input" to="image_raw" />
+      <remap from="~output" to="throttled/image_raw" />
+      <param name="update_rate" value="$(arg throttled_rate)" />
+    </node>
+    <node name="throttle_rgb_compressed"
+          pkg="nodelet" type="nodelet"
+          args="standalone jsk_topic_tools/LightweightThrottle"
+          respawn="true">
+      <remap from="~input" to="image_raw/compressed" />
+      <remap from="~output" to="throttled/image_raw/compressed" />
+      <param name="update_rate" value="$(arg throttled_rate)" />
+    </node>
+  </group>
+
   <include if="$(arg create_panorama)"
 	   file="$(find jsk_perception)/sample/sample_dual_fisheye_to_panorama.launch">
     <arg name="gui" value="false" />
-    <arg name="INPUT_IMAGE" value="/insta360/image_raw" />
+    <arg name="INPUT_IMAGE" value="$(arg dual_fisheye_image)" />
     <arg name="fovd" value="210" />
     <arg name="refine_align" value="$(arg refine_align)" />
     <arg name="save_unwarped" value="$(arg save_unwarped)" />

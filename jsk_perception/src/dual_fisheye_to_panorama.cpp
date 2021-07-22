@@ -38,6 +38,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
+#include <jsk_recognition_msgs/PanoramaInfo.h>
 #include <algorithm>
 #include <math.h>
 #include <boost/assign.hpp>
@@ -60,12 +61,19 @@ namespace jsk_perception
     ROS_INFO("save_unwarped: %7.3f", save_unwarped_?"true":"false");
     ROS_INFO("mls_map_path : %s", mls_map_path_.c_str());
     pub_panorama_image_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
+    pub_panorama_info_ = advertise<jsk_recognition_msgs::PanoramaInfo>(*pnh_, "panorama_info", 1);
 
     sticher_initialized_ = false;
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&DualFisheyeToPanorama::configCallback, this, _1, _2);
     srv_->setCallback (f);
+
+    msg_panorama_info_.projection_model = "equirectangular";
+    msg_panorama_info_.theta_min = 0;
+    msg_panorama_info_.theta_max = M_PI;
+    msg_panorama_info_.phi_min = -M_PI;
+    msg_panorama_info_.phi_max = M_PI;
 
     onInitPostProcess();
   }
@@ -118,6 +126,8 @@ namespace jsk_perception
     pub_panorama_image_.publish(cv_bridge::CvImage(image_msg->header,
                                                    image_msg->encoding,
                                                    pano).toImageMsg());
+    msg_panorama_info_.header = image_msg->header;
+    pub_panorama_info_.publish(msg_panorama_info_);
   }
 }
 

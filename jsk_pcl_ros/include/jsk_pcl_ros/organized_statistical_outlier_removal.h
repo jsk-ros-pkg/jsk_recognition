@@ -34,61 +34,62 @@
  *********************************************************************/
 
 
-#ifndef JSK_PERCEPTION_DUAL_FISHEYE_TO_PANORAMA_H_
-#define JSK_PERCEPTION_DUAL_FISHEYE_TO_PANORAMA_H_
+#ifndef JSK_PCL_ROS_ORGANIZED_STATISTICAL_OUTLIER_REMOVAL_H_
+#define JSK_PCL_ROS_ORGANIZED_STATISTICAL_OUTLIER_REMOVAL_H_
 
+#include <pcl/pcl_base.h>
+#include <pcl_ros/pcl_nodelet.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
-#include <sensor_msgs/Image.h>
-#include <sensor_msgs/CameraInfo.h>
-#include <jsk_recognition_msgs/PanoramaInfo.h>
-
-#include <message_filters/subscriber.h>
-#include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/approximate_time.h>
-#include <message_filters/pass_through.h>
+#include <jsk_topic_tools/counter.h>
 #include <dynamic_reconfigure/server.h>
-#include <jsk_perception/DualFisheyeConfig.h>
+#include "jsk_pcl_ros/OrganizedStatisticalOutlierRemovalConfig.h"
 
-#include <opencv2/opencv.hpp>
-
-#include "jsk_perception/fisheye_stitcher.hpp"
-
-
-namespace jsk_perception
+namespace jsk_pcl_ros
 {
-  class DualFisheyeToPanorama: public jsk_topic_tools::DiagnosticNodelet
+  class OrganizedStatisticalOutlierRemoval: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    typedef message_filters::sync_policies::ApproximateTime<
-      sensor_msgs::Image,         // image
-      sensor_msgs::CameraInfo        // camera info
-      > SyncPolicy;
-    typedef jsk_perception::DualFisheyeConfig Config;
-
-    DualFisheyeToPanorama(): DiagnosticNodelet("DualFisheyeToPanorama") {}
+    typedef jsk_pcl_ros::OrganizedStatisticalOutlierRemovalConfig Config;
+    typedef pcl::PointXYZRGB PointT;
+    OrganizedStatisticalOutlierRemoval();
   protected:
-    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
-    void configCallback(Config &new_config, uint32_t level);
+    ////////////////////////////////////////////////////////
+    // methods
+    ////////////////////////////////////////////////////////
     virtual void onInit();
+
     virtual void subscribe();
+
     virtual void unsubscribe();
-    virtual void rectify(const sensor_msgs::Image::ConstPtr& image_msg);
 
-    bool sticher_initialized_;
-    boost::shared_ptr<stitcher::FisheyeStitcher> stitcher_;
-    ros::Subscriber sub_image_;
-    ros::Publisher pub_panorama_image_;
-    ros::Publisher pub_panorama_info_;
+    virtual void configCallback (Config &config, uint32_t level);
 
-    jsk_recognition_msgs::PanoramaInfo msg_panorama_info_;
+    virtual void filter(const sensor_msgs::PointCloud2::ConstPtr& msg);
 
-    bool   enb_lc_;
-    bool   enb_ra_;
-    bool  save_unwarped_;
-    float  fovd_;
-    std::string mls_map_path_;
+    virtual void updateDiagnostic(
+      diagnostic_updater::DiagnosticStatusWrapper &stat);
 
+    ////////////////////////////////////////////////////////
+    // ROS variables
+    ////////////////////////////////////////////////////////
+    ros::Subscriber sub_;
+    ros::Publisher pub_;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    boost::mutex mutex_;
+
+    ////////////////////////////////////////////////////////
+    // Diagnostics variables
+    ////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////
+    // Parameters
+    ////////////////////////////////////////////////////////
+    bool keep_organized_;
+    bool negative_;
+    double std_mul_;
+    int mean_k_;
   private:
+
   };
 }
 

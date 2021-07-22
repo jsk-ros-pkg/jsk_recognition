@@ -139,6 +139,11 @@ def main():
         md5='dddd2c6d7738ac19536a032aed8f9967',
     )
 
+    download_data(
+        path='sample/data/baxter_realsense_l515.bag',
+        url='https://drive.google.com/uc?id=1RKZLA4J2_lzhCtvMTWxGQh4ykVVEeSAd',
+        md5='4dab24bd6e6a7fd5b9e86d053352cdfd',
+    )
 
 
 if __name__ == '__main__':

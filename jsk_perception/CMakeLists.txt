@@ -147,6 +147,7 @@ generate_dynamic_reconfigure_options(
   cfg/SSDObjectDetector.cfg
   cfg/MaskRCNNInstanceSegmentation.cfg
   cfg/VirtualCameraMono.cfg
+  cfg/AWSDetectFaces.cfg
 )
 
 message(WARNING "DEPRECATION WARNING: srv files in jsk_pcl_ros are deprecated."

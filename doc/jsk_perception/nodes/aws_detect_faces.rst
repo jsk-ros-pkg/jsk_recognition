@@ -108,3 +108,7 @@ Example
      attributes (default "ALL"): set either ALL or DEFAULT for returning attributes
      use_usb_cam (default "false"): set true to use USB camera image as input
      use_window (default "true"): set false if you do not want to display window
+
+For JSK user, Download `aws.json` file from
+[Gdrive](https://drive.google.com/file/d/1g9DopJACY0rphGUiU9YGVMdzAPLRsuIk/view?usp=sharing)
+and put this under `/tmp` directory to run sample code.

@@ -2,9 +2,9 @@
 
   <arg name="gui" default="true" />
   <arg name="GPU" default="-1" />
-  <arg name="INPUT_IMAGE" default="/head_rgbd_sensor_remote/rgb/image_rect_color" />
-  <arg name="INPUT_DEPTH_IMAGE" default="/head_rgbd_sensor_remote/depth_registered/hw_registered/image_rect_raw" />
-  <arg name="INPUT_CAMERA_INFO" default="/head_rgbd_sensor_remote/rgb/camera_info" />
+  <arg name="INPUT_IMAGE" default="/remote/head_rgbd_sensor/rgb/image_rect_color" />
+  <arg name="INPUT_DEPTH_IMAGE" default="/remote/head_rgbd_sensor/depth_registered/hw_registered/image_rect_raw" />
+  <arg name="INPUT_CAMERA_INFO" default="/remote/head_rgbd_sensor/rgb/camera_info" />
 
   <!-- <include file="$(find jsk_perception)/sample/include/play_rosbag_people.xml" /> -->
 

@@ -52,9 +52,9 @@ from pcl_msgs.msg import PointIndices
 import rospy
 from sensor_msgs.msg import Image
 
+import time
 
 class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
-
     def __init__(self):
         rospy.logwarn('This node is experimental, and its interface '
                       'can be changed in the future.')
@@ -119,6 +119,7 @@ class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
         return config
 
     def callback(self, imgmsg):
+        start = time.time()
         bridge = cv_bridge.CvBridge()
         img = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='rgb8')
         img_chw = img.transpose(2, 0, 1)  # C, H, W
@@ -182,6 +183,9 @@ class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
             msg_viz = bridge.cv2_to_imgmsg(viz, encoding='rgb8')
             msg_viz.header = imgmsg.header
             self.pub_viz.publish(msg_viz)
+        end = time.time()
+        elapsed = end - start
+        #rospy.loginfo("el_time : {}".format(elapsed))
 
 
 if __name__ == '__main__':

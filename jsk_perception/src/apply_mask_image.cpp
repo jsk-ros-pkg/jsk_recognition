@@ -76,7 +76,7 @@ namespace jsk_perception
       async_->registerCallback(boost::bind(&ApplyMaskImage::apply, this, _1, _2));
     }
     else {
-      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_), (max_interval_duration_);
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
       sync_->connectInput(sub_image_, sub_mask_);
       sync_->registerCallback(boost::bind(&ApplyMaskImage::apply, this, _1, _2));
     }

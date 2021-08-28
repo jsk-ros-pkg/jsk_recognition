@@ -976,7 +976,7 @@ public:
         _br.sendTransform(
                 tf::StampedTransform(
                     transform,
-                    ros::Time::now(),
+                    msg->image.header.stamp,
                     msg->image.header.frame_id,
                     _child_frame_id
                     )

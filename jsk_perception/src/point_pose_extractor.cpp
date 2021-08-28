@@ -557,7 +557,7 @@ class PointPoseExtractor
   ros::ServiceServer _server;
   ros::ServiceClient _client;
   ros::Publisher _pub, _pub_agg, _pub_pose;
-  tf::TransformBroadcaster _br
+  tf::TransformBroadcaster _br;
   image_transport::Publisher _debug_pub;
   double _reprojection_threshold;
   double _distanceratio_threshold;
@@ -960,7 +960,7 @@ public:
         pose_msg.pose = od.objects[0].pose;
         _pub_pose.publish(pose_msg);
         // broadcast tf
-        tf::Transform trasnform(
+        tf::Transform transform(
                 tf::Quaternion(
                     pose_msg.pose.orientation.x,
                     pose_msg.pose.orientation.y,
@@ -968,16 +968,18 @@ public:
                     pose_msg.pose.orientation.w
                     ),
                 tf::Vector3(
-                    pose_msg.pose.position,x,
-                    pose_msg.pose.position,y,
-                    pose_msg.pose.position,z
+                    pose_msg.pose.position.x,
+                    pose_msg.pose.position.y,
+                    pose_msg.pose.position.z
                     )
                 );
         _br.sendTransform(
-                transform,
-                ros::Time::now(),
-                msg->image.header.frame_id,
-                _child_frame_id
+                tf::StampedTransform(
+                    transform,
+                    ros::Time::now(),
+                    msg->image.header.frame_id,
+                    _child_frame_id
+                    )
                 );
       }
     }

@@ -55,6 +55,7 @@
 #include <image_transport/image_transport.h>
 #include <image_geometry/pinhole_camera_model.h>
 #include <tf/tf.h>
+#include <tf/transform_broadcaster.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/foreach.hpp>
 #include <boost/filesystem.hpp>
@@ -556,6 +557,7 @@ class PointPoseExtractor
   ros::ServiceServer _server;
   ros::ServiceClient _client;
   ros::Publisher _pub, _pub_agg, _pub_pose;
+  tf::TransformBroadcaster _br
   image_transport::Publisher _debug_pub;
   double _reprojection_threshold;
   double _distanceratio_threshold;
@@ -568,6 +570,8 @@ class PointPoseExtractor
   bool pnod;
   bool _initialized;
   bool _viewer;
+  bool _broadcast_tf;
+  std::string _child_frame_id;
 
 public:
   PointPoseExtractor() : it(ros::NodeHandle("~")) {
@@ -688,7 +692,6 @@ public:
 
 
   void initialize () {
-    std::string matching_frame;
     std::string _pose_str;
     double template_width;
     double template_height;
@@ -696,7 +699,7 @@ public:
     std::string window_name;
     ros::NodeHandle local_nh("~");
 
-    local_nh.param("child_frame_id", matching_frame, std::string("matching"));
+    local_nh.param("child_frame_id", _child_frame_id, std::string("matching"));
     local_nh.param("object_width",  template_width,  0.06);
     local_nh.param("object_height", template_height, 0.0739);
     local_nh.param("relative_pose", _pose_str, std::string("0 0 0 0 0 0 1"));
@@ -726,6 +729,7 @@ public:
     local_nh.param("window_name", window_name, std::string("sample1"));
     local_nh.param("autosize", _autosize, false);
     local_nh.param("publish_null_object_detection", pnod, false);
+    local_nh.param("broadcast_tf", _broadcast_tf, false);
 
     _first_sample_change = false;
 
@@ -955,6 +959,26 @@ public:
         pose_msg.header = od.header;
         pose_msg.pose = od.objects[0].pose;
         _pub_pose.publish(pose_msg);
+        // broadcast tf
+        tf::Transform trasnform(
+                tf::Quaternion(
+                    pose_msg.pose.orientation.x,
+                    pose_msg.pose.orientation.y,
+                    pose_msg.pose.orientation.z,
+                    pose_msg.pose.orientation.w
+                    ),
+                tf::Vector3(
+                    pose_msg.pose.position,x,
+                    pose_msg.pose.position,y,
+                    pose_msg.pose.position,z
+                    )
+                );
+        _br.sendTransform(
+                transform,
+                ros::Time::now(),
+                msg->image.header.frame_id,
+                _child_frame_id
+                );
       }
     }
     // BOOST_FOREACH(Matching_Template* mt, _templates) {

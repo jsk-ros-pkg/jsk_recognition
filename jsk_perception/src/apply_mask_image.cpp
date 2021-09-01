@@ -33,6 +33,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#include "ros/duration.h"
 #include "jsk_perception/apply_mask_image.h"
 #include <boost/assign.hpp>
 #include <jsk_topic_tools/log_utils.h>
@@ -53,7 +54,7 @@ namespace jsk_perception
     pnh_->param("mask_black_to_transparent", mask_black_to_transparent_, false);
     pnh_->param("use_rectified_image", use_rectified_image_, true);
     pnh_->param("queue_size", queue_size_, 100);
-    pnh_->param("max_interval_duration", max_interval_duration_, ros::DURATION_MAX);
+    pnh_->param("max_interval_duration", max_interval_duration_, ros::DURATION_MAX.toSec());
     pnh_->param("cval", cval_, 0);
     pub_image_ = advertise<sensor_msgs::Image>(
       *pnh_, "output", 1);

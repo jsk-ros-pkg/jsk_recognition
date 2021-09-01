@@ -33,7 +33,6 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "ros/duration.h"
 #include "jsk_perception/apply_mask_image.h"
 #include <boost/assign.hpp>
 #include <jsk_topic_tools/log_utils.h>

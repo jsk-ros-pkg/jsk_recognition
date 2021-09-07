@@ -1,13 +1,19 @@
 <launch>
 
   <arg name="gui" default="true" />
-  <arg name="input_image" default="/zed/rgb/image_rect_color" />
-  <arg name="input_cloud" default="/pc_transformer/output" />
-  <arg name="input_label" default="mask_rcnn_instance_segmentation/output/label_cls" />
+  <arg name="gpu" default="0" />
+  <arg name="queue_size" default="30" />
+  <arg name="INPUT_LABEL" default="mask_rcnn_73b2_kitchen/output/label_cls" />
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
+
+  <include file="$(find jsk_perception)/sample/sample_mask_rcnn_73b2_kitchen.launch" >
+    <arg name="gui" value="false" />
+    <arg name="gpu" value="$(arg gpu)" />
+  </include>
 
   <node name="label_array_to_mask_image"
         pkg="jsk_perception" type="label_array_to_mask_image">
-    <remap from="~input" to="$(arg input_label)" />
+    <remap from="~input" to="$(arg INPUT_LABEL)" />
     <rosparam>
       label_values: [0, 1, 4, 5, 6, 7, 9, 10, 11, 15, 17, 18]
     </rosparam>
@@ -15,66 +21,53 @@
 
   <node name="label_image_decomposer"
         pkg="jsk_perception" type="label_image_decomposer.py">
-    <remap from="~input" to="$(arg input_image)" />
-    <remap from="~input/label" to="$(arg input_label)" />
-    <rosparam>
-      queue_size: 30
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~input/label" to="$(arg INPUT_LABEL)" />
+    <rosparam subst_value="true">
+      queue_size: $(arg queue_size)
+    </rosparam>
+  </node>
+
+  <node name="label_image_decomposer_label_only"
+        pkg="jsk_perception" type="label_image_decomposer.py">
+    <remap from="~input/label" to="$(arg INPUT_LABEL)" />
+    <rosparam subst_value="true">
+      only_label: true
+      queue_size: $(arg queue_size)
     </rosparam>
   </node>
 
   <node name="apply_mask_image"
         pkg="jsk_perception" type="apply_mask_image"
         clear_params="true" >
-    <remap from="~input" to="$(arg input_image)" />
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <remap from="~input/mask" to="label_array_to_mask_image/output" />
     <rosparam subst_value="true">
       clip: false
-    </rosparam>
-  </node>
-
-  <node name="mask_image_to_point_indices"
-        pkg="jsk_pcl_ros_utils" type="mask_image_to_point_indices" >
-    <remap from="~input" to="label_array_to_mask_image/output" />
-  </node>
-
-  <node name="label_extract_indices"
-        pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/ExtractIndices" >
-    <remap from="~input" to="$(arg input_cloud)" />
-    <remap from="~indices" to="mask_image_to_point_indices/output" />
-  </node>
-
-  <node name="point_indices_to_cluster_point_indices"
-        pkg="jsk_pcl_ros_utils" type="point_indices_to_cluster_point_indices">
-    <remap from="~input" to="mask_image_to_point_indices/output" />
-  </node>
-
-  <node name="label_cluster_point_indices_decomposer"
-        pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/ClusterPointIndicesDecomposer" >
-    <remap from="~input" to="label_extract_indices/output" />
-    <remap from="~target" to="point_indices_to_cluster_point_indices/output" />
-    <rosparam>
-      align_boxes: true
-      target_frame_id: base_link
-      approximate_sync: true
-      queue_size: 50
-      sort_by: -z_axis
+      queue_size: $(arg queue_size)
     </rosparam>
   </node>
 
   <group if="$(arg gui)">
     <node name="image_view0"
           pkg="image_view" type="image_view">
-      <remap from="image" to="$(arg input_image)" />
+      <remap from="image" to="$(arg INPUT_IMAGE)" />
     </node>
     <node name="image_view1"
           pkg="image_view" type="image_view">
-      <remap from="image" to="label_array_to_mask_image/output" />
+      <remap from="image" to="label_image_decomposer/output/label_viz" />
     </node>
     <node name="image_view2"
           pkg="image_view" type="image_view">
+      <remap from="image" to="label_array_to_mask_image/output" />
+    </node>
+    <node name="image_view3"
+          pkg="image_view" type="image_view">
       <remap from="image" to="apply_mask_image/output" />
+    </node>
+    <node name="image_view4"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="label_image_decomposer_label_only/output/label_viz" />
     </node>
   </group>
 

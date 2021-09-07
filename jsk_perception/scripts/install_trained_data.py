@@ -294,6 +294,12 @@ def main():
         url='https://drive.google.com/uc?id=1QJa5WE5HD2XZZV5TsFehnKF8QTlS7fHI',
         md5='f7905e49044a18c15ebdaf6dc15b446b',
     )
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/SRHandNet.pts',
+        url='https://drive.google.com/uc?id=10oGfGALjIIwdIWO9MQftN07A3TRdvp3b',
+        md5='9f39d3baa43cf1c962c8f752c009eb14',
+    )
 
 
 if __name__ == '__main__':

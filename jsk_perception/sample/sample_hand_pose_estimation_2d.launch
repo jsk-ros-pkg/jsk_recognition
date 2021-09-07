@@ -1,0 +1,20 @@
+<launch>
+
+  <arg name="gui" default="true" />
+  <arg name="gpu" default="-1" />
+  <arg name="use_usb_cam" default="false" />
+  <arg name="INPUT_IMAGE" default="/usb_cam/image_raw" />
+
+  <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" 
+        if="$(arg use_usb_cam)" />
+
+  <include file="$(find jsk_perception)/sample/include/play_rosbag_hand.xml"
+           unless="$(arg use_usb_cam)" />
+
+  <include file="$(find jsk_perception)/launch/hand_pose_estimation_2d.launch">
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="gpu" value="$(arg gpu)" />
+    <arg name="INPUT_IMAGE" value="$(arg INPUT_IMAGE)" />
+  </include>
+
+</launch>

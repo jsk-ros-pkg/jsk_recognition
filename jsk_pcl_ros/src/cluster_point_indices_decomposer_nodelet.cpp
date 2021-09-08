@@ -424,10 +424,12 @@ namespace jsk_pcl_ros
    const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
    const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients,
    geometry_msgs::Pose& center_pose_msg,
-   jsk_recognition_msgs::BoundingBox& bounding_box)
+   jsk_recognition_msgs::BoundingBox& bounding_box,
+   bool& publish_tf)
   {
     bounding_box.header = header;
     if (segmented_cloud->points.size() == 0) {
+      publish_tf = false;
       NODELET_WARN("segmented cloud size is zero");
       return true;
     }
@@ -746,8 +748,9 @@ namespace jsk_pcl_ros
         pcl::removeNaNFromPointCloud(*segmented_cloud, *segmented_cloud, nan_indices);
       }
 
+      bool publish_tf = publish_tf_;
       bool successp = computeCenterAndBoundingBox(
-        segmented_cloud, input->header, planes, coefficients, pose_msg, bounding_box);
+        segmented_cloud, input->header, planes, coefficients, pose_msg, bounding_box, publish_tf);
       if (!successp) {
         return;
       }
@@ -761,7 +764,7 @@ namespace jsk_pcl_ros
       center_pose_array.poses.push_back(pose_msg);
       bounding_box.header.frame_id = target_frame;
       bounding_box_array.boxes.push_back(bounding_box);
-      if (publish_tf_) {
+      if (publish_tf) {
         tf::Transform transform;
         transform.setOrigin(tf::Vector3(pose_msg.position.x, pose_msg.position.y, pose_msg.position.z));
         transform.setRotation(tf::createIdentityQuaternion());

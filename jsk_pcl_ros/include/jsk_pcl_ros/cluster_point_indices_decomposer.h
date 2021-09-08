@@ -120,7 +120,8 @@ namespace jsk_pcl_ros
      const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
      const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients,
      geometry_msgs::Pose& center_pose_msg,
-     jsk_recognition_msgs::BoundingBox& bounding_box);
+     jsk_recognition_msgs::BoundingBox& bounding_box,
+     bool& publish_tf);
 
     virtual bool transformPointCloudToAlignWithPlane(
       const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,

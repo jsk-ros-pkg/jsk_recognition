@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_organized_statistical_outlier_removal.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_organized_statistical_outlier_removal"
+        name="test_organized_statistical_outlier_removal"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /statistical_outlier_removal/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

@@ -1,0 +1,62 @@
+<launch>
+  <arg name="launch_manager" default="false" />
+  <arg name="manager" default="realsense_nodelet_manager" />
+
+  <arg name="RGB_CAMERA_INFO" value="/camera/color/camera_info" />
+  <arg name="RGB_IMAGE" value="/camera/color/image_rect_color" />
+  <arg name="DEPTH_CAMERA_INFO" value="/camera/aligned_depth_to_color/camera_info" />
+  <arg name="DEPTH_IMAGE" value="/camera/aligned_depth_to_color/image_raw" />
+
+  <param name="/use_sim_time" value="true"/>
+
+  <node name="rosbag_play" pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/sample/data/baxter_realsense_l515.bag --clock --loop"/>
+
+  <group ns="camera">
+    <group ns="color">
+      <node name="republish"
+            pkg="image_transport" type="republish"
+            args="compressed raw">
+        <remap from="in" to="image_rect_color"/>
+        <remap from="out" to="image_rect_color"/>
+      </node>
+    </group>
+
+    <group ns="aligned_depth_to_color">
+      <node name="republish"
+            pkg="image_transport" type="republish"
+            args="compressedDepth raw">
+        <remap from="in" to="image_raw"/>
+        <remap from="out" to="image_raw"/>
+      </node>
+    </group>
+  </group>
+
+  <node pkg="nodelet" type="nodelet" name="$(arg manager)"
+        args="manager" output="screen" if="$(arg launch_manager)" />
+
+  <node pkg="nodelet" type="nodelet" name="point_cloud_xyzrgb"
+        args="standalone depth_image_proc/point_cloud_xyzrgb" output="screen"
+        unless="$(arg launch_manager)" >
+    <remap from="rgb/camera_info" to="$(arg RGB_CAMERA_INFO)" />
+    <remap from="rgb/image_rect_color" to="$(arg RGB_IMAGE)" />
+    <remap from="depth_registered/image_rect" to="$(arg DEPTH_IMAGE)" />
+    <remap from="depth_registered/points" to="/camera/depth_registered/points" />
+    <rosparam>
+      queue_size: 100
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="point_cloud_xyzrgb"
+        args="load depth_image_proc/point_cloud_xyzrgb $(arg manager)" output="screen"
+        if="$(arg launch_manager)" >
+    <remap from="rgb/camera_info" to="$(arg RGB_CAMERA_INFO)" />
+    <remap from="rgb/image_rect_color" to="$(arg RGB_IMAGE)" />
+    <remap from="depth_registered/image_rect" to="$(arg DEPTH_IMAGE)" />
+    <remap from="depth_registered/points" to="/camera/depth_registered/points" />
+    <rosparam>
+      queue_size: 100
+    </rosparam>
+  </node>
+
+</launch>

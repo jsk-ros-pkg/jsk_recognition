@@ -3,6 +3,7 @@
   <include file="$(find jsk_perception)/sample/sample_label_array_to_mask_image.launch">
     <arg name="gui" value="false" />
     <arg name="queue_size" value="100" />
+    <arg name="gpu" value="-1" />
   </include>
 
   <test test-name="test_label_array_to_mask_image"

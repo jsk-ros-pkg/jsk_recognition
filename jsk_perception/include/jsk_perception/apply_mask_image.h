@@ -75,6 +75,7 @@ namespace jsk_perception
     bool mask_black_to_transparent_;
     bool use_rectified_image_;
     int queue_size_;
+    double max_interval_duration_;
     int cval_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
     boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> > async_;

@@ -225,6 +225,12 @@
       Nodelet to convert fisheye image to panorama.
     </description>
   </class>
+  <class name="jsk_perception/DualFisheyeToPanorama" type="jsk_perception::DualFisheyeToPanorama"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Nodelet to convert dual fisheye image to panorama.
+    </description>
+  </class>
   <class name="jsk_perception/Skeletonization" type="jsk_perception::Skeletonization"
          base_class_type="nodelet::Nodelet">
     <description>

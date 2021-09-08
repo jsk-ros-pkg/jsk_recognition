@@ -8,23 +8,23 @@ import yaml
 import itertools, pkg_resources
 from distutils.version import LooseVersion
 if LooseVersion(pkg_resources.get_distribution("chainer").version) >= LooseVersion('7.0.0') and \
-   sys.version_info.major == 2:
-   print('''Please install chainer <= 7.0.0:
+        sys.version_info.major == 2:
+    print('''Please install chainer < 7.0.0:
 
     sudo pip install chainer==6.7.0
 
 c.f https://github.com/jsk-ros-pkg/jsk_recognition/pull/2485
 ''', file=sys.stderr)
-   sys.exit(1)
-if [p for p in list(itertools.chain(*[pkg_resources.find_distributions(_) for _ in sys.path])) if "cupy-" in p.project_name ] == []:
-   print('''Please install CuPy
+    sys.exit(1)
+if [p for p in list(itertools.chain(*[pkg_resources.find_distributions(_) for _ in sys.path])) if "cupy-" in p.project_name or "cupy" == p.project_name ] == []:
+    print('''Please install CuPy
 
     sudo pip install cupy-cuda[your cuda version]
 i.e.
     sudo pip install cupy-cuda91
 
 ''', file=sys.stderr)
-   sys.exit(1)
+    # sys.exit(1)
 import chainer
 from chainercv.datasets.coco.coco_utils \
     import coco_instance_segmentation_label_names

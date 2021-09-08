@@ -54,6 +54,8 @@ namespace jsk_perception
     DiagnosticNodelet::onInit();
     pub_rects_ = advertise<jsk_recognition_msgs::RectArray>(*pnh_, "output", 1);
     pub_objectness_ = advertise<sensor_msgs::Image>(*pnh_, "output/objectness", 1);
+    pnh_->param("score_threshold", score_threshold_, 0.0);
+    pnh_->param("max_num", max_num_, 0);
     // find trained data
     std::string training_path;
 #ifdef ROSPACK_EXPORT
@@ -118,10 +120,17 @@ namespace jsk_perception
     std::vector<cv::Vec4i> saliency_map;
     binger_->computeSaliency(img, saliency_map);
     std::vector<float> objectness_values = binger_->getobjectnessValues();
+    float max_objectness_values = *std::max_element(
+      objectness_values.begin(), objectness_values.end());
+    float threshold = score_threshold_ * max_objectness_values;
 
     jsk_recognition_msgs::RectArray rects_msg;
     cv::Mat objectness_img = cv::Mat(img.rows, img.cols, CV_32FC1);
+    int count = 0;
     for (size_t k=0; k < saliency_map.size(); k++) {
+      if (objectness_values[k] < threshold) {
+        continue;
+      }
       int min_x = static_cast<int>(saliency_map[k][0] / scale);
       int min_y = static_cast<int>(saliency_map[k][1] / scale);
       int max_x = static_cast<int>(saliency_map[k][2] / scale);
@@ -138,6 +147,10 @@ namespace jsk_perception
         for (size_t i=std::max(0, min_x); i < std::min(max_x, img.cols); i++) {
           objectness_img.at<float>(j, i) += objectness_values[k];
         }
+      }
+      count++;
+      if ((max_num_ > 0) && (count >= max_num_)) {
+        break;
       }
     }
     // publish proposals

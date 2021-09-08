@@ -51,12 +51,16 @@ namespace jsk_perception
     pnh_->param("negative", negative_, false);
     pnh_->param("negative/before_clip", negative_before_clip_, true);
     pnh_->param("mask_black_to_transparent", mask_black_to_transparent_, false);
+    pnh_->param("use_rectified_image", use_rectified_image_, true);
     pnh_->param("queue_size", queue_size_, 100);
+    pnh_->param("max_interval_duration", max_interval_duration_, ros::DURATION_MAX.toSec());
     pnh_->param("cval", cval_, 0);
     pub_image_ = advertise<sensor_msgs::Image>(
       *pnh_, "output", 1);
     pub_mask_ = advertise<sensor_msgs::Image>(
       *pnh_, "output/mask", 1);
+    pub_camera_info_ = advertise<sensor_msgs::CameraInfo>(
+      *pnh_, "output/camera_info", 1);
     onInitPostProcess();
   }
 
@@ -64,8 +68,10 @@ namespace jsk_perception
   {
     sub_image_.subscribe(*pnh_, "input", 1);
     sub_mask_.subscribe(*pnh_, "input/mask", 1);
+    sub_info_ = pnh_->subscribe("input/camera_info", 1,
+                                &ApplyMaskImage::infoCallback, this);
     if (approximate_sync_) {
-      async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
+      async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_), (max_interval_duration_);
       async_->connectInput(sub_image_, sub_mask_);
       async_->registerCallback(boost::bind(&ApplyMaskImage::apply, this, _1, _2));
     }
@@ -82,6 +88,13 @@ namespace jsk_perception
   {
     sub_image_.unsubscribe();
     sub_mask_.unsubscribe();
+  }
+
+  void ApplyMaskImage::infoCallback(
+    const sensor_msgs::CameraInfo::ConstPtr& info_msg)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    camera_info_ = info_msg;
   }
 
   void ApplyMaskImage::apply(
@@ -113,8 +126,18 @@ namespace jsk_perception
       cv::bitwise_not(mask, mask);
     }
 
+    cv::Rect region = jsk_recognition_utils::boundingRectOfMaskImage(mask);
+    if (camera_info_) {
+      sensor_msgs::CameraInfo camera_info(*camera_info_);
+      camera_info.header = image_msg->header;
+      camera_info.roi.x_offset = region.x;
+      camera_info.roi.y_offset = region.y;
+      camera_info.roi.width = region.width;
+      camera_info.roi.height = region.height;
+      camera_info.roi.do_rectify = use_rectified_image_;
+      pub_camera_info_.publish(camera_info);
+    }
     if (clip_) {
-      cv::Rect region = jsk_recognition_utils::boundingRectOfMaskImage(mask);
       mask = mask(region);
       image = image(region);
     }

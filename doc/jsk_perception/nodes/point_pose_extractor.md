@@ -24,7 +24,7 @@
 
   Detected Object Pose. 
 
-- `/debug_image` (`cv_bridge::CvImage`) 
+- `~debug_image` (`cv_bridge::CvImage`) 
 
   Output image for debug.
 

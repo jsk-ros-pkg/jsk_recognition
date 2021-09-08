@@ -1,0 +1,21 @@
+<launch>
+
+  <param name="/use_sim_time" value="true" />
+
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros_utils)/sample/data/arc2017_4objects.bag --clock --loop">
+  </node>
+
+  <node name="reference_point_publisher"
+        pkg="rostopic" type="rostopic"
+        args="pub -r 1 -s reference_point_publisher/output geometry_msgs/PointStamped
+              '{header: {stamp: 'now', frame_id: 'camera_link'}, point: {x: 500, y: 100, z: 100}}'"/>
+  
+  <node name="xyz_to_screenpoint"
+        pkg="jsk_pcl_ros_utils" type="xyz_to_screenpoint.py">
+    <remap from="~input/camera_info" to="camera/rgb/camera_info" />
+    <remap from="~input" to="reference_point_publisher/output" />
+  </node>
+
+</launch>

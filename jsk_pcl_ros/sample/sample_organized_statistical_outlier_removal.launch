@@ -1,0 +1,19 @@
+<launch>
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_baxter_realsense_l515.xml">
+    <arg name="launch_manager" value="true" />
+    <arg name="manager" value="realsense_nodelet_manager" />
+  </include>
+
+  <include file="$(find jsk_pcl_ros)/launch/organized_statistical_outlier_removal.launch">
+    <arg name="INPUT_CLOUD" value="/camera/depth_registered/points" />
+    <arg name="INPUT_MASK" value="/mask_rcnn_relook/output/target_mask" />
+    <arg name="MANAGER" value="realsense_nodelet_manager" />
+    <arg name="launch_manager" value="false" />
+  </include>
+
+  <node name="$(anon rviz)" pkg="rviz" type="rviz" if="$(arg gui)"
+        args="-d $(find jsk_pcl_ros)/sample/rviz/organized_statistical_outlier_removal.rviz" />
+
+</launch>

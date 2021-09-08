@@ -15,6 +15,10 @@
   <node name="bing"
         pkg="jsk_perception" type="bing">
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <rosparam>
+      score_threshold: 0.9
+      max_num: 1000
+    </rosparam>
   </node>
 
   <node name="draw_rects"

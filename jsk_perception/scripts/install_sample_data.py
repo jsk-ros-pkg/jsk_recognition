@@ -105,6 +105,17 @@ def main():
         extract=False,
     )
 
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/sample_mask_rcnn_73b2_kitchen.bag',
+        url='https://drive.google.com/uc?id=1DZ6W7gBzbu-7Z-NRw7y0WCGDRpsaYadI',
+        md5='f86a51988fe521863ff845a2c9ff10df',
+        extract=False,
+        compressed_bags=[
+            'sample/data/sample_mask_rcnn_73b2_kitchen.bag',
+        ],
+    )
+
 
 if __name__ == '__main__':
     main()

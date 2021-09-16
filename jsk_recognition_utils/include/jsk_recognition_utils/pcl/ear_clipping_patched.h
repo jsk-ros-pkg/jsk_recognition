@@ -39,6 +39,8 @@
 #include <pcl/point_types.h>
 #include <pcl/surface/processing.h>
 
+#include <boost/shared_ptr.hpp>
+
 namespace pcl
 {
 

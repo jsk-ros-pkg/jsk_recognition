@@ -570,7 +570,7 @@ class PointPoseExtractor
   bool pnod;
   bool _initialized;
   bool _viewer;
-  bool _broadcast_tf;
+  bool _publish_tf;
   std::string _child_frame_id;
 
 public:
@@ -729,7 +729,7 @@ public:
     local_nh.param("window_name", window_name, std::string("sample1"));
     local_nh.param("autosize", _autosize, false);
     local_nh.param("publish_null_object_detection", pnod, false);
-    local_nh.param("broadcast_tf", _broadcast_tf, false);
+    local_nh.param("publish_tf", _publish_tf, false);
 
     _first_sample_change = false;
 
@@ -960,27 +960,29 @@ public:
         pose_msg.pose = od.objects[0].pose;
         _pub_pose.publish(pose_msg);
         // broadcast tf
-        tf::Transform transform(
-                tf::Quaternion(
-                    pose_msg.pose.orientation.x,
-                    pose_msg.pose.orientation.y,
-                    pose_msg.pose.orientation.z,
-                    pose_msg.pose.orientation.w
-                    ),
-                tf::Vector3(
-                    pose_msg.pose.position.x,
-                    pose_msg.pose.position.y,
-                    pose_msg.pose.position.z
-                    )
-                );
-        _br.sendTransform(
-                tf::StampedTransform(
-                    transform,
-                    msg->image.header.stamp,
-                    msg->image.header.frame_id,
-                    _child_frame_id
-                    )
-                );
+        if ( this->_publish_tf ) {
+          tf::Transform transform(
+                  tf::Quaternion(
+                      pose_msg.pose.orientation.x,
+                      pose_msg.pose.orientation.y,
+                      pose_msg.pose.orientation.z,
+                      pose_msg.pose.orientation.w
+                      ),
+                  tf::Vector3(
+                      pose_msg.pose.position.x,
+                      pose_msg.pose.position.y,
+                      pose_msg.pose.position.z
+                      )
+                  );
+          _br.sendTransform(
+                  tf::StampedTransform(
+                      transform,
+                      msg->image.header.stamp,
+                      msg->image.header.frame_id,
+                      _child_frame_id
+                      )
+                  );
+        }
       }
     }
     // BOOST_FOREACH(Matching_Template* mt, _templates) {

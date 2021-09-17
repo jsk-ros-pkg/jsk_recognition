@@ -28,6 +28,10 @@
 
   Output image for debug.
 
+- `/tf` (`tf2_msgs/TFMessage`)
+
+  Detected Object Frame.
+
 ## Parameters
 
 - `~template_filename` (str default: "/sample/opencv-logo2.png")
@@ -45,7 +49,7 @@
 - `~window_name` (str default: "sample1")
 - `~autosize` (bool default: false)
 - `~publish_null_object_detection` (bool default: false)
-- `~broadcast_tf` (bool defaut: false)
+- `~publish_tf` (bool defaut: false)
  + If set to true, detected object pose is also broadcasted as tf frame.
 - `~child_frame_id` (string default: "matching")
  + frame_id of detected object when `~broadcast_tf` is set to true.

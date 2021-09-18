@@ -100,7 +100,7 @@ namespace jsk_pcl_ros
     uint8_t indices_size = static_cast<uint8_t>(indices->indices.size());
     if (cloud_size <= indices_size){
         NODELET_ERROR("Input index is out of expected cloud size");
-        return false;
+        return;
     }
 
     // extract pointcloud with indices

@@ -82,7 +82,7 @@ namespace jsk_pcl_ros
     sub_indices_.unsubscribe();
   }
 
-  void ExtractIndices::convert(
+  bool ExtractIndices::convert(
     const PCLIndicesMsg::ConstPtr& indices_msg,
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
@@ -92,6 +92,16 @@ namespace jsk_pcl_ros
     pcl_conversions::toPCL(*cloud_msg, *input);
     pcl::PointIndices::Ptr indices (new pcl::PointIndices ());
     pcl_conversions::toPCL(*indices_msg, *indices);
+    
+    // check if input size is bigger than indices size 
+    uint8_t data_size = static_cast<uint8_t>(input->data.size());
+    uint32_t point_step_size = static_cast<uint32_t>(input->point_step);
+    uint8_t cloud_size = data_size / point_step_size;
+    uint8_t indices_size = static_cast<uint8_t>(indices->indices.size());
+    if (cloud_size <= indices_size){
+        NODELET_ERROR("Input index is out of expected cloud size");
+        return false;
+    }
 
     // extract pointcloud with indices
     pcl::ExtractIndices<pcl::PCLPointCloud2> extract;
@@ -113,6 +123,7 @@ namespace jsk_pcl_ros
 
     out_cloud_msg.header = cloud_msg->header;
     pub_.publish(out_cloud_msg);
+    return true;
   }
 }
 

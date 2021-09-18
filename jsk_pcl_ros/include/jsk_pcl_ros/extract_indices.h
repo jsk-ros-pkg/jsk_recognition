@@ -62,7 +62,7 @@ namespace jsk_pcl_ros
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    virtual void convert(
+    virtual bool convert(
       const PCLIndicesMsg::ConstPtr& indices_msg,
       const sensor_msgs::PointCloud2::ConstPtr& msg);
 

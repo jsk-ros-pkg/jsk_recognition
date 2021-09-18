@@ -82,7 +82,7 @@ namespace jsk_pcl_ros
     sub_indices_.unsubscribe();
   }
 
-  bool ExtractIndices::convert(
+  void ExtractIndices::convert(
     const PCLIndicesMsg::ConstPtr& indices_msg,
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
@@ -123,7 +123,6 @@ namespace jsk_pcl_ros
 
     out_cloud_msg.header = cloud_msg->header;
     pub_.publish(out_cloud_msg);
-    return true;
   }
 }
 

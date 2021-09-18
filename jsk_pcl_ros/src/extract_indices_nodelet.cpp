@@ -98,7 +98,7 @@ namespace jsk_pcl_ros
     uint32_t point_step_size = static_cast<uint32_t>(input->point_step);
     uint8_t cloud_size = data_size / point_step_size;
     uint8_t indices_size = static_cast<uint8_t>(indices->indices.size());
-    if (cloud_size <= indices_size){
+    if (cloud_size < indices_size){
         NODELET_ERROR("Input index is out of expected cloud size");
         return;
     }

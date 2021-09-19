@@ -94,10 +94,10 @@ namespace jsk_pcl_ros
     pcl_conversions::toPCL(*indices_msg, *indices);
     
     // check if input size is bigger than indices size 
-    uint8_t data_size = static_cast<uint8_t>(input->data.size());
-    uint32_t point_step_size = static_cast<uint32_t>(input->point_step);
-    uint8_t cloud_size = data_size / point_step_size;
-    uint8_t indices_size = static_cast<uint8_t>(indices->indices.size());
+    int data_size = static_cast<int>(input->data.size());
+    int point_step_size = static_cast<int>(input->point_step);
+    int cloud_size = data_size / point_step_size;
+    int indices_size = static_cast<int>(indices->indices.size());
     if (cloud_size < indices_size){
         NODELET_ERROR("Input index is out of expected cloud size: %d > %d", indices_size, cloud_size);
         return;

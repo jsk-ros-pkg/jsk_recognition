@@ -92,6 +92,16 @@ namespace jsk_pcl_ros
     pcl_conversions::toPCL(*cloud_msg, *input);
     pcl::PointIndices::Ptr indices (new pcl::PointIndices ());
     pcl_conversions::toPCL(*indices_msg, *indices);
+    
+    // check if input size is bigger than indices size 
+    int32_t data_size = static_cast<int32_t>(input->data.size());
+    int32_t point_step_size = static_cast<int32_t>(input->point_step);
+    int32_t cloud_size = data_size / point_step_size;
+    int32_t indices_size = static_cast<int32_t>(indices->indices.size());
+    if (cloud_size < indices_size){
+        NODELET_ERROR("Input index is out of expected cloud size: %d > %d", indices_size, cloud_size);
+        return;
+    }
 
     // extract pointcloud with indices
     pcl::ExtractIndices<pcl::PCLPointCloud2> extract;

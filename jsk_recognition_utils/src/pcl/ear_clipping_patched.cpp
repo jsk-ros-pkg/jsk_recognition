@@ -75,49 +75,49 @@ pcl::EarClippingPatched::triangulate (const Vertices& vertices, PolygonMesh& out
     return;
   }
 
-  std::vector<uint32_t> remaining_vertices = vertices.vertices;
+  Vertices remaining_vertices = vertices;
   size_t count = triangulateClockwiseVertices(remaining_vertices, output);
 
   // if the input vertices order is anti-clockwise, it always left a
   // convex polygon and start infinite loops, which means will left more
   // than 3 points.
-  if (remaining_vertices.size() < 3) return;
+  if (remaining_vertices.vertices.size() < 3) return;
 
   output.polygons.erase(output.polygons.end(), output.polygons.end() + count);
-  remaining_vertices.resize(n_vertices);
+  remaining_vertices.vertices.resize(n_vertices);
   for (size_t v = 0; v < n_vertices; v++)
-      remaining_vertices[v] = vertices.vertices[n_vertices - 1 - v];
+      remaining_vertices.vertices[v] = vertices.vertices[n_vertices - 1 - v];
   triangulateClockwiseVertices(remaining_vertices, output);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 size_t
-pcl::EarClippingPatched::triangulateClockwiseVertices (std::vector<uint32_t>& vertices, PolygonMesh& output)
+pcl::EarClippingPatched::triangulateClockwiseVertices (Vertices& vertices, PolygonMesh& output)
 {
   // triangles count
   size_t count = 0;
 
   // Avoid closed loops.
-  if (vertices.front () == vertices.back ())
-    vertices.erase (vertices.end () - 1);
+  if (vertices.vertices.front () == vertices.vertices.back ())
+    vertices.vertices.erase (vertices.vertices.end () - 1);
 
   // null_iterations avoids infinite loops if the polygon is not simple.
-  for (int u = static_cast<int> (vertices.size ()) - 1, null_iterations = 0;
-      vertices.size () > 2 && null_iterations < static_cast<int >(vertices.size () * 2);
-      ++null_iterations, u = (u+1) % static_cast<int> (vertices.size ()))
+  for (int u = static_cast<int> (vertices.vertices.size ()) - 1, null_iterations = 0;
+      vertices.vertices.size () > 2 && null_iterations < static_cast<int >(vertices.vertices.size () * 2);
+      ++null_iterations, u = (u+1) % static_cast<int> (vertices.vertices.size ()))
   {
-    int v = (u + 1) % static_cast<int> (vertices.size ());
-    int w = (u + 2) % static_cast<int> (vertices.size ());
+    int v = (u + 1) % static_cast<int> (vertices.vertices.size ());
+    int w = (u + 2) % static_cast<int> (vertices.vertices.size ());
 
-    if (vertices.size() == 3 || isEar (u, v, w, vertices))
+    if (vertices.vertices.size() == 3 || isEar (u, v, w, vertices))
     {
       Vertices triangle;
       triangle.vertices.resize (3);
-      triangle.vertices[0] = vertices[u];
-      triangle.vertices[1] = vertices[v];
-      triangle.vertices[2] = vertices[w];
+      triangle.vertices[0] = vertices.vertices[u];
+      triangle.vertices[1] = vertices.vertices[v];
+      triangle.vertices[2] = vertices.vertices[w];
       output.polygons.push_back (triangle);
-      vertices.erase (vertices.begin () + v);
+      vertices.vertices.erase (vertices.vertices.begin () + v);
       null_iterations = 0;
       count++;
     }
@@ -127,12 +127,12 @@ pcl::EarClippingPatched::triangulateClockwiseVertices (std::vector<uint32_t>& ve
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 bool
-pcl::EarClippingPatched::isEar (int u, int v, int w, const std::vector<uint32_t>& vertices)
+pcl::EarClippingPatched::isEar (int u, int v, int w, const Vertices& vertices)
 {
   Eigen::Vector3f p_u, p_v, p_w;
-  p_u = points_->points[vertices[u]].getVector3fMap();
-  p_v = points_->points[vertices[v]].getVector3fMap();
-  p_w = points_->points[vertices[w]].getVector3fMap();
+  p_u = points_->points[vertices.vertices[u]].getVector3fMap();
+  p_v = points_->points[vertices.vertices[v]].getVector3fMap();
+  p_w = points_->points[vertices.vertices[w]].getVector3fMap();
 
   const float eps = 1e-15f;
   Eigen::Vector3f p_vu, p_vw;
@@ -146,11 +146,11 @@ pcl::EarClippingPatched::isEar (int u, int v, int w, const std::vector<uint32_t>
 
   Eigen::Vector3f p;
   // 2: Check if any other vertex is inside the triangle.
-  for (int k = 0; k < static_cast<int> (vertices.size ()); k++)
+  for (int k = 0; k < static_cast<int> (vertices.vertices.size ()); k++)
   {
     if ((k == u) || (k == v) || (k == w))
       continue;
-    p = points_->points[vertices[k]].getVector3fMap();
+    p = points_->points[vertices.vertices[k]].getVector3fMap();
 
     if (isInsideTriangle (p_u, p_v, p_w, p))
       return (false);
@@ -164,10 +164,10 @@ pcl::EarClippingPatched::isEar (int u, int v, int w, const std::vector<uint32_t>
   // HACK: avoid double-counting intersection at polygon vertices
   Eigen::Vector3f p_inf = p_mid_uw + (p_v - p_mid_uw) * 1e15f + p_vu * 1e10f;
   int intersect_count = 0;
-  for (int i = 0; i < static_cast<int>(vertices.size()); i++)
+  for (int i = 0; i < static_cast<int>(vertices.vertices.size()); i++)
   {
-    p_i0 = points_->points[vertices[i]].getVector3fMap();
-    p_i1 = points_->points[vertices[(i + 1) % static_cast<int>(vertices.size())]].getVector3fMap();
+    p_i0 = points_->points[vertices.vertices[i]].getVector3fMap();
+    p_i1 = points_->points[vertices.vertices[(i + 1) % static_cast<int>(vertices.vertices.size())]].getVector3fMap();
     if (intersect(p_mid_uw, p_inf, p_i0, p_i1))
       intersect_count++;
   }

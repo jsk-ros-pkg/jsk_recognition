@@ -39,6 +39,8 @@
 #include <pcl/point_types.h>
 #include <pcl/surface/processing.h>
 
+#include <boost/shared_ptr.hpp>
+
 namespace pcl
 {
 
@@ -87,7 +89,7 @@ namespace pcl
         * \param[out] output the resultant polygonal mesh
         */
       size_t
-      triangulateClockwiseVertices (std::vector<uint32_t>& vertices, PolygonMesh& output);
+      triangulateClockwiseVertices (Vertices& vertices, PolygonMesh& output);
 
       /** \brief Check if the triangle (u,v,w) is an ear. 
         * \param[in] u the first triangle vertex 
@@ -96,7 +98,7 @@ namespace pcl
         * \param[in] vertices a set of input vertices
         */
       bool
-      isEar (int u, int v, int w, const std::vector<uint32_t>& vertices);
+      isEar (int u, int v, int w, const Vertices& vertices);
 
       /** \brief Check if p is inside the triangle (u,v,w). 
         * \param[in] u the first triangle vertex 

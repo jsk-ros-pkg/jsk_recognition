@@ -34,6 +34,7 @@ env:
     - ROSDEP_ADDITIONAL_OPTIONS='-n -r -v --ignore-src' # run rosdep without -q
   matrix:
     - CHECK_PYTHON3_COMPILE=true
+    - CHECK_PYTHON2_COMPILE=true
     - ROS_DISTRO=melodic DOCKER_IMAGE_JENKINS="ros-ubuntu:18.04-base" BEFORE_SCRIPT="sudo pip uninstall -y fcn chainer chainercv decorator cupy-cuda91; sudo ln -sf /bin/echo /usr/local/bin/pip; sudo ln -sf /bin/echo /usr/local/bin/pip2" TEST_PKGS="jsk_recognition_msgs" # check https://github.com/jsk-ros-pkg/jsk_recognition/pull/2533
     - ROS_DISTRO=indigo
     - ROS_DISTRO=indigo CATKIN_TOOLS_CONFIG_OPTIONS="--install" TEST_PKGS='jsk_recognition_msgs' # to skip test
@@ -52,6 +53,7 @@ before_script:
   - if [[ "$ROS_DISTRO" == "melodic" && "$DOCKER_IMAGE_JENKINS" == "" ]]; then export export DOCKER_IMAGE_JENKINS='ros-ubuntu:18.04-pcl'; fi
   - if [[ "$ROS_DISTRO" == "noetic" && "$DOCKER_IMAGE_JENKINS" == "" ]]; then export export DOCKER_IMAGE_JENKINS='ros-ubuntu:20.04-pcl'; fi
 script:
+  - if [ "${CHECK_PYTHON2_COMPILE}" == "true" ]; then python2 -m compileall .; exit $?; fi
   - if [ "${CHECK_PYTHON3_COMPILE}" == "true" ]; then bash -c "ret=0; trap 'ret=1' ERR; python3 -m compileall .; 2to3 -w -f except -f execfile -f has_key -f import -f raw_input -f zip .; git diff --exit-code . :^.travis > /dev/null; echo Exitting with \$ret; exit \$ret"; exit $?; fi
   # use https://github.com/ros-infrastructure/rosdep/pull/694 to respect version_lt for python pip, some package requries python3
   - export BEFORE_SCRIPT="sudo pip install numpy==1.16.6; sudo pip install fcn chainercv chainer-mask-rcnn==0.3.0 decorator==4.4.2 chainer==6.7.0 cupy-cuda91; $BEFORE_SCRIPT"

@@ -1,0 +1,27 @@
+<launch>
+
+  <param name="/use_sim_time" value="true" />
+
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_perception)/sample/data/sample_mask_rcnn_73b2_kitchen.bag --clock --loop">
+  </node>
+
+  <group ns="/image_publisher">
+    <node name="republish"
+          pkg="image_transport" type="republish"
+          args="compressed raw">
+      <remap from="in" to="output" />
+      <remap from="out" to="output" />
+    </node>
+  </group>
+  <group ns="/mask_rcnn_73b2_kitchen/output">
+    <node name="republish"
+          pkg="image_transport" type="republish"
+          args="compressed raw">
+      <remap from="in" to="viz" />
+      <remap from="out" to="viz" />
+    </node>
+  </group>
+
+</launch>

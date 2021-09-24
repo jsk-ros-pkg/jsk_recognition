@@ -53,6 +53,7 @@ namespace jsk_perception
     pnh_->param("mask_black_to_transparent", mask_black_to_transparent_, false);
     pnh_->param("use_rectified_image", use_rectified_image_, true);
     pnh_->param("queue_size", queue_size_, 100);
+    pnh_->param("max_interval_duration", max_interval_duration_, ros::DURATION_MAX.toSec());
     pnh_->param("cval", cval_, 0);
     pub_image_ = advertise<sensor_msgs::Image>(
       *pnh_, "output", 1);
@@ -70,7 +71,7 @@ namespace jsk_perception
     sub_info_ = pnh_->subscribe("input/camera_info", 1,
                                 &ApplyMaskImage::infoCallback, this);
     if (approximate_sync_) {
-      async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
+      async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_), (max_interval_duration_);
       async_->connectInput(sub_image_, sub_mask_);
       async_->registerCallback(boost::bind(&ApplyMaskImage::apply, this, _1, _2));
     }

@@ -97,6 +97,33 @@ def main():
         extract=False,
     )
 
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/hand_pose_estimation_2d.bag',
+        url='https://drive.google.com/uc?id=1yJ2IYNmSO-0n0pE_Rs6FCgDQ8EKiCndr',
+        md5='362df96e8eaacaa82faa05ecebcd2166',
+        extract=False,
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/sample_rect_array_in_panorama_to_bounding_box_array.bag',
+        url='https://drive.google.com/uc?id=1f613TsYuPk1DWuGuUfkJVBbPv2-4Io69',
+        md5='04ba99ee993860634c0064d167b5cbe5',
+        extract=False,
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/sample_mask_rcnn_73b2_kitchen.bag',
+        url='https://drive.google.com/uc?id=1DZ6W7gBzbu-7Z-NRw7y0WCGDRpsaYadI',
+        md5='f86a51988fe521863ff845a2c9ff10df',
+        extract=False,
+        compressed_bags=[
+            'sample/data/sample_mask_rcnn_73b2_kitchen.bag',
+        ],
+    )
+
 
 if __name__ == '__main__':
     main()

@@ -27,8 +27,8 @@ import chainer
 from jsk_recognition_utils.chainermodels.deep_sort_net\
     import DeepSortFeatureExtractor
 
-from .vis_bboxes import vis_bboxes
-from . import deep_sort
+from vis_bboxes import vis_bboxes
+import deep_sort
 
 
 def extract_image_patch(image, bbox, patch_shape):

@@ -46,9 +46,9 @@ from jsk_recognition_msgs.msg import PeoplePose
 from jsk_recognition_msgs.msg import PeoplePoseArray
 from sensor_msgs.msg import Image
 
-from .hmr.smpl import SMPL
-from .hmr.net import EncoderFC3Dropout
-from .hmr.resnet_v2_50 import ResNet_v2_50
+from hmr.smpl import SMPL
+from hmr.net import EncoderFC3Dropout
+from hmr.resnet_v2_50 import ResNet_v2_50
 
 
 def format_pose_msg(person_pose):

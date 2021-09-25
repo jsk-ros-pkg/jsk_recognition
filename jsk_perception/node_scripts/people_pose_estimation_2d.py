@@ -51,7 +51,7 @@ from jsk_recognition_msgs.msg import Segment
 from sensor_msgs.msg import CameraInfo
 from sensor_msgs.msg import Image
 
-from .openpose import PoseNet, HandNet
+from openpose import PoseNet, HandNet
 
 
 def find_joint(limb, jts):

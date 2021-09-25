@@ -33,7 +33,7 @@ from jsk_recognition_msgs.msg import ClassificationResult
 from jsk_recognition_msgs.msg import Label
 from jsk_recognition_msgs.msg import LabelArray
 
-from .deep_sort.deep_sort_tracker import DeepSortTracker
+from deep_sort.deep_sort_tracker import DeepSortTracker
 
 
 class DeepSortTrackerNode(object):

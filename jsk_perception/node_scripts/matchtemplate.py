@@ -85,7 +85,7 @@ class MepConverter:
     # general template modifier function
     def set_template (self, ref_id='', ref_image=None, ref_rect=None,
                       ser_frame=None, ser_rect=None, color=None, method=None):
-        if not self.templates.has_key(ref_id):
+        if ref_id not in self.templates:
             self.templates[ref_id] = {'ref_orig':None,'ref_point':None,'ref_image':None,
                                       'ser_frame':None, 'ser_rect':None,
                                       'color':'mono8', 'method':cv2.TM_SQDIFF_NORMED} # normalized SSD

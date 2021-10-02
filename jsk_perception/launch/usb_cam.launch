@@ -7,7 +7,7 @@
   <arg name="frame_rate" />
   <arg name="brightness" />
   <arg name="gui" default="false" />
-  <arg name="frame_id" default="$(arg camera)_link" />
+  <arg name="frame_id" default="$(arg camera_name)_link" />
 
   <node pkg="usb_cam" type="usb_cam_node" name="$(arg camera_name)">
     <rosparam subst_value="true">

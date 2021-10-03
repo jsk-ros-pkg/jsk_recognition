@@ -17,7 +17,7 @@
       pixel_format: $(arg video_mode)
       framerate: $(arg frame_rate)
       brightness: $(arg brightness)
-      frame_id: $(arg frame_id)
+      camera_frame_id: $(arg frame_id)
     </rosparam>
   </node>
 

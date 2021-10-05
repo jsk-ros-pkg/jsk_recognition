@@ -33,7 +33,7 @@ def main():
 
     download_data(
         path='sample/data/2017-02-05-16-11-09_shelf_bin.bag',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vYWI2NnZrekEwSmc',
+        url='https://drive.google.com/uc?id=1LhuGYlPNXEJW-G3dOwxD60z3k9KvYRxg',
         md5='44427634f57ac76111edabd7b1f4e140',
     )
 
@@ -49,7 +49,7 @@ def main():
 
     download_data(
         path='sample/data/bunny_marker_array.bag',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vdW1NMlhiRU9KZDQ',
+        url='https://drive.google.com/uc?id=13SFY5aY6MgYVZhq3obll2DE5ns_Rmei2',
         md5='e7dc29d21bdd30c769396c361e4350fd',
     )
 
@@ -61,7 +61,7 @@ def main():
 
     download_data(
         path='sample/data/arc2017_4objects.bag',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vakpvU0wtMFNCTkk',
+        url='https://drive.google.com/uc?id=1thJxY4BJrU1ltxBoWstTaMEQfhFmsls4',
         md5='2c3af4482cd2e0ee95b58848ae48afaf',
     )
 

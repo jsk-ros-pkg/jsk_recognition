@@ -22,21 +22,21 @@ def main():
 
     download_data(
         path='sample/data/2016-06-24-17-43-57_tabletop.bag.tgz',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vUllPT3VPOHN6LVU',
+        url='https://drive.google.com/uc?id=1aIOrcLu7OxpkEGdUBCC6FWGb6NjP_dkn',
         md5='dbc3daff4fe9812cab7328e7702e6438',
         extract=True,
     )
 
     download_data(
         path='sample/data/2017-06-19-19-34-18_tabletop_coffeecup.tgz',
-        url='https://drive.google.com/uc?id=0B5DV6gwLHtyJRTJ0eGdVYk43bEU',
+        url='https://drive.google.com/uc?id=16uMAe5y5fuqSJpCk_iH6gBBHsyI4Llob',
         md5='58002c60761d192322413f799368ae88',
         extract=True,
     )
 
     download_data(
         path='sample/data/2016-10-26-02-09-51_coffee_cup.pcd',
-        url='https://drive.google.com/uc?id=0B5DV6gwLHtyJVVQ2TFhVSTJqZ3M',
+        url='https://drive.google.com/uc?id=1YiO4UpRCfpskzUvCFmMyaY8mqaKavGlx',
         md5='27d1a39e6ea596c4e24f1347f53f2e7b',
         extract=False,
     )
@@ -50,7 +50,7 @@ def main():
 
     download_data(
         path='sample/data/2016-07-06-12-16-43-person-in-point-cloud.tgz',
-        url='https://drive.google.com/uc?id=0B_NiLAzvehC9cHhnOFd0YUN2N1U',
+        url='https://drive.google.com/uc?id=10cN9sfxOPWqieqIBb6dKs3yJMsG0tH4n',
         md5='c59067adc429fb9f1cf180d350a2da43',
         extract=True,
         compressed_bags=[
@@ -60,19 +60,19 @@ def main():
 
     download_data(
         path='sample/data/stereo_arc2017_objects.bag',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2va1ZvWHJRT3Y5dkk',
+        url='https://drive.google.com/uc?id=1TP0h-uf3A_f9SeIiUiwApDiKII3yA-9E',
         md5='4d8f51d0827f66afe5b91473aeaf9c97',
     )
 
     download_data(
         path='sample/data/room73b2_table.bag',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vdXdfMWNSUU9IVEU',
+        url='https://drive.google.com/uc?id=1qKWPVGxLXaaKAeIXM-XhK7WP05I1X3-s',
         md5='a38fee55c926152f3d65023d60322eb0',
     )
 
     download_data(
         path='sample/data/sample_add_color_from_image_20170319.bag',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vN284RHBXT1duUWM',
+        url='https://drive.google.com/uc?id=1eZZmW4uvlkNMUzDkztrs1gtd91Y3f4QE',
         md5='d432e7eec587708849ac85fdb3c6247f',
         compressed_bags=[
             'sample/data/sample_add_color_from_image_20170319.bag',
@@ -98,7 +98,7 @@ def main():
 
     download_data(
         path='sample/data/sample_door_handle_detector.bag',
-        url='https://drive.google.com/uc?id=0B4ysRIwB7GryMGxCTUI0MHhqWFk',
+        url='https://drive.google.com/uc?id=1CTP_l4NHy7YSiPKPGt6ek-xnHOCMd9IA',
         md5='f702e012730db7aaf01b9868280d8bca',
         compressed_bags=[
             'sample/data/sample_door_handle_detector.bag',

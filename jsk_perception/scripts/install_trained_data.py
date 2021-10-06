@@ -57,7 +57,7 @@ def main():
     download_data(
         pkg_name=PKG,
         path='trained_data/drill_svm.xml',
-        url='https://drive.google.com/uc?id=0B5hRAGKTOm_KWW11R0FTX0xjTDg',
+        url='https://drive.google.com/uc?id=1RaORtBL5LUyG92eNBovMDrNrC8JG-qNt',
         md5='762d0da4bcbf50e0e92939372988901a',
         quiet=quiet,
     )
@@ -73,7 +73,7 @@ def main():
     download_data(
         pkg_name=PKG,
         path='trained_data/apc2015_sample_bof.pkl.gz',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vemVRaDBOWDVpb28',
+        url='https://drive.google.com/uc?id=18V_fTj7A2iRsYqyflJ4seoxFHwgyXKUE',
         md5='97eb737f71a33bfc23ec573f1d351bd8',
         quiet=quiet,
     )
@@ -89,7 +89,7 @@ def main():
     download_data(
         pkg_name=PKG,
         path='trained_data/apc2015_sample_clf.pkl.gz',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2veFY5ZFNqbzAzNmc',
+        url='https://drive.google.com/uc?id=1Wqgal6udQLjSYPe0z-DepGMUWLCJaLP-',
         md5='25e396358e9d7bfd1bd08334953fc287',
         quiet=quiet,
     )
@@ -119,21 +119,21 @@ def main():
     download_data(
         pkg_name=PKG,
         path='trained_data/vgg16_fast_rcnn.chainermodel',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vX015UzB4aC13cVk',
+        url='https://drive.google.com/uc?id=1fay8DaRYKUeI3YKkIo8eRRzzivMAGTDu',
         md5='5ae12288962e96124cce212fd3f18cad',
         quiet=quiet,
     )
     download_data(
         pkg_name=PKG,
         path='trained_data/vgg_cnn_m_1024.chainermodel',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vZzJuaFRIdDMtLWc',
+        url='https://drive.google.com/uc?id=1kDCqoGZLufFxWF8lBCMxIzuaJCVwvQ72',
         md5='eb33103e36f299b4433c63fcfc165cbd',
         quiet=quiet,
     )
     download_data(
         pkg_name=PKG,
         path='trained_data/vgg16_bn_apc2015_496000.chainermodel',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vQ2tCN1hoYV84eHM',
+        url='https://drive.google.com/uc?id=1u3_ob0AEihPde7B4da6A0UPet78blhTz',
         md5='4a48c2f39234e46937759f4cc43bb257',
         quiet=quiet,
     )
@@ -151,7 +151,7 @@ def main():
     download_data(
         pkg_name=PKG,
         path='trained_data/bvlc_vgg16.chainermodel',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vSlFjQlJFQjM5TEk',
+        url='https://drive.google.com/uc?id=13gICi5kgqaqM67lVNKKwMFYz_NRKWY5G',
         md5='292e6472062392f5de02ef431bba4a48',
     )
 
@@ -159,7 +159,7 @@ def main():
     download_data(
         pkg_name=PKG,
         path='trained_data/bvlc_alexnet.chainermodel',
-        url='https://drive.google.com/uc?id=0B5DV6gwLHtyJZkd1ZTRiNUdrUXM',
+        url='https://drive.google.com/uc?id=1Vr1pvMrmDmK9tj4zF8l74ozbcpN1bU67',
         md5='2175620a2237bbd33e35bf38867d84b2',
     )
 

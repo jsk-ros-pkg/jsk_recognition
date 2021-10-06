@@ -9,7 +9,7 @@ def main():
     download_data(
         pkg_name=PKG,
         path='sample/data/2016-11-11-12-53-06_in_lab.bag',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vdE9IRERDLXRoUWs',
+        url='https://drive.google.com/uc?id=11Oi0nKJpkMQqYg-nftGaWnD3uZ13nFXx',
         md5='5066157f7373a19829f4edba65068a89',
         extract=False,
         compressed_bags=[
@@ -20,7 +20,7 @@ def main():
     download_data(
         pkg_name=PKG,
         path='sample/data/2016-10-15-23-21-42_moving_bottle.bag',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vTDZOZGhrTTNvc00',
+        url='https://drive.google.com/uc?id=1Puo5mU7Xjv4byGIK-IfvdvsvqPuLe6ii',
         md5='ad4e7d298c0d9985295d93e47c7b03e6',
         extract=False,
         compressed_bags=[
@@ -31,7 +31,7 @@ def main():
     download_data(
         pkg_name=PKG,
         path='sample/data/2017-06-20-12-00-00_people_images_in_lab.bag.tgz',
-        url='https://drive.google.com/uc?id=0B_NiLAzvehC9Yzl4YzB1WnlFcXM',
+        url='https://drive.google.com/uc?id=1VYLgjccB9sCa5ht32r3FLjUC2fhFkyZI',
         md5='0a397a2ff14c07954cc0b9178e33600d',
         extract=True,
     )
@@ -40,20 +40,20 @@ def main():
     download_data(
         pkg_name=PKG,
         path='sample/data/apc2016_object_imgs_and_masks.bag',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2veVJ4N21tVlB3MGs',
+        url='https://drive.google.com/uc?id=1H3PYwHsberifKk8K1zVfKFzEHMhzHB1S',
         md5='fc03e326e0b46f6ecdf9287ddc5f0f68',
     )
     download_data(
         pkg_name=PKG,
         path='sample/data/apc2016_object_imgs_and_masks_templates.tgz',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vX0NqcXNGYXEzUlE',
+        url='https://drive.google.com/uc?id=15e-16BiejGM0ANT4S5Mei04MKpTg6ikj',
         md5='df30d3bf32fda521f4c888c83a394fe5',
         extract=True,
     )
     download_data(
         pkg_name=PKG,
         path='sample/data/resnet_features_apc2016.npz',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vM3hhOTBGNjA1eTQ',
+        url='https://drive.google.com/uc?id=1cbSIrgBpllXzIq52K5Vw7mgI22Ag2eXA',
         md5='ff7f6a90090d152e2c43bf5057d4e853',
     )
 

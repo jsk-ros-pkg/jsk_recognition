@@ -8,6 +8,7 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <build_depend>catkin_virtualenv</build_depend>
   <build_depend>message_generation</build_depend>
 
   <exec_depend>audio_capture</exec_depend>
@@ -20,5 +21,9 @@
   <exec_depend>message_runtime</exec_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
+
+  <export>
+    <pip_requirements>requirements.txt</pip_requirements>
+  </export>
 
 </package>

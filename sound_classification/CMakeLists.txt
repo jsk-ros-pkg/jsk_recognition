@@ -21,5 +21,8 @@ catkin_package(
   message_runtime
   )
 
-include_directories(
-  )
+install(DIRECTORY launch scripts sample_rosbag
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  USE_SOURCE_PERMISSIONS
+)
+

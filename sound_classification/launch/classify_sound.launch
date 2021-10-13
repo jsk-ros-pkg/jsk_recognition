@@ -1,0 +1,36 @@
+<launch>
+
+  <arg name="use_rosbag" default="false" />
+  <arg name="filename" default="/" />
+  <arg name="use_microphone" default="true" />
+  <arg name="gui" default="true" />
+
+  <include file="$(find sound_classification)/launch/audio_to_spectrogram.launch" >
+    <arg name="use_rosbag" value="$(arg use_rosbag)" />
+    <arg name="filename" value="$(arg filename)" />
+    <arg name="use_microphone" value="$(arg use_microphone)" />
+    <arg name="gui" value="false" />
+  </include>
+
+  <!-- Classify sounds -->
+  <node pkg="sound_classification" type="sound_classifier.py" name="sound_classifier" output="screen" >
+    <remap from="~input" to="/preprocess_gray_image/output_normalized" />
+    <rosparam subst_value="true">
+      gpu: 0
+      model_name: nin
+    </rosparam>
+  </node>
+
+  <!-- Visualize sound classification -->
+  <group if="$(arg gui)">
+    <node name="sound_classification_result"
+          pkg="sound_classification" type="draw_classification_result.py" >
+      <remap from="~input" to="/sound_classifier/output" />
+      <remap from="~input/image" to="/sound_classifier/debug/net_input" />
+    </node>
+    <node pkg="image_view" type="image_view" name="classification_result_view"  >
+      <remap from="image" to="/sound_classification_result/output" />
+    </node>
+  </group>
+
+</launch>

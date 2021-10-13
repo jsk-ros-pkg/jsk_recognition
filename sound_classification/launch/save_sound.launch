@@ -1,0 +1,44 @@
+<launch>
+
+  <arg name="use_rosbag" default="false" />
+  <arg name="filename" default="/" />
+  <arg name="use_microphone" default="true" />
+  <arg name="gui" default="true"/>
+  <arg name="target_class" default="" />
+  <arg name="save_when_sound" default="true"/>
+  <arg name="threshold" default="0.5"/>
+  <arg name="save_data_rate" default="5"/>
+
+  <include file="$(find sound_classification)/launch/audio_to_spectrogram.launch" >
+    <arg name="use_rosbag" value="$(arg use_rosbag)" />
+    <arg name="filename" value="$(arg filename)" />
+    <arg name="use_microphone" value="$(arg use_microphone)" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="threshold" value="$(arg threshold)" />
+  </include>
+
+  <!-- Collect spectrogram with sound class, only when the robot is in sound. -->
+  <node pkg="sound_classification" type="sound_saver.py" name="sound_saver" output="screen">
+    <remap from="~in_sound" to="/sound_detector_volume/in_sound" />
+    <remap from="~input" to="/preprocess_gray_image/output_normalized" />
+    <remap from="~input_raw" to="/spectrum_to_spectrogram/spectrogram" />
+    <rosparam subst_value="true">
+      <!-- params below is enabled only when save_data is true -->
+      save_data_rate: $(arg save_data_rate) <!-- related to spectrogram_period -->
+      target_class: $(arg target_class)
+      save_when_sound: $(arg save_when_sound)
+      save_raw_spectrogram: true
+    </rosparam>
+  </node>
+
+  <!-- Detect sound based on pixel value sum (nearly equals to volume) -->
+  <node pkg="sound_classification" type="sound_detector_volume.py"
+        name="sound_detector_volume" respawn="true" output="screen">
+    <remap from="~input" to="/preprocess_gray_image/output" />
+    <rosparam subst_value="true">
+      power_per_pixel_threshold: $(arg threshold)
+      lazy: false
+    </rosparam>
+  </node>
+
+</launch>

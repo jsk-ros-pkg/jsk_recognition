@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>sound_classification</name>
+  <version>0.0.2</version>
+  <description>The sound_classification package</description>
+  <maintainer email="708yamaguchi@gmail.com">Naoya Yamaguchi</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>message_generation</build_depend>
+
+  <exec_depend>audio_capture</exec_depend>
+  <exec_depend>audio_to_spectrogram</exec_depend>
+  <exec_depend>image_view</exec_depend>
+  <exec_depend>imgaug-pip</exec_depend>
+  <exec_depend>jsk_recognition_msgs</exec_depend>
+  <exec_depend>jsk_topic_tools</exec_depend>
+  <exec_depend>message_filters</exec_depend>
+  <exec_depend>message_runtime</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+
+</package>

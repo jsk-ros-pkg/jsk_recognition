@@ -1,0 +1,18 @@
+<launch>
+  <arg name="filename" />
+  <arg name="use_microphone" default="true" />
+
+  <node name="rosbag_record"
+        pkg="rosbag" type="record"
+        args="-O $(arg filename)
+              -b 0
+              /audio
+              "
+        output="screen">
+  </node>
+
+  <include file="$(find sound_classification)/launch/audio_to_spectrogram.launch" >
+    <arg name="use_microphone" value="$(arg use_microphone)" />
+    <arg name="gui" value="true" />
+  </include>
+</launch>

@@ -13,7 +13,7 @@ import rospy
 
 from jsk_perception.cfg import ImagePublisherConfig
 from sensor_msgs.msg import CameraInfo
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, CompressedImage
 
 
 class ImagePublisher(object):
@@ -32,6 +32,7 @@ class ImagePublisher(object):
         dynamic_reconfigure.server.Server(
             ImagePublisherConfig, self._cb_dyn_reconfig)
         self.pub = rospy.Publisher('~output', Image, queue_size=1)
+        self.pub_compressed = rospy.Publisher('~output/compressed', CompressedImage, queue_size=1)
         self.publish_info = rospy.get_param('~publish_info', True)
         if self.publish_info:
             self.pub_info = rospy.Publisher(
@@ -56,7 +57,8 @@ class ImagePublisher(object):
                     cv2.CV_8UC1, cv2.CV_16UC1, cv2.CV_32FC1]):
                 img = cv2.imread(file_name, cv2.IMREAD_COLOR)
             with self.lock:
-                self.imgmsg = self.cv2_to_imgmsg(img, self.encoding)
+                self.imgmsg, self.compmsg = \
+                    self.cv2_to_imgmsg(img, self.encoding)
         return config
 
     def publish(self, event):
@@ -65,9 +67,14 @@ class ImagePublisher(object):
         now = rospy.Time.now()
         # setup ros message and publish
         with self.lock:
-            self.imgmsg.header.stamp = now
-            self.imgmsg.header.frame_id = self.frame_id
-        self.pub.publish(self.imgmsg)
+            self.imgmsg.header.stamp = \
+                self.compmsg.header.stamp = now
+            self.imgmsg.header.frame_id = \
+                self.compmsg.header.frame_id = self.frame_id
+        if self.pub.get_num_connections() > 0:
+            self.pub.publish(self.imgmsg)
+        if self.pub_compressed.get_num_connections() > 0:
+            self.pub_compressed.publish(self.compmsg)
         if self.publish_info:
             info = CameraInfo()
             info.header.stamp = now
@@ -126,7 +133,11 @@ class ImagePublisher(object):
         else:
             rospy.logerr('unsupported encoding: {0}'.format(encoding))
             return
-        return bridge.cv2_to_imgmsg(img, encoding=encoding)
+        compressed_msg = CompressedImage()
+        compressed_msg.format = "jpeg"
+        compressed_msg.data = np.array(
+            cv2.imencode('.jpg', img)[1]).tostring()
+        return bridge.cv2_to_imgmsg(img, encoding=encoding), compressed_msg
 
 
 if __name__ == '__main__':

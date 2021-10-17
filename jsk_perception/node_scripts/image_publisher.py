@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os
+import os, sys
 from threading import Lock
 
 import cv2
@@ -43,18 +43,18 @@ class ImagePublisher(object):
         file_name = config['file_name']
         config['file_name'] = os.path.abspath(file_name)
         img = cv2.imread(file_name, cv2.IMREAD_UNCHANGED)
-        # when file is gray scale but encoding is not grayscale,
-        # load the image again in color
-        if (len(img.shape) == 2 and
-                getCvType(self.encoding) not in [
-                    cv2.CV_8UC1, cv2.CV_16UC1, cv2.CV_32FC1]):
-            img = cv2.imread(file_name, cv2.IMREAD_COLOR)
         if img is None:
             rospy.logwarn('Could not read image file: {}'.format(file_name))
             with self.lock:
                 self.imgmsg = None
         else:
             rospy.loginfo('Read the image file: {}'.format(file_name))
+            # when file is gray scale but encoding is not grayscale,
+            # load the image again in color
+            if (len(img.shape) == 2 and
+                getCvType(self.encoding) not in [
+                    cv2.CV_8UC1, cv2.CV_16UC1, cv2.CV_32FC1]):
+                img = cv2.imread(file_name, cv2.IMREAD_COLOR)
             with self.lock:
                 self.imgmsg = self.cv2_to_imgmsg(img, self.encoding)
         return config

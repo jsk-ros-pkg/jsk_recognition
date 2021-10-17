@@ -32,7 +32,7 @@ class ImagePublisher(object):
         dynamic_reconfigure.server.Server(
             ImagePublisherConfig, self._cb_dyn_reconfig)
         self.pub = rospy.Publisher('~output', Image, queue_size=1)
-        self.pub_compressed = rospy.Publisher('~output/compressed', CompressedImage, queue_size=1)
+        self.pub_compressed = rospy.Publisher('{}/compressed'.format(rospy.resolve_name('~output')), CompressedImage, queue_size=1)
         self.publish_info = rospy.get_param('~publish_info', True)
         if self.publish_info:
             self.pub_info = rospy.Publisher(

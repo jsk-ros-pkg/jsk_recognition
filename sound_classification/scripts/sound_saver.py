@@ -35,8 +35,11 @@ class SoundSaver(object):
         self.raw_image_save_dir = osp.join(self.image_save_dir, 'raw')
         if not osp.exists(self.raw_image_save_dir):
             makedirs(self.raw_image_save_dir)
-        noise = np.load(osp.join(self.train_dir, 'noise.npy'))
-        np.save(osp.join(self.image_save_dir, 'noise.npy'), noise)
+        if osp.exists(osp.join(self.train_dir, 'noise.npy')):
+            noise = np.load(osp.join(self.train_dir, 'noise.npy'))
+            np.save(osp.join(self.image_save_dir, 'noise.npy'), noise)
+        else:
+            rospy.logerr("{} not found".format(osp.join(self.train_dir, 'noise.npy')))
         # ROS
         self.bridge = CvBridge()
         self.save_data_rate = rospy.get_param('~save_data_rate')

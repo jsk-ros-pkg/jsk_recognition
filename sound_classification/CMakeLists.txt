@@ -6,6 +6,11 @@ find_package(catkin REQUIRED
   message_generation
   std_msgs
   )
+if (${catkin_virtualenv_VERSION} VERSION_LESS "0.3.0")
+  message(STATUS "sound_classification requires catkin_virtualenv >= 0.3.0")
+  return()
+endif()
+
 
 add_message_files(
   FILES

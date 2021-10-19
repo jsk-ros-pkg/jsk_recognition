@@ -27,7 +27,9 @@ catkin_package(
   message_runtime
   )
 
-catkin_generate_virtualenv()
+catkin_generate_virtualenv(
+  INPUT_REQUIREMENTS requirements.in
+  )
 
 file(GLOB SCRIPTS_FILES scripts/*.py)
 catkin_install_python(

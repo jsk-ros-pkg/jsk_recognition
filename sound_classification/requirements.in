@@ -1,0 +1,4 @@
+opencv-python==4.2.0.32 # latest opencv-python for pyhthon2.7 https://github.com/opencv/opencv-python/releases/tag/32
+imageio==2.6.0 # require for imgaug
+imgaug==0.4.0
+chainer>=5.0.0,<7.0.0 # For Python 2.x, chainer 5.x.x is needed, 7.0.0 will not work on Python2

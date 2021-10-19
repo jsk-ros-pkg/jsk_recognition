@@ -14,7 +14,7 @@
   <exec_depend>audio_capture</exec_depend>
   <exec_depend>audio_to_spectrogram</exec_depend>
   <exec_depend>image_view</exec_depend>
-  <exec_depend>imgaug-pip</exec_depend>
+  <!-- <exec_depend>imgaug-pip</exec_depend> --> <!-- pip install imgaug installs python-opencv, whcih imcompatible with python2, so we need to instal specific versino of python-opencv, see https://stackoverflow.com/questions/63448467/installing-opencv-fails-because-it-cannot-find-skbuild#comment112227128_63457606. Since 1.2.15, we use requirement.txt to install imgaug==0.4.0 and opencv-python==4.2.0.32 -->
   <exec_depend>jsk_recognition_msgs</exec_depend>
   <exec_depend>jsk_topic_tools</exec_depend>
   <exec_depend>message_filters</exec_depend>

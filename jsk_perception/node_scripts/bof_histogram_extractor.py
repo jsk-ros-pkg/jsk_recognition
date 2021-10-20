@@ -37,7 +37,7 @@ class BoFHistogramExtractor(ConnectionBasedTransport):
             self.bof = pickle.load(f)
         if (StrictVersion(get_distribution('scikit-learn').version) >=
                 StrictVersion('0.17.0')):
-            if 'n_jobs' not in self.bof.nn.__dict__:
+            if 'n_jobs' not in self.bof.nn.__dict__ or not isinstance(self.bof.nn.n_jobs, int):
                 # In scikit-learn>=0.17.0,
                 # sklearn.neighbors.NearestNeighbors needs 'n_jobs' attribute.
                 # https://github.com/jsk-ros-pkg/jsk_recognition/issues/1669

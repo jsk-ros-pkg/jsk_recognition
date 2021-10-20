@@ -250,8 +250,8 @@ class HumanMeshRecovery(ConnectionBasedTransport):
         people_pose_msg = PeoplePoseArray(header=header)
         for i, person_joint_positions in enumerate(people_joint_positions):
             pose_msg = PeoplePose()
-            for joint_pose in person_joint_positions:
-                pose_msg.limb_names.append(str(i))
+            for j, joint_pose in enumerate(person_joint_positions):
+                pose_msg.limb_names.append(str(j))
                 pose_msg.scores.append(0.0)
                 q_xyzw = tf.transformations.quaternion_from_matrix(joint_pose)
                 pose_msg.poses.append(

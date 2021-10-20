@@ -17,6 +17,10 @@
   <arg name="gui" default="false" />
   <arg name="threshold" default="0.5" />
 
+  <arg name="pause_rosbag" default="true" />
+  <arg name="rosbag_args" value="--clock --pause" if="$(arg pause_rosbag)" />
+  <arg name="rosbag_args" value="--clock" unless="$(arg pause_rosbag)" />
+
   <!-- Start: Data conversion -->
   <!-- audio -> spectrum -> mono spectrogram -> preprocessed mono spectrogram -->
 
@@ -25,7 +29,7 @@
     <param name="use_sim_time" value="true" />
     <node name="rosbag_play"
           pkg="rosbag" type="play"
-          args="$(arg filename) --clock --pause"
+          args="$(arg filename) $(arg rosbag_args)"
           output="screen" />
   </group>
   <group unless="$(arg use_rosbag)" >

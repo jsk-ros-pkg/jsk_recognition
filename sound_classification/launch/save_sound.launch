@@ -1,6 +1,7 @@
 <launch>
 
   <arg name="use_rosbag" default="false" />
+  <arg name="pause_rosbag" default="true" />
   <arg name="filename" default="/" />
   <arg name="use_microphone" default="true" />
   <arg name="gui" default="true"/>
@@ -11,6 +12,7 @@
 
   <include file="$(find sound_classification)/launch/audio_to_spectrogram.launch" >
     <arg name="use_rosbag" value="$(arg use_rosbag)" />
+    <arg name="pause_rosbag" value="$(arg pause_rosbag)" />
     <arg name="filename" value="$(arg filename)" />
     <arg name="use_microphone" value="$(arg use_microphone)" />
     <arg name="gui" value="$(arg gui)" />

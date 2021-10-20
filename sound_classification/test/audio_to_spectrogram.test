@@ -1,0 +1,17 @@
+<launch>
+  <arg name="gui" default="false" />
+
+  <include file="$(find sound_classification)/launch/audio_to_spectrogram.launch" >
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="filename" value="$(find sound_classification)/sample_rosbag/applause.bag" />
+    <arg name="use_rosbag" value="true" />
+    <arg name="pause_rosbag" value="false" />
+  </include>
+
+  <test test-name="preprocess_gray_image_test" pkg="rostest" type="hztest" name="preprocess_gray_image_test" >
+    <param name="topic" value="/preprocess_gray_image/output_normalized" />
+    <param name="hz" value="470" />
+    <param name="hzerror" value="100.0" />
+    <param name="test_duration" value="5.0" />
+  </test>
+</launch>

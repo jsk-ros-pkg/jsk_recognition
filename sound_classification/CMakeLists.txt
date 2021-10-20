@@ -45,3 +45,16 @@ install(DIRECTORY launch scripts sample_rosbag
 install(FILES requirements.txt
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
+
+if(CATKIN_ENABLE_TESTING)
+  find_package(catkin REQUIRED COMPONENTS roslaunch rostest)
+
+  file(GLOB LAUNCH_FILES launch/*.launch)
+  list(REMOVE_ITEM LAUNCH_FILES "${PROJECT_SOURCE_DIR}/launch/record_audio_rosbag.launch")
+  foreach(LAUNCH_FILE ${LAUNCH_FILES})
+    roslaunch_add_file_check(${LAUNCH_FILE})
+  endforeach()
+
+  add_rostest(test/audio_to_spectrogram.test)
+  add_rostest(test/classify_sound.test)
+endif()

@@ -78,6 +78,10 @@ def split():
                         help='Neural network model to use dataset')
     parser.add_argument('-n', '--number', default='100', type=int,
                         help='maximum number of images per class used to create dataset')
+    # Ignore arguments sent by roslaunch.
+    parser.add_argument('__name:', help=argparse.SUPPRESS, nargs='?')
+    parser.add_argument('__log:', help=argparse.SUPPRESS, nargs='?')
+
     args = parser.parse_args()
     rate = args.rate
     if args.model == 'nin':

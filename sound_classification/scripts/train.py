@@ -121,6 +121,9 @@ def main():
     parser.add_argument('-m', '--model', type=str,
                         choices=['nin', 'vgg16'], default='nin',
                         help='Neural network model to use dataset')
+    # Ignore arguments sent by roslaunch.
+    parser.add_argument('__name:', help=argparse.SUPPRESS, nargs='?')
+    parser.add_argument('__log:', help=argparse.SUPPRESS, nargs='?')
 
     args = parser.parse_args()
 

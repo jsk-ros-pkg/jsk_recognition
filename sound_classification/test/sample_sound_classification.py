@@ -55,7 +55,7 @@ class SoundClassifyTest(unittest.TestCase):
             # create dataset
             self.rosrun('sound_classification', 'create_dataset.py', '--number 20')
             # train
-            self.rosrun('sound_classification', 'train.py', '--epoch 3')
+            self.rosrun('sound_classification', 'train.py', '--epoch 3 --gpu -1')
             # classify sound
             self.roslaunch(['sound_classification', 'classify_sound.launch', 'gui:=false'], timeout=120)
         except Exception as e:

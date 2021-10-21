@@ -71,7 +71,7 @@ def split():
                         help='train:test dataset rate (default 0.8:0.2)')
     parser.add_argument('-p', '--path', default=osp.join(rospack.get_path(
         'sound_classification'), 'train_data'), help='path to train data')
-    parser.add_argument('-a', '--augment', default='5', type=int,
+    parser.add_argument('-a', '--augment', default='1', type=int,
                         help='create {augment} images per 1 image')
     parser.add_argument('-m', '--model', type=str,
                         choices=['nin', 'vgg16'], default='nin',

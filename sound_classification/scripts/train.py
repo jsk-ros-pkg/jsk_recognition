@@ -128,7 +128,10 @@ def main():
     args = parser.parse_args()
 
     # Configs for train with chainer
-    device = chainer.cuda.get_device_from_id(args.gpu)  # for python2
+    if args.gpu >= 0:
+        device = chainer.cuda.get_device_from_id(args.gpu)  # for python2
+    else:
+        device = None
     batchsize = 32
     # Path to training image-label list file
     train_labels = osp.join(rospack.get_path('sound_classification'),
@@ -150,11 +153,12 @@ def main():
     val = PreprocessedDataset(val_labels, False)
 
     model = load_model(args.model, train.n_class)
-    if hasattr(model, 'to_device'):
-        model.to_device(device)
-        device.use()
-    else:
-        model.to_gpu(device)
+    if device is not None:
+        if hasattr(model, 'to_device'):
+            model.to_device(device)
+            device.use()
+        else:
+            model.to_gpu(device)
 
     # These iterators load the images with subprocesses running in parallel
     # to the training/validation.

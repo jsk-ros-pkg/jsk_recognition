@@ -29,7 +29,7 @@ ROS package to classify sound stream.
     - Some pip packages which are not managed in rosdep are needed.
         ```bash
         cd ~/sound_classification_ws/src/sound_classification
-        pip install requirements.txt
+        pip install -r requirements.txt
         ```
     - cuda and cupy are needed for chainer. See https://docs-cupy.chainer.org/en/stable/compatibility.html
     - Using GPU is highly recommended.
@@ -77,7 +77,10 @@ ROS package to classify sound stream.
          |---|---|
          |![](https://user-images.githubusercontent.com/19769486/86824253-d9e6df80-c0c8-11ea-8946-ca1367c1b1b0.png)|![](https://user-images.githubusercontent.com/19769486/86824246-d81d1c00-c0c8-11ea-8c13-dc9660e89ea0.png)|
 
-1. Collect spectrogram you would like to classify at `train_data/original_spectrogram/TARGET_CLASS`.
+1. Collect spectrogram you would like to classify.
+
+    - When the volume exceeds the `threshold`, save the spectrogram at `train_data/original_spectrogram/TARGET_CLASS`.
+    - You can use rosbag and stream as sound sources.
 
     1. Rosbag version (Recommended)
         - I recommend to use rosbag to collect spectrograms. The rosbag makes it easy to use `save_sound.launch` with several parameters.

@@ -1,12 +1,15 @@
 <launch>
 
+  <arg name="gpu" default="0" />
   <arg name="use_rosbag" default="false" />
+  <arg name="pause_rosbag" default="true" />
   <arg name="filename" default="/" />
   <arg name="use_microphone" default="true" />
   <arg name="gui" default="true" />
 
   <include file="$(find sound_classification)/launch/audio_to_spectrogram.launch" >
     <arg name="use_rosbag" value="$(arg use_rosbag)" />
+    <arg name="pause_rosbag" value="$(arg pause_rosbag)" />
     <arg name="filename" value="$(arg filename)" />
     <arg name="use_microphone" value="$(arg use_microphone)" />
     <arg name="gui" value="false" />
@@ -16,7 +19,7 @@
   <node pkg="sound_classification" type="sound_classifier.py" name="sound_classifier" output="screen" >
     <remap from="~input" to="/preprocess_gray_image/output_normalized" />
     <rosparam subst_value="true">
-      gpu: 0
+      gpu: $(arg gpu)
       model_name: nin
     </rosparam>
   </node>

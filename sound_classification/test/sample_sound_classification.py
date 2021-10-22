@@ -53,11 +53,11 @@ class SoundClassifyTest(unittest.TestCase):
             # start collect spectrograms from sample rosbags for applause class
             self.roslaunch(['sound_classification', 'save_sound.launch', 'use_rosbag:=true', 'filename:=$(find sound_classification)/sample_rosbag/applause.bag', 'target_class:=applause', 'threshold:=5', 'pause_rosbag:=false', 'gui:=false'], timeout=10)
             # create dataset
-            self.rosrun('sound_classification', 'create_dataset.py', '--number 20')
+            self.rosrun('sound_classification', 'create_dataset.py', '--number 20 --augment 5')
             # train
             self.rosrun('sound_classification', 'train.py', '--epoch 3 --gpu -1')
             # classify sound
-            self.roslaunch(['sound_classification', 'classify_sound.launch', 'gui:=false'], timeout=120)
+            self.roslaunch(['sound_classification', 'classify_sound.launch', 'gui:=false', 'use_microphone:=false', 'use_rosbag:=true', 'filename:=$(find sound_classification)/sample_rosbag/applause.bag', 'pause_rosbag:=false', 'gpu:=-1'], timeout=120)
         except Exception as e:
             rospy.logerr("Failed to test sound_classify ({})".format(e))
             self.fail("test_sound_classify failed ({})".format(e))

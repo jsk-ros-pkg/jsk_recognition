@@ -10,7 +10,7 @@
         time-limit="300" >
     <rosparam>
       topic_0: /sound_classifier/output
-      timeout_0: 120
+      timeout_0: 300
     </rosparam>
   </test>
 </launch>

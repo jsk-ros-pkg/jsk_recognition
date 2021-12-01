@@ -9,9 +9,7 @@ import message_filters
 import numpy as np
 import rospy
 import sensor_msgs.msg
-from skrobot.coordinates.math import matrix2quaternion
-from skrobot.coordinates.math import rotation_matrix_from_axis
-
+from tf.transformations import unit_vector, superimposition_matrix, quaternion_from_matrix
 from jsk_topic_tools import ConnectionBasedTransport
 
 
@@ -307,17 +305,21 @@ class PaperFinder(ConnectionBasedTransport):
             if normal[2] < 0:
                 normal *= -1.0
             normal = normal / np.linalg.norm(normal)
-            rot = rotation_matrix_from_axis(normal, vec_a)
-            q_wxyz = matrix2quaternion(rot)
+            #
+            e1 = normal
+            e2 = unit_vector(vec_a)
+            e3 = np.cross(e1, e2)
+            M = superimposition_matrix([e1,e2,e3],((1,0,0),(0,1,0),(0,0,1)))
+            q_xyzw = quaternion_from_matrix(M)
 
             pose = geometry_msgs.msg.Pose()
             pose.position.x = center[0]
             pose.position.y = center[1]
             pose.position.z = center[2]
-            pose.orientation.w = q_wxyz[0]
-            pose.orientation.x = q_wxyz[1]
-            pose.orientation.y = q_wxyz[2]
-            pose.orientation.z = q_wxyz[3]
+            pose.orientation.x = q_xyzw[0]
+            pose.orientation.y = q_xyzw[1]
+            pose.orientation.z = q_xyzw[2]
+            pose.orientation.w = q_xyzw[3]
             pose_array_msg.poses.append(pose)
         self.pose_array_pub.publish(pose_array_msg)
 

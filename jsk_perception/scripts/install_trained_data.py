@@ -57,7 +57,7 @@ def main():
     download_data(
         pkg_name=PKG,
         path='trained_data/drill_svm.xml',
-        url='https://drive.google.com/uc?id=0B5hRAGKTOm_KWW11R0FTX0xjTDg',
+        url='https://drive.google.com/uc?id=1RaORtBL5LUyG92eNBovMDrNrC8JG-qNt',
         md5='762d0da4bcbf50e0e92939372988901a',
         quiet=quiet,
     )
@@ -73,7 +73,7 @@ def main():
     download_data(
         pkg_name=PKG,
         path='trained_data/apc2015_sample_bof.pkl.gz',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vemVRaDBOWDVpb28',
+        url='https://drive.google.com/uc?id=18V_fTj7A2iRsYqyflJ4seoxFHwgyXKUE',
         md5='97eb737f71a33bfc23ec573f1d351bd8',
         quiet=quiet,
     )
@@ -89,7 +89,7 @@ def main():
     download_data(
         pkg_name=PKG,
         path='trained_data/apc2015_sample_clf.pkl.gz',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2veFY5ZFNqbzAzNmc',
+        url='https://drive.google.com/uc?id=1Wqgal6udQLjSYPe0z-DepGMUWLCJaLP-',
         md5='25e396358e9d7bfd1bd08334953fc287',
         quiet=quiet,
     )
@@ -119,21 +119,21 @@ def main():
     download_data(
         pkg_name=PKG,
         path='trained_data/vgg16_fast_rcnn.chainermodel',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vX015UzB4aC13cVk',
+        url='https://drive.google.com/uc?id=1fay8DaRYKUeI3YKkIo8eRRzzivMAGTDu',
         md5='5ae12288962e96124cce212fd3f18cad',
         quiet=quiet,
     )
     download_data(
         pkg_name=PKG,
         path='trained_data/vgg_cnn_m_1024.chainermodel',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vZzJuaFRIdDMtLWc',
+        url='https://drive.google.com/uc?id=1kDCqoGZLufFxWF8lBCMxIzuaJCVwvQ72',
         md5='eb33103e36f299b4433c63fcfc165cbd',
         quiet=quiet,
     )
     download_data(
         pkg_name=PKG,
         path='trained_data/vgg16_bn_apc2015_496000.chainermodel',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vQ2tCN1hoYV84eHM',
+        url='https://drive.google.com/uc?id=1u3_ob0AEihPde7B4da6A0UPet78blhTz',
         md5='4a48c2f39234e46937759f4cc43bb257',
         quiet=quiet,
     )
@@ -143,15 +143,15 @@ def main():
     download_data(
         pkg_name=PKG,
         path='trained_data/fcn8s_voc.npz',
-        url = 'https://drive.google.com/uc?id=0B9P1L--7Wd2vWG5MeUEwWmxudU0',
-        md5 = '75128c0e175767fc82a7d4f1e21f4009',
+        url='https://drive.google.com/uc?id=1l3mhrD4GEnS7NJld0Ba41kXLETgFfsfu',
+        md5='75128c0e175767fc82a7d4f1e21f4009',
     )
 
     # node_scripts/vgg16_object_recognition.py
     download_data(
         pkg_name=PKG,
         path='trained_data/bvlc_vgg16.chainermodel',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vSlFjQlJFQjM5TEk',
+        url='https://drive.google.com/uc?id=13gICi5kgqaqM67lVNKKwMFYz_NRKWY5G',
         md5='292e6472062392f5de02ef431bba4a48',
     )
 
@@ -159,7 +159,7 @@ def main():
     download_data(
         pkg_name=PKG,
         path='trained_data/bvlc_alexnet.chainermodel',
-        url='https://drive.google.com/uc?id=0B5DV6gwLHtyJZkd1ZTRiNUdrUXM',
+        url='https://drive.google.com/uc?id=1Vr1pvMrmDmK9tj4zF8l74ozbcpN1bU67',
         md5='2175620a2237bbd33e35bf38867d84b2',
     )
 
@@ -228,13 +228,13 @@ def main():
     download_data(
         pkg_name=PKG,
         path='trained_data/resnet_lsvrc2012_mean.npy',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vTDV3ZzUyTlBFZE0',
+        url='https://drive.google.com/uc?id=18gXkkbkTZnw1UDSQcgI0zUoXv2Cj_3Kf',
         md5='00431426c4fab22985885da0e2ff31b8',
     )
     download_data(
         pkg_name=PKG,
         path='trained_data/resnet152_from_caffe.npz',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vQVBodlFsMnpGbkU',
+        url='https://drive.google.com/uc?id=1WQFpSzrk6jLlf_kFX0IPlN7K-P3IUFW0',
         md5='77fe66a229a2444688a21e3b63fa0661',
     )
 
@@ -293,6 +293,12 @@ def main():
         'ssd512_73B2_kitchen_20191114_classnames.yaml',
         url='https://drive.google.com/uc?id=1QJa5WE5HD2XZZV5TsFehnKF8QTlS7fHI',
         md5='f7905e49044a18c15ebdaf6dc15b446b',
+    )
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/SRHandNet.pts',
+        url='https://drive.google.com/uc?id=10oGfGALjIIwdIWO9MQftN07A3TRdvp3b',
+        md5='9f39d3baa43cf1c962c8f752c009eb14',
     )
 
 

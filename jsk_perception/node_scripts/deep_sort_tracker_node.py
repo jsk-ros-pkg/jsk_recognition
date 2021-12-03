@@ -15,7 +15,7 @@ if LooseVersion(pkg_resources.get_distribution("chainer").version) >= LooseVersi
 c.f https://github.com/jsk-ros-pkg/jsk_recognition/pull/2485
 ''', file=sys.stderr)
     sys.exit(1)
-if [p for p in list(itertools.chain(*[pkg_resources.find_distributions(_) for _ in sys.path])) if "cupy-" in p.project_name ] == []:
+if [p for p in list(itertools.chain(*[pkg_resources.find_distributions(_) for _ in sys.path])) if "cupy-" in p.project_name or "cupy" == p.project_name ] == []:
     print('''Please install CuPy
 
     sudo pip install cupy-cuda[your cuda version]
@@ -87,6 +87,11 @@ class DeepSortTrackerNode(object):
 
         scores = []
         rects = []
+
+        if len(rects_msg.rects) != len(class_msg.label_proba):
+            rospy.logwarn('The sizes of RectArray and LabelArray does not match. Skipping...')
+            return
+
         for i, r in enumerate(rects_msg.rects):
             if self.target_labels is not None and \
                class_msg.label_names[i] not in self.target_labels:

@@ -51,7 +51,7 @@ namespace jsk_recognition_utils
     for (int y=0; y < range_image.height; y++) {
       for (int x=0; x<range_image.width; x++) {
         pcl::PointWithRange rangePt = range_image.getPoint(x,y);
-        if (!pcl_isfinite(rangePt.range)) {
+        if (!std::isfinite(rangePt.range)) {
           pcl::visualization::FloatImageUtils::getColorForFloat(
             rangePt.range, r, g, b);
         }

@@ -8,6 +8,9 @@
   <arg name="person_label" value="0" if="$(arg COCO)" />
   <arg name="person_label" value="14" unless="$(arg COCO)" />
 
+  <arg name="approximate_sync" default="true" />
+  <arg name="slop" default="1.0" />
+
   <node name="image_publisher"
         pkg="jsk_perception" type="image_publisher.py"
         clear_params="true">
@@ -60,6 +63,7 @@
     <remap from="~input/label" to="apply_mask_image/output" />
     <rosparam subst_value="true">
       bg_label: -1
+      queue_size: 50
     </rosparam>
   </node>
 

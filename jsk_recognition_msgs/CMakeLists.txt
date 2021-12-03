@@ -34,6 +34,7 @@ add_message_files(
   ModelCoefficientsArray.msg
   Object.msg
   ObjectArray.msg
+  PanoramaInfo.msg  #  added on jsk_recognition_msgs until https://github.com/ros/common_msgs/pull/171 merged
   ParallelEdgeArray.msg
   ParallelEdge.msg
   PlotData.msg
@@ -71,6 +72,8 @@ add_message_files(
   SegmentArray.msg
   PeoplePose.msg
   PeoplePoseArray.msg
+  HandPose.msg
+  HandPoseArray.msg
   )
 
 # TODO(wkentaro): Most of srv files are duplicated in jsk_pcl_ros,

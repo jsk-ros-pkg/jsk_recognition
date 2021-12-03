@@ -18,7 +18,7 @@ if LooseVersion(pkg_resources.get_distribution("chainer").version) >= LooseVersi
 c.f https://github.com/jsk-ros-pkg/jsk_recognition/pull/2485
 ''', file=sys.stderr)
    sys.exit(1)
-if [p for p in list(itertools.chain(*[pkg_resources.find_distributions(_) for _ in sys.path])) if "cupy-" in p.project_name ] == []:
+if [p for p in list(itertools.chain(*[pkg_resources.find_distributions(_) for _ in sys.path])) if "cupy-" in p.project_name or "cupy" == p.project_name ] == []:
    print('''Please install CuPy
 
     sudo pip install cupy-cuda[your cuda version]
@@ -26,7 +26,7 @@ i.e.
     sudo pip install cupy-cuda91
 
 ''', file=sys.stderr)
-   sys.exit(1)
+   # sys.exit(1)
 import chainer
 import chainer.functions as F
 from chainer import cuda
@@ -494,10 +494,10 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
             vec = chainer.cuda.to_gpu(vec)
         norm = xp.sqrt(xp.sum(vec ** 2, axis=1)) + eps
         vec = vec / norm[:, None]
-        start_end = zip(np.round(np.mgrid[np.vstack(target_candidates_A)[:, 1].reshape(-1, 1):np.vstack(target_candidates_B)[:, 1].reshape(-1, 1):(mid_num * 1j)]).astype(np.int32),
+        start_end = list(zip(np.round(np.mgrid[np.vstack(target_candidates_A)[:, 1].reshape(-1, 1):np.vstack(target_candidates_B)[:, 1].reshape(-1, 1):(mid_num * 1j)]).astype(np.int32),
                         np.round(np.mgrid[np.vstack(target_candidates_A)[:, 0].reshape(-1, 1):np.vstack(
                             target_candidates_B)[:, 0].reshape(-1, 1):(mid_num * 1j)]).astype(np.int32),
-                        np.concatenate([[[index] * mid_num for i in range(len(c))] for index, c in zip(target_indices, target_candidates_B)]),)
+                        np.concatenate([[[index] * mid_num for i in range(len(c))] for index, c in zip(target_indices, target_candidates_B)]),))
 
         v = score_mid[np.concatenate(
             start_end, axis=1).tolist()].reshape(-1, mid_num, 2)

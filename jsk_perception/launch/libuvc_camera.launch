@@ -8,9 +8,11 @@
   <arg name="frame_rate" />
   <arg name="brightness" />
   <arg name="gui" default="false" />
+  <arg name="frame_id" default="$(arg camera_name)_link" />
 
   <group ns="$(arg camera_name)">
     <node name="insta_camera_node" pkg="libuvc_camera" type="camera_node">
+      <param name="frame_id" value="$(arg frame_id)" />
       <param name="vendor" value="$(arg vendor)" />
       <param name="product" value="$(arg product)" />
       <param name="height" value="$(arg height)" />

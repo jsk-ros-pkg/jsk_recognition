@@ -27,6 +27,10 @@ import posedetection_msgs.msg
 
 from openravepy import *
 
+# use raw_input for python2 c.f. https://stackoverflow.com/questions/5868506/backwards-compatible-input-calls-in-python
+if hasattr(__builtins__, 'raw_input'):
+    input = raw_input
+
 class VisibilityModel(metaclass.AutoReloader):
     def __init__(self,measurements=None,filename=None,symmetricplane=None,kinbodyfile=None):
         if measurements is not None:
@@ -197,7 +201,7 @@ if __name__=='__main__':
 
     visualizer = OpenRAVEVisualizer(options.kinbodyfile,measurementsfilename=options.measurements,automaticadd=not options.single)
     while True:
-        cmd = raw_input('Enter command (q-quit and save,c-capture): ');
+        cmd = input('Enter command (q-quit and save,c-capture): ');
         if cmd == 'q':
             break
         elif cmd == 'c' and options.single:

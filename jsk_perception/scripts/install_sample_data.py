@@ -65,6 +65,19 @@ def main():
         extract=False,
     )
 
+
+    # d435 floor
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/2020-11-11-15-58-47-d435-floor.bag',
+        url='https://drive.google.com/uc?id=1B1oC6C9ZrjOQTScmbWwR_Y91GAFIg4bu',
+        md5='6b07e3c8a4b5a012bcddaa63ca2b4bdf',
+        extract=False,
+        compressed_bags=[
+            'sample/data/2020-11-11-15-58-47-d435-floor.bag',
+        ],
+    )
+
     download_data(
         pkg_name=PKG,
         path='sample/data/insta360_air.bag.tgz',

@@ -86,6 +86,8 @@ namespace jsk_perception
     bool   enb_ra_;
     bool  save_unwarped_;
     float  fovd_;
+    int image_height_;
+    int image_width_;
     std::string mls_map_path_;
 
   private:

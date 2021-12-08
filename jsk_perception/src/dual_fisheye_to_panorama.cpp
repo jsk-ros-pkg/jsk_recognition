@@ -55,11 +55,15 @@ namespace jsk_perception
     pnh_->param("fovd", fovd_, 195.0f);
     pnh_->param("save_unwarped", save_unwarped_, false);
     pnh_->param("mls_map_path", mls_map_path_, std::string(""));
+    pnh_->param("image_height", image_height_, 1920);
+    pnh_->param("image_width", image_width_, 3840);
     ROS_INFO("light_compen : %s", enb_lc_?"true":"false");
     ROS_INFO("refine_align : %s", enb_ra_?"true":"false");
     ROS_INFO("fovd         : %7.3f", fovd_);
     ROS_INFO("save_unwarped: %7.3f", save_unwarped_?"true":"false");
     ROS_INFO("mls_map_path : %s", mls_map_path_.c_str());
+    ROS_INFO("image_height : %d", image_height_);
+    ROS_INFO("image_width  : %d", image_width_);
     pub_panorama_image_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
     pub_panorama_info_ = advertise<jsk_recognition_msgs::PanoramaInfo>(*pnh_, "panorama_info", 1);
 
@@ -99,7 +103,7 @@ namespace jsk_perception
   void DualFisheyeToPanorama::rectify(const sensor_msgs::Image::ConstPtr& image_msg)
   {
     cv::Mat img;
-    cv::resize(cv_bridge::toCvCopy(image_msg, image_msg->encoding)->image, img, cv::Size(3840,1920));
+    cv::resize(cv_bridge::toCvCopy(image_msg, image_msg->encoding)->image, img, cv::Size(image_width_,image_height_));
 
     if ( ! sticher_initialized_ )  {
       ROS_INFO("initialize stitcher w:%d h:%d", img.size().width, img.size().height);

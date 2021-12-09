@@ -27,6 +27,18 @@
     </rosparam>
   </node>
 
+  <node name="people_pose_2d_to_3d"
+        pkg="jsk_perception" type="people_pose_2d_to_3d.py"
+        output="screen">
+    <remap from="~input/pose" to="people_pose_estimation_2d/pose_2d" />
+    <remap from="~input/info" to="$(arg INPUT_CAMERA_INFO)" />
+    <remap from="~input/depth" to="$(arg INPUT_DEPTH_IMAGE)" />
+    <rosparam subst_value="true">
+      approximate_sync: true
+      queue_size: 500
+    </rosparam>
+  </node>
+
   <node name="people_mask_publisher"
         pkg="jsk_perception" type="people_mask_publisher.py"
         output="screen">
@@ -42,6 +54,11 @@
   <node name="people_poses_to_poses"
         pkg="jsk_recognition_msgs" type="people_pose_array_to_pose_array.py">
     <remap from="~input" to="people_pose_estimation_2d/pose" />
+  </node>
+
+  <node name="people_poses_to_poses1"
+        pkg="jsk_recognition_msgs" type="people_pose_array_to_pose_array.py">
+    <remap from="~input" to="people_pose_2d_to_3d/output/pose" />
   </node>
 
   <group if="$(arg gui)" >

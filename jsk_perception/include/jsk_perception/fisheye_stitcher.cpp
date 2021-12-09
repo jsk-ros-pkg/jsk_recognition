@@ -917,7 +917,6 @@ FisheyeStitcher::stitch(const cv::Mat& in_img_L, const cv::Mat& in_img_R,
       cv::imwrite("Ref_2.jpg", Ref_2);
       cv::imwrite("Tmpl_1.jpg", Tmpl_1);
       cv::imwrite("Tmpl_2.jpg", Tmpl_2);
-      std::cout << "saved images..." << std::endl;
     }
 
     //------------------------------------------------------------------------//

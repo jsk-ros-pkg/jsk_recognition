@@ -57,10 +57,15 @@ namespace jsk_perception
     pnh_->param("mls_map_path", mls_map_path_, std::string(""));
     pnh_->param("image_height", image_height_, 1920);
     pnh_->param("image_width", image_width_, 3840);
+    pnh_->param("blend_param_p_wid", blend_param_p_wid_, 55);
+    pnh_->param("blend_param_p_x1", blend_param_p_x1_, 90 - 15);
+    pnh_->param("blend_param_p_x2", blend_param_p_x2_, 1780 - 5);
+    pnh_->param("blend_param_row_start", blend_param_row_start_, 590);
+    pnh_->param("blend_param_row_end", blend_param_row_end_, 1320);
     ROS_INFO("light_compen : %s", enb_lc_?"true":"false");
     ROS_INFO("refine_align : %s", enb_ra_?"true":"false");
     ROS_INFO("fovd         : %7.3f", fovd_);
-    ROS_INFO("save_unwarped: %7.3f", save_unwarped_?"true":"false");
+    ROS_INFO("save_unwarped: %s", save_unwarped_?"true":"false");
     ROS_INFO("mls_map_path : %s", mls_map_path_.c_str());
     ROS_INFO("image_height : %d", image_height_);
     ROS_INFO("image_width  : %d", image_width_);
@@ -125,7 +130,13 @@ namespace jsk_perception
                          static_cast<int>(img.size().width / 2), img.size().height));
     // Stitch video frames
     cv::Mat pano;
-    pano = stitcher_->stitch(img_l, img_r);
+    pano = stitcher_->stitch(img_l, img_r,
+                             blend_param_p_wid_,
+                             blend_param_p_x1_,
+                             blend_param_p_x2_,
+                             blend_param_row_start_,
+                             blend_param_row_end_
+                             );
 
     pub_panorama_image_.publish(cv_bridge::CvImage(image_msg->header,
                                                    image_msg->encoding,

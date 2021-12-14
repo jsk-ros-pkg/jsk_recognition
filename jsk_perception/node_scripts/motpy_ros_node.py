@@ -17,7 +17,7 @@ from jsk_recognition_msgs.msg import ClassificationResult
 from jsk_recognition_msgs.msg import Track
 from jsk_recognition_msgs.msg import TrackArray
 
-from jsk_perception.lib import visualize_tracks
+from jsk_perception.lib import visualize_tracks, load_label_names
 
 
 class MotpyROS(object):
@@ -33,6 +33,8 @@ class MotpyROS(object):
         self.tracker = MultiObjectTracker(dt=dt)
 
         self.target_labels = rospy.get_param('~target_labels', None)
+
+        self.label_names = load_label_names()
 
         self.pub_visualized_image = rospy.Publisher(
             '~output/viz',
@@ -100,6 +102,7 @@ class MotpyROS(object):
                                              - active_track.box[1]
                                              ),
                                    class_id=active_track.class_id,
+                                   class_name=self.label_names[active_track.class_id],
                                    score=active_track.score
                                    )
                              for active_track in active_tracks]

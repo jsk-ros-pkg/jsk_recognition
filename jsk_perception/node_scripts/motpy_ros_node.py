@@ -17,28 +17,7 @@ from jsk_recognition_msgs.msg import ClassificationResult
 from jsk_recognition_msgs.msg import Track
 from jsk_recognition_msgs.msg import TrackArray
 
-import cv2
-import numpy as np
-
-
-def visualize_tracks(input_frame, tracks_msg):
-
-    frame = input_frame
-    for track in tracks_msg.track:
-        H = (track.track_id * 71) % 256
-        S = 255
-        V = 255
-        bgr = cv2.cvtColor(
-            np.array([[[H, S, V]]], dtype=np.uint8), cv2.COLOR_HSV2BGR)[0][0]
-        color = (bgr[2], bgr[1], bgr[0])
-        frame = cv2.rectangle(frame,
-                              (track.rect.x, track.rect.y),
-                              (track.rect.x + track.rect.width,
-                               track.rect.y + track.rect.height),
-                              color,
-                              3
-                              )
-    return frame
+from jsk_perception.lib import visualize_tracks
 
 
 class MotpyROS(object):

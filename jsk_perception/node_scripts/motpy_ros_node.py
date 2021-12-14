@@ -19,6 +19,8 @@ from jsk_recognition_msgs.msg import TrackArray
 
 from jsk_perception.lib import visualize_tracks, load_label_names
 
+import uuid
+
 
 class MotpyROS(object):
 
@@ -37,8 +39,7 @@ class MotpyROS(object):
         self.label_names = load_label_names()
 
         self.pub_visualized_image = rospy.Publisher(
-            '~output/viz',
-            Image, queue_size=1)
+            '~output/viz', Image, queue_size=1)
         self.pub_tracks = rospy.Publisher(
             '~output/tracks', TrackArray, queue_size=1)
         self.subscribe()
@@ -89,17 +90,17 @@ class MotpyROS(object):
             )
 
         self.tracker.step(detections=detections)
-        active_tracks = self.tracker.active_tracks(min_steps_alive=10)
+        active_tracks = self.tracker.active_tracks(min_steps_alive=3)
 
         tracks_msg = TrackArray()
         tracks_msg.header = img_msg.header
-        tracks_msg.tracks = [Track(track_id=active_track.id,
-                                   rect=Rect(x=active_track.box[0],
-                                             y=active_track.box[1],
-                                             width=active_track.box[2]
-                                             - active_track.box[0],
-                                             height=active_track.box[3]
-                                             - active_track.box[1]
+        tracks_msg.tracks = [Track(track_id=(uuid.UUID(active_track.id).int % 2147483647),
+                                   rect=Rect(x=int(active_track.box[0]),
+                                             y=int(active_track.box[1]),
+                                             width=int(active_track.box[2]
+                                             - active_track.box[0]),
+                                             height=int(active_track.box[3]
+                                             - active_track.box[1])
                                              ),
                                    class_id=active_track.class_id,
                                    class_name=self.label_names[active_track.class_id],

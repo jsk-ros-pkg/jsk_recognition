@@ -11,6 +11,8 @@ import numpy as np
 import tf2_ros
 import tf2_geometry_msgs
 
+from jsk_perception.lib import transformPanoramaPoint, calcSphericalPoint
+
 import math
 import sys
 import threading
@@ -22,24 +24,6 @@ from jsk_recognition_msgs.msg import PanoramaInfo
 from jsk_recognition_msgs.msg import RectArray, ClassificationResult
 from jsk_recognition_msgs.msg import BoundingBox, BoundingBoxArray
 from geometry_msgs.msg import Twist, PointStamped, PoseStamped
-
-def transformPanoramaPoint(x,
-                           y,
-                           image_height,
-                           image_width,
-                           theta_min,
-                           theta_max,
-                           phi_min,
-                           phi_max):
-    phi = phi_max + 1.0 * (phi_min - phi_max) * x / image_width
-    theta = theta_min + 1.0 * (theta_max - theta_min) * y / image_height
-    return (theta, phi)
-
-
-def calcSphericalPoint( theta, phi, r ):
-    return ( r * math.sin(theta) * math.cos(phi),
-             r * math.sin(theta) * math.sin(phi),
-             r * math.cos(theta) )
 
 
 class RectArrayInPanoramaToBoundingBoxArray(object):

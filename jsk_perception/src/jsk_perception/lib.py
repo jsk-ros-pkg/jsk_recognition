@@ -1,6 +1,8 @@
-import math
 import cv2
+import math
 import numpy as np
+import rospy
+import yaml
 
 
 def transformPanoramaPoint(x,
@@ -40,3 +42,11 @@ def visualize_tracks(input_frame, tracks_msg):
                               3
                               )
     return frame
+
+
+def load_label_names():
+    label_names = rospy.get_param("~label_names")
+    if isinstance(label_names, str):
+        with open(label_names, "r") as f:
+            label_names = tuple(yaml.load(f))
+    return label_names

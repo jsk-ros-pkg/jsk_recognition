@@ -17,7 +17,8 @@ from jsk_recognition_msgs.msg import ClassificationResult
 from jsk_recognition_msgs.msg import Track
 from jsk_recognition_msgs.msg import TrackArray
 
-from jsk_perception.lib import visualize_tracks, load_label_names
+from jsk_perception.jsk_perception_utils import load_label_names
+from jsk_perception.jsk_perception_utils import visualize_tracks
 
 import uuid
 

@@ -1,29 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import actionlib
 import rospy
 import message_filters
 import PyKDL
 
-import numpy as np
-
 import tf2_ros
 import tf2_geometry_msgs
 
-from jsk_perception.lib import transformPanoramaPoint, calcSphericalPoint
+from jsk_perception.jsk_perception_utils import transformPanoramaPoint
+from jsk_perception.jsk_perception_utils import calcSphericalPoint
 
 import math
 import sys
-import threading
 
-from sound_play.libsoundplay import SoundClient
 
 from sensor_msgs.msg import Image
 from jsk_recognition_msgs.msg import PanoramaInfo
 from jsk_recognition_msgs.msg import RectArray, ClassificationResult
 from jsk_recognition_msgs.msg import BoundingBox, BoundingBoxArray
-from geometry_msgs.msg import Twist, PointStamped, PoseStamped
 
 
 class RectArrayInPanoramaToBoundingBoxArray(object):

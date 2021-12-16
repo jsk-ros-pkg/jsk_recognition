@@ -17,8 +17,8 @@ from jsk_recognition_msgs.msg import ClassificationResult
 from jsk_recognition_msgs.msg import Track
 from jsk_recognition_msgs.msg import TrackArray
 
-from jsk_perception.jsk_perception_utils import load_label_names
-from jsk_perception.jsk_perception_utils import visualize_tracks
+from jsk_recognition_utils.panorama_utils import load_label_names
+from jsk_recognition_utils.panorama_utils import visualize_tracks
 
 import uuid
 
@@ -31,18 +31,24 @@ class MotpyROS(object):
 
         self.bridge = CvBridge()
 
+        self.panorama_mode = rospy.get_param('~panorama_mode', True)
         dt = rospy.get_param('~dt')
 
-        self.tracker = MultiObjectTracker(dt=dt)
+        if self.panorama_mode:
+            msg_image = rospy.wait_for_message('~input', Image)
+            self.width_image = msg_image.width
+            self.tracker = MultiObjectTracker(dt=dt)
+        else:
+            self.tracker = MultiObjectTracker(dt=dt)
 
         self.target_labels = rospy.get_param('~target_labels', None)
-
         self.label_names = load_label_names()
 
         self.pub_visualized_image = rospy.Publisher(
             '~output/viz', Image, queue_size=1)
         self.pub_tracks = rospy.Publisher(
             '~output/tracks', TrackArray, queue_size=1)
+
         self.subscribe()
 
     def subscribe(self):

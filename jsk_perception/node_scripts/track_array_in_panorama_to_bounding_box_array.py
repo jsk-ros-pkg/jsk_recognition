@@ -7,8 +7,8 @@ import PyKDL
 import tf2_ros
 import tf2_geometry_msgs
 
-from jsk_perception.jsk_perception_utils import calcSphericalPoint
-from jsk_perception.jsk_perception_utils import transformPanoramaPoint
+from jsk_recognition_utils.panorama_utils import calcSphericalPoint
+from jsk_recognition_utils.panorama_utils import transformPanoramaPoint
 
 import math
 import sys

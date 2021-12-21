@@ -33,6 +33,7 @@ catkin_python_setup()
 
 generate_dynamic_reconfigure_options(
   cfg/PoseArrayToPose.cfg
+  cfg/PolygonArrayToBoxArray.cfg
   cfg/PolygonArrayToPolygon.cfg
 )
 
@@ -109,6 +110,7 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/add_cluster_indices.test)
     add_rostest(test/image_16uc1_to_32fc1.test)
     add_rostest(test/polygon_array_publisher.test)
+    add_rostest(test/polygon_array_to_box_array.test)
     add_rostest(test/polygon_array_to_polygon.test)
     add_rostest(test/pose_array_to_pose.test)
     add_rostest(test/rect_array_to_polygon_array.test)

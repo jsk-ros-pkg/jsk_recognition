@@ -47,6 +47,7 @@ class PolygonArrayPublisher(object):
         self.pub_polygons = rospy.Publisher("~output", PolygonArray, queue_size=1)
         if self.publish_coeffs:
             if self.are_polygons_in_planar is False:
+                self.publish_coeffs = False
                 rospy.logwarn(
                     '~publish_coeffs is True,'
                     ' but ModelCoefficientsArray is not published'

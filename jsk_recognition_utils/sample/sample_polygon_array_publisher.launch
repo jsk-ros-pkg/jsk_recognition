@@ -9,6 +9,7 @@
         pkg="jsk_recognition_utils" type="polygon_array_publisher.py"
         output="screen">
     <rosparam>
+      publish_coeffs: true
       frame_id: base_link
       polygons:
       - points:

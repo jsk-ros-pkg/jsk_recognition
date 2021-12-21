@@ -10,6 +10,7 @@
         time-limit="60" retry="3">
     <rosparam>
       topic_0: /polygon_array_publisher/output
+      topic_1: /polygon_array_publisher/output/coefficients
       timeout_0: 60
     </rosparam>
   </test>

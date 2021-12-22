@@ -1,0 +1,18 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_draw_rects_for_non_ascii_labels.launch">
+    <env name="gui" value="false" />
+  </include>
+
+  <test test-name="test_draw_rects_py"
+        name="test_draw_rects_py"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="360">
+    <rosparam>
+      topic_0: /draw_rects/output
+      topic_1: /draw_rects_with_classification_result/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

@@ -11,12 +11,10 @@ from pcl_msgs.msg import ModelCoefficients
 
 def is_planar(points):
     points = np.array(points)
-    # 3 points are always in a plane.
-    if len(points) < 4:
-        return True
     # 2d points are always in a plane.
     if len(points[0]) < 3:
-        return True
+        coeffs = np.array([0, 0, 1, 0], 'f')
+        return True, coeffs
     # Pick out three points (p0, p1, p2) from the given points.
     # Make sure that the three points do not line up in a straight line.
     p0 = points[0]

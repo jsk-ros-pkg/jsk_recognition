@@ -17,6 +17,8 @@ def is_planar(points):
     # 2d points are always in a plane.
     if len(points[0]) < 3:
         return True
+    # Pick out three points (p0, p1, p2) from the given points.
+    # Make sure that the three points do not line up in a straight line.
     p0 = points[0]
     points = points[1:]
     dists = np.linalg.norm(points - p0, axis=1, ord=2)
@@ -25,10 +27,14 @@ def is_planar(points):
     v0 = p1 - p0
     p2 = points[np.argmin(np.dot(points - p0, v0))]
     v1 = p2 - p0
+    # Calculate the normal to the plane composed of p0, p1, and p2.
     normal = np.cross(v0, v1)
     norm = np.linalg.norm(normal, ord=2)
     normal = normal / norm
+    # Check the normal vector and the vector from p0 to each point are vertical
     dists = np.abs(np.dot(points - p0, normal))
+    # Equation of plane: coeffs[0]*x + coeffs[1]*y + coeffs[2]*z + d = 0
+    # So, d = - (coeffs[0]*p[0] + coeffs[1]*p[1] + coeffs[2]*p[2])
     d = - np.dot(normal, p0)
     coeffs = np.array([normal[0], normal[1], normal[2], d], 'f')
     return np.allclose(dists, 0.0), coeffs

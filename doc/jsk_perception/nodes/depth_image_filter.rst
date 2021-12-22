@@ -23,7 +23,7 @@ Publishing Topic
 
 * ``~output/mask`` (``sensor_msgs/Image``)
 
-  Maks image.
+  Mask image.
 
 
 Parameters
@@ -31,7 +31,7 @@ Parameters
 
 * ``~threshold`` (Float, Default: ``0.0``)
 
-  Mask threshold. Normally, ixels with a depth value farther than this value will be masked.
+  Mask threshold. Normally, pixels with a depth value farther than this value will be masked.
 
 * ``~negative`` (Bool, Default: ``False``)
 

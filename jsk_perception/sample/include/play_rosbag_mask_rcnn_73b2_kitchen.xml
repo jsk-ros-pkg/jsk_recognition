@@ -1,11 +1,21 @@
 <launch>
 
   <param name="/use_sim_time" value="true" />
+  <arg name="use_japanese_label" default="false" />
 
-  <node name="rosbag_play"
-        pkg="rosbag" type="play"
-        args="$(find jsk_perception)/sample/data/sample_mask_rcnn_73b2_kitchen.bag --clock --loop">
-  </node>
+  <group if="$(arg use_japanese_label)" >
+    <node name="rosbag_play"
+          pkg="rosbag" type="play"
+          args="$(find jsk_perception)/sample/data/sample_mask_rcnn_73b2_kitchen_japanese_label.bag --clock --loop">
+    </node>
+  </group>
+
+  <group unless="$(arg use_japanese_label)" >
+    <node name="rosbag_play"
+          pkg="rosbag" type="play"
+          args="$(find jsk_perception)/sample/data/sample_mask_rcnn_73b2_kitchen.bag --clock --loop">
+    </node>
+  </group>
 
   <group ns="/image_publisher">
     <node name="republish"

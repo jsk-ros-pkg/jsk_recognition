@@ -12,7 +12,7 @@ Draw rectangles (and their classes if available) on image
 .. image:: ./images/draw_rects_for_non_ascii.jpg
 
 If you want to draw non-ascii characters, use ``draw_rects.py``.
-The sample program described below (`sample_draw_rects_for_non_ascii_labels.launch`) needs to build `jsk_recognition_utils` in order to install Japanese fonts.
+The sample program described below (``sample_draw_rects_for_non_ascii_labels.launch``) needs to build ``jsk_recognition_utils`` in order to install Japanese fonts.
 
 
 Subscribing Topic

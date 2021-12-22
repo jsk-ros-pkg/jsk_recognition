@@ -6,6 +6,7 @@ from jsk_recognition_utils import color
 from jsk_recognition_utils import conversations
 from jsk_recognition_utils import feature
 from jsk_recognition_utils import mask
+from jsk_recognition_utils import put_text
 from jsk_recognition_utils import visualize
 from jsk_recognition_utils import geometry
 

@@ -1,3 +1,5 @@
+import sys
+
 import numpy as np
 from PIL import Image
 from PIL import ImageDraw
@@ -32,6 +34,8 @@ def put_text_to_image(
     offset_y : float
         y position offset.
     """
+    if sys.version_info < (3, 0):
+        text = text.decode('utf-8')
     pil_font = ImageFont.truetype(font=font_path, size=font_size)
     dummy_draw = ImageDraw.Draw(Image.new("RGB", (0, 0)))
     text_w, text_h = dummy_draw.textsize(text, font=pil_font)

@@ -112,7 +112,7 @@ class DrawRects(ConnectionBasedTransport):
             pt1 = (int(rect.x * self.resolution_factor),
                    int(rect.y * self.resolution_factor))
             pt2 = (int((rect.x + rect.width) * self.resolution_factor),
-                   int((rect.y + rect.width) * self.resolution_factor))
+                   int((rect.y + rect.height) * self.resolution_factor))
             cv2.rectangle(img, pt1=pt1, pt2=pt2,
                           color=color.tolist(),
                           thickness=self.rect_boldness,

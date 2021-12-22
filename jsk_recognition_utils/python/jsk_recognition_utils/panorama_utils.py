@@ -5,7 +5,7 @@ import rospy
 import yaml
 
 
-def transformPanoramaPoint(x,
+def transform_panorama_point(x,
                            y,
                            image_height,
                            image_width,
@@ -18,7 +18,7 @@ def transformPanoramaPoint(x,
     return (theta, phi)
 
 
-def calcSphericalPoint(theta, phi, r):
+def calc_spherical_point(theta, phi, r):
     return (r * math.sin(theta) * math.cos(phi),
             r * math.sin(theta) * math.sin(phi),
             r * math.cos(theta))

@@ -28,6 +28,9 @@ def is_planar(points):
     # Calculate the normal to the plane composed of p0, p1, and p2.
     normal = np.cross(v0, v1)
     norm = np.linalg.norm(normal, ord=2)
+    # If the input polygon is a line or a point, it is not considered a plane.
+    if np.isclose(norm, 0.0):
+        return False, np.array([0, 0, 0, 0], 'f')
     normal = normal / norm
     # Check the normal vector and the vector from p0 to each point are vertical
     dists = np.abs(np.dot(points - p0, normal))

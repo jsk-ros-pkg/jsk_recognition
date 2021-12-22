@@ -9,6 +9,11 @@ What is this?
 
 Draw rectangles (and their classes if available) on image
 
+.. image:: ./images/draw_rects_for_non_ascii.jpg
+
+If you want to draw non-ascii characters, use ``draw_rects.py``.
+
+
 Subscribing Topic
 -----------------
 
@@ -57,6 +62,11 @@ Parameters
 
   Boldness for each rectangles.
 
+* ``~font_path`` (String, default: ``""``)
+
+  Font path. This value is only valid in ``draw_rects.py``.
+  Specify the font with the characters you want to display.
+
 * ``~label_size`` (Double, default: ``1.0``)
 
   Text size for each class labels.
@@ -91,3 +101,10 @@ Example
 .. code-block:: bash
 
    roslaunch jsk_perception sample_draw_rects.launch
+
+
+The sample to display Japanese is as follows.
+
+.. code-block:: bash
+
+   roslaunch jsk_perception sample_draw_rects_for_non_ascii_labels.launch

@@ -56,7 +56,8 @@ def _tile_images(imgs, tile_shape, concatenated_image, margin_color=None):
     return concatenated_image
 
 
-def get_tile_image(imgs, tile_shape=None, result_img=None, margin_color=None):
+def get_tile_image(imgs, tile_shape=None, result_img=None, margin_color=None,
+                   min_size=50):
     """Concatenate images whose sizes are different.
 
     @param imgs: image list which should be concatenated
@@ -78,6 +79,8 @@ def get_tile_image(imgs, tile_shape=None, result_img=None, margin_color=None):
     for img in imgs:
         max_height = min([max_height, img.shape[0]])
         max_width = min([max_width, img.shape[1]])
+    max_height = max(max_height, min_size)
+    max_width = max(max_width, min_size)
 
     # resize and concatenate images
     for i, img in enumerate(imgs):

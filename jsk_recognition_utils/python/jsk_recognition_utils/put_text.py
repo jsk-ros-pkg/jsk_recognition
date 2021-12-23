@@ -77,10 +77,11 @@ def put_text_to_image(
     text_area[y1-y0:y2-y0, x1-x0:x2-x0] = img[y1:y2, x1:x2]
 
     # convert pil image to cv2 image.
-    pil_img = Image.fromarray(text_area)
-    draw = ImageDraw.Draw(pil_img)
-    draw.text(xy=(0, 0), text=text, fill=color, font=pil_font)
+    if not (text_area.shape[0] == 0 or text_area.shape[0] == 0):
+        pil_img = Image.fromarray(text_area)
+        draw = ImageDraw.Draw(pil_img)
+        draw.text(xy=(0, 0), text=text, fill=color, font=pil_font)
 
-    text_area = np.array(pil_img, dtype=np.uint8)
-    img[y1:y2, x1:x2] = text_area[y1-y0:y2-y0, x1-x0:x2-x0]
+        text_area = np.array(pil_img, dtype=np.uint8)
+        img[y1:y2, x1:x2] = text_area[y1-y0:y2-y0, x1-x0:x2-x0]
     return img

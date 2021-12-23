@@ -42,8 +42,14 @@ def _tile_images(imgs, tile_shape, concatenated_image, margin_color=None):
     one_width = imgs[0].shape[1]
     one_height = imgs[0].shape[0]
     if concatenated_image is None:
-        concatenated_image = np.zeros((one_height * y_num, one_width * x_num, 3),
-                                      dtype=np.uint8)
+        if imgs[0].ndim == 2:
+            concatenated_image = np.zeros((one_height * y_num, one_width * x_num),
+                                          dtype=np.uint8)
+        elif imgs[0].ndim == 3:
+            concatenated_image = np.zeros((one_height * y_num, one_width * x_num, 3),
+                                          dtype=np.uint8)
+        else:
+            raise NotImplementedError
         if margin_color is not None:
             concatenated_image[:, :] = margin_color
     for y in range(y_num):
@@ -89,8 +95,14 @@ def get_tile_image(imgs, tile_shape=None, result_img=None, margin_color=None,
         scale = min([h_scale, w_scale])
         h, w = int(scale * h), int(scale * w)
         img = cv2.resize(img, (w, h))
-        img = centerize(img, (max_height, max_width, 3),
-                        margin_color=margin_color)
+        if img.ndim == 2:
+            img = centerize(img, (max_height, max_width),
+                            margin_color=margin_color)
+        elif img.ndim == 3:
+            img = centerize(img, (max_height, max_width, 3),
+                            margin_color=margin_color)
+        else:
+            raise NotImplementedError
         imgs[i] = img
     return _tile_images(imgs, tile_shape, result_img,
                         margin_color=margin_color)

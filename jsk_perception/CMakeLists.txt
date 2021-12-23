@@ -137,6 +137,7 @@ generate_dynamic_reconfigure_options(
   cfg/GaussianBlur.cfg
   cfg/KMeans.cfg
   cfg/ImageTimeDiff.cfg
+  cfg/OCR.cfg
   cfg/OverlayImageColorOnMono.cfg
   cfg/SelectiveSearch.cfg
   cfg/LabelToMaskImage.cfg

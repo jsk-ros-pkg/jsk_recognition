@@ -8,7 +8,7 @@ from PIL import ImageFont
 
 def put_text_to_image(
         img, text, pos, font_path, font_size, color, background_color=None,
-        offset_x=0, offset_y=0):
+        offset_x=0, offset_y=0, loc='top'):
     """Put text to image using pillow.
 
     You can put text to an image including non-ASCII characters.
@@ -33,6 +33,8 @@ def put_text_to_image(
         x position offset.
     offset_y : float
         y position offset.
+    loc : str
+        location.
     """
     if sys.version_info < (3, 0):
         text = text.decode('utf-8')
@@ -41,7 +43,12 @@ def put_text_to_image(
     text_w, text_h = dummy_draw.textsize(text, font=pil_font)
     text_bottom_offset = int(0.1 * text_h)
     x, y = pos
-    offset_y = (text_h+text_bottom_offset) + offset_y
+    if loc == 'top':
+        offset_y = (text_h + text_bottom_offset) + offset_y
+    elif loc == 'center':
+        offset_y = offset_y
+    else:
+        raise NotImplementedError('loc {} not implemented.'.format(loc))
     x0 = x - offset_x
     y0 = y - offset_y
     img_h, img_w = img.shape[:2]

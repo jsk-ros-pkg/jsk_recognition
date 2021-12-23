@@ -106,6 +106,7 @@ add_custom_target(${PROJECT_NAME}_install_trained_data ALL COMMAND python$ENV{RO
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(
   cfg/ConcaveHullMaskImage.cfg
+  cfg/CRAFT.cfg
   cfg/RectArrayActualSizeFilter.cfg
   cfg/PolygonArrayColorLikelihood.cfg
   cfg/PolygonArrayColorHistogram.cfg

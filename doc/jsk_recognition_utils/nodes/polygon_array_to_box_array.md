@@ -28,6 +28,7 @@ For example, this can be used when users use polygon for collision avoidance pro
 
     Output boxes.
     Each box contains each input polygon.
+    The long side of the bounding box is the x-axis, and the normal direction is the z-axis.
 
 * `~output/polygons` (`jsk_recognition_msgs/PolygonArray`)
 

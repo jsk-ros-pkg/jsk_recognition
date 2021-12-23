@@ -133,10 +133,12 @@ class PolygonArrayToRectBoxArray(ConnectionBasedTransport):
                  for point in polygon.polygon.points],
                 dtype=np.float32)
             normal = [a, b, c]
+            # Project 3d points onto a plane.
             projected_points = rotate_points(
                 points,
                 normal,
                 base_normal)
+            # Calculate the smallest rectangle on the plane.
             shapely_polygon = shapely.geometry.Polygon(
                 projected_points)
             rect = shapely_polygon.minimum_rotated_rectangle
@@ -144,10 +146,12 @@ class PolygonArrayToRectBoxArray(ConnectionBasedTransport):
             rect_polygon_2d = - np.ones((5, 3), 'f') * d
             rect_polygon_2d[:, 0] = x
             rect_polygon_2d[:, 1] = y
+            # Return the rectangle to 3d space.
             rect_polygon = rotate_points(
                 rect_polygon_2d,
                 base_normal,
                 normal)
+            # Save as ros message.
             polygon = geometry_msgs.msg.PolygonStamped(
                 header=polygon.header)
             for x, y, z in rect_polygon:
@@ -160,6 +164,8 @@ class PolygonArrayToRectBoxArray(ConnectionBasedTransport):
             box_msg = jsk_recognition_msgs.msg.BoundingBox(
                 header=polygon.header)
             base_matrix = np.eye(4)
+            # The long side is the x-axis and
+            # the normal direction is the z-axis.
             matrix = rotation_matrix_from_axis(
                 rect_polygon[1] - rect_polygon[0], normal, 'xz')
             base_matrix[:3, :3] = matrix

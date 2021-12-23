@@ -31,6 +31,7 @@ env:
     - NOT_TEST_INSTALL=true
     - USE_JENKINS=true
     - USE_DEB=true
+    - EXTRA_DEB="python-numpy" # add python-numpy due to https://github.com/ros/rosdistro/pull/31552
     - ROSDEP_ADDITIONAL_OPTIONS='-n -r -v --ignore-src' # run rosdep without -q
   matrix:
     - CHECK_PYTHON3_COMPILE=true

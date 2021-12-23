@@ -9,6 +9,8 @@ What is this?
 Detect text region from image.
 This is a ROS node for ``CRAFT: Character-Region Awareness For Text detection``.
 
+In order to use this feature, you need to install `pytorch <https://pytorch.org/get-started/locally/>`_ (pytorch >= 1.4.0 is recommended).
+
 
 Subscribing Topic
 -----------------

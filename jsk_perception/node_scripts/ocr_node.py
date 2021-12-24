@@ -226,9 +226,12 @@ class OCRNode(ConnectionBasedTransport):
             self.pub_debug_binary_viz.publish(msg_viz)
 
         # Sort the polygons in order of distance from the top left.
-        polys = np.array(polys, dtype=np.int32)
-        indices = np.argsort(polys.sum(axis=2).min(axis=1))
-        text = ' '.join([texts[i].decode('utf-8') for i in indices])
+        if len(polys) > 0:
+            polys = np.array(polys, dtype=np.int32)
+            indices = np.argsort(polys.sum(axis=2).min(axis=1))
+            text = ' '.join([texts[i].decode('utf-8') for i in indices])
+        else:
+            text = ''
         self.pub_str.publish(
             std_msgs.msg.String(data=text))
 
@@ -260,6 +263,7 @@ class OCRNode(ConnectionBasedTransport):
     def process_ocr(self, img, polys):
         texts = []
         imgs = []
+        binary_imgs = []
         if len(polys) > 0:
             n_jobs = min(self.n_jobs, len(polys))
             process = Pool(n_jobs)

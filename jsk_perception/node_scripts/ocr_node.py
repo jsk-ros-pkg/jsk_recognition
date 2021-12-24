@@ -42,7 +42,12 @@ def crop_img(img, poly):
     x_max = min(np.max(poly[:, 0]), img.shape[1])
     y_min = max(np.min(poly[:, 1]), 0)
     y_max = min(np.max(poly[:, 1]), img.shape[0])
-    croppped_img = img[y_min:y_max, x_min:x_max, :]
+    w = x_max - x_min
+    h = y_max - y_min
+    pts1 = np.float32(poly)
+    pts2 = np.float32([[0, 0], [w, 0], [w, h], [0, h]])
+    rot_mat = cv2.getPerspectiveTransform(pts1, pts2)
+    croppped_img = cv2.warpPerspective(img, rot_mat, (w, h))
     return croppped_img
 
 

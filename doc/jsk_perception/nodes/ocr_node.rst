@@ -77,7 +77,7 @@ Parameters
   In current ``ocr_node.py`` uses ``tesseract-ocr``.
 
   If you want to use a language other than English,
-  please install the appropriate language data and change the ``language`` argument.
+  please install the appropriate language data from `packages <https://packages.ubuntu.com/search?lang=en&suite=impish&searchon=names&keywords=tesseract>`_ and change the ``language`` argument.
 
   For example, if you want to use Japanese,
   please install ``tesseract-ocr-jpn`` (``apt install tesseract-ocr-jpn`` in ``Ubuntu``) and pass ``jpn`` as the ``language`` argument.

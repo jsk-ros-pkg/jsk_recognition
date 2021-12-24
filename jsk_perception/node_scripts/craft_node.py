@@ -105,9 +105,9 @@ class CRAFTNode(ConnectionBasedTransport):
         model_path = rospy.get_param('~model_path')
         refine_model_path = rospy.get_param('~refine_model_path')
 
-        device = rospy.get_param('~gpu', -1)
-        if torch.cuda.is_available() and device >= 0:
-            device = torch.device('cuda:{}'.format(device))
+        gpu = rospy.get_param('~gpu', -1)
+        if torch.cuda.is_available() and gpu >= 0:
+            device = torch.device('cuda:{}'.format(gpu))
         else:
             device = torch.device('cpu')
         net.load_state_dict(
@@ -118,9 +118,11 @@ class CRAFTNode(ConnectionBasedTransport):
 
         refine_net = RefineNet()
         refine_net.load_state_dict(
-            copy_state_dict(torch.load(refine_model_path)))
+            copy_state_dict(
+                torch.load(refine_model_path, map_location=device)))
         refine_net = refine_net.to(device)
-        refine_net = torch.nn.DataParallel(refine_net)
+        if torch.cuda.is_available() and gpu >= 0:
+            refine_net = torch.nn.DataParallel(refine_net)
         refine_net.eval()
 
         self.net = net

@@ -109,6 +109,7 @@
   <exec_depend>sound_play</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>tesseract-ocr</exec_depend>
+  <exec_depend>tesseract-ocr-jpn</exec_depend>
   <exec_depend>tf</exec_depend>
   <exec_depend>tf2_geometry_msgs</exec_depend>
   <exec_depend>topic_tools</exec_depend>

@@ -8,6 +8,8 @@ What is this?
 
 
 Optical Character Reader (OCR) node from image and text area.
+We recommend the python3 environment.
+For python2 users, please do pip install ``pytesseract==0.3.1`` manually because the latest version of pytesseract is not installed automatically.
 
 
 Subscribing Topic

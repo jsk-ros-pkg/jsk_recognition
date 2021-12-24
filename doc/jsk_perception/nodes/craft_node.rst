@@ -49,7 +49,7 @@ Parameters
 
 * ``~gpu`` (Int, default: ``0``)
 
-  GPU id.
+  GPU id. ``-1`` represents CPU mode.
 
 * ``~model_path`` (String, required)
 

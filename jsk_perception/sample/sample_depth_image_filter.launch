@@ -1,0 +1,45 @@
+<launch>
+
+  <arg name="gui" default="true" />
+  <arg name="INPUT_IMAGE" default="/camera/rgb/image_rect_color" />
+  <arg name="INPUT_DEPTH_IMAGE" default="/camera/depth_registered/hw_registered/image_rect_raw" />
+
+  <include file="$(find jsk_perception)/sample/include/play_rosbag_people.xml" />
+
+  <node name="depth_image_filter"
+        pkg="jsk_perception" type="depth_image_filter.py"
+        clear_params="true"
+        output="screen" >
+    <remap from="~input" to="$(arg INPUT_DEPTH_IMAGE)" />
+    <rosparam subst_value="true">
+      threshold: 2.0
+    </rosparam>
+  </node>
+
+  <group ns="depth_image_filter" >
+    <node name="apply_mask_image"
+          pkg="nodelet" type="nodelet"
+          args="standalone jsk_perception/ApplyMaskImage">
+      <remap from="~input" to="$(arg INPUT_IMAGE)" />
+      <remap from="~input/mask" to="output/mask" />
+      <rosparam>
+        approximate_sync: true
+        clip: false
+      </rosparam>
+    </node>
+  </group>
+
+  <group if="$(arg gui)">
+    <node name="image_view00"
+          pkg="image_view" type="image_view"
+          clear_params="true">
+      <remap from="image" to="depth_image_filter/output/mask" />
+    </node>
+    <node name="image_view01"
+          pkg="image_view" type="image_view"
+          clear_params="true">
+      <remap from="image" to="depth_image_filter/apply_mask_image/output" />
+    </node>
+  </group>
+
+</launch>

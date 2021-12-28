@@ -7,7 +7,7 @@ import rospkg
 import rospy
 from sensor_msgs.msg import Image
 from topic_tools import LazyTransport
-from .process_gray_image import spectral_subtract, normalize_gray_image
+from sound_classification.process_gray_image import spectral_subtract, normalize_gray_image
 
 
 class PreprocessGrayImage(LazyTransport):

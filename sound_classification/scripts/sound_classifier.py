@@ -16,8 +16,8 @@ import skimage.transform
 
 import cv_bridge
 from jsk_recognition_msgs.msg import ClassificationResult
-from nin.nin import NIN
-from vgg16.vgg16_batch_normalization import VGG16BatchNormalization
+from sound_classification.nin.nin import NIN
+from sound_classification.vgg16.vgg16_batch_normalization import VGG16BatchNormalization
 from jsk_topic_tools import ConnectionBasedTransport  # TODO use LazyTransport
 import os.path as osp
 from process_gray_image import img_jet

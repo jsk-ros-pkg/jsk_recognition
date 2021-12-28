@@ -13,8 +13,8 @@ import chainer.backends.cuda
 from chainer.serializers import npz
 from chainer.training import extensions
 
-from .nin.nin import NIN
-from .vgg16.vgg16_batch_normalization import VGG16BatchNormalization
+from sound_classification.nin.nin import NIN
+from sound_classification.vgg16.vgg16_batch_normalization import VGG16BatchNormalization
 
 import matplotlib
 import numpy as np

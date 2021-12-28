@@ -35,7 +35,7 @@
 # test : (number of images per class) * (1 - (train:test rate))
 
 import argparse
-from process_gray_image import img_jet
+from .process_gray_image import img_jet
 import imgaug as ia
 import imgaug.augmenters as iaa
 from PIL import Image as Image_

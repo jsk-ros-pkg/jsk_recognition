@@ -24,7 +24,6 @@ jobs:
         uses: jsk-ros-pkg/jsk_travis@master
         with:
           USE_JENKINS: true
-          EXTRA_DEB : "python-numpy"
           ROS_DISTRO : kinetic
           ROS_PARALLEL_JOBS : "-j8"
           ROS_PARALLEL_TEST_JOBS : "-j4"

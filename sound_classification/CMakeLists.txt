@@ -5,6 +5,7 @@ find_package(catkin REQUIRED
   catkin_virtualenv
   message_generation
   std_msgs
+  roslaunch
   )
 if (${catkin_virtualenv_VERSION} VERSION_LESS "0.3.0")
   message(STATUS "sound_classification requires catkin_virtualenv >= 0.3.0")
@@ -56,5 +57,8 @@ if(CATKIN_ENABLE_TESTING)
   endforeach()
 
   add_rostest(test/audio_to_spectrogram.test)
-  add_rostest(test/classify_sound.test)
+  # kinetic could not run roslaunch.parent.ROSLaunchParent() see https://github.com/ros/ros_comm/issues/1734
+  if (${roslaunch_VERSION} VERSION_GREATER "1.12.17")
+    add_rostest(test/classify_sound.test)
+  endif()
 endif()

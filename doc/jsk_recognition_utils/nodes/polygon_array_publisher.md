@@ -13,6 +13,9 @@ Get polygons as rosparam and publish them as `jsk_recognition_msgs/PolygonArray`
 
   Output polygons.
 
+* `~output/coefficients` (`jsk_recognition_msgs/ModelCoefficientsArray`)
+
+  Output coefficients. This topic will be published if `~publish_coeffs` is `True` and each polygon is in planar.
 
 ## Parameters
 
@@ -32,11 +35,16 @@ Get polygons as rosparam and publish them as `jsk_recognition_msgs/PolygonArray`
 
   Publish rate [Hz].
 
+* `~publish_coeffs` (Bool, default: `False`)
+
+    If this value is true and each polygon is in planar, publish `jsk_recognition_msgs/ModelCoefficientsArray`.
+
 Example parameters are below.
 
 ```xml
 <rosparam>
   frame_id: base_link
+  publish_coeffs: true
   polygons:
   - points:
     - [1.0, -1.0, 0.0]

@@ -1,0 +1,18 @@
+<launch>
+
+  <param name="/use_sim_time" value="true"/>
+
+  <node name="rosbag_play" pkg="rosbag" type="play"
+        args="$(find jsk_perception)/sample/data/2020-11-11-15-58-47-d435-floor.bag --clock --loop"/>
+
+  <group ns="d435">
+    <node name="point_cloud_xyzrgb"
+          pkg="nodelet" type="nodelet"
+          args="standalone depth_image_proc/point_cloud_xyzrgb">
+      <remap from="rgb/camera_info" to="color/camera_info"/>
+      <remap from="rgb/image_rect_color" to="color/image_raw"/>
+      <remap from="depth_registered/image_rect" to="aligned_depth_to_color/image_raw"/>
+    </node>
+  </group>
+
+</launch>

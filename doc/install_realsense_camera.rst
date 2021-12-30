@@ -34,8 +34,8 @@ Please see `this page <https://github.com/IntelRealSense/librealsense/blob/maste
 
 .. code-block:: bash
 
-  sudo apt-key adv --keyserver keys.gnupg.net --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE
-  sudo add-apt-repository "deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo $(lsb_release -cs) main" -u
+  sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE
+  sudo add-apt-repository "deb https://librealsense.intel.com/Debian/apt-repo $(lsb_release -cs) main" -u
   sudo apt update
   sudo apt-get install librealsense2-dkms librealsense2-utils librealsense2-dev librealsense2-dbg
 
@@ -49,6 +49,10 @@ and please build realsense-ros from source
   cd src/
   git clone https://github.com/IntelRealSense/realsense-ros.git
   catkin build
+
+If you install librealsense2 from Intel repo, make sure realsense-ros and librealsense are not installed from ROS repository.
+This will happen if you run `rosdep install` with some package have dependencies for them.
+Please run `rosdep` with `--skip-keys=librealsense2`.
 
 
 Method 2: Install `librealsense2` and `realsense-ros` from ROS Repository

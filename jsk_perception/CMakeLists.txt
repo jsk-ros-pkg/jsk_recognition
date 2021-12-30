@@ -127,6 +127,7 @@ generate_dynamic_reconfigure_options(
   cfg/ColorHistogramSlidingMatcher.cfg
   cfg/BackgroundSubstraction.cfg
   cfg/GrabCut.cfg
+  cfg/DepthImageFilter.cfg
   cfg/Fisheye.cfg
   cfg/DualFisheye.cfg
   cfg/SlidingWindowObjectDetector.cfg
@@ -564,6 +565,7 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/virtual_camera_mono.test)
     jsk_add_rostest(test/ssd_object_detector.test)
     jsk_add_rostest(test/ycc_decomposer.test)
+    jsk_add_rostest(test/depth_image_filter.test)
     if(TARGET JSK_NODELET_${PROJECT_NAME}_bing)
       jsk_add_rostest(test/bing.test)
     endif()

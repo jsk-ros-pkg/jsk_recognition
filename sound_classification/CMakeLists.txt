@@ -38,7 +38,8 @@ catkin_package(
 catkin_generate_virtualenv(
   PYTHON_INTERPRETER python2
   INPUT_REQUIREMENTS requirements.in
-  )
+  USE_SYSTEM_PACKAGES FALSE
+)
 
 file(GLOB SCRIPTS_FILES scripts/*.py)
 file(GLOB NODE_SCRIPTS_FILES node_scripts/*.py)

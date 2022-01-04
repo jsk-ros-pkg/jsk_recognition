@@ -35,12 +35,13 @@ catkin_generate_virtualenv(
   )
 
 file(GLOB SCRIPTS_FILES scripts/*.py)
+file(GLOB NODE_SCRIPTS_FILES node_scripts/*.py)
 catkin_install_python(
-  PROGRAMS ${SCRIPTS_FILES}
+  PROGRAMS ${SCRIPTS_FILES} ${NODE_SCRIPTS_FILES}
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(DIRECTORY launch scripts sample_rosbag
+install(DIRECTORY launch scripts node_scripts sample_rosbag
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   USE_SOURCE_PERMISSIONS
   )

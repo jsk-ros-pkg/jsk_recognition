@@ -1,0 +1,34 @@
+<launch>
+
+  <arg name="gpu" default="-1" doc="gpu device id. -1 indicates cpu mode." />
+  <arg name="input_audio" default="/audio" />
+  <arg name="sampling_rate" default="16000" />
+  <arg name="gui" default="true" />
+  <arg name="n_channel" default="2" />
+
+  <node name="audio_tagging"
+        pkg="sound_classification" type="audio_tagging.py"
+        output="screen" >
+    <remap from="~audio" to="$(arg input_audio)" />
+    <rosparam subst_value="true" >
+      gpu: $(arg gpu)
+      mic_sampling_rate: $(arg sampling_rate)
+      n_channel: $(arg n_channel)
+      window_size: 1.0
+    </rosparam>
+  </node>
+
+  <!-- Visualize sound classification -->
+  <group if="$(arg gui)">
+    <node name="sound_classification_result"
+          pkg="sound_classification" type="draw_classification_result.py" output="screen" >
+      <remap from="~input" to="/audio_tagging/output/class" />
+      <remap from="~input/image" to="" />
+    </node>
+    <node name="classification_result_view"
+          pkg="image_view" type="image_view" >
+      <remap from="image" to="/sound_classification_result/output" />
+    </node>
+  </group>
+
+</launch>

@@ -54,8 +54,15 @@ class DrawClassificationResult(ConnectionBasedTransport):
     def subscribe(self):
         self.sub = message_filters.Subscriber('~input', ClassificationResult)
         self.sub_img = message_filters.Subscriber('~input/image', Image)
-        sync = message_filters.TimeSynchronizer(
-            [self.sub, self.sub_img], queue_size=10)
+        subs = [self.sub, self.sub_img]
+        queue_size = rospy.get_param('~queue_size', 10)
+        if rospy.get_param('~approximate_sync', False):
+            slop = rospy.get_param('~slop', 0.1)
+            sync = message_filters.ApproximateTimeSynchronizer(
+                fs=subs, queue_size=queue_size, slop=slop)
+        else:
+            sync = message_filters.TimeSynchronizer(
+                fs=self.subs, queue_size=queue_size)
         sync.registerCallback(self._draw)
 
     def unsubscribe(self):

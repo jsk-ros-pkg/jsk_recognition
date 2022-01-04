@@ -28,6 +28,8 @@ typing-extensions==3.6.6  # via chainer
 typing==3.6.6             # via chainer, typing-extensions
 librosa
 panns-inference
+torch==1.6.0
+torchvision==0.7.0
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

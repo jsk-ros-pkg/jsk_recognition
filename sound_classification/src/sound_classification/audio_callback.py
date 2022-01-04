@@ -17,7 +17,7 @@ class AudioStream(object):
                  n_channel=1, target_channel=0,
                  get_latest_data=False,
                  discard_data=True,
-                 is_speeching_topic_name=None):
+                 is_speaking_topic_name=None):
         self.is_subscribing = True
         self.get_latest_data = get_latest_data
         self.discard_data = discard_data
@@ -29,7 +29,7 @@ class AudioStream(object):
         self.input_sample_rate = input_sample_rate
         self.output_sample_rate = output_sample_rate or self.input_sample_rate
         self.type_code = {}
-        self.is_speeching_topic_name = is_speeching_topic_name
+        self.is_speaking_topic_name = is_speaking_topic_name
         for code in ['b', 'h', 'i', 'l']:
             self.type_code[array.array(code).itemsize] = code
 
@@ -41,20 +41,20 @@ class AudioStream(object):
         self.topic_name = topic_name
         self.sub_audio = rospy.Subscriber(
             self.topic_name, AudioData, self.audio_cb)
-        if self.is_speeching_topic_name is not None:
+        if self.is_speaking_topic_name is not None:
             self.sub_speeching = rospy.Subscriber(
-                self.is_speeching_topic_name,
+                self.is_speaking_topic_name,
                 std_msgs.msg.Bool,
                 self.is_speaking_topic_callback,
                 queue_size=1)
 
     def is_speaking_topic_callback(self, msg):
-        self.is_speeching = msg.data
-        if self.is_subscribing is True and self.is_speeching is True:
+        self.is_speaking = msg.data
+        if self.is_subscribing is True and self.is_speaking is True:
             with self.lock:
                 self.is_subscribing = False
                 self.sub_audio.unregister()
-        elif self.is_subscribing is False and self.is_speeching is False:
+        elif self.is_subscribing is False and self.is_speaking is False:
             with self.lock:
                 self.is_subscribing = True
                 self.audio_buffer = np.array([], dtype=self.dtype)

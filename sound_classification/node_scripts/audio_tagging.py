@@ -12,6 +12,9 @@ import torch
 from sound_classification import AudioStream
 
 
+MIN_INPUT_SIZE = 9919
+
+
 class AudioTaggingNode(object):
 
     def __init__(self):
@@ -28,7 +31,8 @@ class AudioTaggingNode(object):
         else:
             rospy.logerr("'~bitdepth' {} is unsupported.".format(bitdepth))
         self.window_size = rospy.get_param('~window_size', 1.0)
-        self.audio_buffer_len = int(self.sampling_rate * self.window_size)
+        self.audio_buffer_len = min(
+            int(self.sampling_rate * self.window_size), MIN_INPUT_SIZE)
 
         # setup audio tagging.
         gpu_id = rospy.get_param('~gpu', -1)

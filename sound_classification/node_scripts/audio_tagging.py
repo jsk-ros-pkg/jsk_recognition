@@ -8,7 +8,9 @@ from panns_inference import AudioTagging
 from panns_inference import labels
 import rospy
 import torch
+from dynamic_reconfigure.server import Server
 
+from sound_classification.cfg import AudioTaggingConfig as Config
 from sound_classification import AudioStream
 
 
@@ -30,9 +32,7 @@ class AudioTaggingNode(object):
             self.dtype = 'int16'
         else:
             rospy.logerr("'~bitdepth' {} is unsupported.".format(bitdepth))
-        self.window_size = rospy.get_param('~window_size', 1.0)
-        self.audio_buffer_len = min(
-            int(self.sampling_rate * self.window_size), MIN_INPUT_SIZE)
+        self.srv = Server(Config, self.config_callback)
 
         # setup audio tagging.
         gpu_id = rospy.get_param('~gpu', -1)
@@ -65,6 +65,12 @@ class AudioTaggingNode(object):
             rospy.logwarn('You cannot set 0 as the rate; change it to 1.')
             rate = 1
         rospy.Timer(rospy.Duration(1.0 / rate), self.timer_cb)
+
+    def config_callback(self, config, level):
+        self.audio_buffer_len = max(
+            int(self.sampling_rate * config.window_size), MIN_INPUT_SIZE)
+        config.window_size = self.audio_buffer_len / self.sampling_rate
+        return config
 
     def timer_cb(self, timer):
         if self.stream.sufficient_data(self.audio_buffer_len):

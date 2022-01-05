@@ -12,6 +12,7 @@ if (${catkin_virtualenv_VERSION} VERSION_LESS "0.3.0")
   return()
 endif()
 
+catkin_python_setup()
 
 add_message_files(
   FILES

@@ -1,0 +1,18 @@
+<launch>
+
+  <arg name="gpu" default="-1" doc="gpu device id. -1 indicates cpu mode." />
+  <arg name="mic_sampling_rate" default="16000" />
+  <arg name="gui" default="true" />
+
+  <include file="$(find sound_classification)/sample/include/room_610_sound.xml" >
+  </include>
+
+  <include file="$(find sound_classification)/launch/audio_tagging.launch" >
+    <arg name="input_audio" value="/audio" />
+    <arg name="input_image" value="/hsrb/head_rgbd_sensor/rgb/image_raw" />
+    <arg name="n_channel" value="1" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="gpu" value="$(arg gpu)" />
+  </include>
+
+</launch>

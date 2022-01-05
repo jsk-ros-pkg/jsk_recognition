@@ -2,19 +2,10 @@
 
   <arg name="gpu" default="-1" doc="gpu device id. -1 indicates cpu mode." />
   <arg name="input_audio" default="/audio" />
-  <arg name="mic_sampling_rate" default="44100" />
+  <arg name="input_image" />
+  <arg name="mic_sampling_rate" default="16000" />
   <arg name="gui" default="true" />
-  <arg name="n_channel" default="2" />
-
-  <include file="$(find sound_classification)/launch/audio_to_spectrogram.launch" >
-    <arg name="gui" value="false" />
-    <!-- <arg name="filename" value="$(find sound_classification)/sample_rosbag/applause.bag" /> -->
-    <arg name="filename" value="$(find sound_classification)/sample_rosbag/no_sound.bag" />
-    <arg name="use_rosbag" value="false" />
-    <arg name="pause_rosbag" value="false" />
-    <arg name="n_channel" default="$(arg n_channel)" />
-    <arg name="mic_sampling_rate" default="$(arg mic_sampling_rate)" />
-  </include>
+  <arg name="n_channel" default="1" />
 
   <node name="mono_to_color"
         pkg="sound_classification" type="mono_to_color_node.py"
@@ -30,7 +21,8 @@
       gpu: $(arg gpu)
       mic_sampling_rate: $(arg mic_sampling_rate)
       n_channel: $(arg n_channel)
-      window_size: 2.0
+      window_size: 3.0
+      rate: 30
     </rosparam>
   </node>
 
@@ -39,7 +31,7 @@
     <node name="sound_classification_result"
           pkg="sound_classification" type="draw_classification_result.py" output="screen" >
       <remap from="~input" to="audio_tagging/output/class" />
-      <remap from="~input/image" to="mono_to_color/output" />
+      <remap from="~input/image" to="$(arg input_image)" />
       <rosparam>
         approximate_sync: true
         queue_size: 100

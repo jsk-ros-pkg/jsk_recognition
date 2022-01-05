@@ -20,6 +20,9 @@ add_message_files(
   InSound.msg
   )
 
+# download and install sample data
+add_custom_target(${PROJECT_NAME}_install_sample_data ALL COMMAND python$ENV{ROS_PYTHON_VERSION} ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
+
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(
   cfg/AudioTagging.cfg

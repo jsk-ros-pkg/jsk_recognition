@@ -9,7 +9,7 @@ futures==3.1.1            # via imageio
 imageio==2.6.0            # via -r requirements.in, imgaug
 imgaug==0.4.0             # via -r requirements.in
 kiwisolver==1.1.0         # via matplotlib
-matplotlib==2.2.5         # via imgaug, scikit-image
+matplotlib==3.5.1         # via imgaug, scikit-image
 networkx==2.2             # via scikit-image
 numpy==1.22.0             # via chainer, imageio, imgaug, matplotlib, opencv-python, pywavelets, scipy
 opencv-python==4.2.0.32   # via -r requirements.in, imgaug
@@ -26,6 +26,7 @@ six==1.16.0               # via chainer, cycler, imgaug, matplotlib, protobuf, p
 subprocess32==3.5.4       # via matplotlib
 typing-extensions==3.6.6  # via chainer
 typing==3.6.6             # via chainer, typing-extensions
+numba==0.53.1
 librosa
 panns-inference
 torch==1.6.0

@@ -1,0 +1,31 @@
+backports.functools-lru-cache==1.6.4  # via matplotlib
+chainer==6.7.0            # via -r requirements.in
+cloudpickle==1.3.0        # via scikit-image
+cycler==0.10.0            # via matplotlib
+decorator==4.4.2          # via networkx
+enum34==1.1.10            # via imageio
+filelock==3.2.1           # via chainer
+futures==3.3.0            # via imageio
+imageio==2.6.0            # via -r requirements.in, imgaug
+imgaug==0.4.0             # via -r requirements.in
+kiwisolver==1.1.0         # via matplotlib
+matplotlib==2.2.5         # via imgaug, scikit-image
+networkx==2.2             # via scikit-image
+numpy==1.16.6             # via chainer, imageio, imgaug, matplotlib, opencv-python, pywavelets, scipy
+opencv-python==4.2.0.32   # via -r requirements.in, imgaug
+pillow==6.2.2             # via imageio, imgaug, scikit-image
+protobuf==3.17.3          # via chainer
+pyparsing==2.4.7          # via matplotlib
+python-dateutil==2.8.2    # via matplotlib
+pytz==2021.3              # via matplotlib
+pywavelets==1.0.3         # via scikit-image
+scikit-image==0.14.5      # via imgaug
+scipy==1.2.3              # via imgaug, scikit-image
+shapely==1.7.1            # via imgaug
+six==1.16.0               # via chainer, cycler, imgaug, matplotlib, protobuf, python-dateutil, scikit-image
+subprocess32==3.5.4       # via matplotlib
+typing-extensions==3.6.6  # via chainer
+typing==3.6.6             # via chainer, typing-extensions
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools

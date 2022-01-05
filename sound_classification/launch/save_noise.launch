@@ -1,0 +1,24 @@
+<launch>
+
+  <arg name="use_rosbag" default="false" />
+  <arg name="filename" default="/" />
+  <arg name="use_microphone" default="true" />
+  <arg name="gui" default="true" />
+  <arg name="save_data_rate" default="10" />
+
+  <include file="$(find sound_classification)/launch/audio_to_spectrogram.launch" >
+    <arg name="use_rosbag" value="$(arg use_rosbag)" />
+    <arg name="filename" value="$(arg filename)" />
+    <arg name="use_microphone" value="$(arg use_microphone)" />
+    <arg name="gui" value="$(arg gui)" />
+  </include>
+
+  <!-- Collect noise spectrogram -->
+  <node pkg="sound_classification" type="noise_saver.py" name="noise_saver" output="screen">
+    <remap from="~raw_spectrogram" to="/spectrum_to_spectrogram/spectrogram" />
+    <rosparam subst_value="true">
+      save_data_rate: $(arg save_data_rate) <!-- related to spectrogram_period -->
+    </rosparam>
+  </node>
+
+</launch>

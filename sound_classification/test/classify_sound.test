@@ -1,0 +1,16 @@
+<launch>
+  <node name="sample_sound_classification"
+        pkg="sound_classification"
+        type="sample_sound_classification.py"
+        output="screen" />
+
+  <test test-name="test_sound_classification_result"
+        name="test_sound_classification_result"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="800" retry="2" >
+    <rosparam>
+      topic_0: /sound_classifier/output
+      timeout_0: 800
+    </rosparam>
+  </test>
+</launch>

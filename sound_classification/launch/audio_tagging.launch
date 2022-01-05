@@ -2,9 +2,25 @@
 
   <arg name="gpu" default="-1" doc="gpu device id. -1 indicates cpu mode." />
   <arg name="input_audio" default="/audio" />
-  <arg name="sampling_rate" default="16000" />
+  <arg name="mic_sampling_rate" default="44100" />
   <arg name="gui" default="true" />
   <arg name="n_channel" default="2" />
+
+  <include file="$(find sound_classification)/launch/audio_to_spectrogram.launch" >
+    <arg name="gui" value="false" />
+    <!-- <arg name="filename" value="$(find sound_classification)/sample_rosbag/applause.bag" /> -->
+    <arg name="filename" value="$(find sound_classification)/sample_rosbag/no_sound.bag" />
+    <arg name="use_rosbag" value="false" />
+    <arg name="pause_rosbag" value="false" />
+    <arg name="n_channel" default="$(arg n_channel)" />
+    <arg name="mic_sampling_rate" default="$(arg mic_sampling_rate)" />
+  </include>
+
+  <node name="mono_to_color"
+        pkg="sound_classification" type="mono_to_color_node.py"
+        output="screen" >
+    <remap from="~input" to="preprocess_gray_image/output_normalized" />
+  </node>
 
   <node name="audio_tagging"
         pkg="sound_classification" type="audio_tagging.py"
@@ -12,9 +28,9 @@
     <remap from="~audio" to="$(arg input_audio)" />
     <rosparam subst_value="true" >
       gpu: $(arg gpu)
-      mic_sampling_rate: $(arg sampling_rate)
+      mic_sampling_rate: $(arg mic_sampling_rate)
       n_channel: $(arg n_channel)
-      window_size: 1.0
+      window_size: 2.0
     </rosparam>
   </node>
 
@@ -22,12 +38,16 @@
   <group if="$(arg gui)">
     <node name="sound_classification_result"
           pkg="sound_classification" type="draw_classification_result.py" output="screen" >
-      <remap from="~input" to="/audio_tagging/output/class" />
-      <remap from="~input/image" to="" />
+      <remap from="~input" to="audio_tagging/output/class" />
+      <remap from="~input/image" to="mono_to_color/output" />
+      <rosparam>
+        approximate_sync: true
+        queue_size: 100
+      </rosparam>
     </node>
     <node name="classification_result_view"
           pkg="image_view" type="image_view" >
-      <remap from="image" to="/sound_classification_result/output" />
+      <remap from="image" to="sound_classification_result/output" />
     </node>
   </group>
 

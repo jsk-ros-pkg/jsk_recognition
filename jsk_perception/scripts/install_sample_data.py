@@ -137,6 +137,17 @@ def main():
         ],
     )
 
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/sample_mask_rcnn_73b2_kitchen_japanese_label.bag',
+        url='https://drive.google.com/uc?id=1Kfgj7rkuQB14o73t7FbkAee19oNKkYSt',
+        md5='83c23c1005794d4ee5b7461c23f3b259',
+        extract=False,
+        compressed_bags=[
+            'sample/data/sample_mask_rcnn_73b2_kitchen_japanese_label.bag',
+        ],
+    )
+
 
 if __name__ == '__main__':
     main()

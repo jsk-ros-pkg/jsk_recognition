@@ -20,7 +20,7 @@ from sound_classification.nin.nin import NIN
 from sound_classification.vgg16.vgg16_batch_normalization import VGG16BatchNormalization
 from jsk_topic_tools import ConnectionBasedTransport  # TODO use LazyTransport
 import os.path as osp
-from process_gray_image import img_jet
+from sound_classification.process_gray_image import img_jet
 import rospy
 from sensor_msgs.msg import Image
 

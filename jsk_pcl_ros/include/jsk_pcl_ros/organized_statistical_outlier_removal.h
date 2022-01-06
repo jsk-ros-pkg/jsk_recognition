@@ -42,6 +42,13 @@
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <jsk_topic_tools/counter.h>
 #include <dynamic_reconfigure/server.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
+
+#include "sensor_msgs/PointCloud2.h"
+#include "jsk_recognition_msgs/ClusterPointIndices.h"
+
 #include "jsk_pcl_ros/OrganizedStatisticalOutlierRemovalConfig.h"
 
 namespace jsk_pcl_ros
@@ -50,6 +57,12 @@ namespace jsk_pcl_ros
   {
   public:
     typedef jsk_pcl_ros::OrganizedStatisticalOutlierRemovalConfig Config;
+    typedef message_filters::sync_policies::ExactTime<
+    sensor_msgs::PointCloud2,
+    jsk_recognition_msgs::ClusterPointIndices > SyncPolicy;
+    typedef message_filters::sync_policies::ApproximateTime<
+    sensor_msgs::PointCloud2,
+    jsk_recognition_msgs::ClusterPointIndices > ApproximateSyncPolicy;
     typedef pcl::PointXYZRGB PointT;
     OrganizedStatisticalOutlierRemoval();
   protected:
@@ -64,7 +77,15 @@ namespace jsk_pcl_ros
 
     virtual void configCallback (Config &config, uint32_t level);
 
-    virtual void filter(const sensor_msgs::PointCloud2::ConstPtr& msg);
+    virtual void filter(
+            const pcl::PointCloud<PointT>::Ptr cloud,
+            pcl::PointCloud<PointT>::Ptr cloud_filtered,
+            bool keep_organized);
+    virtual void filterCloud(const sensor_msgs::PointCloud2::ConstPtr& msg);
+    virtual void filterCloudWithClusterPointIndices(
+            const sensor_msgs::PointCloud2::ConstPtr& msg,
+            const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& cpi_msg);
+
 
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
@@ -73,6 +94,11 @@ namespace jsk_pcl_ros
     // ROS variables
     ////////////////////////////////////////////////////////
     ros::Subscriber sub_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_cloud_;
+    message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_cpi_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> >async_;
+
     ros::Publisher pub_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
@@ -84,6 +110,9 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // Parameters
     ////////////////////////////////////////////////////////
+    bool use_cpi_;
+    bool use_async_;
+    int queue_size_;
     bool keep_organized_;
     bool negative_;
     double std_mul_;

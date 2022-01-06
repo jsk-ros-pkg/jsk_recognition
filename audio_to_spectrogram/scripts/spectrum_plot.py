@@ -57,7 +57,6 @@ class SpectrumPlot():
         self.ax.set_xlim((self.freq.min(), self.freq.max()))
         self.ax.set_ylim((0.0, 20))
         self.ax.legend(loc='upper right')
-        print(self.pub_img.get_num_connections())
         if self.pub_img.get_num_connections() > 0:
             bridge = cv_bridge.CvBridge()
             img = convert_matplotlib_to_img(self.fig)

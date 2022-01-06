@@ -24,6 +24,48 @@ def cross_product(a, b):
     return np.dot(outer_product_matrix(a), b)
 
 
+# minimum_rotated_rectangle is available since 1.6.0 (melodic)
+# https://github.com/shapely/shapely/pull/361
+from distutils.version import LooseVersion
+if LooseVersion(shapely.__version__) < LooseVersion('1.6.0'):
+    import math
+    from itertools import islice
+    from shapely.affinity import affine_transform
+    @property
+    def minimum_rotated_rectangle(polygon):
+        """Returns the general minimum bounding rectangle of
+        the geometry. Can possibly be rotated. If the convex hull
+        of the object is a degenerate (line or point) this same degenerate
+        is returned.
+        """
+        # first compute the convex hull
+        hull = polygon.convex_hull
+        try:
+            coords = hull.exterior.coords
+        except AttributeError: # may be a Point or a LineString
+            return hull
+        # generate the edge vectors between the convex hull's coords
+        edges = ((pt2[0]-pt1[0], pt2[1]-pt1[1]) for pt1, pt2 in zip(coords, islice(coords, 1, None)))
+
+        def _transformed_rects():
+            for dx, dy in edges:
+                # compute the normalized direction vector of the edge vector
+                length = math.sqrt(dx**2 + dy**2)
+                ux, uy = dx/length, dy/length
+                # compute the normalized perpendicular vector
+                vx, vy = -uy, ux
+                # transform hull from the original coordinate system to the coordinate system
+                # defined by the edge and compute the axes-parallel bounding rectangle
+                transf_rect = affine_transform(hull, (ux,uy,vx,vy,0,0)).envelope
+                # yield the transformed rectangle and a matrix to transform it back
+                # to the original coordinate system
+                yield (transf_rect, (ux,vx,uy,vy,0,0))
+
+        # check for the minimum area rectangle and return it
+        transf_rect, inv_matrix = min(_transformed_rects(), key=lambda r : r[0].area)
+        return affine_transform(transf_rect, inv_matrix)
+    shapely.geometry.Polygon.minimum_rotated_rectangle = minimum_rotated_rectangle
+
 def rotation_matrix_from_axis(
         first_axis=(1, 0, 0), second_axis=(0, 1, 0), axes='xy'):
     if axes not in ['xy', 'yx', 'xz', 'zx', 'yz', 'zy']:

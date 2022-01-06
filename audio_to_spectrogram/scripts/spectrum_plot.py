@@ -3,11 +3,31 @@
 
 from __future__ import division
 
+try:
+    # for python2.x
+    from StringIO import StringIO as BufIO
+except ModuleNotFoundError:
+    # for python3.x
+    from io import BytesIO as BufIO
+
+import cv_bridge
 import matplotlib.pyplot as plt
 import numpy as np
+import PIL
 import rospy
+import sensor_msgs.msg
 
 from jsk_recognition_msgs.msg import Spectrum
+
+
+def convert_matplotlib_to_img(fig):
+    buf = BufIO()
+    fig.savefig(buf, format="png")
+    buf.seek(0)
+    img = np.array(
+        PIL.Image.open(buf), dtype=np.uint8)
+    img = img[..., :3]
+    return img
 
 
 class SpectrumPlot():
@@ -23,7 +43,9 @@ class SpectrumPlot():
         self.ax.set_xlabel('Frequency [Hz]', fontsize=12)
         self.ax.set_ylabel('Amplitude', fontsize=12)
         self.line, = self.ax.plot([0, 0], label='Amplitude of Spectrum')
-        # ROS subscriber
+        # ROS publisher and subscriber
+        self.pub_img = rospy.Publisher(
+            '~output/viz', sensor_msgs.msg.Image, queue_size=1)
         self.sub_spectrum = rospy.Subscriber(
             '~spectrum', Spectrum, self._cb, queue_size=1000)
 
@@ -35,10 +57,16 @@ class SpectrumPlot():
         self.ax.set_xlim((self.freq.min(), self.freq.max()))
         self.ax.set_ylim((0.0, 20))
         self.ax.legend(loc='upper right')
+        print(self.pub_img.get_num_connections())
+        if self.pub_img.get_num_connections() > 0:
+            bridge = cv_bridge.CvBridge()
+            img = convert_matplotlib_to_img(self.fig)
+            img_msg = bridge.cv2_to_imgmsg(img, encoding='rgb8')
+            img_msg.header = msg.header
+            self.pub_img.publish(img_msg)
 
 
 if __name__ == '__main__':
     rospy.init_node('spectrum_plot')
     SpectrumPlot()
-    while not rospy.is_shutdown():
-        plt.pause(.1)  # real-time plotting
+    rospy.spin()

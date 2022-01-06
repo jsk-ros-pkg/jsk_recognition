@@ -11,6 +11,7 @@ except ModuleNotFoundError:
     from io import BytesIO as BufIO
 
 import cv_bridge
+from jsk_topic_tools import ConnectionBasedTransport
 import matplotlib.pyplot as plt
 import numpy as np
 import PIL
@@ -30,9 +31,10 @@ def convert_matplotlib_to_img(fig):
     return img
 
 
-class SpectrumPlot():
+class SpectrumPlot(ConnectionBasedTransport):
 
     def __init__(self):
+        super(SpectrumPlot, self).__init__()
         # Set matplotlib config
         self.fig = plt.figure(figsize=(8, 5))
         self.fig.suptitle('Spectrum plot', size=12)
@@ -44,10 +46,15 @@ class SpectrumPlot():
         self.ax.set_ylabel('Amplitude', fontsize=12)
         self.line, = self.ax.plot([0, 0], label='Amplitude of Spectrum')
         # ROS publisher and subscriber
-        self.pub_img = rospy.Publisher(
+        self.pub_img = self.advertise(
             '~output/viz', sensor_msgs.msg.Image, queue_size=1)
+
+    def subscribe(self):
         self.sub_spectrum = rospy.Subscriber(
             '~spectrum', Spectrum, self._cb, queue_size=1000)
+
+    def unsupported(self):
+        self.sub_spectrum.unregister()
 
     def _cb(self, msg):
         # Plot spectrum

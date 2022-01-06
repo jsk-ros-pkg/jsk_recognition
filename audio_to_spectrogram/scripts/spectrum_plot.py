@@ -53,7 +53,7 @@ class SpectrumPlot(ConnectionBasedTransport):
         self.sub_spectrum = rospy.Subscriber(
             '~spectrum', Spectrum, self._cb, queue_size=1000)
 
-    def unsupported(self):
+    def unsubscribe(self):
         self.sub_spectrum.unregister()
 
     def _cb(self, msg):

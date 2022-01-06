@@ -2,6 +2,7 @@
 
 try:
     from motpy import Detection, MultiObjectTracker
+    from jsk_recognition_utils.panorama_multi_object_tracker import PanoramaMultiObjectTracker
 except ModuleNotFoundError:
     print('motpy is not found. Please install it.')
     import sys
@@ -37,7 +38,7 @@ class MotpyROS(object):
         if self.panorama_mode:
             msg_image = rospy.wait_for_message('~input', Image)
             self.width_image = msg_image.width
-            self.tracker = MultiObjectTracker(dt=dt)
+            self.tracker = PanoramaMultiObjectTracker(dt=dt,image_width=self.width_image)
         else:
             self.tracker = MultiObjectTracker(dt=dt)
 

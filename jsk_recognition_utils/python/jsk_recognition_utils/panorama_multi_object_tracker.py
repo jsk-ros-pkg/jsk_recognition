@@ -29,16 +29,37 @@ def calculate_iou_panorama(bboxes1, bboxes2, image_width, dim: int = 2):
     coords_b2 = np.split(bboxes2, 2 * dim, axis=1)
 
     coords = np.zeros(shape=(2, dim, bboxes1.shape[0], bboxes2.shape[0]))
-    val_inter, val_b1, val_b2 = 1.0, 1.0, 1.0
+    volume_inter, volume_b1, volume_b2 = 1.0, 1.0, 1.0
     for d in range(dim):
-        coords[0, d] = np.maximum(coords_b1[d], np.transpose(coords_b2[d]))  # top-left
-        coords[1, d] = np.minimum(coords_b1[d + dim], np.transpose(coords_b2[d + dim]))  # bottom-right
+        if d == 0: # x
+            top_left = np.maximum(coords_b1[d], np.transpose(coords_b2[d]))  # x_min, y_min
+            bottom_right = np.minimum(coords_b1[d + dim], np.transpose(coords_b2[d + dim]))  # x_max, y_max
+            temp_vol_inter = np.maximum(bottom_right - top_left, 0)
 
-        val_inter *= np.maximum(coords[1, d] - coords[0, d], 0)
-        val_b1 *= coords_b1[d + dim] - coords_b1[d]
-        val_b2 *= coords_b2[d + dim] - coords_b2[d]
+            top_left = np.maximum(coords_b1[d], np.transpose(coords_b2[d] + image_width))  # x_min, y_min
+            bottom_right = np.minimum(coords_b1[d + dim], np.transpose(coords_b2[d + dim] + image_width))  # x_max, y_max
+            temp_vol_inter_plus = np.maximum(bottom_right - top_left, 0)
 
-    iou = val_inter / (np.clip(val_b1 + np.transpose(val_b2) - val_inter, a_min=0, a_max=None) + EPS)
+            top_left = np.maximum(coords_b1[d], np.transpose(coords_b2[d] - image_width))  # x_min, y_min
+            bottom_right = np.minimum(coords_b1[d + dim], np.transpose(coords_b2[d + dim] - image_width))  # x_max, y_max
+            temp_vol_inter_minus = np.maximum(bottom_right - top_left, 0)
+
+            volume_inter *= np.maximum(np.maximum(temp_vol_inter_plus, temp_vol_inter_minus), temp_vol_inter)
+            volume_b1 *= coords_b1[d + dim] - coords_b1[d]
+            volume_b2 *= coords_b2[d + dim] - coords_b2[d]
+
+        else: # y
+            top_left = np.maximum(coords_b1[d], np.transpose(coords_b2[d]))  # top-left
+            bottom_right = np.minimum(coords_b1[d + dim], np.transpose(coords_b2[d + dim]))  # bottom-right
+
+            volume_inter *= np.maximum(bottom_right - top_left, 0)
+            volume_b1 *= coords_b1[d + dim] - coords_b1[d]
+            volume_b2 *= coords_b2[d + dim] - coords_b2[d]
+
+    iou = volume_inter / (np.clip(volume_b1 + np.transpose(volume_b2) - volume_inter, a_min=0, a_max=None) + EPS)
+    #print('length of bbox tracker: {}'.format(bboxes1.shape[0]))
+    #print('length of bbox detections: {}'.format(bboxes2.shape[0]))
+    #print('iou: {}'.format(iou))
     return iou
 
 

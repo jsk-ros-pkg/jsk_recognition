@@ -7,4 +7,17 @@
         args="$(find sound_classification)/sample/data/room610-sound-2022-01-05-11-02-05.bag --loop --clock">
   </node>
 
+  <group ns="hsrb">
+    <group ns="head_rgbd_sensor">
+      <group ns="rgb">
+        <node name="republish"
+              pkg="image_transport" type="republish"
+              args="compressed raw">
+          <remap from="in" to="image_raw"/>
+          <remap from="out" to="image_raw"/>
+        </node>
+      </group>
+    </group>
+  </group>
+
 </launch>

@@ -57,6 +57,10 @@
       <remap from="~spectrum" to="/audio_to_spectrum/spectrum_filtered" />
     </node>
 
+    <node pkg="image_view" type="image_view" name="spectrum_view"  >
+      <remap from="image" to="/spectrum_plot/output/viz" />
+    </node>
+
     <!-- visualize spectrogram -->
     <!-- you can get spectrogram image topic from /spectrogram_view/output-->
     <node pkg="image_view" type="image_view" name="spectrogram_view"  >

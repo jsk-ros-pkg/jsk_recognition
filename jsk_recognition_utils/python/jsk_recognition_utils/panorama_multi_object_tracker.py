@@ -7,10 +7,11 @@ if sys.version_info.major < 3:
 from motpy.core import Box, Detection, Track, Vector, setup_logger
 from motpy.metrics import angular_similarity
 from motpy.model import Model, ModelPreset
-from motpy.tracker import SigleObjectTracker, BaseMatchingFunction
+from motpy.tracker import SingleObjectTracker, BaseMatchingFunction
 from motpy.tracker import KalmanTracker, SimpleTracker
 from motpy.tracker import EPS
 from motpy.tracker import _sequence_has_none
+from motpy.tracker import DEFAULT_MODEL_SPEC
 import numpy as np
 import scipy
 from typing import (Any, Callable, Dict, List, Optional, Sequence, Tuple, Type, Union)
@@ -87,7 +88,7 @@ def match_by_cost_matrix_for_panorama(trackers: Sequence[SingleObjectTracker],
     if len(trackers) == 0 or len(detections) == 0:
         return []
 
-    cost_mat, iou_mat = cost_matrix_iou_feature(trackers, detections, image_width, **kwargs)
+    cost_mat, iou_mat = cost_matrix_iou_feature_for_panorama(trackers, detections, image_width, **kwargs)
     row_ind, col_ind = scipy.optimize.linear_sum_assignment(cost_mat)
 
     matches = []
@@ -116,6 +117,7 @@ class PanoramaIOUAndFeatureMatchingFunction(BaseMatchingFunction):
                  multi_match_min_iou: float = 1. + EPS,
                  feature_similarity_fn: Callable = angular_similarity,
                  feature_similarity_beta: Optional[float] = None) -> None:
+        self.image_width = image_width
         self.min_iou = min_iou
         self.multi_match_min_iou = multi_match_min_iou
         self.feature_similarity_fn = feature_similarity_fn
@@ -125,7 +127,7 @@ class PanoramaIOUAndFeatureMatchingFunction(BaseMatchingFunction):
                  trackers: Sequence[SingleObjectTracker],
                  detections: Sequence[Detection]) -> np.ndarray:
         return match_by_cost_matrix_for_panorama(
-            trackers, detections, image_width,
+            trackers, detections, self.image_width,
             min_iou=self.min_iou,
             multi_match_min_iou=self.multi_match_min_iou,
             feature_similarity_fn=self.feature_similarity_fn,

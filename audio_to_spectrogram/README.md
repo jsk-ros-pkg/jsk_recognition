@@ -89,6 +89,8 @@ roslaunch audio_to_spectrogram sample_audio_to_spectrogram.launch
 
   A script to publish frequency vs amplitude plot image.
 
+![](docs/images/spectrum.jpg)
+
   - ### Publishing topics
 
     - `~output/viz` (`sensor_msgs/Image`)

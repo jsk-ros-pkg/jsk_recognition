@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 2.8.3)
 project(audio_to_spectrogram)
 
 find_package(catkin)
-if(NOT $ENV{ROS_DISTRO} STREQUAL "indigo") # on noetic it needs catkin_install_python to support Python3 and it does not work on indigo for some reason...
-  catkin_python_setup()
-endif()
+
+catkin_python_setup()
+
 catkin_package()
 
 install(DIRECTORY launch sample test

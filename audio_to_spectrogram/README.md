@@ -14,9 +14,9 @@ Here is an example using rosbag with 300Hz audio.
 roslaunch audio_to_spectrogram sample_audio_to_spectrogram.launch
 ```
 
-|Spectrum|Spectrogram|
-|---|---|
-|![](https://user-images.githubusercontent.com/19769486/82075694-9a7ac300-9717-11ea-899c-db6119a76d52.png)|![](https://user-images.githubusercontent.com/19769486/82075685-96e73c00-9717-11ea-9abc-e6e74104d666.png)|
+|Audio Amplitude|Spectrum|Spectrogram|
+|---|---|---|
+|![](docs/images/audio_amplitude.jpg)|![](https://user-images.githubusercontent.com/19769486/82075694-9a7ac300-9717-11ea-899c-db6119a76d52.png)|![](https://user-images.githubusercontent.com/19769486/82075685-96e73c00-9717-11ea-9abc-e6e74104d666.png)|
 
 # Scripts
 
@@ -88,6 +88,8 @@ roslaunch audio_to_spectrogram sample_audio_to_spectrogram.launch
 ## audio_amplitude_plot.py
 
   A script to publish audio amplitude plot image.
+
+![](docs/images/audio_amplitude.jpg)
 
   - ### Publishing topics
 

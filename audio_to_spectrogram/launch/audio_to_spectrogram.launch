@@ -55,6 +55,11 @@
   <node name="audio_amplitude_plot"
         pkg="audio_to_spectrogram" type="audio_amplitude_plot.py" output="screen">
     <remap from="~audio" to="$(arg audio_topic)" />
+    <rosparam subst_value="true">
+      n_channel: $(arg n_channel)
+      mic_sampling_rate: $(arg mic_sampling_rate)
+      bitdepth: $(arg bitdepth)
+    </rosparam>
   </node>
 
   <!-- publish frequency vs amplitude image -->

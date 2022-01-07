@@ -51,6 +51,12 @@
     </rosparam>
   </node>
 
+  <!-- publish amplitude image -->
+  <node name="audio_amplitude_plot"
+        pkg="audio_to_spectrogram" type="audio_amplitude_plot.py" output="screen">
+    <remap from="~audio" to="$(arg audio_topic)" />
+  </node>
+
   <!-- publish frequency vs amplitude image -->
   <node name="spectrum_plot"
         pkg="audio_to_spectrogram" type="spectrum_plot.py" >
@@ -58,6 +64,10 @@
   </node>
 
   <group if="$(arg gui)">
+    <node pkg="image_view" type="image_view" name="audio_amplitude_view"  >
+      <remap from="image" to="/audio_amplitude_plot/output/viz" />
+    </node>
+
     <node pkg="image_view" type="image_view" name="spectrum_view"  >
       <remap from="image" to="/spectrum_plot/output/viz" />
     </node>

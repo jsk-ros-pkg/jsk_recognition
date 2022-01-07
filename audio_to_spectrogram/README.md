@@ -43,7 +43,15 @@ roslaunch audio_to_spectrogram sample_audio_to_spectrogram.launch
 
       Period [s] to sample audio data for one FFT.
 
-    - `~depth` (`Int`, default: `16`)
+    - `~n_channel` (`Int`, default: `1`)
+
+      Number of channel of microphone.
+
+    - `~target_channel` (`Int`, default: `0`)
+
+      Target channel.
+
+    - `~bitdepth` (`Int`, default: `16`)
 
       Number of bits per audio data.
 
@@ -104,6 +112,22 @@ roslaunch audio_to_spectrogram sample_audio_to_spectrogram.launch
       Audio stream data from microphone. The audio format must be `wave`.
 
   - ### Parameters
+    - `~mic_sampling_rate` (`Int`, default: `16000`)
+
+      Sampling rate [Hz] of microphone. Namely, sampling rate of audio topic.
+
+    - `~n_channel` (`Int`, default: `1`)
+
+      Number of channel of microphone.
+
+    - `~target_channel` (`Int`, default: `0`)
+
+      Target channel.
+
+    - `~bitdepth` (`Int`, default: `16`)
+
+      Number of bits per audio data.
+
     - `~maximum_amplitude` (`Int`, default: `10000`)
 
       Maximum range of amplitude to plot.

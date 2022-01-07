@@ -8,8 +8,8 @@ import PyKDL
 import tf2_ros
 import tf2_geometry_msgs
 
-from jsk_recognition_utils.panorama_utils import calcSphericalPoint
-from jsk_recognition_utils.panorama_utils import transformPanoramaPoint
+from jsk_recognition_utils.panorama_utils import calc_spherical_point
+from jsk_recognition_utils.panorama_utils import transform_panorama_point
 
 import math
 import sys
@@ -122,7 +122,7 @@ class RectArrayInPanoramaToBoundingBoxArray(object):
                     rospy.logwarn('height for label "{}" (id:{}) is not specified'.format(label_name,label_id))
                 continue
 
-            (theta_a, phi_a) = transformPanoramaPoint(
+            (theta_a, phi_a) = transform_panorama_point(
                 rect.x,
                 rect.y,
                 self._image_height,
@@ -132,7 +132,7 @@ class RectArrayInPanoramaToBoundingBoxArray(object):
                 self._phi_min,
                 self._phi_max
             )
-            (theta_b, phi_b) = transformPanoramaPoint(
+            (theta_b, phi_b) = transform_panorama_point(
                 rect.x + rect.width,
                 rect.y + rect.height,
                 self._image_height,
@@ -149,7 +149,7 @@ class RectArrayInPanoramaToBoundingBoxArray(object):
             distance = (
                 self._dimensions_labels[label_name][2] / 2.0) / math.tan((theta_b - theta_a) / 2.0)
 
-            (x, y, z) = calcSphericalPoint(theta, phi, distance)
+            (x, y, z) = calc_spherical_point(theta, phi, distance)
             position_fixedbased = pykdl_transform_fixed_to_panorama * \
                 PyKDL.Vector(x, y, z)
 

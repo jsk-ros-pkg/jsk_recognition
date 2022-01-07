@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 2.8.3)
 project(audio_to_spectrogram)
 
 find_package(catkin)
+
+catkin_python_setup()
+
 catkin_package()
 
 install(DIRECTORY launch sample scripts test

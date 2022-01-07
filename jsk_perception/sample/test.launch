@@ -1,0 +1,104 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <arg name="ROSBAG_FILE" default="/home/sktometometo/Desktop/out.bag" />
+  <arg name="INPUT_PANORAMA_IMAGE" default="/dual_fisheye_to_panorama/output" />
+  <arg name="INPUT_PANORAMA_INFO" default="/dual_fisheye_to_panorama/panorama_info" />
+  <arg name="INPUT_CLASS" default="/edgetpu_panorama_object_detector/output/class" />
+  <arg name="INPUT_RECTS" default="/edgetpu_panorama_object_detector/output/rects" />
+
+  <param name="/use_sim_time" value="true" />
+  <node
+    pkg="rosbag"
+    name="rosbag_play"
+    type="play"
+    args="$(arg ROSBAG_FILE) --clock --loop" />
+  <node
+    pkg="image_transport"
+    type="republish"
+    name="panorama_decompress"
+    args="compressed in:=/dual_fisheye_to_panorama/output raw out:=/dual_fisheye_to_panorama/output"
+    />
+
+  <!-- coral_usb -->
+  <include file="$(find coral_usb)/launch/edgetpu_panorama_object_detector.launch" >
+      <arg name="INPUT_IMAGE" value="/dual_fisheye_to_panorama/output" />
+  </include>
+
+  <!-- visualize output of object detector -->
+  <node
+    pkg="jsk_perception"
+    type="draw_rects"
+    name="draw_rects"
+    >
+    <remap from="~input" to="$(arg INPUT_PANORAMA_IMAGE)" />
+    <remap from="~input/rects" to="$(arg INPUT_RECTS)" />
+    <remap from="~input/class" to="$(arg INPUT_CLASS)" />
+  </node>
+
+  <!-- motpy_ros_node -->
+  <node
+    pkg="jsk_perception"
+    type="motpy_ros_node.py"
+    name="motpy_ros_node"
+    output="screen"
+    >
+    <remap from="~input" to="$(arg INPUT_PANORAMA_IMAGE)" />
+    <remap from="~input/rects" to="$(arg INPUT_RECTS)" />
+    <remap from="~input/class" to="$(arg INPUT_CLASS)" />
+    <rosparam subst_value="true">
+        dt: 0.2
+        target_labels:
+          - person
+        label_names: $(find jsk_perception)/config/coco_labelnames.yaml
+        approximate_sync: True
+        slop: 0.1
+        min_iou: 0.3
+    </rosparam>
+  </node>
+
+  <!-- rect_array_in_panorama_to_bounding_box_array -->
+  <node
+    pkg="jsk_perception"
+    type="rect_array_in_panorama_to_bounding_box_array.py"
+    name="rect_array_in_panorama_to_bounding_box_array"
+    >
+    <remap from="~panorama_image" to="$(arg INPUT_PANORAMA_IMAGE)" />
+    <remap from="~panorama_info" to="$(arg INPUT_PANORAMA_INFO)" />
+    <remap from="~input_class" to="$(arg INPUT_CLASS)" />
+    <remap from="~input_rects" to="$(arg INPUT_RECTS)" />
+    <rosparam>
+        frame_fixed: "camera"
+        dimensions_labels:
+            person: [0.5, 0.5, 1.5]
+    </rosparam>
+  </node>
+
+  <!-- track_array_in_panorama_to_bounding_box_array -->
+  <node
+    pkg="jsk_perception"
+    type="track_array_in_panorama_to_bounding_box_array.py"
+    name="track_array_in_panorama_to_bounding_box_array"
+    output="screen"
+    >
+    <remap from="~panorama_image" to="$(arg INPUT_PANORAMA_IMAGE)" />
+    <remap from="~panorama_info" to="$(arg INPUT_PANORAMA_INFO)" />
+    <remap from="~input_tracks" to="/motpy_ros_node/output/tracks" />
+    <rosparam>
+        frame_fixed: "camera"
+        dimensions_labels:
+            person: [0.5, 0.5, 1.5]
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node
+      pkg="rviz"
+      type="rviz"
+      name="$(anon rviz)"
+      args="-d $(find jsk_perception)/sample/config/sample_track_array_in_panorama_to_bounding_box_array.rviz"
+    />
+  </group>
+
+</launch>

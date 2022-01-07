@@ -3,32 +3,16 @@
 
 from __future__ import division
 
-try:
-    # for python2.x
-    from StringIO import StringIO as BufIO
-except ModuleNotFoundError:
-    # for python3.x
-    from io import BytesIO as BufIO
-
 import cv_bridge
 from jsk_topic_tools import ConnectionBasedTransport
 import matplotlib.pyplot as plt
 import numpy as np
-import PIL
 import rospy
 import sensor_msgs.msg
 
 from jsk_recognition_msgs.msg import Spectrum
 
-
-def convert_matplotlib_to_img(fig):
-    buf = BufIO()
-    fig.savefig(buf, format="png")
-    buf.seek(0)
-    img = np.array(
-        PIL.Image.open(buf), dtype=np.uint8)
-    img = img[..., :3]
-    return img
+from audio_to_spectrogram import convert_matplotlib_to_img
 
 
 class SpectrumPlot(ConnectionBasedTransport):

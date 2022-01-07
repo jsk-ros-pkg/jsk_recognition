@@ -32,15 +32,25 @@ class MotpyROS(object):
 
         self.bridge = CvBridge()
 
-        self.panorama_mode = rospy.get_param('~panorama_mode', True)
+        self.panorama_mode = rospy.get_param('~panorama_mode', False)
         dt = rospy.get_param('~dt')
+
+        min_iou = rospy.get_param('~min_iou', 0.1)
+        multi_match_min_iou = rospy.get_param('~multi_match_min_iou', 1.000001)
+        kwargs = {'min_iou': min_iou,
+                  'multi_match_min_iou': multi_match_min_iou}
 
         if self.panorama_mode:
             msg_image = rospy.wait_for_message('~input', Image)
             self.width_image = msg_image.width
-            self.tracker = PanoramaMultiObjectTracker(dt=dt,image_width=self.width_image)
+            self.tracker = PanoramaMultiObjectTracker(
+                                dt=dt,
+                                image_width=self.width_image,
+                                matching_fn_kwargs=kwargs)
         else:
-            self.tracker = MultiObjectTracker(dt=dt)
+            self.tracker = MultiObjectTracker(
+                                dt=dt,
+                                matching_fn_kwargs=kwargs)
 
         self.target_labels = rospy.get_param('~target_labels', None)
         self.label_names = load_label_names()
@@ -86,6 +96,7 @@ class MotpyROS(object):
         for index, rect in enumerate(rects_msg.rects):
             if self.target_labels is not None and \
                     class_msg.label_names[index] not in self.target_labels:
+                rospy.logwarn('{} is not in target_labels.'.format(class_msg.label_names[index]))
                 continue
             detections.append(
                 Detection(box=[rect.x,
@@ -98,7 +109,7 @@ class MotpyROS(object):
             )
 
         self.tracker.step(detections=detections)
-        active_tracks = self.tracker.active_tracks(min_steps_alive=3)
+        active_tracks = self.tracker.active_tracks(min_steps_alive=1)
 
         tracks_msg = TrackArray()
         tracks_msg.header = img_msg.header

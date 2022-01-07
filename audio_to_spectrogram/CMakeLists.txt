@@ -1,9 +1,15 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(audio_to_spectrogram)
 
-find_package(catkin)
+find_package(catkin REQUIRED COMPONENTS
+  dynamic_reconfigure
+)
 
 catkin_python_setup()
+
+generate_dynamic_reconfigure_options(
+  cfg/AudioAmplitudePlot.cfg
+)
 
 catkin_package()
 

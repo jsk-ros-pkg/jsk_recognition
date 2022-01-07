@@ -87,6 +87,9 @@ namespace jsk_pcl_ros_utils
       pcl::PointCloud<PointT>::Ptr cloud,
       pcl::PointIndices::Ptr indices,
       pcl::ModelCoefficients::Ptr original_coefficients);
+    virtual void forceToDirectOrigin(
+      const pcl::ModelCoefficients::Ptr& coefficients,
+      pcl::ModelCoefficients::Ptr& output_coefficients);
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////

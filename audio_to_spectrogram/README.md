@@ -85,6 +85,35 @@ roslaunch audio_to_spectrogram sample_audio_to_spectrogram.launch
 
       Publish rate [Hz] of spectrogram topic.
 
+## audio_amplitude_plot.py
+
+  A script to publish audio amplitude plot image.
+
+  - ### Publishing topics
+
+    - `~output/viz` (`sensor_msgs/Image`)
+
+      Audio amplitude plot image.
+
+  - ### Subscribing topics
+
+    - `~audio` (`audio_common_msgs/AudioData`)
+
+      Audio stream data from microphone. The audio format must be `wave`.
+
+  - ### Parameters
+    - `~maximum_amplitude` (`Int`, default: `10000`)
+
+      Maximum range of amplitude to plot.
+
+    - `~window_size` (`Double`, default: `10.0`)
+
+      Window size of sound input to plot.
+
+    - `~rate` (`Double`, default: `10.0`)
+
+      Publish rate [Hz] of audio amplitude image topic.
+
 ## spectrum_plot.py
 
   A script to publish frequency vs amplitude plot image.

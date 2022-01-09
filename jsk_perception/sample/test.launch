@@ -5,8 +5,6 @@
   <arg name="ROSBAG_FILE" default="/home/sktometometo/Desktop/out.bag" />
   <arg name="INPUT_PANORAMA_IMAGE" default="/dual_fisheye_to_panorama/output" />
   <arg name="INPUT_PANORAMA_INFO" default="/dual_fisheye_to_panorama/panorama_info" />
-  <arg name="INPUT_CLASS" default="/edgetpu_panorama_object_detector/output/class" />
-  <arg name="INPUT_RECTS" default="/edgetpu_panorama_object_detector/output/rects" />
 
   <param name="/use_sim_time" value="true" />
   <node
@@ -22,9 +20,20 @@
     />
 
   <!-- coral_usb -->
-  <include file="$(find coral_usb)/launch/edgetpu_panorama_object_detector.launch" >
-      <arg name="INPUT_IMAGE" value="/dual_fisheye_to_panorama/output" />
-  </include>
+  <node name="edgetpu_panorama_object_detector"
+        pkg="coral_usb" type="edgetpu_panorama_object_detector.py"
+        output="screen" respawn="true">
+    <remap from="~input" to="$(arg INPUT_PANORAMA_IMAGE)" />
+    <rosparam subst_value="true" >
+      model_file: package://coral_usb/models/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite
+      label_file: package://coral_usb/models/coco_labels.txt
+      image_transport: raw
+      device_id: 0
+      n_split: 3
+      overlap: true
+      nms_thresh: 0.0
+    </rosparam>
+  </node>
 
   <!-- visualize output of object detector -->
   <node
@@ -33,29 +42,8 @@
     name="draw_rects"
     >
     <remap from="~input" to="$(arg INPUT_PANORAMA_IMAGE)" />
-    <remap from="~input/rects" to="$(arg INPUT_RECTS)" />
-    <remap from="~input/class" to="$(arg INPUT_CLASS)" />
-  </node>
-
-  <!-- motpy_ros_node -->
-  <node
-    pkg="jsk_perception"
-    type="motpy_ros_node.py"
-    name="motpy_ros_node"
-    output="screen"
-    >
-    <remap from="~input" to="$(arg INPUT_PANORAMA_IMAGE)" />
-    <remap from="~input/rects" to="$(arg INPUT_RECTS)" />
-    <remap from="~input/class" to="$(arg INPUT_CLASS)" />
-    <rosparam subst_value="true">
-        dt: 0.2
-        target_labels:
-          - person
-        label_names: $(find jsk_perception)/config/coco_labelnames.yaml
-        approximate_sync: True
-        slop: 0.1
-        min_iou: 0.3
-    </rosparam>
+    <remap from="~input/rects" to="/edgetpu_panorama_object_detector/output/rects" />
+    <remap from="~input/class" to="/edgetpu_panorama_object_detector/output/class" />
   </node>
 
   <!-- rect_array_in_panorama_to_bounding_box_array -->
@@ -66,12 +54,32 @@
     >
     <remap from="~panorama_image" to="$(arg INPUT_PANORAMA_IMAGE)" />
     <remap from="~panorama_info" to="$(arg INPUT_PANORAMA_INFO)" />
-    <remap from="~input_class" to="$(arg INPUT_CLASS)" />
-    <remap from="~input_rects" to="$(arg INPUT_RECTS)" />
+    <remap from="~input_rects" to="/edgetpu_panorama_object_detector/output/rects" />
+    <remap from="~input_class" to="/edgetpu_panorama_object_detector/output/class" />
     <rosparam>
         frame_fixed: "camera"
         dimensions_labels:
             person: [0.5, 0.5, 1.5]
+    </rosparam>
+  </node>
+
+  <!-- motpy_ros_node -->
+  <node
+    pkg="jsk_perception"
+    type="motpy_ros_node.py"
+    name="motpy_ros_node"
+    output="screen"
+    >
+    <remap from="~input" to="$(arg INPUT_PANORAMA_IMAGE)" />
+    <remap from="~input/rects" to="/edgetpu_panorama_object_detector/output/rects" />
+    <remap from="~input/class" to="/edgetpu_panorama_object_detector/output/class" />
+    <rosparam subst_value="true">
+        dt: 0.2
+        target_labels:
+          - person
+        label_names: $(find jsk_perception)/config/coco_labelnames.yaml
+        approximate_sync: True
+        slop: 0.1
     </rosparam>
   </node>
 
@@ -91,6 +99,31 @@
             person: [0.5, 0.5, 1.5]
     </rosparam>
   </node>
+
+  <!-- boundin_box_tracker_node -->
+  <node
+    pkg="jsk_perception"
+    type="bounding_box_tracker_node.py"
+    name="bounding_box_tracker_node"
+    output="screen"
+    >
+    <remap from="~input" to="/rect_array_in_panorama_to_bounding_box_array/bbox_array" />
+    <rosparam subst_value="true">
+        dt: 0.2
+        target_labels:
+          - person
+        label_names: $(find jsk_perception)/config/coco_labelnames.yaml
+        approximate_sync: True
+        slop: 0.1
+    </rosparam>
+  </node>
+
+  <node
+      pkg="tf2_ros"
+      type="static_transform_publisher"
+      name="camera_tf_publisher"
+      args="0 0 0 0 0 0 camera insta360_link"
+      />
 
   <group if="$(arg gui)">
     <node

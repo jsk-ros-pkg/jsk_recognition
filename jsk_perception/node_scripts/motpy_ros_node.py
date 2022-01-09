@@ -2,7 +2,6 @@
 
 try:
     from motpy import Detection, MultiObjectTracker
-    from jsk_recognition_utils.panorama_multi_object_tracker import PanoramaMultiObjectTracker
 except ModuleNotFoundError:
     print('motpy is not found. Please install it.')
     import sys
@@ -21,6 +20,8 @@ from jsk_recognition_msgs.msg import TrackArray
 from jsk_recognition_utils.panorama_utils import load_label_names
 from jsk_recognition_utils.panorama_utils import visualize_tracks
 
+import numpy as np
+
 import uuid
 
 
@@ -32,27 +33,17 @@ class MotpyROS(object):
 
         self.bridge = CvBridge()
 
-        self.panorama_mode = rospy.get_param('~panorama_mode', False)
         dt = rospy.get_param('~dt')
-
         min_iou = rospy.get_param('~min_iou', 0.1)
         multi_match_min_iou = rospy.get_param('~multi_match_min_iou', 1.000001)
+        self.min_steps_alive = rospy.get_param('~min_steps_alive', 3)
+
         kwargs = {'min_iou': min_iou,
                   'multi_match_min_iou': multi_match_min_iou}
 
-        self.min_steps_alive = rospy.get_param('~min_steps_alive', 3)
-
-        if self.panorama_mode:
-            msg_image = rospy.wait_for_message('~input', Image)
-            self.width_image = msg_image.width
-            self.tracker = PanoramaMultiObjectTracker(
-                                dt=dt,
-                                image_width=self.width_image,
-                                matching_fn_kwargs=kwargs)
-        else:
-            self.tracker = MultiObjectTracker(
-                                dt=dt,
-                                matching_fn_kwargs=kwargs)
+        self.tracker = MultiObjectTracker(
+                            dt=dt,
+                            matching_fn_kwargs=kwargs)
 
         self.target_labels = rospy.get_param('~target_labels', None)
         self.label_names = load_label_names()
@@ -101,10 +92,11 @@ class MotpyROS(object):
                 rospy.logwarn('{} is not in target_labels.'.format(class_msg.label_names[index]))
                 continue
             detections.append(
-                Detection(box=[rect.x,
+                Detection(box=np.array(
+                              [rect.x,
                                rect.y,
                                rect.x + rect.width,
-                               rect.y + rect.height],
+                               rect.y + rect.height]),
                           score=class_msg.label_proba[index],
                           class_id=class_msg.labels[index]
                           )

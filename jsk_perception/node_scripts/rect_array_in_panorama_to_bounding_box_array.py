@@ -107,8 +107,10 @@ class RectArrayInPanoramaToBoundingBoxArray(object):
 
         for label_id, \
             label_name, \
+            label_proba, \
             rect in zip(msg_class.labels,
                         msg_class.label_names,
+                        msg_class.label_proba,
                         msg_rects.rects):
 
             if label_name not in self._dimensions_labels:
@@ -163,6 +165,7 @@ class RectArrayInPanoramaToBoundingBoxArray(object):
             msg_bbox.dimensions.y = self._dimensions_labels[label_name][1]
             msg_bbox.dimensions.z = self._dimensions_labels[label_name][2]
             msg_bbox.label = label_id
+            msg_bbox.value = label_proba
 
             msg_bbox_array.boxes.append(msg_bbox)
 

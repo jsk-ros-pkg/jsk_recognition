@@ -40,6 +40,8 @@ class MotpyROS(object):
         kwargs = {'min_iou': min_iou,
                   'multi_match_min_iou': multi_match_min_iou}
 
+        self.min_steps_alive = rospy.get_param('~min_steps_alive', 3)
+
         if self.panorama_mode:
             msg_image = rospy.wait_for_message('~input', Image)
             self.width_image = msg_image.width
@@ -109,7 +111,7 @@ class MotpyROS(object):
             )
 
         self.tracker.step(detections=detections)
-        active_tracks = self.tracker.active_tracks(min_steps_alive=1)
+        active_tracks = self.tracker.active_tracks(min_steps_alive=self.min_steps_alive)
 
         tracks_msg = TrackArray()
         tracks_msg.header = img_msg.header

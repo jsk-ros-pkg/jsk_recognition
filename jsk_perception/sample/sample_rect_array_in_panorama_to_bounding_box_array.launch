@@ -2,7 +2,7 @@
 
   <arg name="gui" default="true" />
 
-  <arg name="INPUT_PANORAMA_IMAGE" default="/dual_fisheye_to_panorama/output/quater" />
+  <arg name="INPUT_PANORAMA_IMAGE" default="/dual_fisheye_to_panorama/output" />
   <arg name="INPUT_PANORAMA_INFO" default="/dual_fisheye_to_panorama/panorama_info" />
   <arg name="INPUT_CLASS" default="/edgetpu_panorama_object_detector/output/class" />
   <arg name="INPUT_RECTS" default="/edgetpu_panorama_object_detector/output/rects" />
@@ -20,15 +20,11 @@
     args="compressed in:=/dual_fisheye_to_panorama/output raw out:=/dual_fisheye_to_panorama/output"
     />
   <node
-    pkg="nodelet"
-    type="nodelet"
-    name="panorama_image_resize"
-    args="standalone image_proc/resize">
-    <param name="scale_height" value="0.5" />
-    <param name="scale_width" value="0.5" />
-    <remap from="image" to="/dual_fisheye_to_panorama/output" />
-    <remap from="~image" to="/dual_fisheye_to_panorama/output/quater" />
-  </node>
+    pkg="tf2_ros"
+    type="static_transform_publisher"
+    name="camera_tf_publisher"
+    args="0 0 0 0 0 0 camera insta360_link"
+    />
 
   <!-- visualize output of object detector -->
   <node

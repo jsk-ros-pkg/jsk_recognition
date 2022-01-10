@@ -47,5 +47,5 @@ def load_label_names():
     label_names = rospy.get_param("~label_names")
     if isinstance(label_names, str):
         with open(label_names, "r") as f:
-            label_names = tuple(yaml.load(f))
+            label_names = tuple(yaml.load(f, yaml.Loader))
     return label_names

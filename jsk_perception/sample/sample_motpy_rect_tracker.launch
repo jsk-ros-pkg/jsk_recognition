@@ -1,7 +1,7 @@
 <launch>
   <arg name="gui" default="true" />
 
-  <arg name="INPUT_PANORAMA_IMAGE" default="/dual_fisheye_to_panorama/output/quater" />
+  <arg name="INPUT_PANORAMA_IMAGE" default="/dual_fisheye_to_panorama/output" />
   <arg name="INPUT_PANORAMA_INFO" default="/dual_fisheye_to_panorama/panorama_info" />
   <arg name="INPUT_CLASS" default="/edgetpu_panorama_object_detector/output/class" />
   <arg name="INPUT_RECTS" default="/edgetpu_panorama_object_detector/output/rects" />
@@ -19,15 +19,11 @@
     args="compressed in:=/dual_fisheye_to_panorama/output raw out:=/dual_fisheye_to_panorama/output"
     />
   <node
-    pkg="nodelet"
-    type="nodelet"
-    name="panorama_image_resize"
-    args="standalone image_proc/resize">
-    <param name="scale_height" value="0.5" />
-    <param name="scale_width" value="0.5" />
-    <remap from="image" to="/dual_fisheye_to_panorama/output" />
-    <remap from="~image" to="/dual_fisheye_to_panorama/output/quater" />
-  </node>
+      pkg="tf2_ros"
+      type="static_transform_publisher"
+      name="camera_tf_publisher"
+      args="0 0 0 0 0 0 camera insta360_link"
+      />
 
   <!-- visualize output of object detector -->
   <node
@@ -40,11 +36,11 @@
     <remap from="~input/class" to="$(arg INPUT_CLASS)" />
   </node>
 
-  <!-- motpy_ros_node -->
+  <!-- motpy_rect_tracker -->
   <node
     pkg="jsk_perception"
-    type="motpy_ros_node.py"
-    name="motpy_ros_node"
+    type="motpy_rect_tracker.py"
+    name="motpy_rect_tracker"
     output="screen"
     >
     <remap from="~input" to="$(arg INPUT_PANORAMA_IMAGE)" />
@@ -60,7 +56,7 @@
     </rosparam>
   </node>
 
-  <!-- rect_array_in_panorama_to_bounding_box_array -->
+  <!-- track_array_in_panorama_to_bounding_box_array -->
   <node
     pkg="jsk_perception"
     type="track_array_in_panorama_to_bounding_box_array.py"
@@ -69,7 +65,7 @@
     >
     <remap from="~panorama_image" to="$(arg INPUT_PANORAMA_IMAGE)" />
     <remap from="~panorama_info" to="$(arg INPUT_PANORAMA_INFO)" />
-    <remap from="~input_tracks" to="/motpy_ros_node/output/tracks" />
+    <remap from="~input_tracks" to="/motpy_rect_tracker/output/tracks" />
     <rosparam>
         frame_fixed: "camera"
         dimensions_labels:
@@ -82,7 +78,7 @@
       pkg="rviz"
       type="rviz"
       name="$(anon rviz)"
-      args="-d $(find jsk_perception)/sample/config/sample_track_array_in_panorama_to_bounding_box_array.rviz"
+      args="-d $(find jsk_perception)/sample/config/sample_mopy_rect_tracker.rviz"
     />
   </group>
 

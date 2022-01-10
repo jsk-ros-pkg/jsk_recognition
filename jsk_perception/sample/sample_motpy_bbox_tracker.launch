@@ -2,38 +2,29 @@
 
   <arg name="gui" default="true" />
 
-  <arg name="ROSBAG_FILE" default="/home/sktometometo/Desktop/out.bag" />
   <arg name="INPUT_PANORAMA_IMAGE" default="/dual_fisheye_to_panorama/output" />
   <arg name="INPUT_PANORAMA_INFO" default="/dual_fisheye_to_panorama/panorama_info" />
+  <arg name="INPUT_CLASS" default="/edgetpu_panorama_object_detector/output/class" />
+  <arg name="INPUT_RECTS" default="/edgetpu_panorama_object_detector/output/rects" />
 
   <param name="/use_sim_time" value="true" />
   <node
     pkg="rosbag"
     name="rosbag_play"
     type="play"
-    args="$(arg ROSBAG_FILE) --clock --loop" />
+    args="$(find jsk_perception)/sample/data/sample_rect_array_in_panorama_to_bounding_box_array.bag --clock --loop" />
   <node
     pkg="image_transport"
     type="republish"
     name="panorama_decompress"
     args="compressed in:=/dual_fisheye_to_panorama/output raw out:=/dual_fisheye_to_panorama/output"
     />
-
-  <!-- coral_usb -->
-  <node name="edgetpu_panorama_object_detector"
-        pkg="coral_usb" type="edgetpu_panorama_object_detector.py"
-        output="screen" respawn="true">
-    <remap from="~input" to="$(arg INPUT_PANORAMA_IMAGE)" />
-    <rosparam subst_value="true" >
-      model_file: package://coral_usb/models/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite
-      label_file: package://coral_usb/models/coco_labels.txt
-      image_transport: raw
-      device_id: 0
-      n_split: 3
-      overlap: true
-      nms_thresh: 0.0
-    </rosparam>
-  </node>
+  <node
+      pkg="tf2_ros"
+      type="static_transform_publisher"
+      name="camera_tf_publisher"
+      args="0 0 0 0 0 0 camera insta360_link"
+      />
 
   <!-- visualize output of object detector -->
   <node
@@ -42,8 +33,8 @@
     name="draw_rects"
     >
     <remap from="~input" to="$(arg INPUT_PANORAMA_IMAGE)" />
-    <remap from="~input/rects" to="/edgetpu_panorama_object_detector/output/rects" />
-    <remap from="~input/class" to="/edgetpu_panorama_object_detector/output/class" />
+    <remap from="~input/rects" to="$(arg INPUT_RECTS)" />
+    <remap from="~input/class" to="$(arg INPUT_CLASS)" />
   </node>
 
   <!-- rect_array_in_panorama_to_bounding_box_array -->
@@ -54,8 +45,8 @@
     >
     <remap from="~panorama_image" to="$(arg INPUT_PANORAMA_IMAGE)" />
     <remap from="~panorama_info" to="$(arg INPUT_PANORAMA_INFO)" />
-    <remap from="~input_rects" to="/edgetpu_panorama_object_detector/output/rects" />
-    <remap from="~input_class" to="/edgetpu_panorama_object_detector/output/class" />
+    <remap from="~input_rects" to="$(arg INPUT_RECTS)" />
+    <remap from="~input_class" to="$(arg INPUT_CLASS)" />
     <rosparam>
         frame_fixed: "camera"
         dimensions_labels:
@@ -63,48 +54,11 @@
     </rosparam>
   </node>
 
-  <!-- motpy_ros_node -->
+  <!-- motpy_bbox_tracker -->
   <node
     pkg="jsk_perception"
-    type="motpy_ros_node.py"
-    name="motpy_ros_node"
-    output="screen"
-    >
-    <remap from="~input" to="$(arg INPUT_PANORAMA_IMAGE)" />
-    <remap from="~input/rects" to="/edgetpu_panorama_object_detector/output/rects" />
-    <remap from="~input/class" to="/edgetpu_panorama_object_detector/output/class" />
-    <rosparam subst_value="true">
-        dt: 0.2
-        target_labels:
-          - person
-        label_names: $(find jsk_perception)/config/coco_labelnames.yaml
-        approximate_sync: True
-        slop: 0.1
-    </rosparam>
-  </node>
-
-  <!-- track_array_in_panorama_to_bounding_box_array -->
-  <node
-    pkg="jsk_perception"
-    type="track_array_in_panorama_to_bounding_box_array.py"
-    name="track_array_in_panorama_to_bounding_box_array"
-    output="screen"
-    >
-    <remap from="~panorama_image" to="$(arg INPUT_PANORAMA_IMAGE)" />
-    <remap from="~panorama_info" to="$(arg INPUT_PANORAMA_INFO)" />
-    <remap from="~input_tracks" to="/motpy_ros_node/output/tracks" />
-    <rosparam>
-        frame_fixed: "camera"
-        dimensions_labels:
-            person: [0.5, 0.5, 1.5]
-    </rosparam>
-  </node>
-
-  <!-- boundin_box_tracker_node -->
-  <node
-    pkg="jsk_perception"
-    type="bounding_box_tracker_node.py"
-    name="bounding_box_tracker_node"
+    type="motpy_bbox_tracker.py"
+    name="motpy_bbox_tracker"
     output="screen"
     >
     <remap from="~input" to="/rect_array_in_panorama_to_bounding_box_array/bbox_array" />
@@ -118,19 +72,12 @@
     </rosparam>
   </node>
 
-  <node
-      pkg="tf2_ros"
-      type="static_transform_publisher"
-      name="camera_tf_publisher"
-      args="0 0 0 0 0 0 camera insta360_link"
-      />
-
   <group if="$(arg gui)">
     <node
       pkg="rviz"
       type="rviz"
       name="$(anon rviz)"
-      args="-d $(find jsk_perception)/sample/config/sample_track_array_in_panorama_to_bounding_box_array.rviz"
+      args="-d $(find jsk_perception)/sample/config/sample_mopy_bbox_tracker.rviz"
     />
   </group>
 

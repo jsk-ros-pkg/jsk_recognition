@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import rospy
-import message_filters
 import PyKDL
 
 import tf2_ros
@@ -14,14 +13,14 @@ from jsk_recognition_utils.panorama_utils import transform_panorama_point
 import math
 import sys
 
-
 from sensor_msgs.msg import Image
 from jsk_recognition_msgs.msg import PanoramaInfo
-from jsk_recognition_msgs.msg import RectArray, ClassificationResult
-from jsk_recognition_msgs.msg import BoundingBox, BoundingBoxArray
+from jsk_recognition_msgs.msg import BoundingBoxArray
+from jsk_recognition_msgs.msg import BoundingBox
+from jsk_recognition_msgs.msg import TrackArray
 
 
-class RectArrayInPanoramaToBoundingBoxArray(object):
+class TrackArrayInPanoramaToBoundingBoxArray(object):
 
     def __init__(self):
 
@@ -38,6 +37,7 @@ class RectArrayInPanoramaToBoundingBoxArray(object):
             rospy.logerr('{}'.format(e))
             sys.exit(1)
 
+        # Parameters
         self._frame_panorama = msg_panorama_info.header.frame_id
         self._theta_min = msg_panorama_info.theta_min
         self._theta_max = msg_panorama_info.theta_max
@@ -46,6 +46,7 @@ class RectArrayInPanoramaToBoundingBoxArray(object):
         self._image_height = msg_panorama_image.height
         self._image_width = msg_panorama_image.width
 
+        # TF
         self._tf_buffer = tf2_ros.Buffer()
         self._tf_listener = tf2_ros.TransformListener(self._tf_buffer)
 
@@ -53,68 +54,45 @@ class RectArrayInPanoramaToBoundingBoxArray(object):
         self._pub_bbox_array = rospy.Publisher(
             '~bbox_array', BoundingBoxArray, queue_size=1)
 
-        rate = rospy.Rate(1)
-        while not rospy.is_shutdown():
-            try:
-                rospy.wait_for_message('~input_class', ClassificationResult, 3)
-                rospy.wait_for_message('~input_rects', RectArray, 3)
-                break
-            except (rospy.ROSException, rospy.ROSInterruptException) as e:
-                rospy.logwarn(
-                    'subscribing topic seems not to be pulished. waiting... Error: {}'.format(e))
-            rate.sleep()
-
         # Subscriber
-        mf_sub_class = message_filters.Subscriber(
-            '~input_class', ClassificationResult)
-        mf_sub_rects = message_filters.Subscriber('~input_rects', RectArray)
+        self._sub = rospy.Subscriber(
+            '~input_tracks', TrackArray, self.callback)
 
-        ts = message_filters.TimeSynchronizer([mf_sub_class, mf_sub_rects], 10)
-        ts.registerCallback(self._cb_object)
+    def callback(self, msg):
 
-        rospy.loginfo('Node is successfully initialized')
-
-    def _cb_object(self,
-                   msg_class,
-                   msg_rects):
-
-        rospy.loginfo('callback called')
-
-        time_current = msg_rects.header.stamp
+        time_current = msg.header.stamp
 
         msg_bbox_array = BoundingBoxArray()
         msg_bbox_array.header.frame_id = self._frame_fixed
-        msg_bbox_array.header.stamp = msg_rects.header.stamp
+        msg_bbox_array.header.stamp = msg.header.stamp
 
         try:
-            pykdl_transform_fixed_to_panorama = tf2_geometry_msgs.transform_to_kdl(
-                self._tf_buffer.lookup_transform(
-                    self._frame_fixed,
-                    self._frame_panorama,
-                    time_current,
-                    timeout=rospy.Duration(self._duration_timeout)
+            pykdl_transform_fixed_to_panorama = \
+                tf2_geometry_msgs.transform_to_kdl(
+                    self._tf_buffer.lookup_transform(
+                        self._frame_fixed,
+                        self._frame_panorama,
+                        time_current,
+                        timeout=rospy.Duration(self._duration_timeout)
+                    )
                 )
-            )
-        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
+        except (tf2_ros.LookupException,
+                tf2_ros.ConnectivityException,
+                tf2_ros.ExtrapolationException) as e:
             rospy.logwarn('{}'.format(e))
             return
 
-        for label_id, \
-            label_name, \
-            label_proba, \
-            rect in zip(msg_class.labels,
-                        msg_class.label_names,
-                        msg_class.label_proba,
-                        msg_rects.rects):
+        for track in msg.tracks:
 
-            if label_name not in self._dimensions_labels:
-                rospy.logwarn('height for label "{}" (id:{}) is not specified'.format(
-                    label_name, label_id))
+            if track.class_name not in self._dimensions_labels:
+                rospy.logwarn(
+                    'height for label "{}" (id:{}) is not specified'.format(
+                        track.class_name, track.class_id))
                 continue
 
             (theta_a, phi_a) = transform_panorama_point(
-                rect.x,
-                rect.y,
+                track.rect.x,
+                track.rect.y,
                 self._image_height,
                 self._image_width,
                 self._theta_min,
@@ -123,8 +101,8 @@ class RectArrayInPanoramaToBoundingBoxArray(object):
                 self._phi_max
             )
             (theta_b, phi_b) = transform_panorama_point(
-                rect.x + rect.width,
-                rect.y + rect.height,
+                track.rect.x + track.rect.width,
+                track.rect.y + track.rect.height,
                 self._image_height,
                 self._image_width,
                 self._theta_min,
@@ -134,10 +112,8 @@ class RectArrayInPanoramaToBoundingBoxArray(object):
             )
             theta = (theta_a + theta_b) / 2.0
             phi = (phi_a + phi_b) / 2.0
-            width_in_rad = phi_b - phi_a
-            height_in_rad = theta_b - theta_a
-            distance = (
-                self._dimensions_labels[label_name][2] / 2.0) / math.tan((theta_b - theta_a) / 2.0)
+            distance = (self._dimensions_labels[track.class_name][2] / 2.0) \
+                / math.tan((theta_b - theta_a) / 2.0)
 
             (x, y, z) = calc_spherical_point(theta, phi, distance)
             position_fixedbased = pykdl_transform_fixed_to_panorama * \
@@ -149,11 +125,13 @@ class RectArrayInPanoramaToBoundingBoxArray(object):
             msg_bbox.pose.position.y = position_fixedbased[1]
             msg_bbox.pose.position.z = position_fixedbased[2]
             msg_bbox.pose.orientation.w = 1.0
-            msg_bbox.dimensions.x = self._dimensions_labels[label_name][0]
-            msg_bbox.dimensions.y = self._dimensions_labels[label_name][1]
-            msg_bbox.dimensions.z = self._dimensions_labels[label_name][2]
-            msg_bbox.label = label_id
-            msg_bbox.value = label_proba
+            msg_bbox.dimensions.x = \
+                self._dimensions_labels[track.class_name][0]
+            msg_bbox.dimensions.y = \
+                self._dimensions_labels[track.class_name][1]
+            msg_bbox.dimensions.z = \
+                self._dimensions_labels[track.class_name][2]
+            msg_bbox.label = track.track_id
 
             msg_bbox_array.boxes.append(msg_bbox)
 
@@ -161,9 +139,8 @@ class RectArrayInPanoramaToBoundingBoxArray(object):
 
 
 def main():
-
-    rospy.init_node('rect_array_in_panorama_to_bounding_box_array')
-    node = RectArrayInPanoramaToBoundingBoxArray()
+    rospy.init_node('track_array_in_panorama_to_bounding_box_array')
+    node = TrackArrayInPanoramaToBoundingBoxArray()
     rospy.spin()
 
 

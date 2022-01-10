@@ -45,7 +45,7 @@ Visualization Manager:
       Offset:
         X: 0
         Y: 0
-        Z: 0
+        Z: -1
       Plane: XY
       Plane Cell Count: 100
       Reference Frame: <Fixed Frame>
@@ -64,7 +64,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Image
       Enabled: true
-      Image Topic: /motpy_ros_node/output/viz
+      Image Topic: /motpy_rect_tracker_node/output/viz
       Max Value: 1
       Median window: 5
       Min Value: 0
@@ -76,25 +76,13 @@ Visualization Manager:
       Value: true
     - Class: jsk_rviz_plugin/BoundingBoxArray
       Enabled: true
-      Name: TrackedBoundingBoxArray
-      Topic: /bounding_box_tracker_node/output/bbox_array
+      Name: BoundingBoxArrayFromTrackArray
+      Topic: /track_array_in_panorama_to_bounding_box_array/bbox_array
       Unreliable: false
       Value: true
       alpha: 0.800000011920929
       color: 25; 255; 0
       coloring: Label
-      line width: 0.004999999888241291
-      only edge: false
-      show coords: false
-    - Class: jsk_rviz_plugin/BoundingBoxArray
-      Enabled: false
-      Name: DetectedBoundingBoxArray
-      Topic: /rect_array_in_panorama_to_bounding_box_array/bbox_array
-      Unreliable: false
-      Value: false
-      alpha: 0.800000011920929
-      color: 25; 255; 0
-      coloring: Flat color
       line width: 0.004999999888241291
       only edge: false
       show coords: false
@@ -144,7 +132,7 @@ Visualization Manager:
       Pitch: 0.7347967624664307
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.643592119216919
+      Yaw: 3.633592128753662
     Saved: ~
 Window Geometry:
   DetectionResult:

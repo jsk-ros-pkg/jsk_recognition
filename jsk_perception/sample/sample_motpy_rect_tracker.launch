@@ -11,7 +11,8 @@
     pkg="rosbag"
     name="rosbag_play"
     type="play"
-    args="$(find jsk_perception)/sample/data/sample_rect_array_in_panorama_to_bounding_box_array.bag --clock --loop" />
+    required="true"
+    args="$(find jsk_perception)/sample/data/sample_rect_array_in_panorama_to_bounding_box_array.bag --clock" />
   <node
     pkg="image_transport"
     type="republish"
@@ -39,8 +40,8 @@
   <!-- motpy_rect_tracker -->
   <node
     pkg="jsk_perception"
-    type="motpy_rect_tracker.py"
-    name="motpy_rect_tracker"
+    type="motpy_rect_tracker_node.py"
+    name="motpy_rect_tracker_node"
     output="screen"
     >
     <remap from="~input" to="$(arg INPUT_PANORAMA_IMAGE)" />
@@ -65,7 +66,7 @@
     >
     <remap from="~panorama_image" to="$(arg INPUT_PANORAMA_IMAGE)" />
     <remap from="~panorama_info" to="$(arg INPUT_PANORAMA_INFO)" />
-    <remap from="~input_tracks" to="/motpy_rect_tracker/output/tracks" />
+    <remap from="~input_tracks" to="/motpy_rect_tracker_node/output/tracks" />
     <rosparam>
         frame_fixed: "camera"
         dimensions_labels:
@@ -78,7 +79,7 @@
       pkg="rviz"
       type="rviz"
       name="$(anon rviz)"
-      args="-d $(find jsk_perception)/sample/config/sample_mopy_rect_tracker.rviz"
+      args="-d $(find jsk_perception)/sample/config/sample_motpy_rect_tracker.rviz"
     />
   </group>
 

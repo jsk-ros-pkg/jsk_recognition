@@ -12,7 +12,8 @@
     pkg="rosbag"
     name="rosbag_play"
     type="play"
-    args="$(find jsk_perception)/sample/data/sample_rect_array_in_panorama_to_bounding_box_array.bag --clock --loop" />
+    required="true"
+    args="$(find jsk_perception)/sample/data/sample_rect_array_in_panorama_to_bounding_box_array.bag --clock" />
   <node
     pkg="image_transport"
     type="republish"
@@ -57,8 +58,8 @@
   <!-- motpy_bbox_tracker -->
   <node
     pkg="jsk_perception"
-    type="motpy_bbox_tracker.py"
-    name="motpy_bbox_tracker"
+    type="motpy_bbox_tracker_node.py"
+    name="motpy_bbox_tracker_node"
     output="screen"
     >
     <remap from="~input" to="/rect_array_in_panorama_to_bounding_box_array/bbox_array" />
@@ -77,7 +78,7 @@
       pkg="rviz"
       type="rviz"
       name="$(anon rviz)"
-      args="-d $(find jsk_perception)/sample/config/sample_mopy_bbox_tracker.rviz"
+      args="-d $(find jsk_perception)/sample/config/sample_motpy_bbox_tracker.rviz"
     />
   </group>
 

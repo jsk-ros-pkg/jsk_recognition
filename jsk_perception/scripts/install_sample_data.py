@@ -120,14 +120,6 @@ def main():
 
     download_data(
         pkg_name=PKG,
-        path='sample/data/sample_rect_array_in_panorama_to_bounding_box_array.bag',
-        url='https://drive.google.com/uc?id=1f613TsYuPk1DWuGuUfkJVBbPv2-4Io69',
-        md5='04ba99ee993860634c0064d167b5cbe5',
-        extract=False,
-    )
-
-    download_data(
-        pkg_name=PKG,
         path='sample/data/sample_mask_rcnn_73b2_kitchen.bag',
         url='https://drive.google.com/uc?id=1DZ6W7gBzbu-7Z-NRw7y0WCGDRpsaYadI',
         md5='f86a51988fe521863ff845a2c9ff10df',
@@ -146,6 +138,22 @@ def main():
         compressed_bags=[
             'sample/data/sample_mask_rcnn_73b2_kitchen_japanese_label.bag',
         ],
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/sample_panorama_camera_00.bag',
+        url='https://drive.google.com/uc?id=1mEbYBPQ_cQ4arRx3F0mZCKYvd2ptimPK',
+        md5='04ba99ee993860634c0064d167b5cbe5',
+        extract=False,
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/sample_panorama_camera_01.bag',
+        url='https://drive.google.com/uc?id=1opSX6Mz27CT29PaDKoRvXRW4ewAdk-rd',
+        md5='0083c29afae51e6f8f53f4e7f3f89d46',
+        extract=False,
     )
 
 

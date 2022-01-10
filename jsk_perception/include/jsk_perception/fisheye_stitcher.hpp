@@ -66,7 +66,12 @@ public:
                     bool enb_light_compen, bool enb_refine_align,
                     bool save_unwarped, std::string map_path);
     ~FisheyeStitcher();
-    cv::Mat stitch(const cv::Mat& image1, const cv::Mat& image2);
+    cv::Mat stitch(const cv::Mat& image1, const cv::Mat& image2,
+                        uint16_t p_wid,
+                        uint16_t p_x1,
+                        uint16_t p_x2,
+                        uint16_t row_start,
+                        uint16_t row_end);
 
 private:
     cv::Mat unwarp(const cv::Mat &in_img);

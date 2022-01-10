@@ -25,11 +25,11 @@ import numpy as np
 import uuid
 
 
-class MotpyROS(object):
+class MotpyRectTracker(object):
 
     def __init__(self):
 
-        super(MotpyROS, self).__init__()
+        super(MotpyRectTracker, self).__init__()
 
         self.bridge = CvBridge()
 
@@ -134,5 +134,5 @@ class MotpyROS(object):
 if __name__ == '__main__':
 
     rospy.init_node('motpy_ros_node')
-    node = MotpyROS()
+    node = MotpyRectTracker()
     rospy.spin()

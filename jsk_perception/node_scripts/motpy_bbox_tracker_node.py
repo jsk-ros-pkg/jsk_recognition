@@ -27,11 +27,11 @@ import numpy as np
 import uuid
 
 
-class BoundingBoxTracker(object):
+class MotpyBboxTracker(object):
 
     def __init__(self):
 
-        super(BoundingBoxTracker, self).__init__()
+        super(MotpyBboxTracker, self).__init__()
 
         dt = rospy.get_param('~dt')
         min_iou = rospy.get_param('~min_iou', 0.1)
@@ -130,5 +130,5 @@ class BoundingBoxTracker(object):
 if __name__ == '__main__':
 
     rospy.init_node('bounding_box_tracker_node')
-    node = BoundingBoxTracker()
+    node = MotpyBboxTracker()
     rospy.spin()

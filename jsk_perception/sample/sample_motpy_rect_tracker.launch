@@ -21,7 +21,6 @@
 
     <!-- motpy_rect_tracker -->
     <node pkg="jsk_perception" type="motpy_rect_tracker_node.py" name="motpy_rect_tracker_node" output="screen">
-        <remap from="~input" to="$(arg INPUT_PANORAMA_IMAGE)" />
         <remap from="~input/rects" to="$(arg INPUT_RECTS)" />
         <remap from="~input/class" to="$(arg INPUT_CLASS)" />
         <rosparam subst_value="true">
@@ -29,6 +28,16 @@
         target_labels:
           - person
         label_names: $(find jsk_perception)/config/coco_labelnames.yaml
+        approximate_sync: True
+        slop: 0.1
+    </rosparam>
+    </node>
+
+    <!-- visualize output of object tracker -->
+    <node pkg="jsk_perception" type="draw_tracks.py" name="draw_tracks">
+        <remap from="~input" to="$(arg INPUT_PANORAMA_IMAGE)" />
+        <remap from="~input/tracks" to="/motpy_rect_tracker_node/output/tracks" />
+        <rosparam subst_value="true">
         approximate_sync: True
         slop: 0.1
     </rosparam>

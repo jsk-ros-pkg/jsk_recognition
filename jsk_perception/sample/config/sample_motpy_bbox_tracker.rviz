@@ -84,14 +84,14 @@ Visualization Manager:
       alpha: 0.800000011920929
       color: 25; 255; 0
       coloring: Label
-      line width: 0.004999999888241291
+      line width: 0.05000000074505806
       only edge: true
       show coords: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: camera
+    Fixed Frame: insta360_link
     Frame Rate: 30
   Name: root
   Tools:
@@ -130,7 +130,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.5697963237762451
+      Pitch: 1.5497963428497314
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
       Yaw: 3.13360857963562

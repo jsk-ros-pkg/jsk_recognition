@@ -3,10 +3,6 @@ import math
 import numpy as np
 import rospy
 import yaml
-import PyKDL
-
-from jsk_recognition_msgs.msg import BoundingBox
-from jsk_recognition_msgs.msg import BoundingBoxArray
 
 
 def transform_panorama_point(x,
@@ -71,6 +67,9 @@ def transform_rect_in_panorama_to_bounding_box(
         fov_theta_max,
         fov_phi_min,
         fov_phi_max):
+    import PyKDL
+    from jsk_recognition_msgs.msg import BoundingBox
+    from jsk_recognition_msgs.msg import BoundingBoxArray
 
     msg_bbox_array = BoundingBoxArray()
     msg_bbox_array.header.frame_id = frame_id_fixed

@@ -25,7 +25,7 @@
         <remap from="~input_class" to="$(arg INPUT_CLASS)" />
         <remap from="~input_rects" to="$(arg INPUT_RECTS)" />
         <rosparam>
-        frame_fixed: "camera"
+        frame_fixed: "insta360_link"
         dimensions_labels:
             person: [0.5, 0.5, 1.5]
     </rosparam>

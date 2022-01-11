@@ -1,8 +1,6 @@
 <launch>
     <arg name="SCENE" default="01" />
 
-    <param name="/use_sim_time" value="true" />
     <node name="rosbag_play" pkg="rosbag" type="play" args="$(find jsk_perception)/sample/data/sample_panorama_camera_$(arg SCENE).bag --clock --loop" />
     <node pkg="image_transport" type="republish" name="panorama_decompress" args="compressed in:=/dual_fisheye_to_panorama/output raw out:=/dual_fisheye_to_panorama/output" />
-    <node pkg="tf2_ros" type="static_transform_publisher" name="camera_tf_publisher" args="0 0 0 0 0 0 camera insta360_link" />
 </launch>

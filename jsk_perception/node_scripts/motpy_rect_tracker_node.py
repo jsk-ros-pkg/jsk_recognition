@@ -45,7 +45,7 @@ class MotpyRectTracker(object):
                             dt=dt,
                             matching_fn_kwargs=kwargs)
 
-        self.target_labels = rospy.get_param('~target_labels', None)
+        self.target_labels = rospy.get_param('~target_labels', [])
         self.label_names = load_label_names()
 
         self.pub_visualized_image = rospy.Publisher(
@@ -75,9 +75,6 @@ class MotpyRectTracker(object):
         sync.registerCallback(self.callback)
 
     def callback(self, img_msg, rects_msg, class_msg):
-
-        input_frame = self.bridge.imgmsg_to_cv2(
-            img_msg, desired_encoding='bgr8')
 
         if len(rects_msg.rects) != len(class_msg.label_proba):
             rospy.logwarn(
@@ -125,6 +122,8 @@ class MotpyRectTracker(object):
             self.pub_tracks.publish(tracks_msg)
 
         if self.pub_visualized_image.get_num_connections() > 0:
+            input_frame = self.bridge.imgmsg_to_cv2(
+                img_msg, desired_encoding='bgr8')
             visualized_frame = visualize_tracks(input_frame, tracks_msg)
             msg = self.bridge.cv2_to_imgmsg(visualized_frame, "bgr8")
             msg.header = img_msg.header

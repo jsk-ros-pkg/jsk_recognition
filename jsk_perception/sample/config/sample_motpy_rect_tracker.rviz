@@ -64,7 +64,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Image
       Enabled: true
-      Image Topic: /motpy_rect_tracker_node/output/viz
+      Image Topic: /draw_tracks/output
       Max Value: 1
       Median window: 5
       Min Value: 0
@@ -132,7 +132,7 @@ Visualization Manager:
       Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.1335837841033936
+      Yaw: 3.1485838890075684
     Saved: ~
 Window Geometry:
   DetectionResult:

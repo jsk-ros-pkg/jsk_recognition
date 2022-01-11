@@ -8,8 +8,6 @@ except ModuleNotFoundError:
     sys.exit(1)
 
 import rospy
-from sensor_msgs.msg import Image
-from cv_bridge import CvBridge
 import message_filters
 from jsk_recognition_msgs.msg import Rect
 from jsk_recognition_msgs.msg import RectArray
@@ -18,7 +16,6 @@ from jsk_recognition_msgs.msg import Track
 from jsk_recognition_msgs.msg import TrackArray
 
 from jsk_recognition_utils.panorama_utils import load_label_names
-from jsk_recognition_utils.panorama_utils import visualize_tracks
 
 import numpy as np
 
@@ -30,8 +27,6 @@ class MotpyRectTracker(object):
     def __init__(self):
 
         super(MotpyRectTracker, self).__init__()
-
-        self.bridge = CvBridge()
 
         dt = rospy.get_param('~dt')
         min_iou = rospy.get_param('~min_iou', 0.1)
@@ -48,8 +43,6 @@ class MotpyRectTracker(object):
         self.target_labels = rospy.get_param('~target_labels', [])
         self.label_names = load_label_names()
 
-        self.pub_visualized_image = rospy.Publisher(
-            '~output/viz', Image, queue_size=1)
         self.pub_tracks = rospy.Publisher(
             '~output/tracks', TrackArray, queue_size=1)
 
@@ -58,13 +51,11 @@ class MotpyRectTracker(object):
     def subscribe(self):
 
         queue_size = rospy.get_param('~queue_size', 100)
-        sub_img = message_filters.Subscriber(
-            '~input', Image, queue_size=1)
         sub_rects = message_filters.Subscriber(
             '~input/rects', RectArray, queue_size=1)
         sub_class = message_filters.Subscriber(
             '~input/class', ClassificationResult, queue_size=1)
-        self.subs = [sub_img, sub_rects, sub_class]
+        self.subs = [sub_rects, sub_class]
         if rospy.get_param('~approximate_sync', False):
             slop = rospy.get_param('~slop', 0.1)
             sync = message_filters.ApproximateTimeSynchronizer(
@@ -74,7 +65,7 @@ class MotpyRectTracker(object):
                 fs=self.subs, queue_size=queue_size)
         sync.registerCallback(self.callback)
 
-    def callback(self, img_msg, rects_msg, class_msg):
+    def callback(self, rects_msg, class_msg):
 
         if len(rects_msg.rects) != len(class_msg.label_proba):
             rospy.logwarn(
@@ -103,7 +94,7 @@ class MotpyRectTracker(object):
         active_tracks = self.tracker.active_tracks(min_steps_alive=self.min_steps_alive)
 
         tracks_msg = TrackArray()
-        tracks_msg.header = img_msg.header
+        tracks_msg.header = rects_msg.header
         tracks_msg.tracks = [Track(track_id=(uuid.UUID(active_track.id).int % 2147483647),
                                    rect=Rect(x=int(active_track.box[0]),
                                              y=int(active_track.box[1]),
@@ -118,16 +109,7 @@ class MotpyRectTracker(object):
                                    )
                              for active_track in active_tracks]
 
-        if self.pub_tracks.get_num_connections() > 0:
-            self.pub_tracks.publish(tracks_msg)
-
-        if self.pub_visualized_image.get_num_connections() > 0:
-            input_frame = self.bridge.imgmsg_to_cv2(
-                img_msg, desired_encoding='bgr8')
-            visualized_frame = visualize_tracks(input_frame, tracks_msg)
-            msg = self.bridge.cv2_to_imgmsg(visualized_frame, "bgr8")
-            msg.header = img_msg.header
-            self.pub_visualized_image.publish(msg)
+        self.pub_tracks.publish(tracks_msg)
 
 
 if __name__ == '__main__':

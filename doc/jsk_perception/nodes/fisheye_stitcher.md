@@ -51,7 +51,7 @@ Here is an example using insta360.
 
 1. Unwarp and save the left and right fisheye images. The images are `$HOME/.ros/l_img_crop.jpg` and `$HOME/.ros/r_img_crop.jpg`
 ```bash
-roslaunch jsk_perception sample_insta360_air.launch use_usb_cam:=true save_unwarp:=true
+roslaunch jsk_perception sample_insta360_air.launch use_usb_cam:=true save_unwarped:=true
 ```
 
 2. Annotate the corresponding points of the left and right images. We use [labelme](https://github.com/wkentaro/labelme) as a GUI tool. When annotating, it is easier to start with `l_img_crop.jpg`, which has a narrow angle of view than `r_img_crop.jpg`. `$HOME/.ros/l_img_crop.json` and `$HOME/.ros/r_img_crop.json` should be outputted.

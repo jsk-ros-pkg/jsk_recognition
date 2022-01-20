@@ -24,29 +24,8 @@
   <arg name="throttled_rate" default="1.0" />
   <arg name="refine_align" default="false" />
   <arg name="save_unwarped" default="false" />
+  <arg name="panorama_resolution_mode" default="high" />
   <arg name="gui" default="true" />
-
-  <!-- 3840 x 1920 configuration -->
-  <arg name="mls_map_path" default="$(find jsk_perception)/config/fisheye_stitcher_grid_xd_yd_3840x1920.yml.gz" doc="Yaml file for MLS grids." />
-  <arg name="blend_image_width" default="3840" />
-  <arg name="blend_image_height" default="1920" />
-  <arg name="blend_param_p_wid" default="55" />
-  <arg name="blend_param_p_x1" default="75" />
-  <arg name="blend_param_p_x2" default="1775" />
-  <arg name="blend_param_row_start" default="590" />
-  <arg name="blend_param_row_end" default="1320" />
-
-  <!-- 2000 x 1000 configuration -->
-  <!--
-  <arg name="mls_map_path" default="$(find jsk_perception)/config/fisheye_stitcher_grid_xd_yd_2000x1000.yml.gz" doc="Yaml file for MLS grids." />
-  <arg name="blend_image_width" default="2000" />
-  <arg name="blend_image_height" default="1000" />
-  <arg name="blend_param_p_wid" default="30" />
-  <arg name="blend_param_p_x1" default="75" />
-  <arg name="blend_param_p_x2" default="885" />
-  <arg name="blend_param_row_start" default="295" />
-  <arg name="blend_param_row_end" default="660" />
-  -->
 
   <!-- Publish camera image -->
   <group if="$(arg publish_image)">
@@ -118,14 +97,7 @@
     <arg name="fovd" value="210" />
     <arg name="refine_align" value="$(arg refine_align)" />
     <arg name="save_unwarped" value="$(arg save_unwarped)" />
-    <arg name="mls_map_path" value="$(arg mls_map_path)" />
-    <arg name="blend_image_width" value="$(arg image_width)" />
-    <arg name="blend_image_height" value="$(arg image_height)" />
-    <arg name="blend_param_p_wid" value="$(arg blend_param_p_wid)" />
-    <arg name="blend_param_p_x1" value="$(arg blend_param_p_x1)" />
-    <arg name="blend_param_p_x2" value="$(arg blend_param_p_x2)" />
-    <arg name="blend_param_row_start" value="$(arg blend_param_row_start)" />
-    <arg name="blend_param_row_end" value="$(arg blend_param_row_end)" />
+    <arg name="resolution_mode" value="$(arg panorama_resolution_mode)" />
   </include>
 
   <group if="$(arg gui)">

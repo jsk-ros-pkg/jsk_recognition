@@ -55,8 +55,8 @@ namespace jsk_perception
     pnh_->param("fovd", fovd_, 195.0f);
     pnh_->param("save_unwarped", save_unwarped_, false);
     pnh_->param("mls_map_path", mls_map_path_, std::string(""));
-    pnh_->param("image_height", image_height_, 1920);
-    pnh_->param("image_width", image_width_, 3840);
+    pnh_->param("blend_image_height", blend_image_height_, 1920);
+    pnh_->param("blend_image_width", blend_image_width_, 3840);
     pnh_->param("blend_param_p_wid", blend_param_p_wid_, 55);
     pnh_->param("blend_param_p_x1", blend_param_p_x1_, 90 - 15);
     pnh_->param("blend_param_p_x2", blend_param_p_x2_, 1780 - 5);
@@ -67,8 +67,13 @@ namespace jsk_perception
     ROS_INFO("fovd         : %7.3f", fovd_);
     ROS_INFO("save_unwarped: %s", save_unwarped_?"true":"false");
     ROS_INFO("mls_map_path : %s", mls_map_path_.c_str());
-    ROS_INFO("image_height : %d", image_height_);
-    ROS_INFO("image_width  : %d", image_width_);
+    ROS_INFO("blend_image_height : %d", blend_image_height_);
+    ROS_INFO("blend_image_width  : %d", blend_image_width_);
+    ROS_INFO("blend_param_p_wid : %d", blend_param_p_wid_);
+    ROS_INFO("blend_param_p_x1 : %d", blend_param_p_x1_);
+    ROS_INFO("blend_param_p_x2 : %d", blend_param_p_x2_);
+    ROS_INFO("blend_param_row_start : %d", blend_param_row_start_);
+    ROS_INFO("blend_param_row_end : %d", blend_param_row_end_);
     pub_panorama_image_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
     pub_panorama_info_ = advertise<jsk_recognition_msgs::PanoramaInfo>(*pnh_, "panorama_info", 1);
 
@@ -108,7 +113,7 @@ namespace jsk_perception
   void DualFisheyeToPanorama::rectify(const sensor_msgs::Image::ConstPtr& image_msg)
   {
     cv::Mat img;
-    cv::resize(cv_bridge::toCvCopy(image_msg, image_msg->encoding)->image, img, cv::Size(image_width_,image_height_));
+    cv::resize(cv_bridge::toCvCopy(image_msg, image_msg->encoding)->image, img, cv::Size(blend_image_width_,blend_image_height_));
 
     if ( ! sticher_initialized_ )  {
       ROS_INFO("initialize stitcher w:%d h:%d", img.size().width, img.size().height);

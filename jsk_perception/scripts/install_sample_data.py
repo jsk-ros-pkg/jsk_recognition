@@ -176,7 +176,7 @@ def main():
         pkg_name=PKG,
         path='sample/data/sample_panorama_camera_04.bag',
         url='https://drive.google.com/uc?id=1Iwom5IMfcQo5ggWohvcBW-q1j0uVY_XA',
-        md5='57620476da225f3fd7302dfb30c4eb68',
+        md5='c8a7720f5d1aee591726697db9f05a8c',
         extract=False,
     )
 

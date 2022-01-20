@@ -5,29 +5,7 @@
   <arg name="refine_align" default="false" doc="If true, panorama is improved by refine align process. Note that this process takes a large CPU load." />
   <arg name="fovd" default="185.0" doc="Camera's Field of View [degree]" />
   <arg name="save_unwarped" default="false" doc="Save unwarped fisheye images. This is useful to create MLS grids." />
-  <arg name="use_high_resolution" default="true" />
-
-  <!-- 3840 x 1920 configuration -->
-  <arg name="mls_map_path" default="$(find jsk_perception)/config/fisheye_stitcher_grid_xd_yd_3840x1920.yml.gz" doc="Yaml file for MLS grids." />
-  <arg name="blend_image_width" default="3840" />
-  <arg name="blend_image_height" default="1920" />
-  <arg name="blend_param_p_wid" default="55" />
-  <arg name="blend_param_p_x1" default="75" />
-  <arg name="blend_param_p_x2" default="1775" />
-  <arg name="blend_param_row_start" default="590" />
-  <arg name="blend_param_row_end" default="1320" />
-
-  <!-- 2000 x 1000 configuration -->
-  <!--
-  <arg name="mls_map_path" default="$(find jsk_perception)/config/fisheye_stitcher_grid_xd_yd_2000x1000.yml.gz" doc="Yaml file for MLS grids." />
-  <arg name="blend_image_width" default="2000" />
-  <arg name="blend_image_height" default="1000" />
-  <arg name="blend_param_p_wid" default="30" />
-  <arg name="blend_param_p_x1" default="75" />
-  <arg name="blend_param_p_x2" default="885" />
-  <arg name="blend_param_row_start" default="295" />
-  <arg name="blend_param_row_end" default="660" />
-  -->
+  <arg name="resolution_mode" default="high" doc="Resolution mode, 'high' or 'low'" />
 
   <node name="dual_fisheye_to_panorama"
         pkg="nodelet" type="nodelet"
@@ -37,14 +15,10 @@
     <param name="refine_align" value="$(arg refine_align)" />
     <param name="fovd" value="$(arg fovd)" />
     <param name="save_unwarped" value="$(arg save_unwarped)" />
-    <param name="mls_map_path" value="$(arg mls_map_path)" />
-    <param name="blend_image_width" value="$(arg image_width)" />
-    <param name="blend_image_height" value="$(arg image_height)" />
-    <param name="blend_param_p_wid" value="$(arg blend_param_p_wid)" />
-    <param name="blend_param_p_x1" value="$(arg blend_param_p_x1)" />
-    <param name="blend_param_p_x2" value="$(arg blend_param_p_x2)" />
-    <param name="blend_param_row_start" value="$(arg blend_param_row_start)" />
-    <param name="blend_param_row_end" value="$(arg blend_param_row_end)" />
+    <rosparam
+        command="load"
+        file="$(find jsk_perception)/config/dual_fisheye_to_panorama/$(arg resolution_mode)_resolution_config.yaml"
+        subst_value="true"/>
   </node>
 
   <group if="$(arg gui)">

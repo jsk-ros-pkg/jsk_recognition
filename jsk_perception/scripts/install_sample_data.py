@@ -156,6 +156,46 @@ def main():
         extract=False,
     )
 
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/sample_panorama_camera_02.bag',
+        url='https://drive.google.com/uc?id=1OZyNjMD4UtyBOqfOL74Kn7_yfuG3g1q0',
+        md5='08eab7f8acdbd23e6ed48740fd1cd675',
+        extract=False,
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/sample_panorama_camera_03.bag',
+        url='https://drive.google.com/uc?id=11DVzyFKF_fRwWGb7-UdaEivLbEfI8LNO',
+        md5='ca5eb04f489b093129f9575e8f24c0fc',
+        extract=False,
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/sample_panorama_camera_04.bag',
+        url='https://drive.google.com/uc?id=1Iwom5IMfcQo5ggWohvcBW-q1j0uVY_XA',
+        md5='57620476da225f3fd7302dfb30c4eb68',
+        extract=False,
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/sample_panorama_camera_05.bag',
+        url='https://drive.google.com/uc?id=1HrsCVpvrOxfKG9_m77rUzNMpHb-Hl5zx',
+        md5='57620476da225f3fd7302dfb30c4eb68',
+        extract=False,
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/sample_panorama_camera_06.bag',
+        url='https://drive.google.com/uc?id=1z7jXYYO4bOfF_KnddnkW8eXMk07onXx_',
+        md5='3cf258ef788ffb937ad926aa5281cdb3',
+        extract=False,
+    )
+
 
 if __name__ == '__main__':
     main()

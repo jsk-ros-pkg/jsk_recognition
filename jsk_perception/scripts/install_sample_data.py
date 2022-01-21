@@ -120,14 +120,6 @@ def main():
 
     download_data(
         pkg_name=PKG,
-        path='sample/data/sample_rect_array_in_panorama_to_bounding_box_array.bag',
-        url='https://drive.google.com/uc?id=1f613TsYuPk1DWuGuUfkJVBbPv2-4Io69',
-        md5='04ba99ee993860634c0064d167b5cbe5',
-        extract=False,
-    )
-
-    download_data(
-        pkg_name=PKG,
         path='sample/data/sample_mask_rcnn_73b2_kitchen.bag',
         url='https://drive.google.com/uc?id=1DZ6W7gBzbu-7Z-NRw7y0WCGDRpsaYadI',
         md5='f86a51988fe521863ff845a2c9ff10df',
@@ -146,6 +138,62 @@ def main():
         compressed_bags=[
             'sample/data/sample_mask_rcnn_73b2_kitchen_japanese_label.bag',
         ],
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/sample_panorama_camera_00.bag',
+        url='https://drive.google.com/uc?id=1mEbYBPQ_cQ4arRx3F0mZCKYvd2ptimPK',
+        md5='04ba99ee993860634c0064d167b5cbe5',
+        extract=False,
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/sample_panorama_camera_01.bag',
+        url='https://drive.google.com/uc?id=1opSX6Mz27CT29PaDKoRvXRW4ewAdk-rd',
+        md5='0083c29afae51e6f8f53f4e7f3f89d46',
+        extract=False,
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/sample_panorama_camera_02.bag',
+        url='https://drive.google.com/uc?id=1OZyNjMD4UtyBOqfOL74Kn7_yfuG3g1q0',
+        md5='08eab7f8acdbd23e6ed48740fd1cd675',
+        extract=False,
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/sample_panorama_camera_03.bag',
+        url='https://drive.google.com/uc?id=11DVzyFKF_fRwWGb7-UdaEivLbEfI8LNO',
+        md5='ca5eb04f489b093129f9575e8f24c0fc',
+        extract=False,
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/sample_panorama_camera_04.bag',
+        url='https://drive.google.com/uc?id=1Iwom5IMfcQo5ggWohvcBW-q1j0uVY_XA',
+        md5='c8a7720f5d1aee591726697db9f05a8c',
+        extract=False,
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/sample_panorama_camera_05.bag',
+        url='https://drive.google.com/uc?id=1HrsCVpvrOxfKG9_m77rUzNMpHb-Hl5zx',
+        md5='57620476da225f3fd7302dfb30c4eb68',
+        extract=False,
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/sample_panorama_camera_06.bag',
+        url='https://drive.google.com/uc?id=1z7jXYYO4bOfF_KnddnkW8eXMk07onXx_',
+        md5='3cf258ef788ffb937ad926aa5281cdb3',
+        extract=False,
     )
 
 

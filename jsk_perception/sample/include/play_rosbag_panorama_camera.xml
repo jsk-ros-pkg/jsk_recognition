@@ -1,0 +1,6 @@
+<launch>
+    <arg name="SCENE" default="01" />
+
+    <node name="rosbag_play" pkg="rosbag" type="play" args="$(find jsk_perception)/sample/data/sample_panorama_camera_$(arg SCENE).bag --clock --loop" />
+    <node pkg="image_transport" type="republish" name="panorama_decompress" args="compressed in:=/dual_fisheye_to_panorama/output raw out:=/dual_fisheye_to_panorama/output" />
+</launch>

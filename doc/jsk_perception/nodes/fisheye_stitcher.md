@@ -35,13 +35,56 @@ This is ROS wrapper of [drNoob13/fisheyeStitcher](https://github.com/drNoob13/fi
 
   Path to .yml.gz file which contains MLS grids information. How to generate this file is explained below.
 
+* `~blend_image_height` (Int, default: 1920)
+
+  Image size to be used for panorama blending.
+
+* `~blend_image_width` (Int, default: 1920)
+
+  Image size to be used for panorama blending.
+
+* `~blend_param_p_wid` (Int, default: 55)
+
+  Parameters used for panorama blending.
+
+* `~blend_param_p_x1` (Int, default: 75)
+
+  Parameters used for panorama blending.
+
+* `~blend_param_p_x2` (Int, default: 1775)
+
+  Parameters used for panorama blending.
+
+* `~blend_param_row_start` (Int, default: 590)
+
+  Parameters used for panorama blending.
+
+* `~blend_param_row_end` (Int, default: 1320)
+
+  Parameters used for panorama blending.
+
+* `~output_image_height` (Int, default: 2000)
+
+  Output image size
+
+* `~output_image_height` (Int, default: 2000)
+
+  Output image size
+
 ## Sample
 Before running the sample, please `catkin build jsk_perception`.
 
 ```bash
 rosrun jsk_perception install_sample_data.py
 rosbag play $(rospack find jsk_perception)/sample/data/insta360_air.bag --loop --clock
-roslaunch jsk_perception sample_dual_fisheye_to_panorama.launch mls_map_path:=$(rospack find jsk_perception)/sample/data/fisheye_stitcher_grid_xd_yd_3840x1920_fetch15.yml.gz
+roslaunch jsk_perception sample_dual_fisheye_to_panorama.launch
+```
+
+Panorama blending will run with high resolution parameters by default. (blending with 3840x1920, output is 4000x2000)
+This configuration requires lots of CPU power. If you want to run wih low resolution parameters.
+
+```bash
+roslaunch jsk_perception sample_dual_fisheye_to_panorama.launch resolution_mode:=low
 ```
 
 ## Update panorama parameter

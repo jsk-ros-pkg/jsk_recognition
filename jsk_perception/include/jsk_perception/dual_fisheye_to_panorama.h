@@ -93,6 +93,8 @@ namespace jsk_perception
     int blend_param_p_x2_;
     int blend_param_row_start_;
     int blend_param_row_end_;
+    int output_image_height_;
+    int output_image_width_;
     std::string mls_map_path_;
 
   private:

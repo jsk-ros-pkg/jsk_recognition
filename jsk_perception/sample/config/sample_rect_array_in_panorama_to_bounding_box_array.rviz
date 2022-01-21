@@ -18,6 +18,7 @@ Panels:
   - Class: rviz/Views
     Expanded:
       - /Current View1
+      - /Current View1/Focal Point1
     Name: Views
     Splitter Ratio: 0.5
   - Class: rviz/Time
@@ -33,7 +34,7 @@ Visualization Manager:
   Class: ""
   Displays:
     - Alpha: 0.800000011920929
-      Cell Size: 0.10000000149011612
+      Cell Size: 1
       Class: rviz/Grid
       Color: 160; 160; 164
       Enabled: true
@@ -45,9 +46,9 @@ Visualization Manager:
       Offset:
         X: 0
         Y: 0
-        Z: -1
+        Z: 0
       Plane: XY
-      Plane Cell Count: 100
+      Plane Cell Count: 1000
       Reference Frame: <Fixed Frame>
       Value: true
     - Class: rviz/Image
@@ -74,11 +75,207 @@ Visualization Manager:
       line width: 0.004999999888241291
       only edge: false
       show coords: false
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        back:
+          Value: false
+        back_fisheye:
+          Value: false
+        base_link:
+          Value: false
+        body:
+          Value: true
+        flat_body:
+          Value: false
+        front_left_hip:
+          Value: false
+        front_left_lower_leg:
+          Value: false
+        front_left_upper_leg:
+          Value: false
+        front_rail:
+          Value: false
+        front_right_hip:
+          Value: false
+        front_right_lower_leg:
+          Value: false
+        front_right_upper_leg:
+          Value: false
+        frontleft:
+          Value: false
+        frontleft_fisheye:
+          Value: false
+        frontright:
+          Value: false
+        frontright_fisheye:
+          Value: false
+        gpe:
+          Value: false
+        head:
+          Value: false
+        insta360_link:
+          Value: true
+        jsk_head_mount_frame:
+          Value: false
+        jsk_payload_frame:
+          Value: false
+        kinova_arm_link:
+          Value: false
+        kinova_base_link:
+          Value: false
+        kinova_dummy_link:
+          Value: false
+        kinova_end_effector_link:
+          Value: false
+        kinova_forearm_link:
+          Value: false
+        kinova_gripper_base_link:
+          Value: false
+        kinova_left_finger_dist_link:
+          Value: false
+        kinova_left_finger_prox_link:
+          Value: false
+        kinova_lower_wrist_link:
+          Value: false
+        kinova_right_finger_dist_link:
+          Value: false
+        kinova_right_finger_prox_link:
+          Value: false
+        kinova_shoulder_link:
+          Value: false
+        kinova_tool_frame:
+          Value: false
+        kinova_upper_wrist_link:
+          Value: false
+        kinova_wrist_camera_aligned_depth_to_color_frame:
+          Value: false
+        kinova_wrist_camera_color_frame:
+          Value: false
+        kinova_wrist_camera_color_optical_frame:
+          Value: false
+        kinova_wrist_camera_depth_frame:
+          Value: false
+        kinova_wrist_camera_depth_optical_frame:
+          Value: false
+        kinova_wrist_camera_link:
+          Value: false
+        left:
+          Value: false
+        left_fisheye:
+          Value: false
+        odom:
+          Value: true
+        rear_left_hip:
+          Value: false
+        rear_left_lower_leg:
+          Value: false
+        rear_left_upper_leg:
+          Value: false
+        rear_rail:
+          Value: false
+        rear_right_hip:
+          Value: false
+        rear_right_lower_leg:
+          Value: false
+        rear_right_upper_leg:
+          Value: false
+        right:
+          Value: false
+        right_fisheye:
+          Value: false
+        vision:
+          Value: false
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        odom:
+          body:
+            base_link:
+              {}
+            flat_body:
+              {}
+            front_left_hip:
+              front_left_upper_leg:
+                front_left_lower_leg:
+                  {}
+            front_rail:
+              jsk_payload_frame:
+                insta360_link:
+                  {}
+            front_right_hip:
+              front_right_upper_leg:
+                front_right_lower_leg:
+                  {}
+            head:
+              back:
+                back_fisheye:
+                  {}
+              frontleft:
+                frontleft_fisheye:
+                  {}
+              frontright:
+                frontright_fisheye:
+                  {}
+              left:
+                left_fisheye:
+                  {}
+              right:
+                right_fisheye:
+                  {}
+            jsk_head_mount_frame:
+              kinova_base_link:
+                kinova_shoulder_link:
+                  kinova_arm_link:
+                    kinova_forearm_link:
+                      kinova_lower_wrist_link:
+                        kinova_upper_wrist_link:
+                          kinova_end_effector_link:
+                            kinova_dummy_link:
+                              kinova_gripper_base_link:
+                                kinova_left_finger_prox_link:
+                                  kinova_left_finger_dist_link:
+                                    {}
+                                kinova_right_finger_prox_link:
+                                  kinova_right_finger_dist_link:
+                                    {}
+                                kinova_wrist_camera_link:
+                                  kinova_wrist_camera_aligned_depth_to_color_frame:
+                                    kinova_wrist_camera_color_optical_frame:
+                                      {}
+                                  kinova_wrist_camera_color_frame:
+                                    {}
+                                  kinova_wrist_camera_depth_frame:
+                                    kinova_wrist_camera_depth_optical_frame:
+                                      {}
+                              kinova_tool_frame:
+                                {}
+            rear_left_hip:
+              rear_left_upper_leg:
+                rear_left_lower_leg:
+                  {}
+            rear_rail:
+              {}
+            rear_right_hip:
+              rear_right_upper_leg:
+                rear_right_lower_leg:
+                  {}
+            vision:
+              {}
+          gpe:
+            {}
+      Update Interval: 0
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: insta360_link
+    Fixed Frame: odom
     Frame Rate: 30
   Name: root
   Tools:
@@ -102,7 +299,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 10
+      Distance: 42.89025115966797
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -117,10 +314,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6503978967666626
-      Target Frame: <Fixed Frame>
+      Pitch: 0.3253977596759796
+      Target Frame: body
       Value: Orbit (rviz)
-      Yaw: 3.768594264984131
+      Yaw: 5.068613529205322
     Saved: ~
 Window Geometry:
   DetectedImage:

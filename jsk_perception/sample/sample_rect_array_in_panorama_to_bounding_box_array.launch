@@ -25,9 +25,11 @@
         <remap from="~input_class" to="$(arg INPUT_CLASS)" />
         <remap from="~input_rects" to="$(arg INPUT_RECTS)" />
         <rosparam>
-        frame_fixed: "insta360_link"
+        frame_fixed: "odom"
         dimensions_labels:
             person: [0.5, 0.5, 1.5]
+            bicycle: [1.0, 1.0, 1.0]
+            car: [3.0, 3.0, 3.0]
     </rosparam>
     </node>
 

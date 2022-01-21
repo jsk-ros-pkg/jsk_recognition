@@ -62,6 +62,8 @@ namespace jsk_perception
     pnh_->param("blend_param_p_x2", blend_param_p_x2_, 1780 - 5);
     pnh_->param("blend_param_row_start", blend_param_row_start_, 590);
     pnh_->param("blend_param_row_end", blend_param_row_end_, 1320);
+    pnh_->param("output_image_height", output_image_height_, 1920);
+    pnh_->param("output_image_width", output_image_width_, 3840);
     ROS_INFO("light_compen : %s", enb_lc_?"true":"false");
     ROS_INFO("refine_align : %s", enb_ra_?"true":"false");
     ROS_INFO("fovd         : %7.3f", fovd_);
@@ -74,6 +76,8 @@ namespace jsk_perception
     ROS_INFO("blend_param_p_x2 : %d", blend_param_p_x2_);
     ROS_INFO("blend_param_row_start : %d", blend_param_row_start_);
     ROS_INFO("blend_param_row_end : %d", blend_param_row_end_);
+    ROS_INFO("output_image_height : %d", output_image_height_);
+    ROS_INFO("output_image_width  : %d", output_image_width_);
     pub_panorama_image_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
     pub_panorama_info_ = advertise<jsk_recognition_msgs::PanoramaInfo>(*pnh_, "panorama_info", 1);
 
@@ -142,10 +146,13 @@ namespace jsk_perception
                              blend_param_row_start_,
                              blend_param_row_end_
                              );
+    // resize panorama image;
+    cv::Mat pano_resized;
+    cv::resize(pano, pano_resized, cv::Size(output_image_width_,output_image_height_));
 
     pub_panorama_image_.publish(cv_bridge::CvImage(image_msg->header,
                                                    image_msg->encoding,
-                                                   pano).toImageMsg());
+                                                   pano_resized).toImageMsg());
     msg_panorama_info_.header = image_msg->header;
     pub_panorama_info_.publish(msg_panorama_info_);
   }

@@ -62,8 +62,8 @@ namespace jsk_perception
     pnh_->param("blend_param_p_x2", blend_param_p_x2_, 1780 - 5);
     pnh_->param("blend_param_row_start", blend_param_row_start_, 590);
     pnh_->param("blend_param_row_end", blend_param_row_end_, 1320);
-    pnh_->param("output_image_height", output_image_height_, 1920);
-    pnh_->param("output_image_width", output_image_width_, 3840);
+    pnh_->param("output_image_height", output_image_height_, 2000);
+    pnh_->param("output_image_width", output_image_width_, 4000);
     ROS_INFO("light_compen : %s", enb_lc_?"true":"false");
     ROS_INFO("refine_align : %s", enb_ra_?"true":"false");
     ROS_INFO("fovd         : %7.3f", fovd_);

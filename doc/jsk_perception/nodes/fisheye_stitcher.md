@@ -116,6 +116,10 @@ rosrun jsk_perception create_mls_correspondence.py
 4. Run `mls_rigid_example2.m` to generate the MLS grids file. matlab can be installed from [the University of Tokyo license](https://jp.mathworks.com/academia/tah-portal/university-of-tokyo-40790257.html). You also need to install the image processing toolbox and the parallel computing toolbox.
 Please check the [official wiki](https://github.com/drNoob13/fisheyeStitcher/wiki/How-to-create-the-MLS-%5BX,Y%5D-grids)
 
+```bash
+matlab -nodisplay -nosplash -nodesktop -r "run('$(rospack find jsk_perception)/scripts/mls_rigid_example2.m');exit"
+```
+
 5. Convert the MLS grid file to a yaml file so that OpenCV can read it.
 ```bash
 rosrun jsk_perception mls_matlab2opencv.py

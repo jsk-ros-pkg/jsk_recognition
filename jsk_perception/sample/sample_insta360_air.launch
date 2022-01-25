@@ -24,6 +24,7 @@
   <arg name="throttled_rate" default="1.0" />
   <arg name="refine_align" default="false" />
   <arg name="save_unwarped" default="false" />
+  <arg name="panorama_resolution_mode" default="high" />
   <arg name="gui" default="true" />
 
   <!-- 3840 x 1920 configuration -->
@@ -118,14 +119,7 @@
     <arg name="fovd" value="210" />
     <arg name="refine_align" value="$(arg refine_align)" />
     <arg name="save_unwarped" value="$(arg save_unwarped)" />
-    <arg name="mls_map_path" value="$(arg mls_map_path)" />
-    <arg name="image_width" value="$(arg image_width)" />
-    <arg name="image_height" value="$(arg image_height)" />
-    <arg name="blend_param_p_wid" value="$(arg blend_param_p_wid)" />
-    <arg name="blend_param_p_x1" value="$(arg blend_param_p_x1)" />
-    <arg name="blend_param_p_x2" value="$(arg blend_param_p_x2)" />
-    <arg name="blend_param_row_start" value="$(arg blend_param_row_start)" />
-    <arg name="blend_param_row_end" value="$(arg blend_param_row_end)" />
+    <arg name="resolution_mode" value="$(arg panorama_resolution_mode)" />
   </include>
 
   <group if="$(arg gui)">

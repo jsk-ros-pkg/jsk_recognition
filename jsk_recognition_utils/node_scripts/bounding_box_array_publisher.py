@@ -47,7 +47,8 @@ class BoundingBoxArrayPublisher(object):
         self.pub = rospy.Publisher('~output', BoundingBoxArray, queue_size=1)
 
         rate = rospy.get_param('~rate', 1)
-        self.timer = rospy.Timer(rospy.Duration(1. / rate), self.publish)
+        self.timer = rospy.Timer(rospy.Duration(1. / rate), self.publish,
+                                 reset=True)
 
     def publish(self, event):
         bbox_array_msg = BoundingBoxArray()

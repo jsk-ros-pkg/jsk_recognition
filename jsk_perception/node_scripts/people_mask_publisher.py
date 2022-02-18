@@ -7,12 +7,12 @@ import numpy as np
 import cv_bridge
 import message_filters
 import rospy
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 from jsk_recognition_msgs.msg import PeoplePoseArray
 from sensor_msgs.msg import Image
 
 
-class PeopleMaskPublisher(ConnectionBasedTransport):
+class PeopleMaskPublisher(DiagnosticTransport):
 
     limb_names = ["Nose",
                   "Neck",
@@ -73,6 +73,7 @@ class PeopleMaskPublisher(ConnectionBasedTransport):
             sub.unregister()
 
     def _cb(self, img_msg, people_pose_array_msg):
+        self.vital_checker.poke()
         br = cv_bridge.CvBridge()
         img = br.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
 

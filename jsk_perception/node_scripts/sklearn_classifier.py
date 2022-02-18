@@ -9,11 +9,11 @@ import numpy as np
 from sklearn.preprocessing import normalize
 
 import rospy
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 from jsk_recognition_msgs.msg import VectorArray, ClassificationResult
 
 
-class ScikitLearnClassifier(ConnectionBasedTransport):
+class ScikitLearnClassifier(DiagnosticTransport):
     def __init__(self):
         super(ScikitLearnClassifier, self).__init__()
         self._init_classifier()
@@ -32,6 +32,7 @@ class ScikitLearnClassifier(ConnectionBasedTransport):
         self.sub_hist.unregister()
 
     def _predict(self, msg):
+        self.vital_checker.poke()
         X = np.array(msg.data).reshape((-1, msg.vector_dim))
         normalize(X, copy=False)
         y_proba = self.clf.predict_proba(X)

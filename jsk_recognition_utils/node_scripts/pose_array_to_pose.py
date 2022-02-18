@@ -7,13 +7,13 @@ from __future__ import print_function
 import dynamic_reconfigure.server
 from geometry_msgs.msg import PoseArray
 from geometry_msgs.msg import PoseStamped
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 from jsk_topic_tools.log_utils import logerr_throttle
 from jsk_recognition_utils.cfg import PoseArrayToPoseConfig
 import rospy
 
 
-class PoseArrayToPose(ConnectionBasedTransport):
+class PoseArrayToPose(DiagnosticTransport):
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -32,6 +32,7 @@ class PoseArrayToPose(ConnectionBasedTransport):
         return config
 
     def _convert(self, msg):
+        self.vital_checker.poke()
         pose_msg = PoseStamped()
         pose_msg.header = msg.header
         if self.index < 0:

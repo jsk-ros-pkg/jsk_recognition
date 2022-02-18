@@ -18,7 +18,7 @@ import cv_bridge
 from jsk_recognition_msgs.msg import ClassificationResult
 from sound_classification.nin.nin import NIN
 from sound_classification.vgg16.vgg16_batch_normalization import VGG16BatchNormalization
-from jsk_topic_tools import ConnectionBasedTransport  # TODO use LazyTransport
+from jsk_topic_tools import DiagnosticTransport  # TODO use LazyTransport
 import os.path as osp
 from sound_classification.process_gray_image import img_jet
 import rospy
@@ -27,7 +27,7 @@ from sensor_msgs.msg import Image
 from train import PreprocessedDataset
 
 
-class SoundClassifier(ConnectionBasedTransport):
+class SoundClassifier(DiagnosticTransport):
     """
     Classify spectrogram using neural network
     input: sensor_msgs/Image, 8UC1
@@ -77,6 +77,7 @@ class SoundClassifier(ConnectionBasedTransport):
             sub.unregister()
 
     def _recognize(self, imgmsg):
+        self.vital_checker.poke()
         bridge = cv_bridge.CvBridge()
         mono = bridge.imgmsg_to_cv2(imgmsg)
         bgr = img_jet(mono)

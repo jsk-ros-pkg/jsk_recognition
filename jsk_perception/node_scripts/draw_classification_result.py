@@ -8,7 +8,7 @@ import cv2
 import cv_bridge
 from distutils.version import LooseVersion
 from jsk_recognition_msgs.msg import ClassificationResult
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 import message_filters
 import numpy as np
 import rospy
@@ -16,7 +16,7 @@ from sensor_msgs.msg import Image
 from jsk_recognition_utils.color import labelcolormap
 
 
-class DrawClassificationResult(ConnectionBasedTransport):
+class DrawClassificationResult(DiagnosticTransport):
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -35,6 +35,7 @@ class DrawClassificationResult(ConnectionBasedTransport):
         self.sub_img.unregister()
 
     def _draw(self, cls_msg, imgmsg):
+        self.vital_checker.poke()
         bridge = cv_bridge.CvBridge()
         rgb = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='rgb8')
 

@@ -7,13 +7,13 @@ from __future__ import print_function
 import dynamic_reconfigure.server
 from geometry_msgs.msg import PolygonStamped
 from jsk_recognition_msgs.msg import PolygonArray
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 from jsk_topic_tools.log_utils import logerr_throttle
 from jsk_recognition_utils.cfg import PolygonArrayToPolygonConfig
 import rospy
 
 
-class PolygonArrayToPolygon(ConnectionBasedTransport):
+class PolygonArrayToPolygon(DiagnosticTransport):
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -32,6 +32,7 @@ class PolygonArrayToPolygon(ConnectionBasedTransport):
         return config
 
     def _convert(self, msg):
+        self.vital_checker.poke()
         polygon_msg = PolygonStamped()
         polygon_msg.header = msg.header
         if self.index < 0:

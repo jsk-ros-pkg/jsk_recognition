@@ -29,7 +29,7 @@ import chainer.serializers as S
 import fcn
 
 import cv_bridge
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 import message_filters
 import numpy as np
 import rospy
@@ -49,7 +49,7 @@ def assert_torch_available():
         raise RuntimeError('Please install pytorch: pip install %s' % url)
 
 
-class FCNObjectSegmentation(ConnectionBasedTransport):
+class FCNObjectSegmentation(DiagnosticTransport):
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -155,6 +155,7 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
             sub.unregister()
 
     def _cb_with_mask(self, img_msg, mask_msg):
+        self.vital_checker.poke()
         br = cv_bridge.CvBridge()
         img = br.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
         mask = br.imgmsg_to_cv2(mask_msg, desired_encoding='mono8')
@@ -172,6 +173,7 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
         self.pub_proba.publish(proba_msg)
 
     def _cb(self, img_msg):
+        self.vital_checker.poke()
         br = cv_bridge.CvBridge()
         img = br.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
         label, proba_img = self.segment(img)

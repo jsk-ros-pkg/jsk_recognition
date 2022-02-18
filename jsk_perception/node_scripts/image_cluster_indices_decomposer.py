@@ -3,13 +3,13 @@
 
 import cv_bridge
 from jsk_recognition_msgs.msg import ClusterPointIndices
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 import message_filters
 import rospy
 from sensor_msgs.msg import Image
 
 
-class ImageClusterIndicesDecomposer(ConnectionBasedTransport):
+class ImageClusterIndicesDecomposer(DiagnosticTransport):
     def __init__(self):
         super(ImageClusterIndicesDecomposer, self).__init__()
         self._pub = self.advertise('~output', Image, queue_size=1)
@@ -34,6 +34,7 @@ class ImageClusterIndicesDecomposer(ConnectionBasedTransport):
         self._sub_cpi.unregister()
 
     def _decompose(self, imgmsg, cpi_msg):
+        self.vital_checker.poke()
         bridge = cv_bridge.CvBridge()
         img = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='rgb8')
 

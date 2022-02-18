@@ -9,7 +9,7 @@ from jsk_recognition_msgs.msg import ClassificationResult
 from jsk_recognition_msgs.msg import RectArray
 from jsk_recognition_utils.color import labelcolormap
 from jsk_recognition_utils.put_text import put_text_to_image
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 from jsk_topic_tools import warn_no_remap
 import message_filters
 import numpy as np
@@ -19,7 +19,7 @@ import sensor_msgs.msg
 from jsk_perception.cfg import DrawRectsConfig
 
 
-class DrawRects(ConnectionBasedTransport):
+class DrawRects(DiagnosticTransport):
 
     def __init__(self):
         super(DrawRects, self).__init__()
@@ -94,6 +94,7 @@ class DrawRects(ConnectionBasedTransport):
             sub.sub.unregister()
 
     def draw_rects_callback(self, img_msg, rects_msg, class_msg=None):
+        self.vital_checker.poke()
         bridge = cv_bridge.CvBridge()
         cv_img = bridge.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
 

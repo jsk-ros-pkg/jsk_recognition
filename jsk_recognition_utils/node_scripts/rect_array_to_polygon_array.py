@@ -4,11 +4,11 @@ from geometry_msgs.msg import Point32
 from geometry_msgs.msg import PolygonStamped
 from jsk_recognition_msgs.msg import PolygonArray
 from jsk_recognition_msgs.msg import RectArray
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 import rospy
 
 
-class RectArrayToPolygonArray(ConnectionBasedTransport):
+class RectArrayToPolygonArray(DiagnosticTransport):
 
     def __init__(self):
         super(RectArrayToPolygonArray, self).__init__()
@@ -21,6 +21,7 @@ class RectArrayToPolygonArray(ConnectionBasedTransport):
         self.sub.unregister()
 
     def _convert(self, msg):
+        self.vital_checker.poke()
         polys_msg = PolygonArray()
         polys_msg.header = msg.header
         for rect in msg.rects:

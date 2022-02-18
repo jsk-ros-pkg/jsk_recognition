@@ -33,7 +33,7 @@ import cv_bridge
 from jsk_recognition_msgs.msg import ClassificationResult
 from jsk_recognition_utils.chainermodels import ResNet152
 from jsk_recognition_utils.chainermodels import ResNet152Feature
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 import message_filters
 import rospy
 from sensor_msgs.msg import Image
@@ -43,7 +43,7 @@ import rospkg
 PKG_PATH = rospkg.RosPack().get_path('jsk_perception')
 
 
-class RegionalFeatureBasedObjectRecognition(ConnectionBasedTransport):
+class RegionalFeatureBasedObjectRecognition(DiagnosticTransport):
 
     def __init__(self):
         super(RegionalFeatureBasedObjectRecognition, self).__init__()
@@ -95,6 +95,7 @@ class RegionalFeatureBasedObjectRecognition(ConnectionBasedTransport):
             sub.unregister()
 
     def callback(self, imgmsg, mask_msg):
+        self.vital_checker.poke()
         bridge = cv_bridge.CvBridge()
         img = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='bgr8')
         mask = bridge.imgmsg_to_cv2(mask_msg, desired_encoding='mono8')

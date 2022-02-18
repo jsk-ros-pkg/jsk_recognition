@@ -38,7 +38,7 @@ import tf
 import cv_bridge
 import message_filters
 import rospy
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import Point
 from geometry_msgs.msg import Quaternion
@@ -152,7 +152,7 @@ mean = np.array([[
     0.06303538,  0.48629287,  0.23359743, -0.02812484,  0.23948504]], 'f')
 
 
-class HumanMeshRecovery(ConnectionBasedTransport):
+class HumanMeshRecovery(DiagnosticTransport):
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -216,6 +216,7 @@ class HumanMeshRecovery(ConnectionBasedTransport):
             sub.unregister()
 
     def _cb(self, img_msg):
+        self.vital_checker.poke()
         br = self.br
         img = br.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
         img, _ = preprocess_image(img)
@@ -227,6 +228,7 @@ class HumanMeshRecovery(ConnectionBasedTransport):
         self.pose_pub.publish(people_pose_msg)
 
     def _cb_with_pose(self, img_msg, people_pose_msg):
+        self.vital_checker.poke()
         br = self.br
         img = br.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
 

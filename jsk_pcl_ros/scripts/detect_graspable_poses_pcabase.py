@@ -7,11 +7,11 @@ import sensor_msgs.point_cloud2 as pc2
 import tf.transformations
 
 from geometry_msgs.msg import Pose, PoseArray
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 from sensor_msgs.msg import PointCloud2
 from sklearn.decomposition import PCA
 
-class DetectGraspablePosesPcabase(ConnectionBasedTransport):
+class DetectGraspablePosesPcabase(DiagnosticTransport):
 
     def __init__(self):
 
@@ -32,7 +32,7 @@ class DetectGraspablePosesPcabase(ConnectionBasedTransport):
         self.sub.unregister()
 
     def callback(self, point_cloud):
-
+        self.vital_checker.poke()
         points = np.array(list(pc2.read_points(point_cloud, skip_nans=True)))
 
         interval_m = self.interval_m

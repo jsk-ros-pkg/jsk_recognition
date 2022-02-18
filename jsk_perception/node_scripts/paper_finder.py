@@ -10,7 +10,7 @@ import numpy as np
 import rospy
 import sensor_msgs.msg
 from tf.transformations import unit_vector, superimposition_matrix, quaternion_from_matrix
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 
 
 def area(poly):
@@ -135,7 +135,7 @@ def draw_squares(image, squares):
         image = cv2.polylines(image, [p], True, (0, 255, 0), thickness=3)
 
 
-class PaperFinder(ConnectionBasedTransport):
+class PaperFinder(DiagnosticTransport):
 
     def __init__(self):
         super(PaperFinder, self).__init__()
@@ -208,6 +208,7 @@ class PaperFinder(ConnectionBasedTransport):
         rospy.loginfo("Received camera info")
 
     def _cb(self, msg):
+        self.vital_checker.poke()
         bridge = self.bridge
         try:
             cv_image = bridge.imgmsg_to_cv2(
@@ -224,6 +225,7 @@ class PaperFinder(ConnectionBasedTransport):
             self.image_pub.publish(vis_msg)
 
     def _cb_with_depth(self, img_msg, depth_msg):
+        self.vital_checker.poke()
         if self.camera_info_msg is None:
             rospy.loginfo("Waiting camera info ...")
         bridge = self.bridge

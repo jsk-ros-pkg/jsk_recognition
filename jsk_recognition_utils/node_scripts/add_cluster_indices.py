@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 
 from jsk_recognition_msgs.msg import ClusterPointIndices
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 import message_filters
 import rospy
 
 
-class AddClusterIndices(ConnectionBasedTransport):
+class AddClusterIndices(DiagnosticTransport):
     def __init__(self):
         super(AddClusterIndices, self).__init__()
         self._pub = self.advertise('~output', ClusterPointIndices,
@@ -34,6 +34,7 @@ class AddClusterIndices(ConnectionBasedTransport):
             sub.unregister()
 
     def _decompose(self, *cpi_msgs):
+        self.vital_checker.poke()
         out_msg = ClusterPointIndices()
         out_msg.header = cpi_msgs[0].header
         for cpi_msg in cpi_msgs:

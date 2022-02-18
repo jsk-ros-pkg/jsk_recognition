@@ -14,7 +14,7 @@ import dynamic_reconfigure.server
 from jsk_recognition_utils import bounding_rect_of_mask
 from jsk_recognition_utils import get_tile_image
 from jsk_recognition_utils.color import labelcolormap
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 from jsk_topic_tools import warn_no_remap
 import message_filters
 import rospy
@@ -84,7 +84,7 @@ def label2rgb(lbl, img=None, label_names=None, alpha=0.3, bg_label=0):
     return lbl_viz
 
 
-class LabelImageDecomposer(ConnectionBasedTransport):
+class LabelImageDecomposer(DiagnosticTransport):
 
     def __init__(self):
         super(LabelImageDecomposer, self).__init__()
@@ -151,6 +151,7 @@ class LabelImageDecomposer(ConnectionBasedTransport):
         self.sub_label.sub.unregister()
 
     def _apply(self, label_msg, img_msg=None):
+        self.vital_checker.poke()
         bridge = cv_bridge.CvBridge()
         label_img = bridge.imgmsg_to_cv2(label_msg)
         if img_msg:
@@ -191,6 +192,7 @@ class LabelImageDecomposer(ConnectionBasedTransport):
             self.pub_bg_mask.publish(bg_mask_msg)
 
     def _apply_tile(self, label_msg, img_msg):
+        self.vital_checker.poke()
         bridge = cv_bridge.CvBridge()
         img = bridge.imgmsg_to_cv2(img_msg)
         label_img = bridge.imgmsg_to_cv2(label_msg)

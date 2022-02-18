@@ -4,7 +4,7 @@ import numpy as np
 
 import cv_bridge
 from jsk_recognition_utils.depth import split_fore_background
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 from jsk_recognition_msgs.msg import RectArray, Rect
 import message_filters
 import rospy
@@ -93,7 +93,7 @@ class Packer():
 # def fuga(msg):
 #     print "~input/rect_array", msg.header.stamp.to_sec()
         
-class BinPack(ConnectionBasedTransport):
+class BinPack(DiagnosticTransport):
     def __init__(self):
         super(BinPack, self).__init__()
         self.pub_ = self.advertise('~output', Image, queue_size=10)
@@ -113,6 +113,7 @@ class BinPack(ConnectionBasedTransport):
         self.sub_.sub.unregister()
         self.sub_rects_.sub.unregister()
     def _apply(self, img_msg, rects):
+        self.vital_checker.poke()
         bridge = cv_bridge.CvBridge()
         img = bridge.imgmsg_to_cv2(img_msg)
         root_rect, blocks = self.bin_pack(rects)

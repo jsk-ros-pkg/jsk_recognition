@@ -4,10 +4,10 @@
 import cv_bridge
 import rospy
 from sensor_msgs.msg import Image
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 
 
-class SplitImage(ConnectionBasedTransport):
+class SplitImage(DiagnosticTransport):
 
     def __init__(self):
         super(SplitImage, self).__init__()
@@ -32,6 +32,7 @@ class SplitImage(ConnectionBasedTransport):
         self.sub.unregister()
 
     def _split_cb(self, msg):
+        self.vital_checker.poke()
         img = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
         height, width, _ = img.shape
         for v in range(self.vertical_parts):

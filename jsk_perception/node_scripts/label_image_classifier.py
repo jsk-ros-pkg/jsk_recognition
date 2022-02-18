@@ -2,13 +2,13 @@
 
 import cv_bridge
 from jsk_recognition_msgs.msg import ClassificationResult
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 import numpy as np
 import rospy
 from sensor_msgs.msg import Image
 
 
-class LabelImageClassifier(ConnectionBasedTransport):
+class LabelImageClassifier(DiagnosticTransport):
 
     classifier_name = 'label_image_classifier'
 
@@ -26,6 +26,7 @@ class LabelImageClassifier(ConnectionBasedTransport):
         self.sub.unregister()
 
     def _cb(self, imgmsg):
+        self.vital_checker.poke()
         bridge = cv_bridge.CvBridge()
         img = bridge.imgmsg_to_cv2(imgmsg)
         label, proba = self._classify(img)

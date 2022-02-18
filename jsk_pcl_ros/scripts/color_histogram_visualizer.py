@@ -13,7 +13,7 @@ matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 from matplotlib import gridspec
 import rospy
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 from jsk_recognition_msgs.msg import ColorHistogram, ColorHistogramArray
 from sensor_msgs.msg import Image
 from jsk_pcl_ros.cfg import ColorHistogramVisualizerConfig as Config
@@ -24,7 +24,7 @@ IMG_WIDTH=800
 IMG_HEIGHT=600
 
 
-class ColorHistogramVisualizer(ConnectionBasedTransport):
+class ColorHistogramVisualizer(DiagnosticTransport):
     def __init__(self):
         super(ColorHistogramVisualizer, self).__init__()
 
@@ -62,6 +62,7 @@ class ColorHistogramVisualizer(ConnectionBasedTransport):
         return hsv_map
 
     def callback(self, msg):
+        self.vital_checker.poke()
         if self.histogram_policy == Config.ColorHistogramVisualizer_HUE:
             img = self.plot_hist_hue(msg.histogram)
         elif self.histogram_policy == Config.ColorHistogramVisualizer_HUE_AND_SATURATION:
@@ -76,6 +77,7 @@ class ColorHistogramVisualizer(ConnectionBasedTransport):
             rospy.logerr("Failed to convert image: %s" % str(e))
 
     def callback_array(self, msg):
+        self.vital_checker.poke()
         if 0 <= self.histogram_index < len(msg.histograms):
             self.callback(msg.histograms[self.histogram_index])
         else:

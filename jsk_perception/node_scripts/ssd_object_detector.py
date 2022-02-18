@@ -9,7 +9,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from cv_bridge import CvBridge
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 import numpy as np
 import rospy
 import time
@@ -54,7 +54,7 @@ from chainercv.visualizations import vis_bbox
 chainer.config.cv_resize_backend = 'cv2'
 
 
-class SSDObjectDetector(ConnectionBasedTransport):
+class SSDObjectDetector(DiagnosticTransport):
 
     def __init__(self):
         super(SSDObjectDetector, self).__init__()
@@ -131,6 +131,7 @@ class SSDObjectDetector(ConnectionBasedTransport):
         return config
 
     def image_cb(self, msg):
+        self.vital_checker.poke()
         if self.profiling:
             rospy.loginfo("callback start: incomming msg is %s msec behind" % ((rospy.Time.now() - msg.header.stamp).to_sec() * 1000.0))
         tprev = time.time()

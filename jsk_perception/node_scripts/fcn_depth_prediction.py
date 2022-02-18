@@ -33,7 +33,7 @@ import numpy as np
 import cv_bridge
 from jsk_recognition_utils.chainermodels import FCN8sDepthPrediction
 from jsk_recognition_utils.chainermodels import FCN8sDepthPredictionConcatFirst
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 import message_filters
 import rospy
 from sensor_msgs.msg import Image
@@ -55,7 +55,7 @@ def colorize_depth(depth, min_value=None, max_value=None):
     return colorized
 
 
-class FCNDepthPrediction(ConnectionBasedTransport):
+class FCNDepthPrediction(DiagnosticTransport):
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -134,6 +134,7 @@ class FCNDepthPrediction(ConnectionBasedTransport):
         return depth_viz_bgr
 
     def _cb(self, img_msg, depth_msg):
+        self.vital_checker.poke()
         br = cv_bridge.CvBridge()
         bgr_img = br.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
         depth_img = br.imgmsg_to_cv2(depth_msg, desired_encoding='passthrough')

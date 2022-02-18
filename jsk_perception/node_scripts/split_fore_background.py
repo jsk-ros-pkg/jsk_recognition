@@ -5,12 +5,12 @@ import numpy as np
 
 import cv_bridge
 from jsk_recognition_utils.depth import split_fore_background
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 import rospy
 from sensor_msgs.msg import Image
 
 
-class SplitForeBackground(ConnectionBasedTransport):
+class SplitForeBackground(DiagnosticTransport):
 
     def __init__(self):
         super(SplitForeBackground, self).__init__()
@@ -26,6 +26,7 @@ class SplitForeBackground(ConnectionBasedTransport):
         self.sub.unregister()
 
     def _apply(self, depth_msg):
+        self.vital_checker.poke()
         # validation
         supported_encodings = {'16UC1', '32FC1'}
         if depth_msg.encoding not in supported_encodings:

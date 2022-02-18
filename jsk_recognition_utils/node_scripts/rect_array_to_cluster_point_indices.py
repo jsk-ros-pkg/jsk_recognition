@@ -7,12 +7,12 @@ import rospy
 
 from jsk_recognition_msgs.msg import ClusterPointIndices
 from jsk_recognition_msgs.msg import RectArray
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 from pcl_msgs.msg import PointIndices
 from sensor_msgs.msg import CameraInfo
 
 
-class RectArrayToClusterPointIndices(ConnectionBasedTransport):
+class RectArrayToClusterPointIndices(DiagnosticTransport):
 
     def __init__(self):
         super(RectArrayToClusterPointIndices, self).__init__()
@@ -48,6 +48,7 @@ class RectArrayToClusterPointIndices(ConnectionBasedTransport):
         self._convert(rects_msg, H, W)
 
     def _convert(self, rects_msg, img_height=None, img_width=None):
+        self.vital_checker.poke()
         H = self.img_height if img_height is None else img_height
         W = self.img_width if img_width is None else img_width
         cpi_msg = ClusterPointIndices(header=rects_msg.header)

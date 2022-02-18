@@ -13,7 +13,7 @@ import rospy
 from dynamic_reconfigure.server import Server
 from jsk_perception.cfg import AWSDetectFacesConfig
 
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 from geometry_msgs.msg import PoseArray, Pose, Point
 from sensor_msgs.msg import CompressedImage, Image
 from opencv_apps.msg import FaceArrayStamped, Face, Rect
@@ -56,7 +56,7 @@ COLORS = [
 ]
 
 
-class DetectFaces(ConnectionBasedTransport):
+class DetectFaces(DiagnosticTransport):
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -160,6 +160,7 @@ class DetectFaces(ConnectionBasedTransport):
             self.offset += 16
 
     def image_callback(self, image):
+        self.vital_checker.poke()
         start_time = rospy.Time.now()
         # decode compressed image
         np_arr = np.fromstring(image.data, np.uint8)

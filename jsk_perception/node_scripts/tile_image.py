@@ -6,7 +6,7 @@ import sys
 import cv2
 import cv_bridge
 import jsk_recognition_utils
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 import message_filters
 import rospy
 from sensor_msgs.msg import Image
@@ -38,7 +38,7 @@ def draw_text_box(img, text, font_scale=0.8, thickness=2,
     cv2.putText(img, text, pt3, font_face, font_scale, fg_color, thickness)
 
 
-class TileImages(ConnectionBasedTransport):
+class TileImages(DiagnosticTransport):
     def __init__(self):
         super(TileImages, self).__init__()
         self.lock = Lock()
@@ -127,6 +127,7 @@ class TileImages(ConnectionBasedTransport):
         imgmsg = bridge.cv2_to_imgmsg(out_bgr, encoding='bgr8')
         self.pub_img.publish(imgmsg)
     def _apply(self, *msgs):
+        self.vital_checker.poke()
         bridge = cv_bridge.CvBridge()
         imgs = []
         for msg, topic in zip(msgs, self.input_topics):

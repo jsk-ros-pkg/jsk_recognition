@@ -9,7 +9,7 @@ import numpy as np
 import rospy
 import shapely.geometry
 from jsk_recognition_utils.cfg import PolygonArrayToBoxArrayConfig
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 from tf.transformations import quaternion_from_matrix as matrix2quaternion
 from tf.transformations import unit_vector as normalize_vector
 
@@ -112,7 +112,7 @@ def rotate_points(points, a, b):
     return points_rot
 
 
-class PolygonArrayToRectBoxArray(ConnectionBasedTransport):
+class PolygonArrayToRectBoxArray(DiagnosticTransport):
 
     def __init__(self):
         super(PolygonArrayToRectBoxArray, self).__init__()
@@ -161,6 +161,7 @@ class PolygonArrayToRectBoxArray(ConnectionBasedTransport):
             s.unregister()
 
     def _cb(self, polygons_msg, coeffs_msg):
+        self.vital_checker.poke()
         new_polygons_msg = jsk_recognition_msgs.msg.PolygonArray()
         new_polygons_msg.header = polygons_msg.header
         boxes_msg = jsk_recognition_msgs.msg.BoundingBoxArray(

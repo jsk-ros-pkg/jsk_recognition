@@ -37,7 +37,7 @@ import chainer.links as L
 
 import cv_bridge
 from dynamic_reconfigure.server import Server
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 import message_filters
 import rospy
 import tf.transformations as T
@@ -211,7 +211,7 @@ class HyperFacePredictor(object):
         return self.forward(imgs)
 
 
-class FacePoseEstimator(ConnectionBasedTransport):
+class FacePoseEstimator(DiagnosticTransport):
     def __init__(self):
         super(FacePoseEstimator, self).__init__()
 
@@ -278,6 +278,7 @@ class FacePoseEstimator(ConnectionBasedTransport):
             s.unregister()
 
     def callback(self, img, pose2d, pose3d):
+        self.vital_checker.poke()
         header = img.header
         try:
             img = self.cv_bridge.imgmsg_to_cv2(img, "bgr8")

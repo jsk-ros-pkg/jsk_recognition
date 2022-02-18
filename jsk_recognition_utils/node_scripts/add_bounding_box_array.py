@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 from jsk_recognition_msgs.msg import BoundingBoxArray
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 import message_filters
 import rospy
 
 
-class AddBoundingBoxArray(ConnectionBasedTransport):
+class AddBoundingBoxArray(DiagnosticTransport):
     def __init__(self):
         super(AddBoundingBoxArray, self).__init__()
         self._pub = self.advertise('~output', BoundingBoxArray, queue_size=1)
@@ -32,6 +32,7 @@ class AddBoundingBoxArray(ConnectionBasedTransport):
             sub.unregister()
 
     def _decompose(self, *bboxes_msgs):
+        self.vital_checker.poke()
         out_msg = BoundingBoxArray()
         out_msg.header = bboxes_msgs[0].header
         for bboxes_msg in bboxes_msgs:

@@ -15,14 +15,14 @@ from sklearn.preprocessing import normalize
 import cv_bridge
 from jsk_recognition_msgs.msg import VectorArray
 from jsk_recognition_utils import decompose_descriptors_with_label
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 import message_filters
 from posedetection_msgs.msg import Feature0D
 from sensor_msgs.msg import Image
 import rospy
 
 
-class BoFHistogramExtractor(ConnectionBasedTransport):
+class BoFHistogramExtractor(DiagnosticTransport):
     def __init__(self):
         super(BoFHistogramExtractor, self).__init__()
 
@@ -67,6 +67,7 @@ class BoFHistogramExtractor(ConnectionBasedTransport):
         self._sub_label.unregister()
 
     def _apply(self, feature_msg, label_msg):
+        self.vital_checker.poke()
         bridge = cv_bridge.CvBridge()
         label = bridge.imgmsg_to_cv2(label_msg)
         desc = np.array(feature_msg.descriptors)

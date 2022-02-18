@@ -4,13 +4,13 @@ from jsk_perception.srv import NonMaximumSuppression
 from jsk_perception.srv import NonMaximumSuppressionResponse
 from jsk_recognition_msgs.msg import Rect
 from jsk_recognition_msgs.msg import RectArray
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 import rospy
 from std_msgs.msg import Int64
 import numpy as np
 
 
-class NonMaximumSuppressionServer(ConnectionBasedTransport):
+class NonMaximumSuppressionServer(DiagnosticTransport):
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -29,6 +29,7 @@ class NonMaximumSuppressionServer(ConnectionBasedTransport):
         self.sub.unregister()
 
     def _msg_cb(self, msg):
+        self.vital_checker.poke()
         rects, count = self.non_max_suppression_handler(msg.rects, self.thre)
 
         rects_msg = RectArray()

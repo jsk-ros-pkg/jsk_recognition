@@ -12,7 +12,7 @@ import numpy as np
 import cv_bridge
 import dynamic_reconfigure.server
 from jsk_perception.cfg import ExtractImageChannelConfig
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 from jsk_topic_tools.log_utils import logwarn_throttle
 import rospy
 from sensor_msgs.msg import Image
@@ -34,7 +34,7 @@ class CvBridgeArbitraryChannels(cv_bridge.CvBridge):
                 raise cv_bridge.CvBridgeError(e)
 
 
-class ExtractImageChannel(ConnectionBasedTransport):
+class ExtractImageChannel(DiagnosticTransport):
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -53,6 +53,7 @@ class ExtractImageChannel(ConnectionBasedTransport):
         self.sub.unregister()
 
     def _callback(self, imgmsg):
+        self.vital_checker.poke()
         if self.channel < 0:
             return
         bridge = CvBridgeArbitraryChannels()

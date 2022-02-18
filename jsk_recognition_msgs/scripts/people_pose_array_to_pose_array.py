@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
 from geometry_msgs.msg import PoseArray
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 import rospy
 
 from jsk_recognition_msgs.msg import PeoplePoseArray
 
 
-class PeoplePoseArrayToPoseArray(ConnectionBasedTransport):
+class PeoplePoseArrayToPoseArray(DiagnosticTransport):
 
     def __init__(self):
         super(PeoplePoseArrayToPoseArray, self).__init__()
@@ -20,6 +20,7 @@ class PeoplePoseArrayToPoseArray(ConnectionBasedTransport):
         self.sub.unregister()
 
     def _cb(self, msg):
+        self.vital_checker.poke()
         out_msg = PoseArray()
         for person_pose in msg.poses:
             out_msg.poses.extend(person_pose.poses)

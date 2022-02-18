@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
 import rospy
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 from jsk_recognition_msgs.msg import Rect, RectArray
 from image_view2.msg import ImageMarker2
 import jsk_recognition_utils
 from std_msgs.msg import ColorRGBA
 from geometry_msgs.msg import Point
-class RectArrayToImageMarker(ConnectionBasedTransport):
+class RectArrayToImageMarker(DiagnosticTransport):
     def __init__(self):
         super(RectArrayToImageMarker, self).__init__()
         self.pub = self.advertise("~output", ImageMarker2, queue_size=1)
@@ -19,6 +19,7 @@ class RectArrayToImageMarker(ConnectionBasedTransport):
         self.sub.unregister()
         
     def convert(self, msg):
+        self.vital_checker.poke()
         marker = ImageMarker2()
         marker.header = msg.header
         marker.type = ImageMarker2.LINE_LIST

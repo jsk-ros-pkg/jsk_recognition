@@ -3,13 +3,13 @@
 import cv_bridge
 from dynamic_reconfigure.server import Server
 from jsk_perception.cfg import DepthImageFilterConfig as Config
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 import numpy as np
 import rospy
 from sensor_msgs.msg import Image
 
 
-class DepthImageFilter(ConnectionBasedTransport):
+class DepthImageFilter(DiagnosticTransport):
 
     def __init__(self):
         super(DepthImageFilter, self).__init__()
@@ -32,6 +32,7 @@ class DepthImageFilter(ConnectionBasedTransport):
         return config
 
     def callback(self, depth_img_msg):
+        self.vital_checker.poke()
         bridge = self.bridge
 
         supported_encodings = {'16UC1', '32FC1'}

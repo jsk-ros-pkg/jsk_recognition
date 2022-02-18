@@ -37,14 +37,14 @@ import cv_bridge
 from jsk_recognition_msgs.msg import ClassificationResult
 from jsk_recognition_utils.chainermodels import VGG16
 from jsk_recognition_utils.chainermodels import VGG16BatchNormalization
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 from jsk_topic_tools.log_utils import logerr_throttle
 import message_filters
 import rospy
 from sensor_msgs.msg import Image
 
 
-class VGG16ObjectRecognition(ConnectionBasedTransport):
+class VGG16ObjectRecognition(DiagnosticTransport):
 
     mean_bgr = np.array([104.00698793, 116.66876762, 122.67891434])
 
@@ -100,6 +100,7 @@ class VGG16ObjectRecognition(ConnectionBasedTransport):
             sub.unregister()
 
     def _recognize(self, imgmsg, mask_msg=None):
+        self.vital_checker.poke()
         bridge = cv_bridge.CvBridge()
         bgr = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='bgr8')
         if mask_msg is not None:

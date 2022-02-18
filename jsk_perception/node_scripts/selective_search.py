@@ -3,7 +3,7 @@
 import rospy
 
 import cv_bridge
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 from jsk_recognition_msgs.msg import RectArray, Rect
 from sensor_msgs.msg import Image
 import dynamic_reconfigure.server
@@ -11,7 +11,7 @@ from jsk_perception.cfg import SelectiveSearchConfig
 import dlib
 import cv2
 
-class SelectiveSearch(ConnectionBasedTransport):
+class SelectiveSearch(DiagnosticTransport):
     def __init__(self):
         super(SelectiveSearch, self).__init__()
         dynamic_reconfigure.server.Server(
@@ -29,6 +29,7 @@ class SelectiveSearch(ConnectionBasedTransport):
         self.max_size = config.max_size
         return config
     def _apply(self, img_msg):
+        self.vital_checker.poke()
         bridge = cv_bridge.CvBridge()
         img_bgr = bridge.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)

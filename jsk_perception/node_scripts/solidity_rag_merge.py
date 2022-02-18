@@ -21,7 +21,7 @@ from skimage.segmentation import slic
 from skimage.util import img_as_uint
 
 import cv_bridge
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 from jsk_topic_tools import warn_no_remap
 import message_filters
 import rospy
@@ -150,7 +150,7 @@ def closed_mask_roi(mask):
 # ros node
 ###############################################################################
 
-class SolidityRagMerge(ConnectionBasedTransport):
+class SolidityRagMerge(DiagnosticTransport):
 
     def __init__(self):
         super(SolidityRagMerge, self).__init__()
@@ -181,6 +181,7 @@ class SolidityRagMerge(ConnectionBasedTransport):
         self.sub_mask.unregister()
 
     def _apply(self, imgmsg, maskmsg):
+        self.vital_checker.poke()
         bridge = cv_bridge.CvBridge()
         img = bridge.imgmsg_to_cv2(imgmsg)
         if img.ndim == 2:

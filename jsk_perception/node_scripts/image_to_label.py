@@ -4,12 +4,12 @@
 import numpy as np
 
 import cv_bridge
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 import rospy
 from sensor_msgs.msg import Image
 
 
-class ImageToLabel(ConnectionBasedTransport):
+class ImageToLabel(DiagnosticTransport):
     def __init__(self):
         super(ImageToLabel, self).__init__()
         self._pub = self.advertise('~output', Image, queue_size=1)
@@ -21,6 +21,7 @@ class ImageToLabel(ConnectionBasedTransport):
         self._sub.unregister()
 
     def _convert(self, msg):
+        self.vital_checker.poke()
         bridge = cv_bridge.CvBridge()
         img = bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
         label = np.ones(img.shape[:2], dtype=np.int32)

@@ -61,14 +61,14 @@ from jsk_recognition_msgs.msg import LabelArray
 from jsk_recognition_msgs.msg import Rect
 from jsk_recognition_msgs.msg import RectArray
 from jsk_recognition_msgs.msg import ClassificationResult
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 from pcl_msgs.msg import PointIndices
 import rospkg
 import rospy
 from sensor_msgs.msg import Image
 
 
-class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
+class MaskRCNNInstanceSegmentation(DiagnosticTransport):
 
     def __init__(self):
         rospy.logwarn('This node is experimental, and its interface '
@@ -174,6 +174,7 @@ class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
         return config
 
     def callback(self, imgmsg):
+        self.vital_checker.poke()
         bridge = cv_bridge.CvBridge()
         img = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='rgb8')
         img_chw = img.transpose((2, 0, 1))  # C, H, W

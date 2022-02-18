@@ -42,7 +42,7 @@ import jsk_recognition_utils
 from jsk_recognition_utils.chainermodels import VGG16FastRCNN
 from jsk_recognition_utils.chainermodels import VGG_CNN_M_1024
 from jsk_recognition_utils.nms import nms
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 import message_filters
 import rospkg
 import rospy
@@ -62,7 +62,7 @@ def img_preprocessing(orig_img, pixel_means, max_size=1000, scale=600):
     return img.transpose([2, 0, 1]).astype(np.float32), im_scale
 
 
-class FastRCNN(ConnectionBasedTransport):
+class FastRCNN(DiagnosticTransport):
 
     def __init__(self, model, target_names, pixel_means, use_gpu):
         super(FastRCNN, self).__init__()
@@ -104,6 +104,7 @@ class FastRCNN(ConnectionBasedTransport):
         self._sub_rects.unregister()
 
     def _detect(self, imgmsg, rects_msg):
+        self.vital_checker.poke()
         bridge = cv_bridge.CvBridge()
         im_orig = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='bgr8')
         im, im_scale = img_preprocessing(im_orig, self.pixel_means)

@@ -41,11 +41,11 @@ from geometry_msgs.msg import Point
 from geometry_msgs.msg import Pose
 from jsk_recognition_msgs.msg import HandPose
 from jsk_recognition_msgs.msg import HandPoseArray
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 from sensor_msgs.msg import Image
 
 
-class HandPoseEstimation2D(ConnectionBasedTransport):
+class HandPoseEstimation2D(DiagnosticTransport):
 
     HAND_COLORS = [
         (100, 100, 100),
@@ -174,6 +174,7 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
             sub.unregister()
 
     def _cb(self, img_msg):
+        self.vital_checker.poke()
         img = self.bridge.imgmsg_to_cv2(
             img_msg, desired_encoding='bgr8')
         hands_points, hands_point_scores, hands_score = \

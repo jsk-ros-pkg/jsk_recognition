@@ -39,7 +39,7 @@ import pylab as plt  # NOQA
 import cv_bridge
 import message_filters
 import rospy
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import Point
 from geometry_msgs.msg import Quaternion
@@ -85,7 +85,7 @@ def padRightDownCorner(img, stride, padValue):
     return img_padded, pad
 
 
-class PeoplePoseEstimation2D(ConnectionBasedTransport):
+class PeoplePoseEstimation2D(DiagnosticTransport):
     # Note: the order of this sequences is important
     # find connection in the specified sequence,
     # center 29 is in the position 15
@@ -267,6 +267,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         self._cb_with_depth_info(img_msg, depth_msg, self.camera_info_msg)
 
     def _cb_with_depth_info(self, img_msg, depth_msg, camera_info_msg):
+        self.vital_checker.poke()
         br = cv_bridge.CvBridge()
         img = br.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
         depth_img = br.imgmsg_to_cv2(depth_msg, 'passthrough')

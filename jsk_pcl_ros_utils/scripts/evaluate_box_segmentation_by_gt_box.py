@@ -4,10 +4,10 @@ from jsk_recognition_msgs.msg import Accuracy
 from jsk_recognition_msgs.msg import BoundingBox
 import jsk_recognition_utils
 import rospy
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 
 
-class EvaluateBoxSegmentationByGTBox(ConnectionBasedTransport):
+class EvaluateBoxSegmentationByGTBox(DiagnosticTransport):
 
     def __init__(self):
         super(EvaluateBoxSegmentationByGTBox, self).__init__()

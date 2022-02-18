@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import rospy 
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 from jsk_recognition_msgs.msg import PolygonArray, ModelCoefficientsArray
 from pcl_msgs.msg import ModelCoefficients
 from geometry_msgs.msg import PolygonStamped
@@ -9,7 +9,7 @@ import message_filters
 from dynamic_reconfigure.server import Server
 from jsk_pcl_ros.cfg import ExtractTopPolygonLikelihoodConfig
 
-class ExtractTopPolygonLikelihood(ConnectionBasedTransport):
+class ExtractTopPolygonLikelihood(DiagnosticTransport):
     def __init__(self):
         super(ExtractTopPolygonLikelihood, self).__init__()
         self._srv = Server(ExtractTopPolygonLikelihoodConfig, self.config_callback)
@@ -27,6 +27,7 @@ class ExtractTopPolygonLikelihood(ConnectionBasedTransport):
         self._sub.sub.unregister()
         self._sub_coef.sub.unregister()
     def callback(self, msg, msg_coef):
+        self.vital_checker.poke()
         if len(msg.polygons) > 0:
             #self._pub.publish(msg.histograms[0])
             max_index = max(xrange(len(msg.polygons)), key=lambda i: msg.likelihood[i])

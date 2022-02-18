@@ -3,12 +3,12 @@
 from jsk_recognition_msgs.msg import Accuracy
 from jsk_recognition_msgs.msg import BoundingBox
 import jsk_recognition_utils
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 import rospy
 from visualization_msgs.msg import MarkerArray
 
 
-class EvaluateVoxelSegmentationByGTBox(ConnectionBasedTransport):
+class EvaluateVoxelSegmentationByGTBox(DiagnosticTransport):
 
     def __init__(self):
         super(EvaluateVoxelSegmentationByGTBox, self).__init__()

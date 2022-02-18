@@ -7,12 +7,12 @@ from __future__ import print_function
 import numpy as np
 
 import cv_bridge
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 import rospy
 from sensor_msgs.msg import Image
 
 
-class Image16UC1To32FC1(ConnectionBasedTransport):
+class Image16UC1To32FC1(DiagnosticTransport):
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -25,6 +25,7 @@ class Image16UC1To32FC1(ConnectionBasedTransport):
         self.sub.unregister()
 
     def transport(self, msg):
+        self.vital_checker.poke()
         if msg.height * msg.width == 0:
             return
         bridge = cv_bridge.CvBridge()

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Author: Yuki Furuta <furushchev@jsk.imi.i.u-tokyo.ac.jp>
 
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 import message_filters as MF
 import numpy as np
 import rospy
@@ -38,7 +38,7 @@ def remove_slash(frame_id):
         return frame_id
 
 
-class PointIt(ConnectionBasedTransport):
+class PointIt(DiagnosticTransport):
     """
     PointIt class object
     """
@@ -116,6 +116,7 @@ class PointIt(ConnectionBasedTransport):
         bbox_msg (jsk_recognition_msgs/BoundingBoxArray)
         cls_msg (jsk_recognition_msgs/ClassificationResult)
         """
+        self.vital_checker.poke()
         if cls_msg is not None:
             if len(bbox_msg.boxes) != len(cls_msg.labels):
                 rospy.logwarn("len(boxes) != len(labels)")
@@ -131,6 +132,7 @@ class PointIt(ConnectionBasedTransport):
 
         refer: https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/output.md
         """
+        self.vital_checker.poke()
         frame_id = remove_slash(ppl_msg.header.frame_id)
         in_objects = self.objects
         objects = []

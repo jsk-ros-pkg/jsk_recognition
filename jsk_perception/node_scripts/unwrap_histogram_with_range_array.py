@@ -4,12 +4,12 @@
 Convert HistogramWithRangeArray to HistogramWithRange
 """
 
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 from jsk_recognition_msgs.msg import HistogramWithRange, HistogramWithRangeArray
 
 import rospy
 
-class HistogramWithRangeArrayUnwrapper(ConnectionBasedTransport):
+class HistogramWithRangeArrayUnwrapper(DiagnosticTransport):
     def __init__(self):
         super(HistogramWithRangeArrayUnwrapper, self).__init__()
         self.index = rospy.get_param('~index', 0)
@@ -19,6 +19,7 @@ class HistogramWithRangeArrayUnwrapper(ConnectionBasedTransport):
     def unsubscribe(self):
         self._sub.unregister()
     def callback(self, msg):
+        self.vital_checker.poke()
         if len(msg.histograms) > self.index:
             self._pub.publish(msg.histograms[self.index])
 

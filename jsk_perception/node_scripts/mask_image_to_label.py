@@ -3,13 +3,13 @@
 
 import numpy as np
 
-from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import DiagnosticTransport
 import rospy
 from sensor_msgs.msg import Image
 import cv_bridge
 
 
-class MaskImageToLabel(ConnectionBasedTransport):
+class MaskImageToLabel(DiagnosticTransport):
     def __init__(self):
         super(MaskImageToLabel, self).__init__()
         self._pub = self.advertise('~output', Image, queue_size=1)
@@ -21,6 +21,7 @@ class MaskImageToLabel(ConnectionBasedTransport):
         self._sub.unregister()
 
     def _apply(self, msg):
+        self.vital_checker.poke()
         bridge = cv_bridge.CvBridge()
         mask = bridge.imgmsg_to_cv2(msg, desired_encoding='mono8')
         if mask.size == 0:

@@ -20,12 +20,13 @@ from skimage.morphology.convex_hull import convex_hull_image
 from skimage.segmentation import slic
 from skimage.util import img_as_uint
 
-import cv_bridge
 from jsk_topic_tools import ConnectionBasedTransport
 from jsk_topic_tools import warn_no_remap
 import message_filters
 import rospy
 from sensor_msgs.msg import Image
+
+from jsk_recognition_utils import cv_bridge
 
 if LooseVersion(skimage.__version__) >= '0.13.0':
     from skimage.future.graph import show_rag

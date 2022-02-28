@@ -1,8 +1,15 @@
 #!/usr/bin/env python
 
-import rospy
+import os
+import sys
 
-import cv_bridge
+import rospy
+# cv_bridge_python3 import
+if os.environ['ROS_PYTHON_VERSION'] == '2':
+    sys.path.insert(0, '/opt/ros/'
+                    + os.environ['ROS_DISTRO']
+                    + '/lib/python3/dist-packages/')
+from jsk_recognition_utils import cv_bridge
 from jsk_topic_tools import ConnectionBasedTransport
 from jsk_recognition_msgs.msg import RectArray, Rect
 from sensor_msgs.msg import Image

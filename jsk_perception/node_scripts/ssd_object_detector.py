@@ -8,7 +8,6 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from cv_bridge import CvBridge
 from jsk_topic_tools import ConnectionBasedTransport
 import numpy as np
 import rospy
@@ -49,6 +48,9 @@ import chainer
 from chainercv.links import SSD300
 from chainercv.links import SSD512
 from chainercv.visualizations import vis_bbox
+
+from jsk_recognition_utils import cv_bridge
+from jsk_recognition_utils import CvBridge
 
 
 chainer.config.cv_resize_backend = 'cv2'

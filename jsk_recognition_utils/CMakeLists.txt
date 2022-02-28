@@ -12,6 +12,7 @@ endif(CCACHE_FOUND)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  catkin_virtualenv
   dynamic_reconfigure
   jsk_recognition_msgs
   pcl_ros
@@ -50,6 +51,26 @@ catkin_package(
  LIBRARIES jsk_recognition_utils
  CATKIN_DEPENDS jsk_recognition_msgs pcl_ros visualization_msgs message_runtime
 )
+
+catkin_generate_virtualenv(
+  INPUT_REQUIREMENTS requirements.in
+  PYTHON_INTERPRETER python3
+  USE_SYSTEM_PACKAGES TRUE
+  ISOLATE_REQUIREMENTS TRUE
+)
+
+file(GLOB SCRIPT_PROGRAMS scripts/*.py)
+catkin_install_python(
+  PROGRAMS ${SCRIPT_PROGRAMS}
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/scripts/)
+file(GLOB NODE_SCRIPTS_FILES node_scripts/*.py)
+catkin_install_python(
+  PROGRAMS ${NODE_SCRIPTS_FILES}
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/node_scripts/)
+file(GLOB SAMPLE_SCRIPTS_FILES sample/*.py)
+catkin_install_python(
+  PROGRAMS ${SAMPLE_SCRIPTS_FILES}
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/sample/)
 
 # Cythonize pyx files
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)

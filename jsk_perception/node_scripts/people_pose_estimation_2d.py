@@ -36,7 +36,7 @@ import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 import pylab as plt  # NOQA
 
-import cv_bridge
+from jsk_recognition_utils import cv_bridge
 import message_filters
 import rospy
 from jsk_topic_tools import ConnectionBasedTransport

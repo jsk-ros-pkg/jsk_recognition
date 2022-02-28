@@ -4,7 +4,7 @@
 import collections
 import sys
 import cv2
-import cv_bridge
+from jsk_recognition_utils import cv_bridge
 import jsk_recognition_utils
 from jsk_topic_tools import ConnectionBasedTransport
 import message_filters

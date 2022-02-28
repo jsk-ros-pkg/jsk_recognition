@@ -4,9 +4,21 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
+import sys
+
 import numpy as np
 
-import cv_bridge
+print(sys.version)
+# cv_bridge_python3 import
+if os.environ['ROS_PYTHON_VERSION'] == '2':
+    python3_path = '/opt/ros/{}/lib/python3/dist-packages/'.format(
+        os.environ['ROS_DISTRO'])
+    sys.path.insert(0, python3_path)
+    import cv_bridge
+    sys.path.remove(python3_path)
+else:
+    import cv_bridge
 from jsk_topic_tools import ConnectionBasedTransport
 import rospy
 from sensor_msgs.msg import Image

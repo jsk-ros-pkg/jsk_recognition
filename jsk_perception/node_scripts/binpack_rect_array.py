@@ -2,7 +2,7 @@
 
 import numpy as np
 
-import cv_bridge
+from jsk_recognition_utils import cv_bridge
 from jsk_recognition_utils.depth import split_fore_background
 from jsk_topic_tools import ConnectionBasedTransport
 from jsk_recognition_msgs.msg import RectArray, Rect
@@ -22,6 +22,8 @@ class Block():
         return self.rect.height - another.rect.height
     def width_cmp(self, another):
         return self.rect.width - another.rect.width
+    def __lt__(self, another):
+        return self.max_cmp(another) or self.min_cmp(another) or self.height_cmp(another) or self.width_cmp(another) or 0
     def __cmp__(self, another): # python2
         return self.max_cmp(another) or self.min_cmp(another) or self.height_cmp(another) or self.width_cmp(another) or 0
         

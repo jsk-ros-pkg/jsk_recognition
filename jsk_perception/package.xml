@@ -18,8 +18,10 @@
 
   <!-- ALPHABETICAL ORDER -->
   <build_depend>angles</build_depend>
+  <build_depend>catkin_virtualenv</build_depend>
   <build_depend>cmake_modules</build_depend>
-  <build_depend>cv_bridge</build_depend>
+  <build_depend condition="$ROS_PYTHON_VERSION == 2">cv_bridge_python3</build_depend>  <!-- for melodic -->
+  <build_depend condition="$ROS_PYTHON_VERSION == 3">cv_bridge</build_depend>  <!-- for noetic -->
   <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>eigen</build_depend>
   <build_depend>geometry_msgs</build_depend>
@@ -37,6 +39,8 @@
   <build_depend>mk</build_depend>
   <build_depend>nodelet</build_depend>
   <build_depend>opencv_apps</build_depend>
+  <build_depend>python3</build_depend>
+  <build_depend>python3-opencv</build_depend>
   <build_depend>pcl_ros</build_depend>
   <build_depend>posedetection_msgs</build_depend>
   <build_depend>roscpp</build_depend>
@@ -50,9 +54,11 @@
   <!-- ALPHABETICAL ORDER -->
 
   <!-- ALPHABETICAL ORDER -->
+  <exec_depend>python3-opencv</exec_depend>
   <exec_depend>angles</exec_depend>
   <exec_depend>checkerboard_detector</exec_depend>
-  <exec_depend>cv_bridge</exec_depend>
+  <build_depend condition="$ROS_PYTHON_VERSION == 2">cv_bridge_python3</build_depend>  <!-- for melodic -->
+  <build_depend condition="$ROS_PYTHON_VERSION == 3">cv_bridge</build_depend>  <!-- for noetic -->
   <exec_depend>dynamic_reconfigure</exec_depend>
   <exec_depend>eigen</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
@@ -80,8 +86,7 @@
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-boto3</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-boto3</exec_depend>
   <!-- install chainer {{ -->
-  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-h5py</exec_depend>
-  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-h5py</exec_depend>
+  <exec_depend>python3-h5py</exec_depend>
   <exec_depend version_lt="7.0.0">python-chainer-pip</exec_depend>
   <!-- python-cahiner-pip depends: [cython, python-numpy] in rosdep/python.yaml, which is not installable on python3 environment -->
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-chainercv-pip</exec_depend>
@@ -93,10 +98,8 @@
   <exec_depend>python-fcn-pip</exec_depend>  <!-- pip -->
   <!-- }} install fcn -->
   <exec_depend version_lt="0.3.7">python-pytesseract-pip</exec_depend>
-  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-sklearn</exec_depend>
-  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-sklearn</exec_depend>
-  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-yaml</exec_depend>
-  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-yaml</exec_depend>
+  <exec_depend>python3-sklearn</exec_depend>
+  <exec_depend>python3-yaml</exec_depend>
   <exec_depend>rosbag</exec_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>roseus</exec_depend>
@@ -127,5 +130,7 @@
   <export>
     <nodelet plugin="${prefix}/plugins/nodelet/libjsk_perception.xml"/>
     <nodelet plugin="${prefix}/plugins/nodelet/libopencv_apps.xml"/>
+    <pip_requirements>requirements.txt</pip_requirements>
   </export>
+
 </package>

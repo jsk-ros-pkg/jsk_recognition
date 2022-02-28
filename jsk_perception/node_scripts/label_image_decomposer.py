@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import sys
 
 import cv2
@@ -9,7 +10,17 @@ import matplotlib.cm
 import numpy as np
 import scipy.ndimage
 
-import cv_bridge
+print(sys.version)
+# cv_bridge_python3 import
+if os.environ['ROS_PYTHON_VERSION'] == '2':
+    python3_path = '/opt/ros/{}/lib/python3/dist-packages/'.format(
+        os.environ['ROS_DISTRO'])
+    sys.path.insert(0, python3_path)
+    from jsk_recognition_utils import cv_bridge
+    sys.path.remove(python3_path)
+else:
+    from jsk_recognition_utils import cv_bridge
+
 import dynamic_reconfigure.server
 from jsk_recognition_utils import bounding_rect_of_mask
 from jsk_recognition_utils import get_tile_image

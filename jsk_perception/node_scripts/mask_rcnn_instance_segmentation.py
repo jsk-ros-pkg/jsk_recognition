@@ -52,7 +52,7 @@ except ImportError:
 ''', file=sys.stderr)
     sys.exit(1)
 
-import cv_bridge
+from jsk_recognition_utils import cv_bridge
 from dynamic_reconfigure.server import Server
 from jsk_perception.cfg import MaskRCNNInstanceSegmentationConfig as Config
 from jsk_recognition_msgs.msg import ClusterPointIndices

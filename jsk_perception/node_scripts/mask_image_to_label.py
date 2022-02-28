@@ -6,7 +6,7 @@ import numpy as np
 from jsk_topic_tools import ConnectionBasedTransport
 import rospy
 from sensor_msgs.msg import Image
-import cv_bridge
+from jsk_recognition_utils import cv_bridge
 
 
 class MaskImageToLabel(ConnectionBasedTransport):

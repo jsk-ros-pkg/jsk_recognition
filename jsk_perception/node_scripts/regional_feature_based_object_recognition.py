@@ -29,7 +29,7 @@ from chainer import cuda
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 
-import cv_bridge
+from jsk_recognition_utils import cv_bridge
 from jsk_recognition_msgs.msg import ClassificationResult
 from jsk_recognition_utils.chainermodels import ResNet152
 from jsk_recognition_utils.chainermodels import ResNet152Feature

@@ -2,10 +2,20 @@
 
 from __future__ import division
 
+import os
 import os.path as osp
+import sys
 
 import cv2
-import cv_bridge
+# cv_bridge_python3 import
+if os.environ['ROS_PYTHON_VERSION'] == '2':
+    python3_path = '/opt/ros/{}/lib/python3/dist-packages/'.format(
+        os.environ['ROS_DISTRO'])
+    sys.path.insert(0, python3_path)
+    import cv_bridge
+    sys.path.remove(python3_path)
+else:
+    import cv_bridge
 import genpy
 import numpy as np
 import rospy

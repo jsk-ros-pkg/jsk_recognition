@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os, sys
+import os
+import sys
 from threading import Lock
 
 import cv2
 import numpy as np
 
-import cv_bridge
-from cv_bridge.boost.cv_bridge_boost import getCvType
 import dynamic_reconfigure.server
 import rospy
-
 from jsk_perception.cfg import ImagePublisherConfig
 from sensor_msgs.msg import CameraInfo
 from sensor_msgs.msg import Image, CompressedImage
@@ -19,6 +17,9 @@ import re
 from PIL import Image as PIL_Image
 from PIL import ExifTags as PIL_ExifTags
 from jsk_recognition_msgs.msg import ExifTags, ExifGPSInfo
+from jsk_recognition_utils import cv_bridge
+from jsk_perception import getCvType
+
 
 class ImagePublisher(object):
 

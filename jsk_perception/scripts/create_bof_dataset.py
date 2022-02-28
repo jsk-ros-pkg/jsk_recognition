@@ -5,7 +5,10 @@ Create BoF and BoF Histogram dataset
 """
 
 import gzip
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except:
+    import pickle
 import argparse
 
 import numpy as np

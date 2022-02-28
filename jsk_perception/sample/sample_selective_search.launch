@@ -12,7 +12,8 @@
   <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <node name="selective_search"
-        pkg="jsk_perception" type="selective_search.py">
+        pkg="jsk_perception" type="selective_search.py"
+        output="screen">
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <rosparam>
       min_size: 1000

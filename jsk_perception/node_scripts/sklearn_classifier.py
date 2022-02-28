@@ -3,8 +3,10 @@
 #
 from __future__ import division
 import gzip
-import cPickle as pickle
-
+try:
+    import cPickle as pickle
+except:
+    import pickle
 import numpy as np
 from sklearn.preprocessing import normalize
 

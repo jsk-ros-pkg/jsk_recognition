@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+import os
+import sys
+
 import cv2
 import numpy as np
 try:
@@ -9,7 +12,15 @@ except ImportError:
     from scipy.misc import lena
     img = cv2.cvtColor(lena().astype(np.uint8), cv2.COLOR_GRAY2BGR)
 
-import cv_bridge
+# cv_bridge_python3 import
+if os.environ['ROS_PYTHON_VERSION'] == '2':
+    python3_path = '/opt/ros/{}/lib/python3/dist-packages/'.format(
+        os.environ['ROS_DISTRO'])
+    sys.path.insert(0, python3_path)
+    import cv_bridge
+    sys.path.remove(python3_path)
+else:
+    import cv_bridge
 import rospy
 from sensor_msgs.msg import Image, CompressedImage
 from sensor_msgs.msg import CameraInfo

@@ -3,7 +3,10 @@
 import roslib; roslib.load_manifest('jsk_perception')
 import rospy
 import numpy as np
-import thread
+try:
+    import thread
+except:
+    import _thread as thread
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import *
 from jsk_recognition_msgs.msg import Rect

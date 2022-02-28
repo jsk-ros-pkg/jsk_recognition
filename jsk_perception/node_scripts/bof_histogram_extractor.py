@@ -5,14 +5,17 @@ Extract BoF histogram in realtime.
 """
 
 import gzip
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except:
+    import pickle
 from distutils.version import StrictVersion
 from pkg_resources import get_distribution
 
 import numpy as np
 from sklearn.preprocessing import normalize
 
-import cv_bridge
+from jsk_recognition_utils import cv_bridge
 from jsk_recognition_msgs.msg import VectorArray
 from jsk_recognition_utils import decompose_descriptors_with_label
 from jsk_topic_tools import ConnectionBasedTransport

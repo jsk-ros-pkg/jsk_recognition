@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
+import os
+import sys
+
 import dynamic_reconfigure.server
 import geometry_msgs.msg
 import jsk_recognition_msgs.msg
@@ -10,8 +13,23 @@ import rospy
 import shapely.geometry
 from jsk_recognition_utils.cfg import PolygonArrayToBoxArrayConfig
 from jsk_topic_tools import ConnectionBasedTransport
-from tf.transformations import quaternion_from_matrix as matrix2quaternion
-from tf.transformations import unit_vector as normalize_vector
+# tf import
+if os.environ['ROS_PYTHON_VERSION'] == '3':
+    from tf.transformations import quaternion_from_matrix as matrix2quaternion
+    from tf.transformations import unit_vector as normalize_vector
+else:
+    ws_python3_paths = [p for p in sys.path if 'devel/lib/python3' in p]
+    if len(ws_python3_paths) == 0:
+        ws_python2_paths = [p for p in sys.path if 'devel/lib/python2.7' in p]
+        ws_python2_path = ws_python2_paths[0]
+        ws_python3_path = ws_python2_path.replace('python2.7', 'python3')
+        sys.path = [ws_python3_path] + sys.path
+        from tf.transformations import quaternion_from_matrix as matrix2quaternion
+        from tf.transformations import unit_vector as normalize_vector
+        sys.path.remove(ws_python3_path)
+    else:
+        from tf.transformations import quaternion_from_matrix as matrix2quaternion
+        from tf.transformations import unit_vector as normalize_vector
 
 
 def outer_product_matrix(v):

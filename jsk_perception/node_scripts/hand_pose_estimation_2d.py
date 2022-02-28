@@ -28,7 +28,7 @@ if LooseVersion(pkg_resources.get_distribution("torch").version) \
     sys.exit(1)
 
 import cv2
-import cv_bridge
+from jsk_recognition_utils import cv_bridge
 import message_filters
 import jsk_data
 import numpy as np

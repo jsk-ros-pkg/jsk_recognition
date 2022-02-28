@@ -5,7 +5,7 @@ from __future__ import division
 from __future__ import print_function
 
 import cv2
-import cv_bridge
+from jsk_recognition_utils import cv_bridge
 from distutils.version import LooseVersion
 from jsk_recognition_msgs.msg import ClassificationResult
 from jsk_topic_tools import ConnectionBasedTransport

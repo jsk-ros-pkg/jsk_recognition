@@ -32,6 +32,7 @@
   <build_depend>jsk_recognition_utils</build_depend>
   <build_depend>jsk_topic_tools</build_depend>
   <build_depend>libcmt</build_depend>
+  <build_depend>libuvc_camera</build_depend>
   <build_depend>message_generation</build_depend>
   <build_depend>mk</build_depend>
   <build_depend>nodelet</build_depend>
@@ -67,6 +68,7 @@
   <exec_depend>jsk_rqt_plugins</exec_depend>
   <exec_depend>jsk_topic_tools</exec_depend>
   <exec_depend>libcmt</exec_depend>
+  <exec_depend>libuvc_camera</exec_depend>
   <exec_depend>message_runtime</exec_depend>
   <exec_depend>mk</exec_depend>
   <exec_depend>ml_classifiers</exec_depend>

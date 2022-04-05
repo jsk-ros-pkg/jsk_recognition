@@ -30,6 +30,7 @@ import cv_bridge
 
 import json
 
+import sys
 
 COLORS = [
     (100, 100, 100),
@@ -68,7 +69,7 @@ class DetectFaces(ConnectionBasedTransport):
                 aws_credentials = json.load(f)
         except IOError:
             rospy.logerr('Cannot open "{}".\n Please put region/aws_access_key_id/aws_secret_access_key to aws.json.'.format(aws_credentials_path))
-            raise
+            sys.exit(1)
 
         try:
             aws_access_key_id = aws_credentials['aws_access_key_id']

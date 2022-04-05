@@ -67,7 +67,7 @@ class DetectFaces(ConnectionBasedTransport):
             with open(aws_credentials_path) as f:
                 aws_credentials = json.load(f)
         except IOError:
-            rospy.logerr('Cannot open "{}".\n Pulease put region/aws_access_key_id/aws_secret_access_key to aws.json.'.format(aws_credentials_path))
+            rospy.logerr('Cannot open "{}".\n Please put region/aws_access_key_id/aws_secret_access_key to aws.json.'.format(aws_credentials_path))
             raise
 
         try:

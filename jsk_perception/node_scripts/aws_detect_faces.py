@@ -73,6 +73,7 @@ class DetectFaces(ConnectionBasedTransport):
         try:
             aws_access_key_id = aws_credentials['aws_access_key_id']
             aws_secret_access_key = aws_credentials['aws_secret_access_key']
+            region_name = aws_credentials['region']
         except KeyError:
             print('Invalid config file')
             raise
@@ -80,7 +81,8 @@ class DetectFaces(ConnectionBasedTransport):
         self.rekognition = boto3.client(
             'rekognition',
             aws_access_key_id=aws_access_key_id,
-            aws_secret_access_key=aws_secret_access_key)
+            aws_secret_access_key=aws_secret_access_key,
+            region_name=region_name)
 
         self.bridge = cv_bridge.CvBridge()
 

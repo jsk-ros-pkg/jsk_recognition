@@ -30,6 +30,7 @@ import cv_bridge
 
 import json
 
+import sys
 
 COLORS = [
     (100, 100, 100),
@@ -67,12 +68,13 @@ class DetectFaces(ConnectionBasedTransport):
             with open(aws_credentials_path) as f:
                 aws_credentials = json.load(f)
         except IOError:
-            rospy.logerr('Cannot open "{}".\n Pulease put region/aws_access_key_id/aws_secret_access_key to aws.json.'.format(aws_credentials_path))
-            raise
+            rospy.logerr('Cannot open "{}".\n Please put region/aws_access_key_id/aws_secret_access_key to aws.json.'.format(aws_credentials_path))
+            sys.exit(1)
 
         try:
             aws_access_key_id = aws_credentials['aws_access_key_id']
             aws_secret_access_key = aws_credentials['aws_secret_access_key']
+            region_name = aws_credentials['region']
         except KeyError:
             print('Invalid config file')
             raise
@@ -80,7 +82,8 @@ class DetectFaces(ConnectionBasedTransport):
         self.rekognition = boto3.client(
             'rekognition',
             aws_access_key_id=aws_access_key_id,
-            aws_secret_access_key=aws_secret_access_key)
+            aws_secret_access_key=aws_secret_access_key,
+            region_name=region_name)
 
         self.bridge = cv_bridge.CvBridge()
 

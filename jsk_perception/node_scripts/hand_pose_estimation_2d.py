@@ -29,6 +29,7 @@ if LooseVersion(pkg_resources.get_distribution("torch").version) \
 
 import cv2
 import cv_bridge
+import message_filters
 import jsk_data
 import numpy as np
 import os.path as osp
@@ -39,10 +40,12 @@ import torch
 
 from geometry_msgs.msg import Point
 from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Quaternion
 from jsk_recognition_msgs.msg import HandPose
 from jsk_recognition_msgs.msg import HandPoseArray
 from jsk_topic_tools import ConnectionBasedTransport
 from sensor_msgs.msg import Image
+from sensor_msgs.msg import CameraInfo
 
 
 class HandPoseEstimation2D(ConnectionBasedTransport):
@@ -116,6 +119,10 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
             '~output/vis', Image, queue_size=1)
         self.hand_pose_pub = self.advertise(
             '~output/pose', HandPoseArray, queue_size=1)
+        self.with_depth = rospy.get_param("~with_depth", False)
+        if self.with_depth is True:
+            self.hand_pose_2d_pub = self.advertise(
+            '~output/pose_2d', HandPoseArray, queue_size=1)
         self.bridge = cv_bridge.CvBridge()
 
     @property
@@ -165,13 +172,108 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
         return osp.join(pkgpath, filepath)
 
     def subscribe(self):
-        sub_img = rospy.Subscriber(
-            '~input', Image, self._cb, queue_size=1, buff_size=2**24)
-        self.subs = [sub_img]
+        if self.with_depth:
+            queue_size = rospy.get_param('~queue_size', 10)
+            sub_img = message_filters.Subscriber(
+                '~input', Image, queue_size=1, buff_size=2**24)
+            sub_depth = message_filters.Subscriber(
+                '~input/depth', Image, queue_size=1, buff_size=2**24)
+            self.subs = [sub_img, sub_depth]
+
+            # NOTE: Camera info is not synchronized by default.
+            # See https://github.com/jsk-ros-pkg/jsk_recognition/issues/2165
+            sync_cam_info = rospy.get_param("~sync_camera_info", False)
+            if sync_cam_info:
+                sub_info = message_filters.Subscriber(
+                    '~input/info', CameraInfo, queue_size=1, buff_size=2**24)
+                self.subs.append(sub_info)
+            else:
+                self.sub_info = rospy.Subscriber(
+                    '~input/info', CameraInfo, self._cb_cam_info)
+
+            if rospy.get_param('~approximate_sync', True):
+                slop = rospy.get_param('~slop', 0.1)
+                sync = message_filters.ApproximateTimeSynchronizer(
+                    fs=self.subs, queue_size=queue_size, slop=slop)
+            else:
+                sync = message_filters.TimeSynchronizer(
+                    fs=self.subs, queue_size=queue_size)
+            if sync_cam_info:
+                sync.registerCallback(self._cb_with_depth_info)
+            else:
+                self.camera_info_msg = None
+                sync.registerCallback(self._cb_with_depth)
+        else:
+            sub_img = rospy.Subscriber(
+                '~input', Image, self._cb, queue_size=1, buff_size=2**24)
+            self.subs = [sub_img]
 
     def unsubscribe(self):
         for sub in self.subs:
             sub.unregister()
+        if self.sub_info is not None:
+            self.sub_info.unregister()
+            self.sub_info = None
+
+    def _cb_cam_info(self, msg):
+        self.camera_info_msg = msg
+        self.sub_info.unregister()
+        self.sub_info = None
+        rospy.loginfo("Received camera info")
+
+    def _cb_with_depth(self, img_msg, depth_msg):
+        if self.camera_info_msg is None:
+            return
+        self._cb_with_depth_info(img_msg, depth_msg, self.camera_info_msg)
+
+    def _cb_with_depth_info(self, img_msg, depth_msg, camera_info_msg):
+        br = cv_bridge.CvBridge()
+        img = br.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
+        depth_img = br.imgmsg_to_cv2(depth_msg, 'passthrough')
+        if depth_msg.encoding == '16UC1':
+            depth_img = np.asarray(depth_img, dtype=np.float32)
+            depth_img /= 1000  # convert metric: mm -> m
+        elif depth_msg.encoding != '32FC1':
+            rospy.logerr('Unsupported depth encoding: %s' % depth_msg.encoding)
+
+        hands_points, hands_point_scores, hands_score = self.hand_pose_estimate(img)
+
+        hand_pose_2d_msg = self._create_2d_hand_pose_array_msgs(
+            hands_points,
+            hands_point_scores,
+            hands_score,
+            img_msg.header)
+
+        # calculate xyz-position
+        fx = camera_info_msg.K[0]
+        fy = camera_info_msg.K[4]
+        cx = camera_info_msg.K[2]
+        cy = camera_info_msg.K[5]
+        hand_pose_array_msg = HandPoseArray(header=img_msg.header)
+        for hand in hand_pose_2d_msg.poses:
+            hand_pose_msg = HandPose(hand_score=hand.hand_score)
+            for pose, finger_name, score in zip(
+                    hand.poses, hand.finger_names,
+                    hand.point_scores):
+                u = pose.position.x
+                v = pose.position.y
+                if 0 <= u < depth_img.shape[0] and \
+                   0 <= v < depth_img.shape[1]:
+                    z = float(depth_img[int(v)][int(u)])
+                else:
+                    continue
+                if np.isnan(z):
+                    continue
+                x = (u - cx) * z / fx
+                y = (v - cy) * z / fy
+                hand_pose_msg.finger_names.append(finger_name)
+                hand_pose_msg.poses.append(
+                    Pose(position=Point(x=x, y=y, z=z),
+                         orientation=Quaternion(w=1)))
+                hand_pose_msg.point_scores.append(score)
+            hand_pose_array_msg.poses.append(hand_pose_msg)
+        self.hand_pose_2d_pub.publish(hand_pose_2d_msg)
+        self.hand_pose_pub.publish(hand_pose_array_msg)
 
     def _cb(self, img_msg):
         img = self.bridge.imgmsg_to_cv2(

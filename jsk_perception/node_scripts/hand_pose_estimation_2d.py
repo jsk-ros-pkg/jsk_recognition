@@ -38,6 +38,7 @@ import rospy
 from skimage import feature
 import torch
 
+from image_geometry import PinholeCameraModel
 from geometry_msgs.msg import Point
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import Quaternion
@@ -227,6 +228,8 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
         self._cb_with_depth_info(img_msg, depth_msg, self.camera_info_msg)
 
     def _cb_with_depth_info(self, img_msg, depth_msg, camera_info_msg):
+        camera_model = PinholeCameraModel()
+        camera_model.fromCameraInfo(camera_info_msg)
         br = cv_bridge.CvBridge()
         img = br.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
         depth_img = br.imgmsg_to_cv2(depth_msg, 'passthrough')
@@ -245,10 +248,6 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
             img_msg.header)
 
         # calculate xyz-position
-        fx = camera_info_msg.K[0]
-        fy = camera_info_msg.K[4]
-        cx = camera_info_msg.K[2]
-        cy = camera_info_msg.K[5]
         hand_pose_array_msg = HandPoseArray(header=img_msg.header)
         for hand in hand_pose_2d_msg.poses:
             hand_pose_msg = HandPose(hand_score=hand.hand_score)
@@ -264,8 +263,8 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
                     continue
                 if np.isnan(z):
                     continue
-                x = (u - cx) * z / fx
-                y = (v - cy) * z / fy
+                x = (u - camera_model.cx()) * z / camera_model.fx()
+                y = (v - camera_model.cy()) * z / camera_model.fy()
                 hand_pose_msg.finger_names.append(finger_name)
                 hand_pose_msg.poses.append(
                     Pose(position=Point(x=x, y=y, z=z),

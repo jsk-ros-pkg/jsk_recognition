@@ -112,9 +112,9 @@ def main():
 
     download_data(
         pkg_name=PKG,
-        path='sample/data/hand_pose_estimation_2d.bag',
-        url='https://drive.google.com/uc?id=1yJ2IYNmSO-0n0pE_Rs6FCgDQ8EKiCndr',
-        md5='362df96e8eaacaa82faa05ecebcd2166',
+        path='sample/data/2022-04-07-18-36-43_hand_pose_estimation_2d.bag',
+        url='https://drive.google.com/uc?id=1cyXdDPrdOiee9xOE8fW-3TWDCbCuwLBP',
+        md5='5ab7a29cba0f499b684e767458795be1',
         extract=False,
     )
 

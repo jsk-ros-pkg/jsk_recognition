@@ -1,4 +1,4 @@
-oWANG-SRH-2019-07.hand_pose_estimation_2d.py
+hand_pose_estimation_2d.py
 ==========================
 
 

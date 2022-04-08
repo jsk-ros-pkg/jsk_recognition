@@ -42,7 +42,7 @@ Publishing Topic
 
   If ``with_depth`` is false, publish 2D joint position in image.
 
-* ``~output/pose2d`` (``jsk_recognition_msgs/HandPoseArray``)
+* ``~output/pose_2d`` (``jsk_recognition_msgs/HandPoseArray``)
 
   If ``with_depth`` is true, publish 2D joint position.
 

@@ -98,9 +98,18 @@ Parameters
 Example
 -------
 
+For 2d hand pose detection.
+
 .. code-block:: bash
 
    roslaunch jsk_perception sample_hand_pose_estimation_2d.launch gpu:=0
+
+
+For 3d hand pose detection.
+
+.. code-block:: bash
+
+   roslaunch jsk_perception sample_hand_pose_estimation_3d.launch gpu:=0
 
 
 Reference

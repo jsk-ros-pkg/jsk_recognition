@@ -77,6 +77,8 @@
   <exec_depend>openni2_launch</exec_depend>
   <exec_depend>pcl_ros</exec_depend>
   <exec_depend>posedetection_msgs</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-boto3</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-boto3</exec_depend>
   <!-- install chainer {{ -->
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-h5py</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-h5py</exec_depend>

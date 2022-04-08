@@ -44,6 +44,9 @@ from geometry_msgs.msg import Pose
 from geometry_msgs.msg import Quaternion
 from jsk_recognition_msgs.msg import HandPose
 from jsk_recognition_msgs.msg import HandPoseArray
+from jsk_recognition_msgs.msg import HumanSkeleton
+from jsk_recognition_msgs.msg import HumanSkeletonArray
+from jsk_recognition_msgs.msg import Segment
 from jsk_topic_tools import ConnectionBasedTransport
 from sensor_msgs.msg import Image
 from sensor_msgs.msg import CameraInfo
@@ -100,6 +103,15 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
         "little_tip",
     ]
 
+    FINGERNAME2INDEX = {name: i for i, name in enumerate(INDEX2FINGERNAME)}
+    NUMBER_OF_FINGERS = 5
+    NUMBER_OF_FINGER_JOINT = 3
+    CONNECTION_PAIR = [(0, 1), (0, 1), (1, 2), (2, 3),
+                       (0, 5), (4, 5), (5, 6), (6, 7),
+                       (0, 9), (8, 9), (9, 10), (10, 11),
+                       (0, 13), (12, 13), (13, 14), (14, 15),
+                       (0, 17), (16, 17), (17, 18), (18, 19)]
+
     def __init__(self):
         super(self.__class__, self).__init__()
         self.backend = rospy.get_param('~backend', 'torch')
@@ -124,6 +136,8 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
         if self.with_depth is True:
             self.hand_pose_2d_pub = self.advertise(
             '~output/pose_2d', HandPoseArray, queue_size=1)
+            self.skeleton_pub = self.advertise(
+                '~skeleton', HumanSkeletonArray, queue_size=1)
         self.bridge = cv_bridge.CvBridge()
 
     @property
@@ -249,6 +263,7 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
 
         # calculate xyz-position
         hand_pose_array_msg = HandPoseArray(header=img_msg.header)
+
         for hand in hand_pose_2d_msg.poses:
             hand_pose_msg = HandPose(hand_score=hand.hand_score)
             for pose, finger_name, score in zip(
@@ -271,8 +286,33 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
                          orientation=Quaternion(w=1)))
                 hand_pose_msg.point_scores.append(score)
             hand_pose_array_msg.poses.append(hand_pose_msg)
+
+        # prepare HumanSkeletonArray for visualization.
+        skeleton_array_msg = HumanSkeletonArray(header=img_msg.header)
+        for hand_pose_msg in hand_pose_array_msg.poses:
+            hand_joint_index_to_list_index = {
+                self.FINGERNAME2INDEX[name]: i
+                for i, name in enumerate(hand_pose_msg.finger_names)}
+            skeleton_msg = HumanSkeleton(header=img_msg.header)
+            for index_a, index_b in self.CONNECTION_PAIR:
+                if index_a not in hand_joint_index_to_list_index \
+                   or index_b not in hand_joint_index_to_list_index:
+                    continue
+                joint_a_index = hand_joint_index_to_list_index[index_a]
+                joint_b_index = hand_joint_index_to_list_index[index_b]
+                bone = Segment(
+                    start_point=hand_pose_msg.poses[joint_a_index].position,
+                    end_point=hand_pose_msg.poses[joint_b_index].position)
+                bone_name = '{}->{}'.format(
+                    self.INDEX2FINGERNAME[index_a],
+                    self.INDEX2FINGERNAME[index_b])
+                skeleton_msg.bones.append(bone)
+                skeleton_msg.bone_names.append(bone_name)
+            skeleton_array_msg.skeletons.append(skeleton_msg)
+
         self.hand_pose_2d_pub.publish(hand_pose_2d_msg)
         self.hand_pose_pub.publish(hand_pose_array_msg)
+        self.skeleton_pub.publish(skeleton_array_msg)
 
     def _cb(self, img_msg):
         img = self.bridge.imgmsg_to_cv2(

@@ -2,15 +2,21 @@
 
   <arg name="gui" default="true" />
   <arg name="gpu" default="-1" />
-  <arg name="INPUT_IMAGE" default="/usb_cam/image_raw" />
+  <arg name="INPUT_IMAGE" default="/kinect_head/rgb/image_rect_color" />
+  <arg name="INPUT_DEPTH_IMAGE" default="/kinect_head/depth_registered/hw_registered/image_rect" />
+  <arg name="INPUT_CAMERA_INFO" default="/kinect_head/rgb/camera_info" />
+  <arg name="with_depth" default="false" />
 
   <node name="hand_pose_estimation_2d"
         pkg="jsk_perception" type="hand_pose_estimation_2d.py"
         output="screen">
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~input/depth" to="$(arg INPUT_DEPTH_IMAGE)" />
+    <remap from="~input/info" to="$(arg INPUT_CAMERA_INFO)" />
     <rosparam subst_value="true">
       gpu: $(arg gpu)
       model_file: $(find jsk_perception)/trained_data/SRHandNet.pts
+      with_depth: $(arg with_depth)
     </rosparam>
   </node>
 

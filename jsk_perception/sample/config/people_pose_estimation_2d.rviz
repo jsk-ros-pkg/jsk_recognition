@@ -67,9 +67,7 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 4096
       Min Color: 0; 0; 0
-      Min Intensity: 0
       Name: PointCloud2
       Position Transformer: XYZ
       Queue Size: 10
@@ -93,17 +91,6 @@ Visualization Manager:
       Topic: /people_poses_to_poses/output
       Unreliable: false
       Value: true
-    - Arrow Length: 0.30000001192092896
-      Axes Length: 0.10000000149011612
-      Axes Radius: 0.009999999776482582
-      Class: jsk_rviz_plugin/PoseArray
-      Color: 255; 25; 0
-      Enabled: false
-      Name: PoseArray1
-      Shape: Axes
-      Topic: /people_poses_to_poses1/output
-      Unreliable: false
-      Value: false
     - Class: rviz/Image
       Enabled: true
       Image Topic: /people_pose_estimation_2d/output

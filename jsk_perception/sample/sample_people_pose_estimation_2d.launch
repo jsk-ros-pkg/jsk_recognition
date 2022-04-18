@@ -2,42 +2,70 @@
 
   <arg name="gui" default="true" />
   <arg name="gpu" default="-1" />
+  <arg name="coral" default="false" />
   <arg name="INPUT_IMAGE" default="/camera/rgb/image_rect_color" />
   <arg name="INPUT_DEPTH_IMAGE" default="/camera/depth_registered/hw_registered/image_rect_raw" />
   <arg name="INPUT_CAMERA_INFO" default="/camera/rgb/camera_info" />
-  <arg name="LIMB_PART" default="RHand" />
+  <arg name="LIMB_PART" default="right wrist" if="$(arg coral)"/>
+  <arg name="LIMB_PART" default="RHand" unless="$(arg coral)"/>
 
   <include file="$(find jsk_perception)/sample/include/play_rosbag_people.xml" />
 
-  <node name="people_pose_estimation_2d"
-        pkg="jsk_perception" type="people_pose_estimation_2d.py"
-        output="screen">
-    <remap from="~input" to="$(arg INPUT_IMAGE)" />
-    <remap from="~input/info" to="$(arg INPUT_CAMERA_INFO)" />
-    <remap from="~input/depth" to="$(arg INPUT_DEPTH_IMAGE)" />
-    <rosparam subst_value="true">
-      gpu: $(arg gpu)
-      model_file: $(find jsk_perception)/trained_data/pose_estimation_2d_chainermodel.pkl
-      hand:
-        enable: true
-        model_file: $(find jsk_perception)/trained_data/pose_estimation_2d_hand.chainermodel
-      with_depth: true
-      scales: [0.38]
-      stride: 8
-    </rosparam>
-  </node>
 
-  <node name="people_pose_2d_to_3d"
-        pkg="jsk_perception" type="people_pose_2d_to_3d.py"
-        output="screen">
-    <remap from="~input/pose" to="people_pose_estimation_2d/pose_2d" />
-    <remap from="~input/info" to="$(arg INPUT_CAMERA_INFO)" />
-    <remap from="~input/depth" to="$(arg INPUT_DEPTH_IMAGE)" />
-    <rosparam subst_value="true">
-      approximate_sync: true
-      queue_size: 500
-    </rosparam>
-  </node>
+  <!-- Coral TPU -->
+  <group if="$(arg coral)">
+    <node name="people_pose_estimation_2d"
+          pkg="coral_usb" type="edgetpu_human_pose_estimator.py"
+          output="screen" respawn="true">
+      <remap from="~input" to="$(arg INPUT_IMAGE)" />
+      <rosparam subst_value="true" >
+        model_file: package://coral_usb/python/coral_usb/posenet/models/mobilenet/posenet_mobilenet_v1_075_481_641_quant_decoder_edgetpu.tflite
+        image_transport: raw 
+        enable_visualization: true 
+        device_id: 0 
+      </rosparam>
+    </node>
+    <node name="people_pose_2d_to_3d"
+          pkg="jsk_perception" type="people_pose_2d_to_3d.py"
+          output="screen">
+      <remap from="~input/pose" to="people_pose_estimation_2d/output/poses" />
+      <remap from="~input/info" to="$(arg INPUT_CAMERA_INFO)" />
+      <remap from="~input/depth" to="$(arg INPUT_DEPTH_IMAGE)" />
+      <rosparam subst_value="true">
+        approximate_sync: true
+        queue_size: 500
+      </rosparam>
+    </node>
+    <node name="people_pose_2d_output_relay"
+          pkg="topic_tools" type="relay" 
+          args="people_pose_estimation_2d/output/image people_pose_estimation_2d/output"
+          output="screen"/>
+    <node name="people_pose_3d_relay"
+          pkg="topic_tools" type="relay" 
+          args="people_pose_2d_to_3d/output/pose people_pose_estimation_2d/pose"
+          output="screen"/>
+  </group>
+
+  <!-- GPU or CPU -->
+  <group unless="$(arg coral)">
+    <node name="people_pose_estimation_2d"
+          pkg="jsk_perception" type="people_pose_estimation_2d.py"
+          output="screen">
+      <remap from="~input" to="$(arg INPUT_IMAGE)" />
+      <remap from="~input/info" to="$(arg INPUT_CAMERA_INFO)" />
+      <remap from="~input/depth" to="$(arg INPUT_DEPTH_IMAGE)" />
+      <rosparam subst_value="true">
+        gpu: $(arg gpu)
+        model_file: $(find jsk_perception)/trained_data/pose_estimation_2d_chainermodel.pkl
+        hand:
+          enable: true
+          model_file: $(find jsk_perception)/trained_data/pose_estimation_2d_hand.chainermodel
+        with_depth: true
+        scales: [0.38]
+        stride: 8
+      </rosparam>
+    </node>
+  </group>
 
   <node name="people_mask_publisher"
         pkg="jsk_perception" type="people_mask_publisher.py"
@@ -54,11 +82,6 @@
   <node name="people_poses_to_poses"
         pkg="jsk_recognition_msgs" type="people_pose_array_to_pose_array.py">
     <remap from="~input" to="people_pose_estimation_2d/pose" />
-  </node>
-
-  <node name="people_poses_to_poses1"
-        pkg="jsk_recognition_msgs" type="people_pose_array_to_pose_array.py">
-    <remap from="~input" to="people_pose_2d_to_3d/output/pose" />
   </node>
 
   <group if="$(arg gui)" >

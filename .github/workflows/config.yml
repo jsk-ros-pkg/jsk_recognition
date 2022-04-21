@@ -1,0 +1,106 @@
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+env:
+  DISPLAY: ':0.0'
+
+jobs:
+  ros:
+    runs-on: ubuntu-latest
+    container: ubuntu:18.04
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - ROS_DISTRO: indigo
+            USE_DEB: true
+            NOT_TEST_INSTALL : true
+            USE_JENKINS: true
+            DOCKER_IMAGE_JENKINS: ros-ubuntu:14.04-pcl
+            BEFORE_SCRIPT : "sudo pip install numpy==1.16.6; sudo pip install fcn chainercv chainer-mask-rcnn==0.3.0 decorator==4.4.2 chainer==6.7.0 cupy-cuda91; sudo pip install requests[socks]==2.25.1"
+            experimental : false
+          - ROS_DISTRO: kinetic
+            USE_DEB: true
+            NOT_TEST_INSTALL : true
+            USE_JENKINS: true
+            DOCKER_IMAGE_JENKINS: ros-ubuntu:16.04-pcl
+            BEFORE_SCRIPT : "sudo pip install numpy==1.16.6; sudo pip install fcn chainercv chainer-mask-rcnn==0.3.0 decorator==4.4.2 chainer==6.7.0 cupy-cuda91;"
+            experimental : false
+          - ROS_DISTRO: melodic
+            USE_DEB: true
+            NOT_TEST_INSTALL : true
+            USE_JENKINS: true
+            DOCKER_IMAGE_JENKINS: ros-ubuntu:18.04-pcl
+            BEFORE_SCRIPT : "sudo pip install numpy==1.16.6; sudo pip install fcn chainercv chainer-mask-rcnn==0.3.0 decorator==4.4.2 chainer==6.7.0 cupy-cuda91;"
+            experimental : false
+          - ROS_DISTRO: melodic
+            USE_DEB: true
+            NOT_TEST_INSTALL : true
+            USE_JENKINS: true
+            DOCKER_IMAGE_JENKINS: ros-ubuntu:18.04-pcl
+            # check https://github.com/jsk-ros-pkg/jsk_recognition/pull/2533
+            BEFORE_SCRIPT : "sudo pip uninstall -y fcn chainer chainercv decorator cupy-cuda91; sudo ln -sf /bin/echo /usr/local/bin/pip; sudo ln -sf /bin/echo /usr/local/bin/pip2"
+            TEST_PKGS : "jsk_recognition_msgs"
+            experimental : false
+          - ROS_DISTRO: noetic
+            USE_DEB: false
+            NOT_TEST_INSTALL : true
+            USE_JENKINS: true
+            DOCKER_IMAGE_JENKINS: ros-ubuntu:20.04-pcl
+            TEST_PKGS : 'jsk_recognition_msgs' # to skip test
+            BEFORE_SCRIPT : "sudo pip install numpy==1.16.6; sudo pip install fcn chainercv chainer-mask-rcnn==0.3.0 decorator==4.4.2 chainer==6.7.0 cupy-cuda91;"
+            experimental : false
+          - ROS_DISTRO: noetic
+            USE_DEB: false
+            NOT_TEST_INSTALL : true
+            USE_JENKINS: true
+            DOCKER_IMAGE_JENKINS: ros-ubuntu:20.04-pcl
+            BEFORE_SCRIPT : "sudo pip install numpy==1.16.6; sudo pip install fcn chainercv chainer-mask-rcnn==0.3.0 decorator==4.4.2 chainer==6.7.0 cupy-cuda91;"
+            experimental : true
+
+
+    steps:
+      - name: Install latest git ( use sudo for ros-ubuntu )
+        run: |
+          (apt-get update && apt-get install -y sudo) || echo "OK"
+          sudo apt-get update && sudo apt-get install -y software-properties-common && sudo apt-get update && sudo add-apt-repository -y ppa:git-core/ppa && sudo apt-get update && sudo apt-get install -y git
+
+      - name: work around permission issue  # https://github.com/actions/checkout/issues/760#issuecomment-1097501613
+        run: |
+          set -x
+          export USER=$(whoami)
+          if [ "${{ matrix.CONTAINER }}" = "jskrobotics/ros-ubuntu:*" ]; then
+             git config --global --add safe.directory $GITHUB_WORKSPACE || echo "OK" # Show 'could not lock config file /github/home/.gitconfig: Permission denied', but it is ok
+             sudo mkdir -p /__w/
+             sudo chmod 777 -R /__w/
+             sudo chown -R $USER $HOME
+             # sudo mkdir -p /home/runner/work/_temp/_github_workflow/
+             # sudo chown -R $USER $HOME /home/runner/work/_temp/_github_workflow/
+             # ls -al /home/runner/work/_temp/_github_workflow/
+          else
+             git config --global --add safe.directory $GITHUB_WORKSPACE
+          fi
+
+      - name: Chcekout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
+      - name: Run jsk_travis
+        uses: jsk-ros-pkg/jsk_travis@master
+        with:
+          ROS_PARALLEL_JOBS : "-j8"
+          ROS_PARALLEL_TEST_JOBS : "-j4"
+          CATKIN_PARALLEL_TEST_JOBS : "-p1"
+          ROS_DISTRO : ${{ matrix.ROS_DISTRO }}
+          USE_DEB :  ${{ matrix.USE_DEB }}
+          NOT_TEST_INSTALL : ${{ matrix.NOT_TEST_INSTALL }}
+          TEST_PKGS : ${{ matrix.TEST_PKGS }}
+          BEFORE_SCRIPT : ${{ matrix.BEFORE_SCRIPT }}
+          EXTRA_DEB : ${{ matrix.EXTRA_DEB }}
+          USE_JENKINS : ${{ matrix.USE_JENKINS }}
+          DOCKER_IMAGE_JENKINS : ${{ matrix.DOCKER_IMAGE_JENKINS }}

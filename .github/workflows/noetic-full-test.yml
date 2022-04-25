@@ -15,6 +15,10 @@ jobs:
     steps:
       - name: Install latest git ( use sudo for ros-ubuntu, remove sudo for ubntu container), checkout@v2 uses REST API for git<2.18, which removes .git folder and does not checkkout .travis submodules
         run: apt-get update && apt-get install -y software-properties-common && apt-get update && add-apt-repository -y ppa:git-core/ppa && apt-get update && apt-get install -y git
+      - name: work around permission issue  # https://github.com/actions/checkout/issues/760#issuecomment-1097501613
+        run: |
+          set -x
+          git config --global --add safe.directory $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
         with:

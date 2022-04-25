@@ -11,7 +11,7 @@
   <test test-name="preprocess_gray_image_test" pkg="rostest" type="hztest" name="preprocess_gray_image_test" >
     <param name="topic" value="/preprocess_gray_image/output_normalized" />
     <param name="hz" value="470" />
-    <param name="hzerror" value="200.0" />
+    <param name="hzerror" value="300.0" />
     <param name="test_duration" value="5.0" />
   </test>
 </launch>

@@ -5,12 +5,45 @@ import cv2
 import cv_bridge
 import geometry_msgs.msg
 from image_geometry.cameramodels import PinholeCameraModel
+from jsk_recognition_msgs.msg import BoundingBox
+from jsk_recognition_msgs.msg import BoundingBoxArray
+from jsk_topic_tools import ConnectionBasedTransport
 import message_filters
 import numpy as np
 import rospy
 import sensor_msgs.msg
-from tf.transformations import unit_vector, superimposition_matrix, quaternion_from_matrix
-from jsk_topic_tools import ConnectionBasedTransport
+import std_msgs.msg
+from tf.transformations import quaternion_from_matrix
+from tf.transformations import unit_vector as normalize_vector
+
+
+def outer_product_matrix(v):
+    return np.array([[0, -v[2], v[1]],
+                     [v[2], 0, -v[0]],
+                     [-v[1], v[0], 0]])
+
+
+def cross_product(a, b):
+    return np.dot(outer_product_matrix(a), b)
+
+
+def rotation_matrix_from_axis(
+        first_axis=(1, 0, 0), second_axis=(0, 1, 0), axes='xy'):
+    if axes not in ['xy', 'yx', 'xz', 'zx', 'yz', 'zy']:
+        raise ValueError("Valid axes are 'xy', 'yx', 'xz', 'zx', 'yz', 'zy'.")
+    e1 = normalize_vector(first_axis)
+    e2 = normalize_vector(second_axis - np.dot(second_axis, e1) * e1)
+    if axes in ['xy', 'zx', 'yz']:
+        third_axis = cross_product(e1, e2)
+    else:
+        third_axis = cross_product(e2, e1)
+    e3 = normalize_vector(
+        third_axis - np.dot(third_axis, e1) * e1 - np.dot(third_axis, e2) * e2)
+    first_index = ord(axes[0]) - ord('x')
+    second_index = ord(axes[1]) - ord('x')
+    third_index = ((first_index + 1) ^ (second_index + 1)) - 1
+    indices = [first_index, second_index, third_index]
+    return np.vstack([e1, e2, e3])[np.argsort(indices)].T
 
 
 def area(poly):
@@ -158,6 +191,10 @@ class PaperFinder(ConnectionBasedTransport):
         self.pose_array_pub = self.advertise('~output/pose',
                                              geometry_msgs.msg.PoseArray,
                                              queue_size=1)
+        self.bounding_box_array_pub = self.advertise(
+            '~output/box', BoundingBoxArray, queue_size=1)
+        self.length_array_pub = self.advertise(
+            '~output/length', std_msgs.msg.Float32MultiArray, queue_size=1)
         self.bridge = cv_bridge.CvBridge()
         self.camera_info_msg = None
 
@@ -259,6 +296,7 @@ class PaperFinder(ConnectionBasedTransport):
         xyzs = np.concatenate([x, y, z], axis=3)
         new_squares = []
         valid_xyz_corners = []
+        length_array_for_publish = std_msgs.msg.Float32MultiArray()
         for si, xyz in enumerate(xyzs):
             xyz_org = xyz.reshape(4, 3)
             xyz = np.concatenate([xyz, xyz], axis=0)
@@ -283,6 +321,13 @@ class PaperFinder(ConnectionBasedTransport):
             _c = (np.sqrt(np.sum((xyz_org[2] - xyz_org[3]) ** 2)))
             _d = (np.sqrt(np.sum((xyz_org[3] - xyz_org[0]) ** 2)))
             tmp = sorted([_a, _b, _c, _d])
+            length_array = []
+            length_array.append(_a)
+            length_array.append(_b)
+            length_array.append(_c)
+            length_array.append(_d)
+            length_array_for_publish = std_msgs.msg.Float32MultiArray(
+                data=length_array)
             if abs(tmp[0] - self.rect_x) > self.length_tolerance or \
                abs(tmp[1] - self.rect_x) > self.length_tolerance or \
                abs(tmp[2] - self.rect_y) > self.length_tolerance or \
@@ -292,8 +337,10 @@ class PaperFinder(ConnectionBasedTransport):
             if abs(self.area_size - area_value) < self.area_tolerance:
                 new_squares.append(squares[si])
                 valid_xyz_corners.append(xyz_org)
+        self.length_array_pub.publish(length_array_for_publish)
 
         pose_array_msg = geometry_msgs.msg.PoseArray(header=img_msg.header)
+        bounding_box_array_msg = BoundingBoxArray(header=img_msg.header)
         for xyz in valid_xyz_corners:
             center = np.mean(xyz, axis=0)
 
@@ -305,12 +352,16 @@ class PaperFinder(ConnectionBasedTransport):
             if normal[2] < 0:
                 normal *= -1.0
             normal = normal / np.linalg.norm(normal)
-            #
-            e1 = normal
-            e2 = unit_vector(vec_a)
-            e3 = np.cross(e1, e2)
-            M = superimposition_matrix([e1,e2,e3],((1,0,0),(0,1,0),(0,0,1)))
+            M = np.eye(4)
+            M[:3, :3] = rotation_matrix_from_axis(
+                normal, vec_a)
             q_xyzw = quaternion_from_matrix(M)
+            _a = (np.sqrt(np.sum((xyz[0] - xyz[1]) ** 2)))
+            _b = (np.sqrt(np.sum((xyz[1] - xyz[2]) ** 2)))
+            _c = (np.sqrt(np.sum((xyz[2] - xyz[3]) ** 2)))
+            _d = (np.sqrt(np.sum((xyz[3] - xyz[0]) ** 2)))
+            lengths = np.array([_a, _b, _c, _d])
+            indices = np.argsort(lengths)
 
             pose = geometry_msgs.msg.Pose()
             pose.position.x = center[0]
@@ -321,6 +372,21 @@ class PaperFinder(ConnectionBasedTransport):
             pose.orientation.z = q_xyzw[2]
             pose.orientation.w = q_xyzw[3]
             pose_array_msg.poses.append(pose)
+            bounding_box_array = BoundingBox(header=img_msg.header)
+            bounding_box_array.pose.position.x = center[0]
+            bounding_box_array.pose.position.y = center[1]
+            bounding_box_array.pose.position.z = center[2]
+            bounding_box_array.pose.orientation.x = q_xyzw[0]
+            bounding_box_array.pose.orientation.y = q_xyzw[1]
+            bounding_box_array.pose.orientation.z = q_xyzw[2]
+            bounding_box_array.pose.orientation.w = q_xyzw[3]
+            bounding_box_array.dimensions.x = 0.01
+            bounding_box_array.dimensions.y = (
+                lengths[indices[0]] + lengths[indices[1]]) / 2.0
+            bounding_box_array.dimensions.z = (
+                lengths[indices[2]] + lengths[indices[3]]) / 2.0
+            bounding_box_array_msg.boxes.append(bounding_box_array)
+        self.bounding_box_array_pub.publish(bounding_box_array_msg)
         self.pose_array_pub.publish(pose_array_msg)
 
         if self.visualize:

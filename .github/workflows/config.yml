@@ -104,3 +104,4 @@ jobs:
           EXTRA_DEB : ${{ matrix.EXTRA_DEB }}
           USE_JENKINS : ${{ matrix.USE_JENKINS }}
           DOCKER_IMAGE_JENKINS : ${{ matrix.DOCKER_IMAGE_JENKINS }}
+          TIMEOUT_JENKINS : 180

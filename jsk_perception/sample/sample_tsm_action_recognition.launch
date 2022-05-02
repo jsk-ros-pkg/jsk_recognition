@@ -1,0 +1,37 @@
+<launch>
+
+  <arg name="gui" default="true" />
+  <arg name="GPU" default="0" />
+  <arg name="INPUT_IMAGE" default="usb_cam_node/image_raw" />
+
+  <include file="$(find jsk_perception)/sample/include/play_rosbag_hand_gesture.xml"/>
+
+  <node name="tsm_action_recognition_node"
+        pkg="jsk_perception" type="tsm_action_recognition_node.py" output="screen" >
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <rosparam command="load"
+              file="$(find jsk_perception)/trained_data/tsm_action_recognition_jester_classnames.yaml" />
+    <rosparam subst_value="true">
+      gpu: $(arg GPU)
+      pretrained_model: $(find jsk_perception)/trained_data/tsm-action-recognition-for-jester.pth
+    </rosparam>
+  </node>
+
+  <node name="tsm_gesture_recognition_node"
+        pkg="jsk_perception" type="tsm_gesture_recognition_node.py" output="screen" >
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~input/class" to="tsm_action_recognition_node/output/class" />
+    <rosparam subst_value="true">
+      approximate_sync: false
+      queue_size: 30
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)" >
+    <node name="image_view"
+          pkg="image_view" type="image_view" >
+      <remap from="image" to="tsm_gesture_recognition_node/output/viz" />
+    </node>
+  </group>
+
+</launch>

@@ -1,0 +1,24 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_tsm_action_recognition.launch">
+    <arg name="gui" value="false" />
+    <arg name="GPU" value="-1" />
+  </include>
+
+  <test test-name="test_tsm_action_recognition"
+        name="test_tsm_action_recognition"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /tsm_action_recognition_node/output/viz
+      timeout_0: 60
+      topic_1: /tsm_action_recognition_node/output/class
+      timeout_1: 60
+      topic_2: /tsm_gesture_recognition_node/output/viz
+      timeout_2: 60
+      topic_3: /tsm_gesture_recognition_node/output/class
+      timeout_3: 60
+    </rosparam>
+  </test>
+
+</launch>

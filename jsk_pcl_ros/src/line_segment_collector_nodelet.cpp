@@ -161,6 +161,10 @@ namespace jsk_pcl_ros
     onInitPostProcess();
   }
 
+  LineSegmentCollector::~LineSegmentCollector() {
+    sync_.reset();
+  }
+
   void LineSegmentCollector::configCallback(Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mutex_);

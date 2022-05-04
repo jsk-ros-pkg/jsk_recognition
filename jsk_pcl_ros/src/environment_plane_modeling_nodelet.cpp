@@ -115,6 +115,10 @@ namespace jsk_pcl_ros
     onInitPostProcess();
   }
 
+  EnvironmentPlaneModeling::~EnvironmentPlaneModeling() {
+    sync_.reset();
+  }
+
   void EnvironmentPlaneModeling::configCallback(Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mutex_);

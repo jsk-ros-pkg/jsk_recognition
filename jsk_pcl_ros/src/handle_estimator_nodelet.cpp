@@ -60,6 +60,10 @@ namespace jsk_pcl_ros
     onInitPostProcess();
   }
 
+  HandleEstimator::~HandleEstimator() {
+    sync_.reset();
+  }
+
   void HandleEstimator::subscribe()
   {
     sub_index_ = pnh_->subscribe<jsk_recognition_msgs::Int32Stamped>("selected_index", 1, boost::bind( &HandleEstimator::selectedIndexCallback, this, _1));

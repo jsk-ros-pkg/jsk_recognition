@@ -402,6 +402,16 @@ namespace jsk_pcl_ros
     onInitPostProcess();
   }
 
+  EuclideanClustering::~EuclideanClustering() {
+    if (multi_) {
+      if (approximate_sync_) {
+        async_.reset();
+      } else {
+        sync_.reset();
+      }
+    }
+  }
+
   void EuclideanClustering::subscribe()
   {
     ////////////////////////////////////////////////////////

@@ -48,6 +48,10 @@ namespace jsk_pcl_ros
     onInitPostProcess();
   }
 
+  FindObjectOnPlane::~FindObjectOnPlane() {
+    sync_.reset();
+  }
+
   void FindObjectOnPlane::subscribe()
   {
     sub_image_.subscribe(*pnh_, "input", 1);

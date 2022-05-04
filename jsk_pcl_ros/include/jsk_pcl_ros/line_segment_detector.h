@@ -95,7 +95,11 @@ namespace jsk_pcl_ros
     }
     ~LineSegmentDetector()
     {
-      sync_.reset();
+      if (approximate_sync_) {
+        async_.reset();
+      } else {
+        sync_.reset();
+      }
       srv_.reset();
     }
     typedef message_filters::sync_policies::ExactTime<

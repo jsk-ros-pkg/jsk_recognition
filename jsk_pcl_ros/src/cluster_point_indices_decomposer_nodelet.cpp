@@ -120,6 +120,22 @@ namespace jsk_pcl_ros
     onInitPostProcess();
   }
 
+  ClusterPointIndicesDecomposer::~ClusterPointIndicesDecomposer() {
+    if (align_boxes_ && align_boxes_with_plane_) {
+      if (use_async_) {
+        async_align_.reset();
+      } else {
+        sync_align_.reset();
+      }
+    } else {
+      if (use_async_) {
+        async_.reset();
+      } else {
+        sync_.reset();
+      }
+    }
+  }
+
   void ClusterPointIndicesDecomposer::configCallback(Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock(mutex_);

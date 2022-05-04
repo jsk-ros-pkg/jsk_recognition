@@ -57,6 +57,7 @@ namespace jsk_pcl_ros
       sensor_msgs::PointCloud2,
       sensor_msgs::Image > SyncPolicy;
     AddColorFromImageToOrganized(): DiagnosticNodelet("AddColorFromImageToOrganized") { }
+    virtual ~AddColorFromImageToOrganized();
   protected:
     virtual void onInit();
     virtual void subscribe();

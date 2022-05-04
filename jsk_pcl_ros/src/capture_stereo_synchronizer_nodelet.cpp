@@ -65,6 +65,10 @@ namespace jsk_pcl_ros
     onInitPostProcess();
  }
 
+  CaptureStereoSynchronizer::~CaptureStereoSynchronizer() {
+    sync_.reset();
+  }
+
   bool CaptureStereoSynchronizer::checkNearPose(
     const geometry_msgs::Pose& new_pose)
   {

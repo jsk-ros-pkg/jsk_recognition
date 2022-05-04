@@ -234,6 +234,15 @@ namespace jsk_pcl_ros
     onInitPostProcess();
   }
 
+  ParticleFilterTracking::~ParticleFilterTracking() {
+    if (use_change_detection_) {
+      change_sync_.reset();
+    }
+    if (align_box_) {
+      sync_.reset();
+    }
+  }
+
   void ParticleFilterTracking::config_callback(Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mtx_);

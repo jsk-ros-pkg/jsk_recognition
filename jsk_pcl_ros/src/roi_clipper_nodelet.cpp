@@ -58,6 +58,12 @@ namespace jsk_pcl_ros
     onInitPostProcess();
   }
 
+  ROIClipper::~ROIClipper() {
+    if (!not_sync_) {
+      sync_.reset();
+    }
+  }
+
   void ROIClipper::subscribe()
   {
     if (!not_sync_) {

@@ -403,6 +403,10 @@ namespace jsk_pcl_ros
     onInitPostProcess();
   }
 
+  EdgebasedCubeFinder::~EdgebasedCubeFinder() {
+    sync_.reset();
+  }
+
   void EdgebasedCubeFinder::subscribe()
   {
     ////////////////////////////////////////////////////////

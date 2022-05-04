@@ -51,6 +51,10 @@ namespace jsk_pcl_ros
     onInitPostProcess();
   }
 
+  AddColorFromImage::~AddColorFromImage() {
+    sync_.reset();
+  }
+
   void AddColorFromImage::subscribe()
   {
     sub_cloud_.subscribe(*pnh_, "input", 1);

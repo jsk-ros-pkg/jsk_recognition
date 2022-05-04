@@ -64,6 +64,12 @@ namespace jsk_pcl_ros
     onInitPostProcess();
   }
 
+  BoundingBoxFilter::~BoundingBoxFilter() {
+    if (with_indices_) {
+      sync_.reset();
+    }
+  }
+
   void BoundingBoxFilter::subscribe()
   {
     sub_box_.subscribe(*pnh_, "input_box", 1);

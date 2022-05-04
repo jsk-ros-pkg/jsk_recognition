@@ -6,13 +6,15 @@
 
   <test test-name="test_project_image_point"
         name="test_project_image_point"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /project_image_point/output
       timeout_0: 30
       topic_1: /project_image_point/output/ray
       timeout_1: 30
+      check_after_kill_node: true
+      node_names: [project_image_point,]
     </rosparam>
   </test>
 

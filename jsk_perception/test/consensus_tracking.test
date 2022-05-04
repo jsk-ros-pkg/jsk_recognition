@@ -6,13 +6,15 @@
 
   <test test-name="test_consensus_tracking"
         name="test_consensus_tracking"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /consensus_tracking/output/mask
       timeout_0: 30
       topic_1: /consensus_tracking/debug/image
       timeout_1: 30
+      check_after_kill_node: true
+      node_names: [consensus_tracking,]
     </rosparam>
   </test>
 

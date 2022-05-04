@@ -1,5 +1,12 @@
 <launch>
   <arg name="gui" default="true"/>
+  <arg name="launch_manager" default="true" />
+
+  <arg name="MANAGER" default="sample_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet" args="manager"
+        if="$(arg launch_manager)"
+        output="screen" />
 
   <include file="$(find jsk_perception)/sample/sample_image_publisher.launch">
     <arg name="gui" value="false"/>
@@ -49,7 +56,8 @@
 
   <node name="tabletop_color_difference_likelihood"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_perception/TabletopColorDifferenceLikelihood">
+        args="load jsk_perception/TabletopColorDifferenceLikelihood $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input" to="raw_image_rgb/image_color"/>
     <remap from="~input/polygons" to="polygon_array_publisher/output"/>
     <remap from="~input/camera_info" to="raw_image_rgb/camera_info"/>

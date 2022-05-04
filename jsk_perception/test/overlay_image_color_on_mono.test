@@ -6,10 +6,12 @@
 
   <test test-name="test_overlay_image_color_on_mono"
         name="test_overlay_image_color_on_mono"
-        pkg="jsk_tools" type="test_topic_published.py">
+        pkg="jsk_recognition_utils" type="test_topic_published.py">
     <rosparam>
       topic_0: /overlay_image_color_on_mono/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [overlay_image_color_on_mono,]
     </rosparam>
   </test>
 

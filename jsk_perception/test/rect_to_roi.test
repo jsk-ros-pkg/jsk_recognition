@@ -6,11 +6,13 @@
 
   <test test-name="test_rect_to_roi"
         name="test_rect_to_roi"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /polygon_rect_to_roi/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [polygon_rect_to_roi,]
     </rosparam>
   </test>
 

@@ -1,5 +1,12 @@
 <launch>
   <arg name="gui" default="true"/>
+  <arg name="launch_manager" default="true" />
+
+  <arg name="MANAGER" default="sample_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet" args="manager"
+        if="$(arg launch_manager)"
+        output="screen" />
 
   <node name="rect_array_publisher"
         pkg="rostopic" type="rostopic"
@@ -32,7 +39,8 @@
 
   <node name="polygon_rect_to_mask_image"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_perception/RectToMaskImage">
+        args="load jsk_perception/RectToMaskImage $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input" to="polygon_array_to_polygon/output"/>
     <remap from="~input/camera_info" to="camera/rgb/camera_info"/>
   </node>

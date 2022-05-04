@@ -6,13 +6,15 @@
 
   <test test-name="test_polygon_array_color_histogram"
         name="test_polygon_array_color_histogram"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /polygon_array_color_histogram/output
       timeout_0: 30
       topic_1: /polygon_array_color_histogram/debug/polygon_image
       timeout_1: 30
+      check_after_kill_node: true
+      node_names: [polygon_array_color_histogram,]
     </rosparam>
   </test>
 

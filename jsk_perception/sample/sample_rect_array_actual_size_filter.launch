@@ -1,6 +1,13 @@
 <launch>
 
   <arg name="gui" default="true" />
+  <arg name="launch_manager" default="true" />
+
+  <arg name="MANAGER" default="sample_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet" args="manager"
+        if="$(arg launch_manager)"
+        output="screen" />
 
   <param name="/use_sim_time" value="true" />
   <node name="rosbag_play"
@@ -16,7 +23,9 @@
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
   </node>
   <node name="rect_array_actual_size_filter"
-        pkg="jsk_perception" type="rect_array_actual_size_filter">
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/RectArrayActualSizeFilter $(arg MANAGER)"
+        respawn="true">
     <remap from="~input" to="selective_search/output" />
     <remap from="~input/depth_image" to="$(arg INPUT_DEPTH_IMAGE)" />
     <remap from="~input/info" to="$(arg INPUT_CAMERA_INFO)" />

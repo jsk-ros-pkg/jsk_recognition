@@ -47,6 +47,10 @@ namespace jsk_pcl_ros_utils
         "output_coefficients", 1);
   }
 
+  PolygonArrayWrapper::~PolygonArrayWrapper() {
+    sync_.reset();
+  }
+
   void PolygonArrayWrapper::subscribe()
   {
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);

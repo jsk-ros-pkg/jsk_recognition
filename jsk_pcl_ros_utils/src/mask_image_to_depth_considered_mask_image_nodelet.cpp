@@ -60,6 +60,14 @@ namespace jsk_pcl_ros_utils
     onInitPostProcess();
   }
 
+  MaskImageToDepthConsideredMaskImage::~MaskImageToDepthConsideredMaskImage() {
+    if (approximate_sync_) {
+      async_.reset();
+    } else {
+      sync_.reset();
+    }
+  }
+
   void MaskImageToDepthConsideredMaskImage::configCallback(Config &config, uint32_t level){
     boost::mutex::scoped_lock lock(mutex_);
     extract_num_ = config.extract_num;

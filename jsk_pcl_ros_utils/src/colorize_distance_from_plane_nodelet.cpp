@@ -57,6 +57,10 @@ namespace jsk_pcl_ros_utils
     srv_->setCallback (f);
   }
 
+  ColorizeDistanceFromPlane::~ColorizeDistanceFromPlane() {
+    sync_.reset();
+  }
+
   void ColorizeDistanceFromPlane::subscribe()
   {
     ////////////////////////////////////////////////////////

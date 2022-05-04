@@ -87,6 +87,14 @@ namespace jsk_pcl_ros_utils
     }
   }
 
+  NormalConcatenater::~NormalConcatenater() {
+    if (use_async_) {
+      async_.reset();
+    } else {
+      sync_.reset();
+    }
+  }
+
   void NormalConcatenater::subscribe()
   {
     sub_xyz_.subscribe(*pnh_, "input", 1);

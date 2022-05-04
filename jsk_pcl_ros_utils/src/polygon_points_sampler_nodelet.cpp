@@ -53,6 +53,10 @@ namespace jsk_pcl_ros_utils
     onInitPostProcess();
   }
 
+  PolygonPointsSampler::~PolygonPointsSampler() {
+    sync_.reset();
+  }
+
   void PolygonPointsSampler::subscribe()
   {
     sub_polygons_.subscribe(*pnh_, "input/polygons", 1);

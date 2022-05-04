@@ -64,6 +64,10 @@ namespace jsk_pcl_ros_utils
     onInitPostProcess();
   }
 
+  PolygonFlipper::~PolygonFlipper() {
+    sync_.reset();
+  }
+
   void PolygonFlipper::subscribe()
   {
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);

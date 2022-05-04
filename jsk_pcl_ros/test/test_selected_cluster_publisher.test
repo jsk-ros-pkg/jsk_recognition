@@ -6,11 +6,13 @@
 
   <test test-name="test_selected_cluster_publisher"
         name="test_selected_cluster_publisher"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         time-limit="30" retry="3">
     <rosparam>
       topic_0: /selected_cluster_publisher/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [selected_cluster_publisher,]
     </rosparam>
   </test>
 

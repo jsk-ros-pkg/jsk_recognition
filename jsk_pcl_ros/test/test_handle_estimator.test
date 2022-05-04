@@ -6,7 +6,7 @@
 
   <test test-name="test_handle_estimator"
         name="test_handle_estimator"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         time-limit="30" retry="6">
     <rosparam>
       topic_0: /handle_estimator/output
@@ -19,6 +19,8 @@
       timeout_3: 30
       topic_4: /handle_estimator/output_selected_preapproach
       timeout_4: 30
+      check_after_kill_node: true
+      node_names: [handle_estimator,]
     </rosparam>
   </test>
 

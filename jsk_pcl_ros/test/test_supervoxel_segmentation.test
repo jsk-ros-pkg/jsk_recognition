@@ -6,13 +6,15 @@
 
   <test test-name="test_supervoxel_segmentation"
         name="test_supervoxel_segmentation"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /supervoxel_segmentation/output/cloud
       timeout_0: 30
       topic_1: /supervoxel_segmentation/output/indices
       timeout_1: 30
+      check_after_kill_node: true
+      node_names: [supervoxel_segmentation,]
     </rosparam>
   </test>
 

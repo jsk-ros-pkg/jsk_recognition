@@ -6,7 +6,7 @@
 
   <test test-name="test_border_estimator"
         name="test_border_estimator"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /border_estimator/output_cloud
@@ -19,6 +19,8 @@
       timeout_3: 30
       topic_4: /border_estimator/output_range_image
       timeout_4: 30
+      check_after_kill_node: true
+      node_name: border_estimator
     </rosparam>
   </test>
 

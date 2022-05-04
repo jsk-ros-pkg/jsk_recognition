@@ -51,6 +51,7 @@
   <node name="icp_registration"
         pkg="nodelet" type="nodelet"
         args="load jsk_pcl/ICPRegistration /$(arg MANAGER)"
+        respawn="true"
         output="screen">
     <remap from="~input" to="$(arg FILTERED_CLOUD)" />
     <remap from="~input_reference" to="/reference_cloud" />
@@ -59,6 +60,7 @@
   <node name="empty_cloud_icp_registration"
         pkg="nodelet" type="nodelet"
         args="load jsk_pcl/ICPRegistration /$(arg MANAGER)"
+        respawn="true"
         output="screen">
     <remap from="~input" to="$(arg EMPTY_CLOUD)" />
     <remap from="~input_reference" to="/reference_cloud" />
@@ -66,7 +68,7 @@
 
   <test test-name="test_icp_registration"
         name="test_icp_registration"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         time-limit="360" retry="3">
     <rosparam>
       topic_0: /icp_registration/output
@@ -105,6 +107,10 @@
       timeout_19: 30
       topic_20: /empty_cloud_icp_registration/output_pose
       timeout_20: 30
+      check_after_kill_node: true
+      node_names:
+        - icp_registration
+        - empty_cloud_icp_registration
     </rosparam>
   </test>
 

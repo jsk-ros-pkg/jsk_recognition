@@ -6,7 +6,7 @@
 
   <test test-name="test_plane_supported_cuboid_estimator"
         name="test_plane_supported_cuboid_estimator"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /plane_supported_cuboid_estimator/output/result
@@ -35,6 +35,8 @@
       timeout_11: 30
       topic_12: /plane_supported_cuboid_estimator/output/histogram/dz
       timeout_12: 30
+      check_after_kill_node: true
+      node_names: [plane_supported_cuboid_estimator,]
     </rosparam>
   </test>
 

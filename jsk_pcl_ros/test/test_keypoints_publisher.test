@@ -6,11 +6,13 @@
 
   <test test-name="test_keypoints_publisher"
         name="test_keypoints_publisher"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /pcl_nodelet/keypoints_publisher/nerf_keypoints
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [pcl_nodelet/keypoints_publisher,f]
     </rosparam>
   </test>
 

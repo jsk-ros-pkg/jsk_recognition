@@ -6,13 +6,15 @@
 
   <test test-name="test_multi_euclidean_clustering"
         name="test_multi_euclidean_clustering"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         time-limit="360" retry="3">
     <rosparam>
       topic_0: /multi_euclidean_clustering/cluster_num
       timeout_0: 30
       topic_1: /multi_euclidean_clustering/output
       timeout_1: 30
+      check_after_kill_node: true
+      node_names: [multi_euclidean_clustering,]
     </rosparam>
   </test>
 

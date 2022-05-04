@@ -6,7 +6,7 @@
 
   <test test-name="test_cluster_point_indices_decomposer_sort_by"
         name="test_cluster_point_indices_decomposer_sort_by"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /cluster_point_indices_decomposer/boxes
@@ -15,6 +15,11 @@
       timeout_1: 30
       topic_2: /cluster_point_indices_decomposer_cloud_size/boxes
       timeout_2: 30
+      check_after_kill_node: true
+      node_names:
+        - cluster_point_indices_decomposer
+        - cluster_point_indices_decomposer_cloud_size
+        - cluster_point_indices_decomposer_z_axis
     </rosparam>
   </test>
 

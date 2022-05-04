@@ -6,7 +6,7 @@
 
   <test test-name="test_hinted_handle_estimator"
         name="test_hinted_handle_estimator"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /hinted_handle_estimator/handle_pose
@@ -17,6 +17,8 @@
       timeout_2: 30
       topic_3: /hinted_handle_estimator/debug_marker_array
       timeout_3: 30
+      check_after_kill_node: true
+      node_names: [hinted_handle_estimator,]
     </rosparam>
   </test>
 

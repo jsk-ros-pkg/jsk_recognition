@@ -6,13 +6,15 @@
 
   <test test-name="test_heightmap_morphlogical_filtering"
         name="test_heightmap_morphlogical_filtering"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /heightmap_morphological_filtering/output
       timeout_0: 30
       topic_1: /heightmap_morphological_filtering/output/config
       timeout_1: 30
+      check_after_kill_node: true
+      node_names: [heightmap_morphological_filtering,]
     </rosparam>
   </test>
 

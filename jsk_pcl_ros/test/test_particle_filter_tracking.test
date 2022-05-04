@@ -7,7 +7,7 @@
 
   <test test-name="test_particle_filter_tracking"
         name="test_particle_filter_tracking"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /particle_filter_tracking/track_result
@@ -32,6 +32,8 @@
       timeout_9: 30
       topic_10: /particle_filter_tracking/output/no_move_raw
       timeout_10: 30
+      check_after_kill_node: true
+      node_names: [particle_filter_tracking,]
     </rosparam>
   </test>
 

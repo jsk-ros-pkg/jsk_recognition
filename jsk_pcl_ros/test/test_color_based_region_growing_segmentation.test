@@ -3,11 +3,12 @@
   <!-- load log -->
   <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml" />
 
+  <arg name="MANAGER" value="/right_hand_camera/right_hand_camera_nodelet_manager" />
   <arg name="INPUT_CLOUD" value="/right_hand_camera/depth_registered/points" />
 
   <node name="resize_points_publisher"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/ResizePointsPublisher">
+        args="load jsk_pcl/ResizePointsPublisher $(arg MANAGER)">
     <remap from="~input" to="$(arg INPUT_CLOUD)" />
     <remap from="~output" to="$(arg INPUT_CLOUD)/quarter" />
     <rosparam>
@@ -18,17 +19,20 @@
 
   <node name="color_based_region_growing_segmentation_nodelet"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/ColorBasedRegionGrowingSegmentation">
+        args="load jsk_pcl/ColorBasedRegionGrowingSegmentation $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input" to="$(arg INPUT_CLOUD)/quarter" />
   </node>
 
   <test test-name="test_color_based_region_growing_segmentation"
         name="test_color_based_region_growing_segmentation"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         time-limit="30" retry="6">
     <rosparam>
       topic_0: /color_based_region_growing_segmentation_nodelet/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [color_based_region_growing_segmentation_nodelet,]
     </rosparam>
   </test>
 

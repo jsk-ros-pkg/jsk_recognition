@@ -6,7 +6,7 @@
 
   <test test-name="test_capture_stereo_synchronizer"
         name="test_capture_stereo_synchronizer"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /capture_stereo_synchronizer/output/pose
@@ -25,6 +25,8 @@
       timeout_6: 30
       topic_7: /capture_stereo_synchronizer/output/count
       timeout_7: 30
+      check_after_kill_node: true
+      node_names: [capture_stereo_synchronizer,]
     </rosparam>
   </test>
 

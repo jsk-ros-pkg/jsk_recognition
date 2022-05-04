@@ -6,7 +6,7 @@
 
   <test test-name="test_environment_plane_modeling"
         name="test_environment_plane_modeling"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         time-limit="30" retry="3">
     <rosparam>
       topic_0: /environment_plane_modeling/output
@@ -25,6 +25,9 @@
       timeout_6: 30
       topic_7: /environment_plane_modeling/debug/magnified_plane_poses
       timeout_7: 30
+      check_after_kill_node: true
+      node_names:
+        - environment_plane_modeling
     </rosparam>
   </test>
 

@@ -6,14 +6,18 @@
 
   <include file="$(find jsk_pcl_ros)/sample/sample_convex_connected_voxels.launch">
     <arg name="INPUT_CLOUD" value="$(arg INPUT_CLOUD)" />
+    <arg name="MANAGER" default="/right_hand_camera/right_hand_camera_nodelet_manager" />
+    <arg name="launch_manager" default="false" />
   </include>
 
   <test test-name="test_convex_connected_voxels"
       name="test_convex_connected_voxels"
-      pkg="jsk_tools" type="test_topic_published.py">
+      pkg="jsk_recognition_utils" type="test_topic_published.py">
     <rosparam>
       topic_0: /sample_convex_connected_voxels/output/indices
       timeout_0: 100
+      check_after_kill_node: true
+      node_names: [sample_convex_connected_voxels,]
     </rosparam>
   </test>
 

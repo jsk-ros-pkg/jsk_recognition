@@ -6,11 +6,13 @@
 
   <test test-name="test_hsi_color_filter"
         name="test_hsi_color_filter"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         time-limit="360" retry="3">
     <rosparam>
       topic_0: /hsi_color_filter/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [hsi_color_filter,]
     </rosparam>
   </test>
 

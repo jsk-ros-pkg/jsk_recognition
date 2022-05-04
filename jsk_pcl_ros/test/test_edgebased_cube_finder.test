@@ -6,7 +6,7 @@
 
   <test test-name="test_edgebased_cube_finder"
         name="test_edgebased_cube_finder"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         time-limit="30" retry="3">
     <rosparam>
       topic_0: /edgebased_cube_finder/output
@@ -15,6 +15,9 @@
       timeout_1: 30
       topic_2: /edgebased_cube_finder/debug_filtered_cloud
       timeout_2: 30
+      check_after_kill_node: true
+      node_names:
+        - edgebased_cube_finder
     </rosparam>
   </test>
 

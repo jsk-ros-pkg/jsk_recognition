@@ -6,7 +6,7 @@
 
   <test test-name="test_linemod_detector"
         name="test_linemod_detector"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /linemod_detector/output
@@ -17,6 +17,8 @@
       timeout_2: 30
       topic_3: /linemod_detector/output/template
       timeout_3: 30
+      check_after_kill_node: true
+      node_names: [linemod_detector,]
     </rosparam>
   </test>
 

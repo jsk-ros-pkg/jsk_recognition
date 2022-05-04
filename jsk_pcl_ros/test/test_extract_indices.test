@@ -1,5 +1,9 @@
 <launch>
-  
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_cluster_point_indices_decomposer_sort_by.launch">
+    <arg name="gui" value="false" />
+  </include>
+
   <node name="even_extract_indices"
         pkg="nodelet" type="nodelet"
         args="standalone jsk_pcl/ExtractIndices">
@@ -36,6 +40,7 @@
       keep_organized: true
     </rosparam>
   </node>
+
   <test test-name="test_extract_indices"
         name="test_extract_indices"
         time-limit="360"
@@ -45,4 +50,17 @@
     <remap from="~input/even_organized_result" to="even_organized_extract_indices/output" />
     <remap from="~input/odd_organized_result" to="odd_organized_extract_indices/output" />
   </test>
+
+  <test test-name="test_extract_indices_for_nodelet"
+        name="test_extract_indices_for_nodelet"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
+        time-limit="360" retry="3">
+    <rosparam>
+      topic_0: /extract_indices/output
+      timeout_0: 30
+      check_after_kill_node: true
+      node_names: [extract_indices,]
+    </rosparam>
+  </test>
+
 </launch>

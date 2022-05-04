@@ -4,11 +4,14 @@
   </include>
 
   <test test-name="test_mask_image_filter"
-        name="test_mask_image_filter" pkg="jsk_tools" type="test_topic_published.py"
+        name="test_mask_image_filter"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         time-limit="30" retry="6">
     <rosparam>
       topic_0: /mask_image_filter/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [mask_image_filter,]
     </rosparam>
   </test>
 </launch>

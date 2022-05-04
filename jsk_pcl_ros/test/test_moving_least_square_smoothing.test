@@ -6,11 +6,13 @@
 
   <test test-name="test_moving_least_square_smoothing"
         name="test_moving_least_square_smoothing"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /moving_least_square_smoothing/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [moving_least_square_smoothing,]
     </rosparam>
   </test>
 

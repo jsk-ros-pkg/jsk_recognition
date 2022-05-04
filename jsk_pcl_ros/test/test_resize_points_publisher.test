@@ -6,11 +6,13 @@
 
   <test test-name="test_resize_points_publisher"
         name="test_resize_points_publisher"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /resize_points_publisher/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [resize_points_publisher,]
     </rosparam>
   </test>
 

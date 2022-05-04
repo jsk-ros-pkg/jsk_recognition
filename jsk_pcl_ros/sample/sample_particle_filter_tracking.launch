@@ -92,7 +92,8 @@
 
   <node name="particle_filter_tracking"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/ParticleFilterTracking $(arg manager)">
+        args="load jsk_pcl/ParticleFilterTracking $(arg manager)"
+        respawn="true" >
     <remap from="~input" to="voxel_grid_target/output"/>
     <remap from="~renew_model" to="voxel_grid_reference/output"/>
     <rosparam>

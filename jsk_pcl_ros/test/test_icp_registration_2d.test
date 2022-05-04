@@ -5,11 +5,13 @@
   </include>
 
   <test test-name="test_icp_registration_2d"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         time-limit="360" retry="2">
     <rosparam>
       topic_0: /icp_registration/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [icp_registration,]
     </rosparam>
   </test>
 </launch>

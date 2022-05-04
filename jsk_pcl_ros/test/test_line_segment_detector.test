@@ -6,7 +6,7 @@
 
   <test test-name="test_line_segment_detector"
         name="test_line_segment_detector"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         time-limit="360" retry="3">
     <rosparam>
       topic_0: /line_segment_detector/debug/line_marker
@@ -15,6 +15,8 @@
       timeout_1: 30
       topic_2: /line_segment_detector/output/coefficients
       timeout_2: 30
+      check_after_kill_node: true
+      node_names: [line_segment_detector,]
     </rosparam>
   </test>
 

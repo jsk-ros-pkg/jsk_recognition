@@ -2,6 +2,7 @@
   <arg name="gui" default="true"/>
 
   <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml"/>
+  <arg name="MANAGER" value="/right_hand_camera/right_hand_camera_nodelet_manager" />
 
   <node name="sample_point_publisher"
         pkg="rostopic" type="rostopic"
@@ -11,7 +12,8 @@
 
   <node name="pointcloud_screenpoint"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/PointcloudScreenpoint">
+        args="load jsk_pcl/PointcloudScreenpoint $(arg MANAGER)"
+        respawn="true">
     <remap from="~points" to="/right_hand_camera/depth_registered/points"/>
     <remap from="~point" to="sample_point_publisher/output/screenpoint"/>
     <rosparam>

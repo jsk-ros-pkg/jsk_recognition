@@ -6,11 +6,13 @@
 
   <test test-name="test_pointcloud_to_cluster_point_indices"
         name="test_pointcloud_to_cluster_point_indices"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /pointcloud_to_cluster_point_indices/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [pointcloud_to_cluster_point_indices,]
     </rosparam>
   </test>
 

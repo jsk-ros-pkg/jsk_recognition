@@ -6,13 +6,15 @@
 
   <test test-name="test_pointcloud_to_mask_image"
         name="test_pointcloud_to_mask_image"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         time-limit="360" retry="3">
     <rosparam>
       topic_0: /pointcloud_to_mask_image/output
       timeout_0: 30
       topic_1: /depth_to_mask_image/output
       timeout_1: 30
+      check_after_kill_node: true
+      node_names: [pointcloud_to_mask_image, depth_to_mask_image]
     </rosparam>
   </test>
 

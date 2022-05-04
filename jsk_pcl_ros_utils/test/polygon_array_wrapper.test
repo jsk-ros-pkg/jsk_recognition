@@ -6,13 +6,15 @@
 
   <test test-name="test_polygon_array_wrapper"
         name="test_polygon_array_wrapper"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /polygon_array_wrapper/output_polygons
       timeout_0: 30
       topic_1: /polygon_array_wrapper/output_coefficients
       timeout_1: 30
+      check_after_kill_node: true
+      node_names: [polygon_array_wrapper,]
     </rosparam>
   </test>
 

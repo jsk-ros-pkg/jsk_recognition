@@ -6,7 +6,7 @@
 
   <test test-name="test_plane_reasoner"
         name="test_plane_reasoner"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         time-limit="30" retry="3">
     <rosparam>
       topic_0: /plane_reasoner/output/vertical/inliers
@@ -21,6 +21,8 @@
       timeout_4: 30
       topic_5: /plane_reasoner/output/horizontal/polygons
       timeout_5: 30
+      check_after_kill_node: true
+      node_names: [plane_reasoner,]
     </rosparam>
   </test>
 

@@ -4,7 +4,7 @@
   </include>
 
   <test test-name="test_polygon_magnifier"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         time-limit="360" retry="2">
     <rosparam>
       topic_0: /polygon_magnifier_positive/output

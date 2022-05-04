@@ -6,11 +6,13 @@
 
   <test test-name="test_colorize_height_2d_mapping"
         name="test_colorize_height_2d_mapping"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /colorize_height_2d_mapping/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [colorize_height_2d_mapping,]
     </rosparam>
   </test>
 

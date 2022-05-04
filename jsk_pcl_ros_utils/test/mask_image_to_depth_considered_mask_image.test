@@ -6,11 +6,13 @@
 
   <test test-name="test_mask_image_to_depth_considered_mask_image"
         name="test_mask_image_to_depth_considered_mask_image"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         time-limit="360" retry="3">
     <rosparam>
       topic_0: /depth_considered/output
       timeout_0: 10
+      check_after_kill_node: true
+      node_names: [depth_considered,]
     </rosparam>
   </test>
 

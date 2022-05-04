@@ -6,13 +6,15 @@
 
   <test test-name="test_polygon_flipper"
         name="test_polygon_flipper"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /polygon_flipper/output/polygons
       timeout_0: 30
       topic_1: /polygon_flipper/output/coefficients
       timeout_1: 30
+      check_after_kill_node: true
+      node_names: [polygon_flipper,]
     </rosparam>
   </test>
 

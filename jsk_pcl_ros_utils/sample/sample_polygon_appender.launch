@@ -3,10 +3,12 @@
   <arg name="gui" default="true" />
 
   <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml"/>
+   <arg name="MANAGER" value="/right_hand_camera/right_hand_camera_nodelet_manager" />
 
   <node name="static_polygon_array_publisher0"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl_utils/StaticPolygonArrayPublisher">
+        args="load jsk_pcl_utils/StaticPolygonArrayPublisher $(arg MANAGER)"
+        respawn="true">
     <remap from="~input" to="/right_hand_camera/depth_registered/points"/>
     <rosparam>
       use_message: true
@@ -21,7 +23,8 @@
 
   <node name="static_polygon_array_publisher1"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl_utils/StaticPolygonArrayPublisher">
+        args="load jsk_pcl_utils/StaticPolygonArrayPublisher $(arg MANAGER)"
+        respawn="true">
     <remap from="~input" to="/right_hand_camera/depth_registered/points"/>
     <rosparam>
       use_message: true
@@ -34,7 +37,8 @@
 
   <node name="polygon_appender"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl_utils/PolygonAppender">
+        args="load jsk_pcl_utils/PolygonAppender $(arg MANAGER)"
+        respawn="true">
     <remap from="~input0" to="static_polygon_array_publisher0/output_polygons"/>
     <remap from="~input1" to="static_polygon_array_publisher1/output_polygons"/>
     <remap from="~input_coefficients0" to="static_polygon_array_publisher0/output_coefficients"/>

@@ -6,11 +6,13 @@
 
   <test test-name="test_cluster_point_indices_label_filter"
         name="test_cluster_point_indices_label_filter"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /mask_rcnn_instance_segmentation/output/filtered_cluster_indices
       timeout_0: 60
+      check_after_kill_node: true
+      node_names: [cluster_point_indices_label_filter,]
     </rosparam>
   </test>
 

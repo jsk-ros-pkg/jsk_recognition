@@ -6,7 +6,7 @@
 
   <test test-name="test_spherical_pointcloud_simulator"
         name="test_spherical_pointcloud_simulator"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /spherical_pointcloud_simulator/output

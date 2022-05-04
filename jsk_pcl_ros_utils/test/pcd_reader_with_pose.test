@@ -6,11 +6,13 @@
 
   <test test-name="test_pcd_reader_with_pose"
         name="test_pcd_reader_with_pose"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /pcd_reader_with_pose/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [pcd_reader_with_pose,]
     </rosparam>
   </test>
 

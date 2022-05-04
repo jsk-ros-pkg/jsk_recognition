@@ -1,5 +1,13 @@
 <launch>
   <arg name="gui" default="true"/>
+  <arg name="MANAGER" default="nodelet_manager" />
+  <arg name="launch_manager" default="true" />
+
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet"
+        args="manager"
+        if="$(arg launch_manager)"
+        output="screen" />
 
   <node name="pcd_to_pointcloud"
         pkg="pcl_ros" type="pcd_to_pointcloud"
@@ -25,7 +33,8 @@
 
   <node name="cloud_on_plane"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl_utils/CloudOnPlane">
+        args="load jsk_pcl_utils/CloudOnPlane $(arg MANAGER)"
+        respawn="true">
     <remap from="~input" to="pcd_to_pointcloud/output"/>
     <remap from="~input/polygon" to="polygon_array_publisher/output"/>
     <rosparam>

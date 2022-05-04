@@ -6,7 +6,7 @@
 
   <test test-name="test_plane_concatenator"
         name="test_plane_concatenator"
-        pkg="jsk_tools" type="test_topic_published.py"
+        pkg="jsk_recognition_utils" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /plane_concatenator/output/indices
@@ -15,6 +15,8 @@
       timeout_1: 30
       topic_2: /plane_concatenator/output/coefficients
       timeout_2: 30
+      check_after_kill_node: true
+      node_names: [plane_concatenator,]
     </rosparam>
   </test>
 

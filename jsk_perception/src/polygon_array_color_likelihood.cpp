@@ -61,6 +61,14 @@ namespace jsk_perception
     pub_ = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "output", 1);
   }
 
+  PolygonArrayColorLikelihood::~PolygonArrayColorLikelihood() {
+    if (approximate_sync_) {
+      async_.reset();
+    } else {
+      sync_.reset();
+    }
+  }
+
   void PolygonArrayColorLikelihood::subscribe()
   {
     if (!reference_from_file_) {

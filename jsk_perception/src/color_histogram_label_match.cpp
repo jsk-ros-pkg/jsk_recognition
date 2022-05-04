@@ -60,6 +60,14 @@ namespace jsk_perception
     onInitPostProcess();
   }
 
+  ColorHistogramLabelMatch::~ColorHistogramLabelMatch() {
+    if (use_mask_) {
+      sync_.reset();
+    } else {
+      sync_wo_mask_.reset();
+    }
+  }
+
   void ColorHistogramLabelMatch::subscribe()
   {
     sub_image_.subscribe(*pnh_, "input", 1);

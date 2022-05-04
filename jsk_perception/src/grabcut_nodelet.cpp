@@ -59,6 +59,10 @@ namespace jsk_perception
     onInitPostProcess();
   }
 
+  GrabCut::~GrabCut() {
+    sync_.reset();
+  }
+
   void GrabCut::subscribe()
   {
     sub_image_.subscribe(*pnh_, "input", 1);

@@ -62,6 +62,10 @@ namespace jsk_perception
     onInitPostProcess();
   }
 
+  PolygonArrayColorHistogram::~PolygonArrayColorHistogram() {
+    async_.reset();
+  }
+
   void PolygonArrayColorHistogram::subscribe()
   {
     sub_info_ = pnh_->subscribe("input/info", 1, &PolygonArrayColorHistogram::infoCallback, this);

@@ -76,6 +76,14 @@ namespace jsk_perception
     onInitPostProcess();
   }
 
+  ConsensusTracking::~ConsensusTracking() {
+    if (approximate_sync_) {
+      async_.reset();
+    } else {
+      sync_.reset();
+    }
+  }
+
   void ConsensusTracking::subscribe()
   {
     // subscribers to process the tracking

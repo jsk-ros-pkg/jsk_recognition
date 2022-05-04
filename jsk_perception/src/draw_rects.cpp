@@ -61,6 +61,14 @@ namespace jsk_perception
     onInitPostProcess();
   }
 
+  DrawRects::~DrawRects() {
+    if (use_async_) {
+      async_.reset();
+    } else {
+      sync_.reset();
+    }
+  }
+
   void DrawRects::subscribe()
   {
     sub_image_.subscribe(*pnh_, "input", 1);

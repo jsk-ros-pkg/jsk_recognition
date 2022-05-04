@@ -51,6 +51,14 @@ namespace jsk_perception
     onInitPostProcess();
   }
 
+  RectArrayToDensityImage::~RectArrayToDensityImage() {
+    if (approximate_sync_) {
+      async_.reset();
+    } else {
+      sync_.reset();
+    }
+  }
+
   void RectArrayToDensityImage::subscribe()
   {
     sub_image_.subscribe(*pnh_, "input/image", 1);

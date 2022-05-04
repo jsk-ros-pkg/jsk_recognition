@@ -64,6 +64,14 @@ namespace jsk_perception
     color_alpha_ = config.color_alpha;
   }
 
+  OverlayImageColorOnMono::~OverlayImageColorOnMono() {
+    if (approximate_sync_) {
+      async_.reset();
+    } else {
+      sync_.reset();
+    }
+  }
+
   void OverlayImageColorOnMono::subscribe()
   {
     sub_color_.subscribe(*pnh_, "input/color", 1);

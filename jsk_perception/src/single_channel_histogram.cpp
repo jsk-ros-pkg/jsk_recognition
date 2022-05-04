@@ -56,6 +56,12 @@ namespace jsk_perception
     onInitPostProcess();
   }
 
+  SingleChannelHistogram::~SingleChannelHistogram() {
+    if (use_mask_) {
+      sync_.reset();
+    }
+  }
+
   void SingleChannelHistogram::subscribe()
   {
     ros::V_string names;

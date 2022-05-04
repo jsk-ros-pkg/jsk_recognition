@@ -52,6 +52,14 @@ namespace jsk_perception
     onInitPostProcess();
   }
 
+  UnapplyMaskImage::~UnapplyMaskImage() {
+    if (approximate_sync_) {
+      async_.reset();
+    } else {
+      sync_.reset();
+    }
+  }
+
   void UnapplyMaskImage::subscribe()
   {
     sub_image_.subscribe(*pnh_, "input", 1);

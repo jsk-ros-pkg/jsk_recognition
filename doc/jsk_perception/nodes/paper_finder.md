@@ -28,7 +28,7 @@
 
   Recognized paper pose.
 
-- `~output/box` (`jsk_recognition_msgs/BoundingBoxArray`)
+- `~output/boxes` (`jsk_recognition_msgs/BoundingBoxArray`)
 
   Recognized Bounding Box.
 

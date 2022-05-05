@@ -192,7 +192,7 @@ class PaperFinder(ConnectionBasedTransport):
                                              geometry_msgs.msg.PoseArray,
                                              queue_size=1)
         self.bounding_box_array_pub = self.advertise(
-            '~output/box', BoundingBoxArray, queue_size=1)
+            '~output/boxes', BoundingBoxArray, queue_size=1)
         self.length_array_pub = self.advertise(
             '~output/length', std_msgs.msg.Float32MultiArray, queue_size=1)
         self.bridge = cv_bridge.CvBridge()

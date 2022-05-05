@@ -28,6 +28,14 @@
 
   Recognized paper pose.
 
+- `~output/box` (`jsk_recognition_msgs/BoundingBoxArray`)
+
+  Recognized Bounding Box.
+
+- `~output/length` (`std_msgs/Float32MultiArray`)
+
+  Recognized the rectangle sides of paper.
+
 ## Parameters
 
 - `~angle_tolerance` (float default: `286.4788975654116`)

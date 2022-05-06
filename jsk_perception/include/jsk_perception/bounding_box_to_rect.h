@@ -69,6 +69,7 @@ namespace jsk_perception
       jsk_recognition_msgs::BoundingBox > ApproximateSyncPolicyBox;
 
     BoundingBoxToRect(): DiagnosticNodelet("BoundingBoxToRect") {}
+    virtual ~BoundingBoxToRect();
   protected:
     virtual void onInit();
     virtual void subscribe();

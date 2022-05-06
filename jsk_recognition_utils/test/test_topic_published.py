@@ -2,52 +2,19 @@
 # -*- coding: utf-8 -*-
 
 import re
-import socket
 import sys
 import time
 import unittest
 
 from nose.tools import assert_false
 from nose.tools import assert_true
-import rosgraph
 import rosnode
 import rospy
 import rostopic
-from rostopic import _master_get_topic_types
-from rostopic import get_topic_list
-from rostopic import ROSTopicIOException
 
 
-PKG = 'jsk_recognition_utils'
+PKG = 'jsk_tools'
 NAME = 'test_topic_published'
-
-
-def get_publisher_nodes_from_topic(topic):
-    try:
-        from cStringIO import StringIO
-    except ImportError:
-        from io import StringIO
-    import itertools
-    StringIO()
-
-    def topic_type(t, topic_types):
-        matches = [t_type for t_name, t_type in topic_types if t_name == t]
-        if matches:
-            return matches[0]
-        return 'unknown type'
-
-    master = rosgraph.Master('/rostopic')
-    try:
-        pubs, subs = get_topic_list(master=master)
-        # filter based on topic
-        subs = [x for x in subs if x[0] == topic]
-        pubs = [x for x in pubs if x[0] == topic]
-        _master_get_topic_types(master)
-    except socket.error:
-        raise ROSTopicIOException("Unable to communicate with master!")
-
-    nodes = list(itertools.chain(*[nodes for topic, ttype, nodes in pubs]))
-    return nodes
 
 
 class PublishChecker(object):
@@ -93,9 +60,16 @@ class TestTopicPublished(unittest.TestCase):
         self.check_after_kill_node = rospy.get_param(
             '~check_after_kill_node', False)
         if self.check_after_kill_node:
-            self.target_node_names = rospy.get_param('~node_names')
-            if not isinstance(self.target_node_names, list):
-                self.target_node_names = [self.target_node_names]
+            target_node_names = rospy.get_param('~node_names')
+            if not isinstance(target_node_names, list):
+                target_node_names = [target_node_names]
+            namespace = rospy.get_namespace()
+            self.target_node_names = []
+            for name in target_node_names:
+                if name.startswith('/'):
+                    self.target_node_names.append(name)
+                else:
+                    self.target_node_names.append(namespace + name)
 
     def test_published(self):
         """Test topics are published and messages come"""

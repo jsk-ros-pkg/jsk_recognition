@@ -79,6 +79,7 @@ namespace jsk_pcl_ros_utils
                                                        jsk_recognition_msgs::ClusterPointIndices
                                                        > SyncInlierPolicy;
     typedef jsk_pcl_ros_utils::PlaneRejectorConfig Config;
+    virtual ~PlaneRejector();
   protected:
     virtual void onInit();
     virtual void reject(const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,

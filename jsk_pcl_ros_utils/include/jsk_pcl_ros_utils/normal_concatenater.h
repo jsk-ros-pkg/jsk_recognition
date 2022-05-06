@@ -57,7 +57,7 @@ namespace jsk_pcl_ros_utils
   public:
     typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> SyncPolicy;
     typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> ASyncPolicy;
-    ~NormalConcatenater();
+    virtual ~NormalConcatenater();
   protected:
     ros::Publisher pub_;
     int maximum_queue_size_;

@@ -54,7 +54,7 @@ namespace jsk_pcl_ros_utils
     typedef message_filters::sync_policies::ExactTime<
     jsk_recognition_msgs::PolygonArray, jsk_recognition_msgs::ModelCoefficientsArray,
     jsk_recognition_msgs::PolygonArray, jsk_recognition_msgs::ModelCoefficientsArray> SyncPolicy2;
-    
+    virtual ~PolygonAppender();
   protected:
     virtual void onInit();
     virtual void subscribe();

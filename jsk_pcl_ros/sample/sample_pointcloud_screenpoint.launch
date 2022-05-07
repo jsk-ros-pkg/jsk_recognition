@@ -1,12 +1,13 @@
 <launch>
   <arg name="gui" default="true"/>
+  <arg name="publish_rate" default="1"/>
 
   <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml"/>
   <arg name="MANAGER" value="/right_hand_camera/right_hand_camera_nodelet_manager" />
 
   <node name="sample_point_publisher"
         pkg="rostopic" type="rostopic"
-        args="pub -r 1 -s /sample_point_publisher/output/screenpoint geometry_msgs/PointStamped
+        args="pub -r $(arg publish_rate) -s /sample_point_publisher/output/screenpoint geometry_msgs/PointStamped
               '{header: {stamp: now, frame_id: right_hand_camera_rgb_optical_frame},
                 point: {x: 100, y: 100, z: 0}}'"/>
 
@@ -25,7 +26,8 @@
   </node>
 
   <node name="pointcloud_screenpoint_client"
-        pkg="jsk_pcl_ros" type="pointcloud_screenpoint.l">
+        pkg="jsk_pcl_ros" type="pointcloud_screenpoint.l"
+        respawn="true">
     <remap from="ray_marker_array" to="~output/ray_marker_array"/>
     <remap from="image_marker" to="~output/image_marker"/>
     <remap from="ray_coords" to="~output/ray_coords"/>

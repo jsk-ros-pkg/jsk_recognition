@@ -44,7 +44,8 @@
   </node>
 
   <node name="cloud_on_plane_info"
-        pkg="jsk_pcl_ros_utils" type="cloud_on_plane_info.py">
+        pkg="jsk_pcl_ros_utils" type="cloud_on_plane_info.py"
+        respawn="true" >
     <remap from="~input" to="cloud_on_plane/output"/>
   </node>
 

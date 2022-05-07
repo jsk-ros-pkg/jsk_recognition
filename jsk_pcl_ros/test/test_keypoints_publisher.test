@@ -12,7 +12,7 @@
       topic_0: /pcl_nodelet/keypoints_publisher/nerf_keypoints
       timeout_0: 30
       check_after_kill_node: true
-      node_names: [pcl_nodelet/keypoints_publisher,f]
+      node_names: [pcl_nodelet/keypoints_publisher,]
     </rosparam>
   </test>
 

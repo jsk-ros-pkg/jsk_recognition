@@ -121,6 +121,12 @@ class TestTopicPublished(unittest.TestCase):
                 rospy.sleep(0.01)
             except rospy.exceptions.ROSTimeMovedBackwardsException:
                 continue
+            except rospy.exceptions.ROSInterruptException:
+                not_finished_topics = [topic for topic in self.topics
+                                       if not topic in topics_finished]
+                rospy.logerr('Not received topic {}'.format(
+                    not_finished_topics))
+                sys.exit(0)
         if len(topics_finished) != len(checkers):
             raise ValueError('Not all topics are received')
 

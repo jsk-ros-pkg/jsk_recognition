@@ -54,6 +54,12 @@ def main():
     )
 
     download_data(
+        path='sample/data/bunny_marker_array_d155b9ce5188fbaf89745847fd5882d7.bag',
+        url='https://drive.google.com/uc?id=11Y8oPQbzO7TXKxALE9M46gE0Jr4OPJ2E',
+        md5='6195a3301e782162df185d47dc46c622',
+    )
+
+    download_data(
         path='sample/data/bunny.pcd',
         url='https://raw.githubusercontent.com/PointCloudLibrary/pcl/pcl-1.8.0/test/bunny.pcd',  # NOQA
         md5='a4e58778ba12d3f26304127f6be82897',

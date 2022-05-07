@@ -1,11 +1,13 @@
 <launch>
 
   <arg name="gui" default="true" />
+  <arg name="BAG_FILEPATH" default="$(find jsk_pcl_ros_utils)/sample/data/bunny_marker_array_d155b9ce5188fbaf89745847fd5882d7.bag" />
 
   <param name="/use_sim_time" value="true" />
   <node name="play"
         pkg="rosbag" type="play"
-        args="$(find jsk_pcl_ros_utils)/sample/data/bunny_marker_array.bag --clock --loop">
+        args="$(arg BAG_FILEPATH) --clock --loop"
+        >
   </node>
 
   <node name="bounding_box_array_publisher"

@@ -67,6 +67,24 @@ void PointcloudScreenpoint::onInit()
   onInitPostProcess();
 }
 
+PointcloudScreenpoint::~PointcloudScreenpoint() {
+  // message_filters::Synchronizer needs to be called reset
+  // before message_filters::Subscriber is freed.
+  // Calling reset fixes the following error on shutdown of the nodelet:
+  // terminate called after throwing an instance of
+  // 'boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >'
+  //     what():  boost: mutex lock failed in pthread_mutex_lock: Invalid argument
+  // Also see https://github.com/ros/ros_comm/issues/720 .
+  sync_rect_.reset();
+  sync_point_.reset();
+  sync_point_array_.reset();
+  sync_poly_.reset();
+  async_rect_.reset();
+  async_point_.reset();
+  async_point_array_.reset();
+  async_poly_.reset();
+}
+
 void PointcloudScreenpoint::subscribe()
 {
   points_sub_.subscribe(*pnh_, "points", 1);

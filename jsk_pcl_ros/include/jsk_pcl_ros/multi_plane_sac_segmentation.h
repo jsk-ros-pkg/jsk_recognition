@@ -85,6 +85,7 @@ namespace jsk_pcl_ros
       > SyncNormalImuPolicy;
     typedef message_filters::Synchronizer<SyncNormalImuPolicy>
     NormalImuSynchronizer;
+    virtual ~MultiPlaneSACSegmentation();
   protected:
     ////////////////////////////////////////////////////////
     // methods

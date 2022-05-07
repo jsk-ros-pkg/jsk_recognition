@@ -62,6 +62,7 @@ namespace jsk_pcl_ros
     typedef message_filters::sync_policies::ApproximateTime<
     sensor_msgs::PointCloud2, sensor_msgs::CameraInfo> SyncPolicy;
     typedef BorderEstimatorConfig Config;
+    virtual ~BorderEstimator();
   protected:
     virtual void onInit();
     virtual void estimate(const sensor_msgs::PointCloud2::ConstPtr& msg,

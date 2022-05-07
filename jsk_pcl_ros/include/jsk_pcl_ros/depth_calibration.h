@@ -60,6 +60,7 @@ namespace jsk_pcl_ros
         sensor_msgs::CameraInfo> SyncPolicy;
 
     DepthCalibration(): DiagnosticNodelet("DepthCalibration") { }
+    virtual ~DepthCalibration();
   protected:
     virtual void onInit();
     virtual void calibrate(

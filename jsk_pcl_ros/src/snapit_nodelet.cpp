@@ -75,6 +75,17 @@ namespace jsk_pcl_ros
     onInitPostProcess();
   }
 
+  SnapIt::~SnapIt() {
+    // message_filters::Synchronizer needs to be called reset
+    // before message_filters::Subscriber is freed.
+    // Calling reset fixes the following error on shutdown of the nodelet:
+    // terminate called after throwing an instance of
+    // 'boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >'
+    //     what():  boost: mutex lock failed in pthread_mutex_lock: Invalid argument
+    // Also see https://github.com/ros/ros_comm/issues/720 .
+    sync_polygon_.reset();
+  }
+
   void SnapIt::subscribe()
   {
     sub_polygons_.subscribe(*pnh_, "input/polygons", 1);

@@ -75,6 +75,7 @@ namespace jsk_pcl_ros
     sensor_msgs::PointCloud2> CloudApproximateSyncPolicy;
     typedef jsk_pcl_ros::PPFRegistrationConfig Config;
     PPFRegistration(): DiagnosticNodelet("PPFRegistration") {}
+    virtual ~PPFRegistration();
   protected:
     virtual void onInit();
     virtual void subscribe();

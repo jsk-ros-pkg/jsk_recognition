@@ -66,6 +66,7 @@ namespace jsk_pcl_ros
       USE_VALUE,
       USE_HUE_AND_SATURATION
     };
+    virtual ~ColorHistogramMatcher();
   protected:
     virtual void onInit();
     virtual void feature(

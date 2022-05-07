@@ -60,6 +60,7 @@ namespace jsk_pcl_ros
       sensor_msgs::PointCloud2,
       sensor_msgs::Imu> SyncPolicy;
     NormalDirectionFilter(): DiagnosticNodelet("NormalDirectionFilter") {}
+    virtual ~NormalDirectionFilter();
   protected:
     ////////////////////////////////////////////////////////
     // methods

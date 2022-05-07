@@ -62,6 +62,7 @@ namespace jsk_pcl_ros
     typedef ColorHistogramFilterConfig Config;
 
     ColorHistogramFilter() : DiagnosticNodelet("ColorHistogramFilter"){}
+    virtual ~ColorHistogramFilter();
   protected:
     virtual void onInit();
     virtual void configCallback(Config & config, uint32_t level);

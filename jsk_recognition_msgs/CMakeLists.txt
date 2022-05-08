@@ -59,6 +59,8 @@ add_message_files(
   TimeRange.msg
   TorusArray.msg
   Torus.msg
+  Track.msg
+  TrackArray.msg
   TrackerStatus.msg
   TrackingStatus.msg
   BoolStamped.msg

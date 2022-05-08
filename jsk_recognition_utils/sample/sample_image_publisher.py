@@ -51,7 +51,7 @@ class SampleImagePublisher(object):
 
         # read camera_info from file
         with open(info_file, 'r') as f:
-            info = yaml.load(f)
+            info = yaml.load(f, Loader=yaml.SafeLoader)
         self.infomsg = CameraInfo()
         genpy.message.fill_message_args(self.infomsg, info)
 

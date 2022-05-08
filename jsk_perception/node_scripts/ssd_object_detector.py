@@ -188,6 +188,7 @@ class SSDObjectDetector(ConnectionBasedTransport):
 
         rect_msg = RectArray(header=msg.header)
         for bbox in bboxes:
+            bbox = list(map(int, bbox))
             rect = Rect(x=bbox[1], y=bbox[0],
                         width= bbox[3] - bbox[1],
                         height=bbox[2] - bbox[0])

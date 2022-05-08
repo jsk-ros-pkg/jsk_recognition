@@ -25,7 +25,12 @@ class ScikitLearnClassifier(ConnectionBasedTransport):
     def _init_classifier(self):
         clf_path = rospy.get_param('~clf_path')
         with gzip.open(clf_path) as f:
-            self.clf = pickle.load(f)
+            try:
+                self.clf = pickle.load(f)
+            except UnicodeDecodeError:
+                # load pyhon2's pickle in python3
+                f.seek(0)
+                self.clf = pickle.load(f, encoding='latin1')
 
     def subscribe(self):
         self.sub_hist = rospy.Subscriber('~input', VectorArray, self._predict)

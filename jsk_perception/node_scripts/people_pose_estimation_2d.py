@@ -706,7 +706,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
                         cv2.fillConvexPoly(roi2, polygon - np.array([left, top]), color)
                         cv2.addWeighted(roi, 0.4, roi2, 0.6, 0.0, dst=roi)
                     #
-                    offset += len(self.index2handname) / 2
+                    offset += len(self.index2handname) // 2
 
         return img
 

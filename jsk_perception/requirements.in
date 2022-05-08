@@ -1,5 +1,6 @@
 opencv-python
-chainer
+chainer==6.7.0
+chainercv
 dlib
 fcn
 scikit-learn

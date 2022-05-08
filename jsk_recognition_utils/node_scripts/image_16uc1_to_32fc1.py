@@ -9,19 +9,11 @@ import sys
 
 import numpy as np
 
-print(sys.version)
-# cv_bridge_python3 import
-if os.environ['ROS_PYTHON_VERSION'] == '2':
-    python3_path = '/opt/ros/{}/lib/python3/dist-packages/'.format(
-        os.environ['ROS_DISTRO'])
-    sys.path.insert(0, python3_path)
-    import cv_bridge
-    sys.path.remove(python3_path)
-else:
-    import cv_bridge
 from jsk_topic_tools import ConnectionBasedTransport
 import rospy
 from sensor_msgs.msg import Image
+
+from jsk_recognition_utils import cv_bridge
 
 
 class Image16UC1To32FC1(ConnectionBasedTransport):

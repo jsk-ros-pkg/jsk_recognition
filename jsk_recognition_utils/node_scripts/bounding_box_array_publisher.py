@@ -8,7 +8,11 @@ from geometry_msgs.msg import Vector3
 from jsk_recognition_msgs.msg import BoundingBox
 from jsk_recognition_msgs.msg import BoundingBoxArray
 import rospy
-from tf.transformations import quaternion_from_euler
+
+from jsk_recognition_utils import tf
+
+
+quaternion_from_euler = tf.transformations.quaternion_from_euler
 
 
 class BoundingBoxArrayPublisher(object):

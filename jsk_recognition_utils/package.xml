@@ -15,6 +15,8 @@
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>catkin_virtualenv</build_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>cv_bridge_python3</build_depend>
   <build_depend>cython</build_depend>
   <build_depend>eigen_conversions</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
@@ -33,6 +35,8 @@
   <build_depend>visualization_msgs</build_depend>
   <build_depend>yaml-cpp</build_depend>
   <build_depend>message_generation</build_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>cv_bridge_python3</exec_depend>
   <exec_depend>eigen_conversions</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>image_geometry</exec_depend>
@@ -43,6 +47,7 @@
   <exec_depend>pcl_ros</exec_depend>
   <exec_depend version_lt="7.0.0">python-chainer-pip</exec_depend>
   <exec_depend>python3-skimage</exec_depend>
+  <exec_depend>python3-sklearn</exec_depend>
   <exec_depend>python-fcn-pip</exec_depend>
   <exec_depend>python3-shapely</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>

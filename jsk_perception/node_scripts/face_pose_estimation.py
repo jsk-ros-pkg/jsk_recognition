@@ -40,7 +40,8 @@ from dynamic_reconfigure.server import Server
 from jsk_topic_tools import ConnectionBasedTransport
 import message_filters
 import rospy
-from jsk_recognition_utils import tf.transformations as T
+from jsk_recognition_utils import tf
+T = tf.transformations
 
 from geometry_msgs.msg import PoseArray
 from jsk_perception.cfg import FacePoseEstimationConfig as Config

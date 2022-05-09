@@ -26,7 +26,7 @@ i.e.
     # sys.exit(1)
 import chainer
 from sensor_msgs.msg import Image
-from cv_bridge import CvBridge
+from jsk_recognition_utils import CvBridge
 import message_filters
 from jsk_recognition_msgs.msg import RectArray
 from jsk_recognition_msgs.msg import ClassificationResult

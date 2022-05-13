@@ -56,6 +56,14 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(UseCython)
 add_subdirectory(python/${PROJECT_NAME})
 
+# Compile jsk_recognition_utils::rangeImageToCvMat(pcl_conversion_util.cpp) only when PCL_VISUALIZATION_FOUND, for pcl compiled in embedded environement, where no visualization tool exists
+message(STATUS "PCL_VISUALIZATION_FOUND = ${PCL_VISUALIZATION_FOUND}")
+if(PCL_VISUALIZATION_FOUND)
+  add_definitions("-DPCL_VISUALIZATION_FOUND")
+else()
+  message(WARNING "PCL_VISUALIZATION is not found")
+endif()
+
 find_package(OpenCV REQUIRED core imgproc)
 find_package(PCL REQUIRED)
 find_package(PkgConfig)

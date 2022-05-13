@@ -76,7 +76,7 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
 endif()
 include_directories(
-  include ${catkin_INCLUDE_DIRS}
+  include ${catkin_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS}
 )
 link_libraries(${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PCL_LIBRARIES} yaml-cpp)
 

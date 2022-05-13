@@ -128,6 +128,9 @@ namespace jsk_perception
                                                    pano).toImageMsg());
     msg_panorama_info_.header = image_msg->header;
     pub_panorama_info_.publish(msg_panorama_info_);
+
+    // Poke DiagnosticNodelet
+    vital_checker_->poke();
   }
 }
 

@@ -52,9 +52,15 @@ catkin_package(
 )
 
 # Cythonize pyx files
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-include(UseCython)
-add_subdirectory(python/${PROJECT_NAME})
+find_package( Cython )
+find_package( PythonLibs )
+if ( Cython_FOUND AND PythonLibs_FOUND )
+  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+  include(UseCython)
+  add_subdirectory(python/${PROJECT_NAME})
+else()
+  message(WARNING "Cythonize pyx files needs Cython(${Cython_FOUND}) and PythonLibs(${PythonLIbs_FOUND})")
+endif()
 
 # Compile jsk_recognition_utils::rangeImageToCvMat(pcl_conversion_util.cpp) only when PCL_VISUALIZATION_FOUND, for pcl compiled in embedded environement, where no visualization tool exists
 message(STATUS "PCL_VISUALIZATION_FOUND = ${PCL_VISUALIZATION_FOUND}")

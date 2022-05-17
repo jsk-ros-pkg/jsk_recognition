@@ -30,6 +30,7 @@ else()
   set(ML_CLASSIFIERS ml_classifiers) ## hydro and later
 endif()
 
+
 find_package(catkin REQUIRED COMPONENTS
   diagnostic_updater
   jsk_recognition_utils
@@ -100,8 +101,10 @@ generate_dynamic_reconfigure_options(
 )
 
 find_package(OpenCV REQUIRED core imgproc)
+# pcl needs vtk
+find_package(VTK REQUIRED)
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS} ${VTK_USE_FILE})
 link_directories(${catkin_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
@@ -223,8 +226,9 @@ jsk_pcl_util_nodelet(src/marker_array_voxel_to_pointcloud_nodelet.cpp
   "jsk_pcl_utils/MarkerArrayVoxelToPointCloud" "marker_array_voxel_to_pointcloud")
 add_library(jsk_pcl_ros_utils SHARED ${jsk_pcl_util_nodelet_sources})
 add_dependencies(jsk_pcl_ros_utils ${PROJECT_NAME}_gencfg)
+
 target_link_libraries(jsk_pcl_ros_utils
-  ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
+  ${catkin_LIBRARIES} ${VTK_LIBRARIES} ${pcl_ros_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
 
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 

@@ -669,9 +669,9 @@ namespace jsk_pcl_ros
     for (size_t row_index = start_y; row_index < end_y; ++row_index) {
       for (size_t col_index = start_x; col_index < end_x; ++col_index) {
         const pcl::PointXYZRGBA & point = (*cloud) (col_index, row_index);
-        if (pcl_isfinite (point.x) &&
-            pcl_isfinite (point.y) &&
-            pcl_isfinite (point.z)) {
+        if (std::isfinite (point.x) &&
+            std::isfinite (point.y) &&
+            std::isfinite (point.z)) {
           center = center + point.getVector3fMap();
           ++counter;
         }

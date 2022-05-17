@@ -129,9 +129,9 @@ namespace jsk_pcl_ros
     std::vector<int> a_indices, b_indices;
     for (size_t i = 0; i < cloud.points.size(); i++) {
       pcl::PointXYZRGB pcl_point = cloud.points[i];
-      if (pcl_isfinite(pcl_point.x) &&
-          pcl_isfinite(pcl_point.y) &&
-          pcl_isfinite(pcl_point.z)) { // we don't care nan points
+      if (std::isfinite(pcl_point.x) &&
+          std::isfinite(pcl_point.y) &&
+          std::isfinite(pcl_point.z)) { // we don't care nan points
         Eigen::Vector3f eigen_point = pcl_point.getVector3fMap();
         if (polygon_a.distanceSmallerThan(eigen_point, outlier_threshold_)) {
           a_indices.push_back(i);

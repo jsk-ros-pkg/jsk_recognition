@@ -98,12 +98,12 @@ namespace jsk_pcl_ros_utils
       Eigen::Vector3f s(sensor_transform.translation());
       for (size_t i = 0; i < cloud->points.size(); i++) {
         // Check point is not nan
-        if (pcl_isfinite(cloud->points[i].x) &&
-            pcl_isfinite(cloud->points[i].y) &&
-            pcl_isfinite(cloud->points[i].z) &&
-            pcl_isfinite(cloud->points[i].normal_x) &&
-            pcl_isfinite(cloud->points[i].normal_y) &&
-            pcl_isfinite(cloud->points[i].normal_z)) {
+        if (std::isfinite(cloud->points[i].x) &&
+            std::isfinite(cloud->points[i].y) &&
+            std::isfinite(cloud->points[i].z) &&
+            std::isfinite(cloud->points[i].normal_x) &&
+            std::isfinite(cloud->points[i].normal_y) &&
+            std::isfinite(cloud->points[i].normal_z)) {
           Eigen::Vector3f p = cloud->points[i].getVector3fMap();
           Eigen::Vector3f n(cloud->points[i].normal_x,
                             cloud->points[i].normal_y,

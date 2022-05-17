@@ -140,7 +140,7 @@ namespace jsk_pcl_ros
     {
       std::vector<int> neigh_indices(1);
       std::vector<float> neigh_sqr_dists(1);
-      if (!pcl_isfinite (scene_feature->at(i).descriptor[0])) { //skipping NaNs
+      if (!std::isfinite (scene_feature->at(i).descriptor[0])) { //skipping NaNs
         continue;
       }
       int found_neighs

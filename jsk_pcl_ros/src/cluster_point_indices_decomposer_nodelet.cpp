@@ -580,7 +580,7 @@ namespace jsk_pcl_ros
     double xwidth = maxpt[0] - minpt[0];
     double ywidth = maxpt[1] - minpt[1];
     double zwidth = maxpt[2] - minpt[2];
-    if (!pcl_isfinite(xwidth) || !pcl_isfinite(ywidth) || !pcl_isfinite(zwidth))
+    if (!std::isfinite(xwidth) || !std::isfinite(ywidth) || !std::isfinite(zwidth))
     {
       // all points in cloud are nan or its size is 0
       xwidth = ywidth = zwidth = 0;

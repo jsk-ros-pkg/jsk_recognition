@@ -433,7 +433,7 @@ namespace jsk_pcl_ros
         pcl::PointIndices non_nan_indices;
         for (size_t j = 0; j < indices->indices.size(); j++) {
           pcl::PointXYZ p = cloud->points[indices->indices[j]];
-          if (pcl_isfinite(p.x) && pcl_isfinite(p.y) && pcl_isfinite(p.z)) {
+          if (std::isfinite(p.x) && std::isfinite(p.y) && std::isfinite(p.z)) {
             non_nan_indices.indices.push_back(indices->indices[j]);
           }
         }

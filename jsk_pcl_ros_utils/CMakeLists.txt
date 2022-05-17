@@ -31,6 +31,7 @@ else()
 endif()
 
 find_package(catkin REQUIRED COMPONENTS
+  diagnostic_updater
   jsk_recognition_utils
   dynamic_reconfigure pcl_ros nodelet message_generation genmsg
   ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs

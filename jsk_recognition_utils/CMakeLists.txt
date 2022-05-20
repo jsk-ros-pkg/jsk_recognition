@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   diagnostic_updater
   dynamic_reconfigure
+  jsk_data
   jsk_recognition_msgs
   pcl_ros
   pcl_msgs

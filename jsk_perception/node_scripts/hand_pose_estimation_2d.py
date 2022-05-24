@@ -271,8 +271,8 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
                     hand.point_scores):
                 u = pose.position.x
                 v = pose.position.y
-                if 0 <= u < depth_img.shape[0] and \
-                   0 <= v < depth_img.shape[1]:
+                if 0 <= u < depth_img.shape[1] and \
+                   0 <= v < depth_img.shape[0]:
                     z = float(depth_img[int(v)][int(u)])
                 else:
                     continue

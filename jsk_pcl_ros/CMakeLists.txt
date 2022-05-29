@@ -380,6 +380,8 @@ jsk_pcl_nodelet(src/ppf_registration_nodelet.cpp
   "jsk_pcl/PPFRegistration" "ppf_registration")
 jsk_pcl_nodelet(src/organized_statistical_outlier_removal_nodelet.cpp
   "jsk_pcl/OrganizedStatisticalOutlierRemoval" "organized_statistical_outlier_removal")
+jsk_pcl_nodelet(src/container_occupancy_detector_nodelet.cpp
+  "jsk_pcl/ContainerOccupancyDetector" "container_occupancy_detector")
 
 # kinfu.h uses jsk_rviz_plugins/OverlayText.h, but jsk_recognition should not depends on jsk_visualization
 find_package(jsk_rviz_plugins QUIET)

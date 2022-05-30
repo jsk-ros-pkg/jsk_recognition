@@ -51,52 +51,57 @@
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/PointCloud2.h>
 
+#include <pcl/filters/crop_box.h>
+
 namespace jsk_pcl_ros
 {
   class ContainerOccupancyDetector: public jsk_topic_tools::DiagnosticNodelet
   {
-  public:
-    typedef message_filters::sync_policies::ExactTime<
+    public:
+      typedef message_filters::sync_policies::ExactTime<
       jsk_recognition_msgs::BoundingBoxArray,
       sensor_msgs::PointCloud2
       > SyncPolicy;
-    ContainerOccupancyDetector() : DiagnosticNodelet("ContainerOccupancyDetector") {}
+      ContainerOccupancyDetector() : DiagnosticNodelet("ContainerOccupancyDetector") {}
 
-  protected:
-    ////////////////////////////////////////////////////////
-    // methods
-    ////////////////////////////////////////////////////////
-    virtual void onInit();
-    virtual void calculate(
-      const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& box_array_msg,
-      const sensor_msgs::PointCloud2::ConstPtr& points_msg);
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
-    virtual void subscribe();
-    virtual void unsubscribe();
+    protected:
+      ////////////////////////////////////////////////////////
+      // methods
+      ////////////////////////////////////////////////////////
+      virtual void onInit();
+      virtual void calculate(
+        const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& box_array_msg,
+        const sensor_msgs::PointCloud2::ConstPtr& points_msg);
+      virtual void updateDiagnostic(
+        diagnostic_updater::DiagnosticStatusWrapper &stat);
+      virtual void subscribe();
+      virtual void unsubscribe();
+      virtual bool pointsTransform(
+        const sensor_msgs::PointCloud2::Ptr& points_msg);
 
-    ////////////////////////////////////////////////////////
-    // ROS varariables
-    ////////////////////////////////////////////////////////
-    message_filters::Subscriber<jsk_recognition_msgs::BoundingBoxArray> sub_box_;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_points_;
-    std::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
-    ros::Publisher occupancy_rate_pub_;
-    boost::mutex mutex_;
+      ////////////////////////////////////////////////////////
+      // ROS varariables
+      ////////////////////////////////////////////////////////
+      message_filters::Subscriber<jsk_recognition_msgs::BoundingBoxArray> sub_box_;
+      message_filters::Subscriber<sensor_msgs::PointCloud2> sub_points_;
+      std::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+      ros::Publisher occupancy_rate_pub_;
+      boost::mutex mutex_;
+      tf2_ros::Buffer tf_buffer_;
+      tf2_ros::TransformListener* tf_listener_;
+      sensor_msgs::PointCloud2::Ptr transformed_points_;
 
-    ////////////////////////////////////////////////////////
-    // Diagnostics Variables
-    ////////////////////////////////////////////////////////
-    jsk_recognition_utils::Counter remove_counter_;
-    jsk_recognition_utils::Counter pass_counter_;
+      ////////////////////////////////////////////////////////
+      // Diagnostics Variables
+      ////////////////////////////////////////////////////////
+      jsk_recognition_utils::Counter remove_counter_;
+      jsk_recognition_utils::Counter pass_counter_;
 
-    ////////////////////////////////////////////////////////
-    // Parameters
-    ////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////
+      // Parameters
+      ////////////////////////////////////////////////////////
 
-    bool with_indices_;
-
-  private:
+    private:
 
   };
 }

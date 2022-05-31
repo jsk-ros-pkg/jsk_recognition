@@ -1,5 +1,5 @@
-aws_auto_cehckin_app.py
-=========================
+aws_auto_checkin_app.py
+=======================
 
 What is this?
 -------------
@@ -21,12 +21,13 @@ Subscribing Topic
 * ``~face_roi`` (``opencv_apps/FaceArrayStamped``)
 
   Rectangles on the face of input image. Use ROI value.
-  ```
+
+.. code-block::
+
         msg.faces[].face.x      : X coordinates of the center of the face image in the ~image input
         msg.faces[].face.y      : Y coordinates of the center of the face image in the ~image input
         msg.faces[].face.width  : Width of the face image
         msg.faces[].face.height : Height of the face iamge
-  ```
 
 Publishing Topic
 ----------------
@@ -48,7 +49,9 @@ Parameters
   can find how to generate this file on
   https://aws.amazon.com/jp/builders-flash/202004/auto-checkin-app/.
   In addition to that, you need to add "UserName" and "UserPassword"
-  ```
+
+.. code-block:: json
+
   {
     "Region": "%%REGION%%",
     "ApiEndpoint" : "%%REST_API_ID%%.execute-api.%%REGION%%.amazonaws.com/prod/rekognize_face",
@@ -64,7 +67,6 @@ Parameters
     "UserName": "%%YOUR_USER_NAME%%",
     "UserPassword": "%%YOUR_PASSWORD%%"
   }
-  ```
 
 Sample
 ------

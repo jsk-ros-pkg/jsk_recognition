@@ -33,14 +33,11 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 /*
- * container_occupancy_nodelet.cpp
+ * container_occupancy_detector_nodelet.cpp
  * Author: Yoshiki Obinata <obinata@jsk.imi.i.u-tokyo.ac.jp>
  */
 
 #include "jsk_pcl_ros/container_occupancy_detector.h"
-
-const float FLOAT_MIN = std::numeric_limits<float>::min();
-const float FLOAT_MAX = std::numeric_limits<float>::max();
 
 namespace jsk_pcl_ros{
 
@@ -53,9 +50,9 @@ namespace jsk_pcl_ros{
         onInitPostProcess();
     }
 
-    void ContainerOccupancyDetector::subscribe(){
-        sub_box_.subscribe(*pnh_, "containers", 1);
-        sub_points_.subscribe(*pnh_, "points", 1);
+    void  ContainerOccupancyDetector::subscribe(){
+        sub_box_.subscribe(*pnh_, "containers/boxes", 1);
+        sub_points_.subscribe(*pnh_, "containers/points", 1);
         sync_ = std::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
         sync_->connectInput(sub_box_, sub_points_);
         sync_->registerCallback(boost::bind(&ContainerOccupancyDetector::calculate, this, _1, _2));
@@ -77,49 +74,43 @@ namespace jsk_pcl_ros{
 
         if(!box_array_msg->boxes.empty()){
             // if containers were subscribed
-            if(pointsTransform(points_msg)){
+            if(pointsTransform(box_array_msg, points_msg)){
                 // when point cloud transform succeeded
                 std_msgs::Float64MultiArray occupancy_rates_;
 
-                pcl_conversions::toPCL(*transformed_points_, *pcl_pc2_ptr_);
+                pcl_conversions::toPCL(*transformed_points_msg_, *pcl_pc2_ptr_); // convert to pcl
                 pcl::fromPCLPointCloud2(*pcl_pc2_ptr_, *pcl_xyz_ptr_);
 
                 for(auto box = box_array_msg->boxes.begin();
                     box != box_array_msg->boxes.end();
                     ++box){
                     // calculate occupancy for each bounding boxes
-                    pcl::CropBox<pcl::PointXYZ> box_filter_;
-                    pcl::PointCloud<pcl::PointXYZ>::Ptr box_filtered_points_;
-                    pcl::PointXYZ min_pt_, max_pt_;
                     float sum_occupancy_ = 0.0, occupancy_;
                     float h_rate_;
                     const float box_top_h_ = box->pose.position.z + box->dimensions.z / 2.0;
                     const float box_buttom_h_ = box->pose.position.z - box->dimensions.z / 2.0;
+                    uint64_t n_point_ = 0;
 
-                    box_filter_.setMin(Eigen::Vector4f(
-                                           (box->pose.position.x -
-                                            box->dimensions.x / 2.0),
-                                           (box->pose.position.y -
-                                            box->dimensions.y / 2.0),
-                                           FLOAT_MIN, 1.0f));
-                    box_filter_.setMax(Eigen::Vector4f(
-                                           (box->pose.position.x +
-                                            box->dimensions.x / 2.0),
-                                           (box->pose.position.y +
-                                            box->dimensions.y / 2.0),
-                                           FLOAT_MAX, 1.0f));
-                    for(auto point = box_filtered_points_->points.begin();
-                        point != box_filtered_points_->points.end();
+                    for(auto point = pcl_xyz_ptr_->points.begin();
+                        point != pcl_xyz_ptr_->points.end();
                         ++point){
-                        h_rate_ = (point->z - box_buttom_h_) / (point->z - box_buttom_h_);
-                        if(h_rate_ > 0){
-                            // not count h_rate_ < 0 points
-                            sum_occupancy_ += h_rate_;
+                        // NOTE do we have much better solution?
+                        // The author found cluster_point_indices_decomposer's ~output%02d topic
+                        // it is good if it can be subscribed
+                        if(((point->x > (box->pose.position.x - box->dimensions.x / 2.0)) &&
+                            (point->x < (box->pose.position.x + box->dimensions.x / 2.0))) &&
+                           ((point->y > (box->pose.position.y - box->dimensions.y / 2.0)) &&
+                            (point->y < (box->pose.position.y + box->dimensions.y / 2.0))) &&
+                           ((point->z >= box_buttom_h_))){
+                            // if point in the box
+                            n_point_++;
+                            sum_occupancy_ += (point->z - box_buttom_h_) / (box_top_h_ - box_buttom_h_);
                         }
                     }
-                    occupancy_ = sum_occupancy_ / float(box_filtered_points_->size());
+                    occupancy_ = sum_occupancy_ / float(n_point_);
                     occupancy_rates_.data.push_back(occupancy_);
                 }
+
                 occupancy_rate_pub_.publish(occupancy_rates_);
             }else{
                 // when point cloud transfrom not succeeded
@@ -134,16 +125,20 @@ namespace jsk_pcl_ros{
     }
 
     bool ContainerOccupancyDetector::pointsTransform(
-        const sensor_msgs::PointCloud2::Ptr& points_msg
+        const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& box_array_msg,
+        const sensor_msgs::PointCloud2::ConstPtr& points_msg
     ){
+        // convert pc2's frame to bounding box's one
         geometry_msgs::TransformStamped transform_stamped_;
+        Eigen::Matrix4f mat;
         try{
             transform_stamped_ = tf_buffer_.lookupTransform(
-                "base_link",
+                box_array_msg->header.frame_id,
                 points_msg->header.frame_id,
                 points_msg->header.stamp,
                 ros::Duration(10.0));
-            tf2::doTransform(points_msg, transformed_points_, transform_stamped_);
+            mat = tf2::transformToEigen(transform_stamped_.transform).matrix().cast<float>();
+            pcl_ros::transformPointCloud(mat, *points_msg, *transformed_points_msg_);
             return true;
         }catch(tf2::TransformException &ex){
             NODELET_WARN("Failed to transform tf: %s\n", ex.what());

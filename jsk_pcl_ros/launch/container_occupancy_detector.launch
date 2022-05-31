@@ -37,11 +37,11 @@
            to="$(arg DEFAULT_NAMESPACE)/containers/points" />
   </node>
 
-  <!-- TODO -->
-  <!-- <node pkg="jsk_pcl_ros" type="container_occupancy_detector" -->
-  <!--       name="$(arg DEFAULT_NAMESPACE)" > -->
-  <!--   <remap from="~containers/points" to="$(arg DEFAULT_NAMESPACE)/containers/points" /> -->
-  <!--   <remap from="~containers/boxes" to="$(arg DEFAULT_NAMESPACE)/containers/boxes" /> -->
-  <!-- </node> -->
+
+  <node pkg="jsk_pcl_ros" type="container_occupancy_detector"
+        name="$(arg DEFAULT_NAMESPACE)" >
+    <remap from="~containers/points" to="$(arg DEFAULT_NAMESPACE)/containers/points" />
+    <remap from="~containers/boxes" to="$(arg CONTAINER_BOXES_INPUT)" />
+  </node>
 
 </launch>

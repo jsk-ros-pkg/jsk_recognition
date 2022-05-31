@@ -77,9 +77,9 @@ Sample
 
 
 For JSK user, Download `env.json` file from
-[Gdrive](https://drive.google.com/file/d/1WUrRxPtT0ZuRx-IqjGwDBqeR5vZVTkB1/view?usp=sharing)
+`Gdrive <https://drive.google.com/file/d/1WUrRxPtT0ZuRx-IqjGwDBqeR5vZVTkB1/view?usp=sharing>`_
 and put this under `/tmp` directory to run sample code.
 
-To add new people to face database, add face image file to [Amazon
-S3](https://console.aws.amazon.com/s3),
+To add new people to face database, add face image file to
+`Amazon S3 <https://console.aws.amazon.com/s3>`_,
 `auto-check-in-gapp-register...` buckets

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <arg name="POINTCLOUD_INPUT"/>
+  <arg name="CONTAINER_BOXES_INPUT"/>
+  <arg name="DEFAULT_NAMESPACE" default="container_occupancy_detector"/>
+
+  <node pkg="jsk_pcl_ros" type="rearrange_bounding_box"
+        name="$(arg DEFAULT_NAMESPACE)_rearrange_bounding_box">
+    <remap from="~input" to="$(arg CONTAINER_BOXES_INPUT)"/>
+    <remap from="~output"
+           to="$(arg DEFAULT_NAMESPACE)/rearrange_bounding_box/rescaled_containers"/>
+    <rosparam>
+      scale_z: 2.0
+    </rosparam>
+  </node>
+
+  <node pkg="jsk_pcl_ros" type="attention_clipper"
+        name="$(arg DEFAULT_NAMESPACE)_attention_clipper" output="screen">
+    <remap from="~input/points" to="$(arg POINTCLOUD_INPUT)" />
+    <remap from="~input/box_array"
+           to="$(arg DEFAULT_NAMESPACE)/rearrange_bounding_box/rescaled_containers" />
+    <remap from="~output/box_array"
+           to="$(arg DEFAULT_NAMESPACE)/attention_clipper/rescaled_containers" />
+    <remap from="~output/cluster_point_indices"
+           to="$(arg DEFAULT_NAMESPACE)/attention_clipper/rescaled_containers/cluster_point_indices" />
+    <rosparam>
+      use_multiple_attention: true
+    </rosparam>
+  </node>
+
+  <node pkg="jsk_pcl_ros" type="cluster_point_indices_decomposer"
+        name="$(arg DEFAULT_NAMESPACE)_cluster_point_indices_decomposer" >
+    <remap from="~input" to="$(arg POINTCLOUD_INPUT)" />
+    <remap from="~target"
+           to="$(arg DEFAULT_NAMESPACE)/attention_clipper/rescaled_containers/cluster_point_indices" />
+    <remap from="~debug_output"
+           to="$(arg DEFAULT_NAMESPACE)/containers/points" />
+  </node>
+
+  <!-- TODO -->
+  <!-- <node pkg="jsk_pcl_ros" type="container_occupancy_detector" -->
+  <!--       name="$(arg DEFAULT_NAMESPACE)" > -->
+  <!--   <remap from="~containers/points" to="$(arg DEFAULT_NAMESPACE)/containers/points" /> -->
+  <!--   <remap from="~containers/boxes" to="$(arg DEFAULT_NAMESPACE)/containers/boxes" /> -->
+  <!-- </node> -->
+
+</launch>

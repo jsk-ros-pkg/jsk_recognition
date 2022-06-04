@@ -95,7 +95,8 @@ namespace jsk_pcl_ros{
                   boost::mutex mutex_;
                   tf2_ros::Buffer tf_buffer_;
                   tf2_ros::TransformListener* tf_listener_;
-                  sensor_msgs::PointCloud2::Ptr transformed_points_msg_;
+                  sensor_msgs::PointCloud2::Ptr transformed_points_msg_ =
+                        boost::shared_ptr<sensor_msgs::PointCloud2>(new sensor_msgs::PointCloud2);
 
                   ////////////////////////////////////////////////////////
                   // Diagnostics Variables

@@ -69,8 +69,10 @@ namespace jsk_pcl_ros{
         const sensor_msgs::PointCloud2::ConstPtr& points_msg
     ){
         boost::mutex::scoped_lock lock(mutex_);
-        pcl::PCLPointCloud2Ptr pcl_pc2_ptr_; // shared ptr
-        pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_xyz_ptr_; // shared ptr
+        pcl::PCLPointCloud2Ptr pcl_pc2_ptr_ =
+            boost::shared_ptr<pcl::PCLPointCloud2>(new pcl::PCLPointCloud2);
+        pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_xyz_ptr_ =
+            boost::shared_ptr<pcl::PointCloud<pcl::PointXYZ>>(new pcl::PointCloud<pcl::PointXYZ>);
 
         if(!box_array_msg->boxes.empty()){
             // if containers were subscribed

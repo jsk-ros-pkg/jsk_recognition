@@ -43,19 +43,28 @@ namespace jsk_pcl_ros{
 
     void ContainerOccupancyDetector::onInit(){
         jsk_topic_tools::ConnectionBasedNodelet::onInit();
-
-        occupancy_rate_pub_
-            = advertise<std_msgs::Float64MultiArray>(*pnh_, "occupancy_rate", 1);
+        box_occupancy_pub_
+            = advertise<jsk_recognition_msgs::BoundingBox>(*pnh_, "box_occupancy", 1);
+        boxes_occupancy_pub_
+            = advertise<jsk_recognition_msgs::BoundingBoxArray>(*pnh_, "boxes_occupancy", 1);
         tf_listener_ = new tf2_ros::TransformListener(tf_buffer_);
+        pnh_->param("use_multi_array", use_multi_array_, false); // TODO support mutli array
         onInitPostProcess();
     }
 
-    void  ContainerOccupancyDetector::subscribe(){
-        sub_box_.subscribe(*pnh_, "containers/boxes", 1);
-        sub_points_.subscribe(*pnh_, "containers/points", 1);
+    void ContainerOccupancyDetector::subscribe(){
+        sub_points_.subscribe(*pnh_, "container/points", 1);
         sync_ = std::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-        sync_->connectInput(sub_box_, sub_points_);
-        sync_->registerCallback(boost::bind(&ContainerOccupancyDetector::calculate, this, _1, _2));
+        if (use_multi_array_){
+            // sub_boxes_.subscribe(*pnh_, "container/boxes", 1);
+            // TODO support BoundingBoxArray
+            NODELET_FATAL("Not supporting multi container boxes\n");
+            return;
+        }else{
+            sub_box_.subscribe(*pnh_, "container/box", 1);
+            sync_->connectInput(sub_box_, sub_points_);
+            sync_->registerCallback(boost::bind(&ContainerOccupancyDetector::calculate, this, _1, _2));
+        }
     }
 
     void ContainerOccupancyDetector::unsubscribe(){
@@ -65,69 +74,53 @@ namespace jsk_pcl_ros{
     }
 
     void ContainerOccupancyDetector::calculate(
-        const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& box_array_msg,
+        const jsk_recognition_msgs::BoundingBox::ConstPtr& box_msg,
         const sensor_msgs::PointCloud2::ConstPtr& points_msg
     ){
         boost::mutex::scoped_lock lock(mutex_);
-        pcl::PCLPointCloud2Ptr pcl_pc2_ptr_ =
-            boost::shared_ptr<pcl::PCLPointCloud2>(new pcl::PCLPointCloud2);
-        pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_xyz_ptr_ =
-            boost::shared_ptr<pcl::PointCloud<pcl::PointXYZ>>(new pcl::PointCloud<pcl::PointXYZ>);
+        vital_checker_->poke();
+        if(pointsTransform(box_msg, points_msg)){
+            // when point cloud transform succeeded
+            jsk_recognition_msgs::BoundingBox result_;
+            result_ = *box_msg;
+            pcl_conversions::toPCL(*transformed_points_msg_, *pcl_pc2_ptr_); // convert to pcl
+            pcl::fromPCLPointCloud2(*pcl_pc2_ptr_, *pcl_xyz_ptr_);
+            float sum_occupancy_ = 0.0, occupancy_;
+            float h_rate_;
+            const float box_top_h_ = box_msg->pose.position.z + box_msg->dimensions.z / 2.0;
+            const float box_buttom_h_ = box_msg->pose.position.z - box_msg->dimensions.z / 2.0;
+            uint64_t n_point_ = 0;
 
-        if(!box_array_msg->boxes.empty()){
-            // if containers were subscribed
-            if(pointsTransform(box_array_msg, points_msg)){
-                // when point cloud transform succeeded
-                std_msgs::Float64MultiArray occupancy_rates_;
-
-                pcl_conversions::toPCL(*transformed_points_msg_, *pcl_pc2_ptr_); // convert to pcl
-                pcl::fromPCLPointCloud2(*pcl_pc2_ptr_, *pcl_xyz_ptr_);
-
-                for(auto box = box_array_msg->boxes.begin();
-                    box != box_array_msg->boxes.end();
-                    ++box){
-                    // calculate occupancy for each bounding boxes
-                    float sum_occupancy_ = 0.0, occupancy_;
-                    float h_rate_;
-                    const float box_top_h_ = box->pose.position.z + box->dimensions.z / 2.0;
-                    const float box_buttom_h_ = box->pose.position.z - box->dimensions.z / 2.0;
-                    uint64_t n_point_ = 0;
-
-                    for(auto point = pcl_xyz_ptr_->points.begin();
-                        point != pcl_xyz_ptr_->points.end();
-                        ++point){
-                        // NOTE do we have much better solution?
-                        // The author found cluster_point_indices_decomposer's ~output%02d topic
-                        // it is good if it can be subscribed
-                        if(((point->x > (box->pose.position.x - box->dimensions.x / 2.0)) &&
-                            (point->x < (box->pose.position.x + box->dimensions.x / 2.0))) &&
-                           ((point->y > (box->pose.position.y - box->dimensions.y / 2.0)) &&
-                            (point->y < (box->pose.position.y + box->dimensions.y / 2.0))) &&
-                           ((point->z >= box_buttom_h_))){
-                            // if point in the box
-                            n_point_++;
-                            sum_occupancy_ += (point->z - box_buttom_h_) / (box_top_h_ - box_buttom_h_);
-                        }
-                    }
-                    occupancy_ = sum_occupancy_ / float(n_point_);
-                    occupancy_rates_.data.push_back(occupancy_);
+            for(auto point = pcl_xyz_ptr_->points.begin();
+                point != pcl_xyz_ptr_->points.end();
+                ++point){
+                // NOTE do we have much better solution?
+                // The author found cluster_point_indices_decomposer's ~output%02d topic
+                // it is good if it can be subscribed
+                if(((point->x > (box_msg->pose.position.x - box_msg->dimensions.x / 2.0)) &&
+                    (point->x < (box_msg->pose.position.x + box_msg->dimensions.x / 2.0))) &&
+                   ((point->y > (box_msg->pose.position.y - box_msg->dimensions.y / 2.0)) &&
+                    (point->y < (box_msg->pose.position.y + box_msg->dimensions.y / 2.0))) &&
+                   ((point->z >= box_buttom_h_))){
+                    // if point in the box
+                    n_point_++;
+                    sum_occupancy_ += (point->z - box_buttom_h_) / (box_top_h_ - box_buttom_h_);
                 }
-
-                occupancy_rate_pub_.publish(occupancy_rates_);
-            }else{
-                // when point cloud transfrom not succeeded
-                NODELET_WARN("Failed to transform pointcloud\n");
-                return;
             }
+            occupancy_ = sum_occupancy_ / float(n_point_);
+            result_.value = occupancy_;
+
+            box_occupancy_pub_.publish(result_);
+
         }else{
-            // if no containers
-            NODELET_DEBUG_ONCE("No containers subscribed\n");
+            // when point cloud transfrom not succeeded
+            NODELET_WARN("Failed to transform pointcloud\n");
             return;
         }
     }
 
     bool ContainerOccupancyDetector::pointsTransform(
-        const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& box_array_msg,
+        const jsk_recognition_msgs::BoundingBox::ConstPtr& box_msg,
         const sensor_msgs::PointCloud2::ConstPtr& points_msg
     ){
         // convert pc2's frame to bounding box's one
@@ -135,7 +128,7 @@ namespace jsk_pcl_ros{
         Eigen::Matrix4f mat;
         try{
             transform_stamped_ = tf_buffer_.lookupTransform(
-                box_array_msg->header.frame_id,
+                box_msg->header.frame_id,
                 points_msg->header.frame_id,
                 points_msg->header.stamp,
                 ros::Duration(10.0));

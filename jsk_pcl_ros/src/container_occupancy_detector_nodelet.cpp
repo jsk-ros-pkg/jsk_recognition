@@ -80,22 +80,34 @@ namespace jsk_pcl_ros{
                 pcl::fromPCLPointCloud2(*pcl_pc2_ptr_, *pcl_xyz_ptr_);
                 for(size_t i_box = 0; i_box < boxes_msg->boxes.size(); i_box++){
                     // each boxes
-                    float sum_occupancy_ = 0.0, occupancy_;
-                    float box_top_h_ = boxes_msg->boxes.at(i_box).pose.position.z
-                        + boxes_msg->boxes.at(i_box).dimensions.z / 2.0;
-                    float box_buttom_h_ = boxes_msg->boxes.at(i_box).pose.position.z
-                        - boxes_msg->boxes.at(i_box).dimensions.z / 2.0;
+                    float sum_occupancy_ = 0.0;
+                    int32_t n_points_ = 0;
+                    Eigen::Vector3d t_(boxes_msg->boxes.at(i_box).pose.position.x,
+                                       boxes_msg->boxes.at(i_box).pose.position.y,
+                                       boxes_msg->boxes.at(i_box).pose.position.z);
+                    Eigen::Quaterniond q_(boxes_msg->boxes.at(i_box).pose.orientation.w,
+                                          boxes_msg->boxes.at(i_box).pose.orientation.x,
+                                          boxes_msg->boxes.at(i_box).pose.orientation.y,
+                                          boxes_msg->boxes.at(i_box).pose.orientation.z);
+                    q_.normalize();
+                    Eigen::Vector3d top_(0.0, 0.0, boxes_msg->boxes.at(i_box).dimensions.z / 2.0);
+                    Eigen::Vector3d buttom_(0.0, 0.0, -boxes_msg->boxes.at(i_box).dimensions.z / 2.0);
 
                     for(auto index = point_indices_msg->cluster_indices.at(i_box).indices.begin();
                         index != point_indices_msg->cluster_indices.at(i_box).indices.end();
                         ++index){
                         // each points in the box
-                        sum_occupancy_ += (pcl_xyz_ptr_->at(*index).z - box_buttom_h_)
-                            / (box_top_h_ - box_buttom_h_);
+                        Eigen::Vector3d eigen_point_(pcl_xyz_ptr_->at(*index).x,
+                                                     pcl_xyz_ptr_->at(*index).y,
+                                                     pcl_xyz_ptr_->at(*index).z);
+                        Eigen::Vector3d rotated_point_ = q_.conjugate() * (eigen_point_ - t_); // TODO check this rotation correct
+                        float rate_ = (rotated_point_.z() - buttom_.z()) / (top_.z() - buttom_.z()); // remove points under the box
+                        if(rate_ > 0){
+                            sum_occupancy_ += rate_;
+                            n_points_++;
+                        }
                     }
-                    occupancy_ =
-                        sum_occupancy_ / float(point_indices_msg->cluster_indices.at(i_box).indices.size());
-                    result_.boxes.at(i_box).value = occupancy_;
+                    result_.boxes.at(i_box).value = sum_occupancy_ / float(n_points_);
                 }
                 boxes_occupancy_pub_.publish(result_);
             }else{

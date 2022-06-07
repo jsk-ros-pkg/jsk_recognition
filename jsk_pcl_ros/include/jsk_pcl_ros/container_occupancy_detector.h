@@ -54,6 +54,7 @@
 #include "jsk_recognition_utils/pcl_util.h"
 #include "jsk_recognition_utils/geo_util.h"
 #include <jsk_recognition_msgs/BoundingBoxArray.h>
+#include <jsk_recognition_msgs/ClusterPointIndices.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/PointCloud2.h>
 
@@ -64,8 +65,9 @@ namespace jsk_pcl_ros{
   class ContainerOccupancyDetector: public jsk_topic_tools::DiagnosticNodelet{
     public:
       typedef message_filters::sync_policies::ExactTime<
-      jsk_recognition_msgs::BoundingBox,
-      sensor_msgs::PointCloud2
+      jsk_recognition_msgs::BoundingBoxArray,
+      sensor_msgs::PointCloud2,
+      jsk_recognition_msgs::ClusterPointIndices
       > SyncPolicy;
       ContainerOccupancyDetector() : DiagnosticNodelet("ContainerOccupancyDetector") {}
 
@@ -75,24 +77,25 @@ namespace jsk_pcl_ros{
       ////////////////////////////////////////////////////////
       virtual void onInit();
       virtual void calculate(
-        const jsk_recognition_msgs::BoundingBox::ConstPtr& box_msg,
-        const sensor_msgs::PointCloud2::ConstPtr& points_msg);
+        const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& boxes_msg,
+        const sensor_msgs::PointCloud2::ConstPtr& points_msg,
+        const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& point_indices_msg);
       virtual void updateDiagnostic(
         diagnostic_updater::DiagnosticStatusWrapper &stat);
       virtual void subscribe();
       virtual void unsubscribe();
       virtual bool pointsTransform(
-        const jsk_recognition_msgs::BoundingBox::ConstPtr& box_msg,
+        const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& boxes_msg,
         const sensor_msgs::PointCloud2::ConstPtr& points_msg);
 
       ////////////////////////////////////////////////////////
       // ROS varariables
       ////////////////////////////////////////////////////////
-      message_filters::Subscriber<jsk_recognition_msgs::BoundingBox> sub_box_;
       message_filters::Subscriber<jsk_recognition_msgs::BoundingBoxArray> sub_boxes_;
       message_filters::Subscriber<sensor_msgs::PointCloud2> sub_points_;
+      message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_point_indices_;
       std::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
-      ros::Publisher box_occupancy_pub_, boxes_occupancy_pub_;
+      ros::Publisher boxes_occupancy_pub_;
       boost::mutex mutex_;
       tf2_ros::Buffer tf_buffer_;
       tf2_ros::TransformListener* tf_listener_;

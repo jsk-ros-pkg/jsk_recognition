@@ -43,84 +43,71 @@ namespace jsk_pcl_ros{
 
     void ContainerOccupancyDetector::onInit(){
         jsk_topic_tools::ConnectionBasedNodelet::onInit();
-        box_occupancy_pub_
-            = advertise<jsk_recognition_msgs::BoundingBox>(*pnh_, "box_occupancy", 1);
         boxes_occupancy_pub_
             = advertise<jsk_recognition_msgs::BoundingBoxArray>(*pnh_, "boxes_occupancy", 1);
         tf_listener_ = new tf2_ros::TransformListener(tf_buffer_);
-        pnh_->param("use_multi_array", use_multi_array_, false); // TODO support mutli array
         onInitPostProcess();
     }
 
     void ContainerOccupancyDetector::subscribe(){
+        sub_boxes_.subscribe(*pnh_, "container/boxes", 1);
         sub_points_.subscribe(*pnh_, "container/points", 1);
+        sub_point_indices_.subscribe(*pnh_, "container/point_indices", 1);
         sync_ = std::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-        if (use_multi_array_){
-            // sub_boxes_.subscribe(*pnh_, "container/boxes", 1);
-            // TODO support BoundingBoxArray
-            NODELET_FATAL("Not supporting multi container boxes\n");
-            return;
-        }else{
-            sub_box_.subscribe(*pnh_, "container/box", 1);
-            sync_->connectInput(sub_box_, sub_points_);
-            sync_->registerCallback(boost::bind(&ContainerOccupancyDetector::calculate, this, _1, _2));
-        }
+        sync_->connectInput(sub_boxes_, sub_points_, sub_point_indices_);
+        sync_->registerCallback(boost::bind(&ContainerOccupancyDetector::calculate, this, _1, _2, _3));
     }
 
     void ContainerOccupancyDetector::unsubscribe(){
-        sub_box_.unsubscribe();
+        sub_boxes_.unsubscribe();
         sub_points_.unsubscribe();
-        delete tf_listener_;
+        sub_point_indices_.unsubscribe();
     }
 
     void ContainerOccupancyDetector::calculate(
-        const jsk_recognition_msgs::BoundingBox::ConstPtr& box_msg,
-        const sensor_msgs::PointCloud2::ConstPtr& points_msg
+        const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& boxes_msg,
+        const sensor_msgs::PointCloud2::ConstPtr& points_msg,
+        const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& point_indices_msg
     ){
         boost::mutex::scoped_lock lock(mutex_);
-        vital_checker_->poke();
-        if(pointsTransform(box_msg, points_msg)){
-            // when point cloud transform succeeded
-            jsk_recognition_msgs::BoundingBox result_;
-            result_ = *box_msg;
-            pcl_conversions::toPCL(*transformed_points_msg_, *pcl_pc2_ptr_); // convert to pcl
-            pcl::fromPCLPointCloud2(*pcl_pc2_ptr_, *pcl_xyz_ptr_);
-            float sum_occupancy_ = 0.0, occupancy_;
-            float h_rate_;
-            const float box_top_h_ = box_msg->pose.position.z + box_msg->dimensions.z / 2.0;
-            const float box_buttom_h_ = box_msg->pose.position.z - box_msg->dimensions.z / 2.0;
-            uint64_t n_point_ = 0;
+        // vital_checker_->poke(); TODO fix
+        if (!boxes_msg->boxes.empty()){
+            // if boxes exist
+            if(pointsTransform(boxes_msg, points_msg)){
+                // if succeeded in transforming pointclouds
+                jsk_recognition_msgs::BoundingBoxArray result_ = *boxes_msg;
+                pcl_conversions::toPCL(*transformed_points_msg_, *pcl_pc2_ptr_); // convert to pcl
+                pcl::fromPCLPointCloud2(*pcl_pc2_ptr_, *pcl_xyz_ptr_);
+                for(size_t i_box = 0; i_box < boxes_msg->boxes.size(); i_box++){
+                    // each boxes
+                    float sum_occupancy_ = 0.0, occupancy_;
+                    float box_top_h_ = boxes_msg->boxes.at(i_box).pose.position.z
+                        + boxes_msg->boxes.at(i_box).dimensions.z / 2.0;
+                    float box_buttom_h_ = boxes_msg->boxes.at(i_box).pose.position.z
+                        - boxes_msg->boxes.at(i_box).dimensions.z / 2.0;
 
-            for(auto point = pcl_xyz_ptr_->points.begin();
-                point != pcl_xyz_ptr_->points.end();
-                ++point){
-                // NOTE do we have much better solution?
-                // The author found cluster_point_indices_decomposer's ~output%02d topic
-                // it is good if it can be subscribed
-                if(((point->x > (box_msg->pose.position.x - box_msg->dimensions.x / 2.0)) &&
-                    (point->x < (box_msg->pose.position.x + box_msg->dimensions.x / 2.0))) &&
-                   ((point->y > (box_msg->pose.position.y - box_msg->dimensions.y / 2.0)) &&
-                    (point->y < (box_msg->pose.position.y + box_msg->dimensions.y / 2.0))) &&
-                   ((point->z >= box_buttom_h_))){
-                    // if point in the box
-                    n_point_++;
-                    sum_occupancy_ += (point->z - box_buttom_h_) / (box_top_h_ - box_buttom_h_);
+                    for(auto index = point_indices_msg->cluster_indices.at(i_box).indices.begin();
+                        index != point_indices_msg->cluster_indices.at(i_box).indices.end();
+                        ++index){
+                        // each points in the box
+                        sum_occupancy_ += (pcl_xyz_ptr_->at(*index).z - box_buttom_h_)
+                            / (box_top_h_ - box_buttom_h_);
+                    }
+                    occupancy_ =
+                        sum_occupancy_ / float(point_indices_msg->cluster_indices.at(i_box).indices.size());
+                    result_.boxes.at(i_box).value = occupancy_;
                 }
+                boxes_occupancy_pub_.publish(result_);
+            }else{
+                NODELET_WARN("Failed to transform point cloud\n");
             }
-            occupancy_ = sum_occupancy_ / float(n_point_);
-            result_.value = occupancy_;
-
-            box_occupancy_pub_.publish(result_);
-
         }else{
-            // when point cloud transfrom not succeeded
-            NODELET_WARN("Failed to transform pointcloud\n");
-            return;
+            NODELET_DEBUG("No containers subscribed\n");
         }
     }
 
     bool ContainerOccupancyDetector::pointsTransform(
-        const jsk_recognition_msgs::BoundingBox::ConstPtr& box_msg,
+        const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& boxes_msg,
         const sensor_msgs::PointCloud2::ConstPtr& points_msg
     ){
         // convert pc2's frame to bounding box's one
@@ -128,7 +115,7 @@ namespace jsk_pcl_ros{
         Eigen::Matrix4f mat;
         try{
             transform_stamped_ = tf_buffer_.lookupTransform(
-                box_msg->header.frame_id,
+                boxes_msg->header.frame_id,
                 points_msg->header.frame_id,
                 points_msg->header.stamp,
                 ros::Duration(10.0));

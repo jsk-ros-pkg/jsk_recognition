@@ -1,21 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
   <arg name="POINTCLOUD_INPUT" />
-  <arg name="CONTAINER_BOX_INPUT" default="container/box" />
   <arg name="CONTAINER_BOXES_INPUT" default="container/boxes" />
   <arg name="DEFAULT_NAMESPACE" default="container_occupancy_detector" />
-  <arg name="MULTI_BOXES" default="false" />
   <arg name="manager" default="manager" />
 
   <node pkg="nodelet" type="nodelet" name="$(arg manager)"
         args="manager" output="screen" />
 
-  <node pkg="nodelet" type="nodelet" name="$(arg DEFAULT_NAMESPACE)_rearrange_bounding_box"
+  <node pkg="nodelet" type="nodelet" name="$(arg DEFAULT_NAMESPACE)_rearrange_bounding_box_for_attention_clipper"
         args="load jsk_pcl/RearrangeBoundingBox $(arg manager)"
         output="screen">
     <remap from="~input" to="$(arg CONTAINER_BOXES_INPUT)"/>
     <remap from="~output"
-           to="$(arg DEFAULT_NAMESPACE)/rearrange_bounding_box/rescaled_containers"/>
+           to="$(arg DEFAULT_NAMESPACE)/rearrange_bounding_box_for_attention_clipper/rescaled_containers"/>
     <rosparam>
       scale_z: 2.0
     </rosparam>
@@ -26,7 +24,7 @@
         output="screen">
     <remap from="~input/points" to="$(arg POINTCLOUD_INPUT)" />
     <remap from="~input/box_array"
-           to="$(arg DEFAULT_NAMESPACE)/rearrange_bounding_box/rescaled_containers" />
+           to="$(arg DEFAULT_NAMESPACE)/rearrange_bounding_box_for_attention_clipper/rescaled_containers" />
     <remap from="~output/box_array"
            to="$(arg DEFAULT_NAMESPACE)/attention_clipper/rescaled_containers" />
     <remap from="~output/cluster_point_indices"
@@ -36,37 +34,24 @@
     </rosparam>
   </node>
 
-  <node pkg="nodelet" type="nodelet" name="$(arg DEFAULT_NAMESPACE)_cluster_point_indices_decomposer"
-        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg manager)"
+  <node pkg="nodelet" type="nodelet" name="$(arg DEFAULT_NAMESPACE)_rearrange_bounding_box_for_occupancy_detector"
+        args="load jsk_pcl/RearrangeBoundingBox $(arg manager)"
         output="screen">
-    <remap from="~input" to="$(arg POINTCLOUD_INPUT)" />
-    <remap from="~target"
-           to="$(arg DEFAULT_NAMESPACE)/attention_clipper/rescaled_containers/cluster_point_indices" />
-    <remap from="~debug_output"
-           to="$(arg DEFAULT_NAMESPACE)/containers/points" />
+    <remap from="~input" to="$(arg DEFAULT_NAMESPACE)/attention_clipper/rescaled_containers"/>
+    <remap from="~output"
+           to="$(arg DEFAULT_NAMESPACE)/containers"/>
+    <rosparam>
+      scale_z: 0.5
+    </rosparam>
   </node>
 
-  <!-- TODO should be removed, if mutli box feature is enabled -->
-  <group if="$(arg MULTI_BOXES)">
-    <node pkg="jsk_pcl_ros_utils" type="bounding_box_array_to_bounding_box"
-          name="$(arg DEFAULT_NAMESPACE)_bounding_box_array_to_bounding_box">
-      <remap from="~input" to="$(arg CONTAINER_BOXES_INPUT)" />
-      <remap from="~output" to="$(arg CONTAINER_BOX_INPUT)" />
-      <rosparam>
-        index: 1
-      </rosparam>
-    </node>
-  </group>
-
-  <node pkg="nodelet" type="nodelet" name="$(arg DEFAULT_NAMESPACE)_container_occpancy_detector"
+  <node pkg="nodelet" type="nodelet" name="$(arg DEFAULT_NAMESPACE)"
         args="load jsk_pcl/ContainerOccupancyDetector $(arg manager)"
-        output="screen">
-    <remap from="~container/points" to="$(arg DEFAULT_NAMESPACE)/containers/points" />
-    <remap from="~container/box" to="$(arg CONTAINER_BOX_INPUT)" />
-    <remap from="~container/boxes" to="$(arg CONTAINER_BOXES_INPUT)" />
-    <rosparam>
-      use_multi_array: $(arg MULTI_BOXES)
-    </rosparam>
+        output="screen" >
+    <remap from="~container/boxes" to="$(arg DEFAULT_NAMESPACE)/containers" />
+    <remap from="~container/points" to="$(arg POINTCLOUD_INPUT)" />
+    <remap from="~container/point_indices"
+           to="$(arg DEFAULT_NAMESPACE)/attention_clipper/rescaled_containers/cluster_point_indices" />
   </node>
 
 </launch>

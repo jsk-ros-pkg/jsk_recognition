@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
   <arg name="gui" default="true" />
+  <arg name="topic_tools_start_delay" default="2.0" />
 
   <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_fetch_trashbin.xml" />
 
@@ -24,6 +25,14 @@
     <arg name="CONTAINER_BOXES_INPUT" value="trashbin_boxes" />
     <arg name="manager" value="container_occupancy_nodelet_manager"/>
   </include>
+
+  <!-- for visualizing occupancy rate in rviz -->
+  <node name="occupancy0" pkg="topic_tools" type="transform"
+        args="/container_occupancy_detector/container/occupancies /container0/occupancy std_msgs/Float32 '0.0 if len(m.boxes) == 0 else m.boxes[0].value'" if="$(arg gui)">
+  </node>
+  <node name="occupancy1" pkg="topic_tools" type="transform"
+        args="/container_occupancy_detector/container/occupancies /container1/occupancy std_msgs/Float32 '0.0 if len(m.boxes) != 2 else m.boxes[1].value'" if="$(arg gui)">
+  </node>
 
   <node name="rviz" pkg="rviz" type="rviz"
         args="-d $(find jsk_pcl_ros)/sample/rviz/container_occupancy_detector.rviz"

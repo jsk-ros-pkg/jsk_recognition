@@ -44,7 +44,7 @@ namespace jsk_pcl_ros{
     void ContainerOccupancyDetector::onInit(){
         jsk_topic_tools::ConnectionBasedNodelet::onInit();
         boxes_occupancy_pub_
-            = advertise<jsk_recognition_msgs::BoundingBoxArray>(*pnh_, "boxes_occupancy", 1);
+            = advertise<jsk_recognition_msgs::BoundingBoxArray>(*pnh_, "container/occupancies", 1);
         tf_listener_ = new tf2_ros::TransformListener(tf_buffer_);
         onInitPostProcess();
     }

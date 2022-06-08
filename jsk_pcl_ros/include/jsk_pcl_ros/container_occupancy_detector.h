@@ -33,7 +33,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 /*
- * container_occupancy_nodelet.h
+ * container_occupancy_detector.h
  * Author: Yoshiki Obinata <obinata@jsk.imi.i.u-tokyo.ac.jp>
  */
 
@@ -44,7 +44,6 @@
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl_ros/transforms.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#include <tf2_sensor_msgs/tf2_sensor_msgs.h>
 #include <tf2/transform_datatypes.h>
 #include <tf2_eigen/tf2_eigen.h>
 
@@ -115,7 +114,6 @@ namespace jsk_pcl_ros{
       ////////////////////////////////////////////////////////
       // Parameters
       ////////////////////////////////////////////////////////
-      bool use_multi_array_;
 
     private:
 

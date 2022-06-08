@@ -77,7 +77,13 @@ jobs:
       - name: Install latest git ( use sudo for ros-ubuntu )
         run: |
           (apt-get update && apt-get install -y sudo) || echo "OK"
-          sudo apt-get update && sudo apt-get install -y software-properties-common && sudo apt-get update && sudo add-apt-repository -y ppa:git-core/ppa && sudo apt-get update && sudo apt-get install -y git
+          (apt-get update && apt-get install -y sudo) || echo "OK"
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo apt-get update
+          sudo -E add-apt-repository -y ppa:git-core/ppa
+          sudo apt-get update
+          sudo apt-get install -y git
 
       - name: work around permission issue  # https://github.com/actions/checkout/issues/760#issuecomment-1097501613
         run: |

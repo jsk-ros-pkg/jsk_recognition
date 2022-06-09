@@ -2,27 +2,27 @@
 
   <arg name="gui" default="true" />
   <arg name="gpu" default="-1" />
-  <arg name="use_usb_cam" default="false" />
-  <arg name="with_depth" default="false"  />
-  <arg name="INPUT_IMAGE" default="/usb_cam/image_raw" if="$(arg use_usb_cam)" />
-  <arg name="INPUT_IMAGE" default="/kinect_head/rgb/image_rect_color" unless="$(arg use_usb_cam)" />
+  <arg name="with_depth" default="true" />
+  <arg name="INPUT_IMAGE" default="/kinect_head/rgb/image_rect_color" />
   <arg name="INPUT_DEPTH_IMAGE" default="/kinect_head/depth_registered/hw_registered/image_rect" />
   <arg name="INPUT_CAMERA_INFO" default="/kinect_head/rgb/camera_info" />
 
-  <node name="usb_cam" pkg="usb_cam" type="usb_cam_node"
-        if="$(arg use_usb_cam)" >
-  </node>
-
-  <include file="$(find jsk_perception)/sample/include/play_rosbag_hand.xml"
-           unless="$(arg use_usb_cam)" />
+  <include file="$(find jsk_perception)/sample/include/play_rosbag_hand.xml" />
 
   <include file="$(find jsk_perception)/launch/hand_pose_estimation_2d.launch">
-    <arg name="gui" value="$(arg gui)" />
+    <arg name="gui" value="false" />
     <arg name="gpu" value="$(arg gpu)" />
     <arg name="INPUT_IMAGE" value="$(arg INPUT_IMAGE)" />
     <arg name="INPUT_DEPTH_IMAGE" value="$(arg INPUT_DEPTH_IMAGE)" />
     <arg name="INPUT_CAMERA_INFO" value="$(arg INPUT_CAMERA_INFO)" />
     <arg name="with_depth" value="$(arg with_depth)" />
   </include>
+
+  <group if="$(arg gui)" >
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_perception)/sample/config/hand_pose_estimation.rviz">
+    </node>
+  </group>
 
 </launch>

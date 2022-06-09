@@ -29,6 +29,7 @@ if LooseVersion(pkg_resources.get_distribution("torch").version) \
 
 import cv2
 import cv_bridge
+import message_filters
 import jsk_data
 import numpy as np
 import os.path as osp
@@ -37,12 +38,18 @@ import rospy
 from skimage import feature
 import torch
 
+from image_geometry import PinholeCameraModel
 from geometry_msgs.msg import Point
 from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Quaternion
 from jsk_recognition_msgs.msg import HandPose
 from jsk_recognition_msgs.msg import HandPoseArray
+from jsk_recognition_msgs.msg import HumanSkeleton
+from jsk_recognition_msgs.msg import HumanSkeletonArray
+from jsk_recognition_msgs.msg import Segment
 from jsk_topic_tools import ConnectionBasedTransport
 from sensor_msgs.msg import Image
+from sensor_msgs.msg import CameraInfo
 
 
 class HandPoseEstimation2D(ConnectionBasedTransport):
@@ -96,6 +103,15 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
         "little_tip",
     ]
 
+    FINGERNAME2INDEX = {name: i for i, name in enumerate(INDEX2FINGERNAME)}
+    NUMBER_OF_FINGERS = 5
+    NUMBER_OF_FINGER_JOINT = 3
+    CONNECTION_PAIR = [(0, 1), (0, 1), (1, 2), (2, 3),
+                       (0, 5), (4, 5), (5, 6), (6, 7),
+                       (0, 9), (8, 9), (9, 10), (10, 11),
+                       (0, 13), (12, 13), (13, 14), (14, 15),
+                       (0, 17), (16, 17), (17, 18), (18, 19)]
+
     def __init__(self):
         super(self.__class__, self).__init__()
         self.backend = rospy.get_param('~backend', 'torch')
@@ -116,6 +132,12 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
             '~output/vis', Image, queue_size=1)
         self.hand_pose_pub = self.advertise(
             '~output/pose', HandPoseArray, queue_size=1)
+        self.with_depth = rospy.get_param("~with_depth", False)
+        if self.with_depth is True:
+            self.hand_pose_2d_pub = self.advertise(
+            '~output/pose_2d', HandPoseArray, queue_size=1)
+            self.skeleton_pub = self.advertise(
+                '~skeleton', HumanSkeletonArray, queue_size=1)
         self.bridge = cv_bridge.CvBridge()
 
     @property
@@ -165,13 +187,132 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
         return osp.join(pkgpath, filepath)
 
     def subscribe(self):
-        sub_img = rospy.Subscriber(
-            '~input', Image, self._cb, queue_size=1, buff_size=2**24)
-        self.subs = [sub_img]
+        if self.with_depth:
+            queue_size = rospy.get_param('~queue_size', 10)
+            sub_img = message_filters.Subscriber(
+                '~input', Image, queue_size=1, buff_size=2**24)
+            sub_depth = message_filters.Subscriber(
+                '~input/depth', Image, queue_size=1, buff_size=2**24)
+            self.subs = [sub_img, sub_depth]
+
+            # NOTE: Camera info is not synchronized by default.
+            # See https://github.com/jsk-ros-pkg/jsk_recognition/issues/2165
+            sync_cam_info = rospy.get_param("~sync_camera_info", False)
+            if sync_cam_info:
+                sub_info = message_filters.Subscriber(
+                    '~input/info', CameraInfo, queue_size=1, buff_size=2**24)
+                self.subs.append(sub_info)
+            else:
+                self.sub_info = rospy.Subscriber(
+                    '~input/info', CameraInfo, self._cb_cam_info)
+
+            if rospy.get_param('~approximate_sync', True):
+                slop = rospy.get_param('~slop', 0.1)
+                sync = message_filters.ApproximateTimeSynchronizer(
+                    fs=self.subs, queue_size=queue_size, slop=slop)
+            else:
+                sync = message_filters.TimeSynchronizer(
+                    fs=self.subs, queue_size=queue_size)
+            if sync_cam_info:
+                sync.registerCallback(self._cb_with_depth_info)
+            else:
+                self.camera_info_msg = None
+                sync.registerCallback(self._cb_with_depth)
+        else:
+            sub_img = rospy.Subscriber(
+                '~input', Image, self._cb, queue_size=1, buff_size=2**24)
+            self.subs = [sub_img]
 
     def unsubscribe(self):
         for sub in self.subs:
             sub.unregister()
+        if self.sub_info is not None:
+            self.sub_info.unregister()
+            self.sub_info = None
+
+    def _cb_cam_info(self, msg):
+        self.camera_info_msg = msg
+        self.sub_info.unregister()
+        self.sub_info = None
+        rospy.loginfo("Received camera info")
+
+    def _cb_with_depth(self, img_msg, depth_msg):
+        if self.camera_info_msg is None:
+            return
+        self._cb_with_depth_info(img_msg, depth_msg, self.camera_info_msg)
+
+    def _cb_with_depth_info(self, img_msg, depth_msg, camera_info_msg):
+        camera_model = PinholeCameraModel()
+        camera_model.fromCameraInfo(camera_info_msg)
+        br = cv_bridge.CvBridge()
+        img = br.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
+        depth_img = br.imgmsg_to_cv2(depth_msg, 'passthrough')
+        if depth_msg.encoding == '16UC1':
+            depth_img = np.asarray(depth_img, dtype=np.float32)
+            depth_img /= 1000  # convert metric: mm -> m
+        elif depth_msg.encoding != '32FC1':
+            rospy.logerr('Unsupported depth encoding: %s' % depth_msg.encoding)
+
+        hands_points, hands_point_scores, hands_score = self.hand_pose_estimate(img)
+
+        hand_pose_2d_msg = self._create_2d_hand_pose_array_msgs(
+            hands_points,
+            hands_point_scores,
+            hands_score,
+            img_msg.header)
+
+        # calculate xyz-position
+        hand_pose_array_msg = HandPoseArray(header=img_msg.header)
+
+        for hand in hand_pose_2d_msg.poses:
+            hand_pose_msg = HandPose(hand_score=hand.hand_score)
+            for pose, finger_name, score in zip(
+                    hand.poses, hand.finger_names,
+                    hand.point_scores):
+                u = pose.position.x
+                v = pose.position.y
+                if 0 <= u < depth_img.shape[0] and \
+                   0 <= v < depth_img.shape[1]:
+                    z = float(depth_img[int(v)][int(u)])
+                else:
+                    continue
+                if np.isnan(z):
+                    continue
+                x = (u - camera_model.cx()) * z / camera_model.fx()
+                y = (v - camera_model.cy()) * z / camera_model.fy()
+                hand_pose_msg.finger_names.append(finger_name)
+                hand_pose_msg.poses.append(
+                    Pose(position=Point(x=x, y=y, z=z),
+                         orientation=Quaternion(w=1)))
+                hand_pose_msg.point_scores.append(score)
+            hand_pose_array_msg.poses.append(hand_pose_msg)
+
+        # prepare HumanSkeletonArray for visualization.
+        skeleton_array_msg = HumanSkeletonArray(header=img_msg.header)
+        for hand_pose_msg in hand_pose_array_msg.poses:
+            hand_joint_index_to_list_index = {
+                self.FINGERNAME2INDEX[name]: i
+                for i, name in enumerate(hand_pose_msg.finger_names)}
+            skeleton_msg = HumanSkeleton(header=img_msg.header)
+            for index_a, index_b in self.CONNECTION_PAIR:
+                if index_a not in hand_joint_index_to_list_index \
+                   or index_b not in hand_joint_index_to_list_index:
+                    continue
+                joint_a_index = hand_joint_index_to_list_index[index_a]
+                joint_b_index = hand_joint_index_to_list_index[index_b]
+                bone = Segment(
+                    start_point=hand_pose_msg.poses[joint_a_index].position,
+                    end_point=hand_pose_msg.poses[joint_b_index].position)
+                bone_name = '{}->{}'.format(
+                    self.INDEX2FINGERNAME[index_a],
+                    self.INDEX2FINGERNAME[index_b])
+                skeleton_msg.bones.append(bone)
+                skeleton_msg.bone_names.append(bone_name)
+            skeleton_array_msg.skeletons.append(skeleton_msg)
+
+        self.hand_pose_2d_pub.publish(hand_pose_2d_msg)
+        self.hand_pose_pub.publish(hand_pose_array_msg)
+        self.skeleton_pub.publish(skeleton_array_msg)
 
     def _cb(self, img_msg):
         img = self.bridge.imgmsg_to_cv2(

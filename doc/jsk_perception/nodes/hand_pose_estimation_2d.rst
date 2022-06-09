@@ -20,19 +20,33 @@ Subscribing Topic
 
   Input image.
 
+* ``~input/depth`` (``sensor_msgs/Image``)
 
+  Input depth image.
+
+* ``~input/info`` (``sensor_msgs/CameraInfo``)
+
+  Input camera info.
+
+  
 Publishing Topic
 ----------------
-
-* ``~output/pose`` (``jsk_recognition_msgs/HandPoseArray``)
-
-  Detected hand keypoints 2D positions and scores in image.
 
 * ``~output/vis`` (``sensor_msgs/Image``)
 
   Visualization image of detected hand poses.
 
+* ``~output/pose`` (``jsk_recognition_msgs/HandPoseArray``)
 
+  If ``with_depth`` is true, publish 3D joint position.
+
+  If ``with_depth`` is false, publish 2D joint position in image.
+
+* ``~output/pose_2d`` (``jsk_recognition_msgs/HandPoseArray``)
+
+  If ``with_depth`` is true, publish 2D joint position.
+
+  
 Parameters
 ----------
 
@@ -60,13 +74,42 @@ Parameters
 
   Trained `SRHandNet model file <https://www.yangangwang.com/papers/WANG-SRH-2019-07.html>`_.
 
+* ``~with_depth`` (Bool, Default: ``False``)
 
+  If true, subscribe ``~input/depth`` and ``~input/info``.
+
+* ``~sync_camera_info`` (Bool, Default: ``False``)
+
+  Synchronize ``~input/info`` if enabled, otherwise the last received camera info message is used.
+
+* ``~approximate_sync`` (Bool, Default: ``True``)
+
+  Use approximate synchronization policy.
+
+* ``~queue_size`` (Int, Default: ``10``)
+
+  Queue size for synchronization.
+
+* ``~slop`` (Float, Default: ``0.1``)
+
+  Slop for approximate sync.
+
+  
 Example
 -------
+
+For 2d hand pose detection.
 
 .. code-block:: bash
 
    roslaunch jsk_perception sample_hand_pose_estimation_2d.launch gpu:=0
+
+
+For 3d hand pose detection.
+
+.. code-block:: bash
+
+   roslaunch jsk_perception sample_hand_pose_estimation_3d.launch gpu:=0
 
 
 Reference

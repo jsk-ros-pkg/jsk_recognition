@@ -29,7 +29,8 @@ Publishing Topic
 
   Pose of the face as determined by its pitch, roll, and yaw. The pose is published in Quaternion, to reconstruct Roll, Pitch, Yaw, use following codes.
 
-  ```
+.. code-block:: bash
+
   import math
   import rospy
   from geometry_msgs.msg import PoseArray
@@ -45,11 +46,11 @@ Publishing Topic
       rospy.init_node('pose_example')
       rospy.Subscriber('/aws_detect_faces/poses', PoseArray, cb)
       rospy.spin()
-  ```
+
 
 * ``~attributes`` (``jsk_recognition_msgs/ClassificationResult``)
 
-   Attributes of the face, such as emotions, presence of beard, sunglasses, and so on, with confidence.
+  Attributes of the face, such as emotions, presence of beard, sunglasses, and so on, with confidence.
 
 * ``~landmarks`` (``jsk_recognition_msgs/PeoplePoseArray``)
 
@@ -69,13 +70,16 @@ Parameters
   see `Set up an AWS account and create an IAM user
   <https://docs.aws.amazon.com/rekognition/latest/dg/setting-up.html>`_
   for how to obtain keys.
-  ```
+
+.. code-block:: json
+
   {
+      "region" : "xxxxxxxxxxxxxxxxxxxx",
       "aws_access_key_id" : "####################",
       "aws_secret_access_key" : "********************"
   }
 
-  ```
+  
 
 * ``~attributes`` (Bool, Default: ``ALL``)
 

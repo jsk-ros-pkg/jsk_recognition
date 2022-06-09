@@ -4,9 +4,6 @@ on:
       - master
   pull_request:
 
-env:
-  DISPLAY: ':0.0'
-
 jobs:
   ros:
     runs-on: ubuntu-latest

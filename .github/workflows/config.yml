@@ -73,6 +73,7 @@ jobs:
     steps:
       - name: Install latest git ( use sudo for ros-ubuntu )
         run: |
+          [ -e /etc/apt/sources.list.d/ubuntu-esm-infra-$(lsb_release -cs).list ] && sudo rm /etc/apt/sources.list.d/ubuntu-esm-infra-$(lsb_release -cs).list ## fix Err https://esm.ubuntu.com trusty-infra-security/main amd64 Packages, gnutls_handshake() failed: Handshake failed
           (apt-get update && apt-get install -y sudo) || echo "OK"
           (apt-get update && apt-get install -y sudo) || echo "OK"
           sudo apt-get update

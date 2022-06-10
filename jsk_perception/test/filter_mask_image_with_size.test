@@ -2,6 +2,8 @@
 
   <include file="$(find jsk_perception)/sample/sample_filter_mask_image_with_size.launch">
     <arg name="gui" value="false" />
+    <arg name="rosbag_play_args" value="-r 0.25 -l --clock" />
+    <arg name="flow_velocity_thresholding_threshold" default="1.0" />
   </include>
 
   <test test-name="test_filter_mask_image_with_size"

@@ -164,6 +164,11 @@ class DetectFaces(ConnectionBasedTransport):
                         fontScale=1, color=(0, 255, 0), thickness=1, lineType=cv2.LINE_AA)
             self.offset += 16
 
+    @property
+    def visualize(self):
+        return self.use_window \
+            or self.image_pub.get_num_connections() > 0
+
     def image_callback(self, image):
         start_time = rospy.Time.now()
         # decode compressed image
@@ -174,7 +179,8 @@ class DetectFaces(ConnectionBasedTransport):
             img = img[:, :, ::-1]
 
         img_gray = None
-        if self.use_window:
+        visualize = self.visualize
+        if visualize:
             img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             img_gray = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2BGR)
 
@@ -217,7 +223,7 @@ class DetectFaces(ConnectionBasedTransport):
 
                 face_msg.face = bbox_msg
 
-                if self.use_window:
+                if visualize:
                     cv2.rectangle(img_gray, (left, top), (left + width, top + height), color=(0, 255, 0), thickness=2)
 
             # Indicates the location of landmarks on the face.
@@ -233,7 +239,7 @@ class DetectFaces(ConnectionBasedTransport):
                     landmark_msg.limb_names.append(landmark['Type'])
                     landmark_msg.poses.append(Pose(position=Point(x=px, y=py)))
 
-                    if self.use_window:
+                    if visualize:
                         cv2.circle(img_gray, (px, py), 1, COLORS[i % (len(COLORS))], thickness=-1)
 
                 landmarks_msgs.poses.append(landmark_msg)
@@ -343,11 +349,12 @@ class DetectFaces(ConnectionBasedTransport):
             if pose_msgs:
                 pose_msgs.poses.append(pose_msg)
 
-        if self.use_window:
+        if visualize:
             cv2.imshow(image._connection_header['topic'], img_gray)
             cv2.waitKey(1)
 
-        self.image_pub.publish(self.bridge.cv2_to_imgmsg(img_gray, encoding='bgr8'))
+            self.image_pub.publish(self.bridge.cv2_to_imgmsg(
+                img_gray, encoding='bgr8'))
 
         self.faces_pub.publish(face_msgs)
         self.poses_pub.publish(pose_msgs)

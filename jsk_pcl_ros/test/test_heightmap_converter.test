@@ -6,7 +6,7 @@
 
   <test test-name="test_heightmap_converter"
         name="test_heightmap_converter"
-        pkg="jsk_recognition_utils" type="test_topic_published.py"
+        pkg="jsk_tools" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /heightmap_converter/output

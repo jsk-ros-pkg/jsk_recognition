@@ -6,7 +6,7 @@
 
   <test test-name="test_heightmap_morphlogical_filtering"
         name="test_heightmap_morphlogical_filtering"
-        pkg="jsk_recognition_utils" type="test_topic_published.py"
+        pkg="jsk_tools" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /heightmap_morphological_filtering/output

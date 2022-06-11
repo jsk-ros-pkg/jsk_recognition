@@ -6,7 +6,7 @@
 
   <test test-name="test_color_histogram_label_match"
         name="test_color_histogram_label_match"
-        pkg="jsk_recognition_utils" type="test_topic_published.py"
+        pkg="jsk_tools" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /color_histogram_label_match/output/extracted_region

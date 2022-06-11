@@ -26,7 +26,7 @@
 
   <test test-name="test_color_based_region_growing_segmentation"
         name="test_color_based_region_growing_segmentation"
-        pkg="jsk_recognition_utils" type="test_topic_published.py"
+        pkg="jsk_tools" type="test_topic_published.py"
         time-limit="30" retry="6">
     <rosparam>
       topic_0: /color_based_region_growing_segmentation_nodelet/output

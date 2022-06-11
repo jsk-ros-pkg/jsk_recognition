@@ -6,7 +6,7 @@
 
   <test test-name="test_find_object_on_plane"
         name="test_find_object_on_plane"
-        pkg="jsk_recognition_utils" type="test_topic_published.py"
+        pkg="jsk_tools" type="test_topic_published.py"
         time-limit="30" retry="3">
     <rosparam>
       topic_0: /find_object_on_plane/debug/min_area_rect_image

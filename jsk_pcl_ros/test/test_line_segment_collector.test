@@ -6,7 +6,7 @@
 
   <test test-name="test_line_segment_collector"
         name="test_line_segment_collector"
-        pkg="jsk_recognition_utils" type="test_topic_published.py"
+        pkg="jsk_tools" type="test_topic_published.py"
         retry="3">
     <rosparam>
       topic_0: /line_segment_collector/output/cloud

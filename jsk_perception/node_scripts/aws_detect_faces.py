@@ -9,6 +9,8 @@
 # Author: Kei Okada <k-okada@jsk.t.u-tokyo.ac.jp>
 #
 
+from __future__ import division
+
 import rospy
 from dynamic_reconfigure.server import Server
 from jsk_perception.cfg import AWSDetectFacesConfig
@@ -109,7 +111,7 @@ class DetectFaces(ConnectionBasedTransport):
         #
         # c.f. https://answers.ros.org/question/220502/image-subscriber-lag-despite-queue-1/
         #
-        self.buff_size = rospy.get_param('~buff_size', 640 * 480 / 5 * 10)
+        self.buff_size = rospy.get_param('~buff_size', 640 * 480 // 5 * 10)
         rospy.loginfo("rospy.Subscriber buffer size : {}".format(self.buff_size))
 
     def subscribe(self):
@@ -158,7 +160,7 @@ class DetectFaces(ConnectionBasedTransport):
         rospy.loginfo("    {}".format(text))
         if self.use_window:
             cv2.putText(img, text,
-                        (bbox.x + bbox.height / 2 + 8, bbox.y - bbox.width / 2 + self.offset), cv2.FONT_HERSHEY_PLAIN,
+                        (bbox.x + bbox.height // 2 + 8, bbox.y - bbox.width // 2 + self.offset), cv2.FONT_HERSHEY_PLAIN,
                         fontScale=1, color=(0, 255, 0), thickness=1, lineType=cv2.LINE_AA)
             self.offset += 16
 
@@ -208,8 +210,8 @@ class DetectFaces(ConnectionBasedTransport):
                 left = int(face['BoundingBox']['Left'] * img_gray.shape[1])
                 width = int(face['BoundingBox']['Width'] * img_gray.shape[1])
                 height = int(face['BoundingBox']['Height'] * img_gray.shape[0])
-                bbox_msg.x = left + width / 2
-                bbox_msg.y = top + height / 2
+                bbox_msg.x = left + width // 2
+                bbox_msg.y = top + height // 2
                 bbox_msg.width = width
                 bbox_msg.height = height
 

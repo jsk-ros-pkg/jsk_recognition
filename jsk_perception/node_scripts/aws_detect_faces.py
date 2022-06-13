@@ -179,6 +179,8 @@ class DetectFaces(ConnectionBasedTransport):
             img = img[:, :, ::-1]
 
         img_gray = None
+        img_width = img.shape[1]
+        img_height = img.shape[0]
         visualize = self.visualize
         if visualize:
             img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -212,10 +214,10 @@ class DetectFaces(ConnectionBasedTransport):
             face_msg = Face()
             bbox_msg = Rect()  # Rect data type, x-y is center point
             if 'BoundingBox' in face:
-                top = int(face['BoundingBox']['Top'] * img_gray.shape[0])
-                left = int(face['BoundingBox']['Left'] * img_gray.shape[1])
-                width = int(face['BoundingBox']['Width'] * img_gray.shape[1])
-                height = int(face['BoundingBox']['Height'] * img_gray.shape[0])
+                top = int(face['BoundingBox']['Top'] * img_height)
+                left = int(face['BoundingBox']['Left'] * img_width)
+                width = int(face['BoundingBox']['Width'] * img_width)
+                height = int(face['BoundingBox']['Height'] * img_height)
                 bbox_msg.x = left + width // 2
                 bbox_msg.y = top + height // 2
                 bbox_msg.width = width
@@ -233,8 +235,8 @@ class DetectFaces(ConnectionBasedTransport):
                 landmark_msg.poses = []
                 for i in range(len(face['Landmarks'])):
                     landmark = face['Landmarks'][i]
-                    px = int(landmark['X'] * img_gray.shape[1])
-                    py = int(landmark['Y'] * img_gray.shape[0])
+                    px = int(landmark['X'] * img_width)
+                    py = int(landmark['Y'] * img_height)
 
                     landmark_msg.limb_names.append(landmark['Type'])
                     landmark_msg.poses.append(Pose(position=Point(x=px, y=py)))
@@ -248,31 +250,31 @@ class DetectFaces(ConnectionBasedTransport):
                 eye_right_msg = Rect()
                 landmark = next((x for x in face['Landmarks'] if x['Type'] == 'eyeLeft'), False)
                 if landmark:
-                    eye_left_msg.x = int(landmark['X'] * img_gray.shape[1])
-                    eye_left_msg.y = int(landmark['Y'] * img_gray.shape[0])
+                    eye_left_msg.x = int(landmark['X'] * img_width)
+                    eye_left_msg.y = int(landmark['Y'] * img_height)
 
                 landmark1 = next((x for x in face['Landmarks'] if x['Type'] == 'leftEyeLeft'), False)
                 landmark2 = next((x for x in face['Landmarks'] if x['Type'] == 'leftEyeRight'), False)
                 if landmark1 and landmark2:
-                    eye_left_msg.width = int((landmark2['X'] - landmark1['X']) * img_gray.shape[1])
+                    eye_left_msg.width = int((landmark2['X'] - landmark1['X']) * img_width)
                 landmark1 = next((x for x in face['Landmarks'] if x['Type'] == 'leftEyeUp'), False)
                 landmark2 = next((x for x in face['Landmarks'] if x['Type'] == 'leftEyeDown'), False)
                 if landmark1 and landmark2:
-                    eye_left_msg.height = int((landmark2['Y'] - landmark1['Y']) * img_gray.shape[0])
+                    eye_left_msg.height = int((landmark2['Y'] - landmark1['Y']) * img_height)
 
                 landmark = next((x for x in face['Landmarks'] if x['Type'] == 'eyeRight'), False)
                 if landmark:
-                    eye_right_msg.x = int(landmark['X'] * img_gray.shape[1])
-                    eye_right_msg.y = int(landmark['Y'] * img_gray.shape[0])
+                    eye_right_msg.x = int(landmark['X'] * img_width)
+                    eye_right_msg.y = int(landmark['Y'] * img_height)
 
                 landmark1 = next((x for x in face['Landmarks'] if x['Type'] == 'rightEyeLeft'), False)
                 landmark2 = next((x for x in face['Landmarks'] if x['Type'] == 'rightEyeRight'), False)
                 if landmark1 and landmark2:
-                    eye_right_msg.width = int((landmark2['X'] - landmark1['X']) * img_gray.shape[1])
+                    eye_right_msg.width = int((landmark2['X'] - landmark1['X']) * img_width)
                 landmark1 = next((x for x in face['Landmarks'] if x['Type'] == 'rightEyeUp'), False)
                 landmark2 = next((x for x in face['Landmarks'] if x['Type'] == 'rightEyeDown'), False)
                 if landmark1 and landmark2:
-                    eye_right_msg.height = int((landmark2['Y'] - landmark1['Y']) * img_gray.shape[0])
+                    eye_right_msg.height = int((landmark2['Y'] - landmark1['Y']) * img_height)
 
                 face_msg.eyes = [eye_left_msg, eye_right_msg]
 

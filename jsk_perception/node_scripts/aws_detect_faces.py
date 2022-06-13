@@ -349,10 +349,11 @@ class DetectFaces(ConnectionBasedTransport):
             if pose_msgs:
                 pose_msgs.poses.append(pose_msg)
 
-        if visualize:
+        if self.use_window:
             cv2.imshow(image._connection_header['topic'], img_gray)
             cv2.waitKey(1)
 
+        if self.image_pub.get_num_connections() > 0:
             self.image_pub.publish(self.bridge.cv2_to_imgmsg(
                 img_gray, encoding='bgr8'))
 

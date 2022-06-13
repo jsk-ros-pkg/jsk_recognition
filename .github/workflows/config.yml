@@ -18,7 +18,7 @@ jobs:
             NOT_TEST_INSTALL : true
             USE_JENKINS: true
             DOCKER_IMAGE_JENKINS: ros-ubuntu:14.04-pcl
-            BEFORE_SCRIPT : "sudo pip install numpy==1.16.6; sudo pip install fcn chainercv chainer-mask-rcnn==0.3.0 decorator==4.4.2 chainer==6.7.0 protobuf==3.18.0 cupy-cuda91; sudo pip install requests[socks]==2.25.1"
+            BEFORE_SCRIPT : "sudo pip install numpy==1.16.6; sudo pip install scikit-learn==0.19.1 scipy==1.2.3; sudo pip install fcn chainercv chainer-mask-rcnn==0.3.0 decorator==4.4.2 chainer==6.7.0 protobuf==3.18.0 cupy-cuda91; sudo pip install requests[socks]==2.25.1"
             experimental : false
           - ROS_DISTRO: kinetic
             USE_DEB: true

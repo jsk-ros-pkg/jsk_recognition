@@ -2,6 +2,7 @@
 
   <include file="$(find jsk_pcl_ros)/sample/sample_rearrange_bounding_box.launch">
     <arg name="gui" value="false" />
+    <arg name="debug" value="true" />
   </include>
 
   <test test-name="test_rearrange_bounding_box"
@@ -12,6 +13,12 @@
       topic_0: /rearrange_bounding_box/output
       timeout_0: 30
     </rosparam>
+  </test>
+
+  <test test-name="test_rearrange_bounding_box_rotation"
+        name="test_rearrange_bounding_box_rotation"
+        pkg="jsk_pcl_ros" type="test_rearrange_bounding_box_rotation.py"
+        time-limit="30" retry="3">
   </test>
 
 </launch>

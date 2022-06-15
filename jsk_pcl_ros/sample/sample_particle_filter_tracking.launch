@@ -1,5 +1,6 @@
 <launch>
   <arg name="gui" default="true"/>
+  <arg name="rosbag_play_args" default="--clock --loop" />
 
   <arg name="input" default="/camera/depth/points"/>
   <arg name="sensor_frame" default="/camera_depth_optical_frame"/>
@@ -8,7 +9,7 @@
 
   <node name="rosbag_play"
         pkg="rosbag" type="play"
-        args="$(find jsk_pcl_ros)/sample/data/2017-06-19-19-34-18_tabletop_coffeecup.bag --clock --loop"/>
+        args="$(find jsk_pcl_ros)/sample/data/2017-06-19-19-34-18_tabletop_coffeecup.bag $(arg rosbag_play_args)"/>
 
   <node name="optical_frame_tf_publisher"
       pkg="tf" type="static_transform_publisher"

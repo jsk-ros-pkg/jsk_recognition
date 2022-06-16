@@ -29,7 +29,7 @@ class ExtractTopPolygonLikelihood(ConnectionBasedTransport):
     def callback(self, msg, msg_coef):
         if len(msg.polygons) > 0:
             #self._pub.publish(msg.histograms[0])
-            max_index = max(xrange(len(msg.polygons)), key=lambda i: msg.likelihood[i])
+            max_index = max(list(range(len(msg.polygons))), key=lambda i: msg.likelihood[i])
             res = PolygonArray()
             res.header = msg.header
             res.polygons = [msg.polygons[max_index]]

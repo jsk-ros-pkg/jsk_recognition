@@ -39,7 +39,7 @@ class DrawClassificationResult(ConnectionBasedTransport):
         rgb = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='rgb8')
 
         n_results = len(cls_msg.labels)
-        for i in xrange(n_results):
+        for i in range(n_results):
             label = cls_msg.labels[i]
             color = self.cmap[label % len(self.cmap)] * 255
             legend_size = int(rgb.shape[0] * 0.1)

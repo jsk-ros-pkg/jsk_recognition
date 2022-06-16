@@ -479,6 +479,17 @@ namespace jsk_pcl_ros
     }
     
     NODELET_INFO("best score is: %f", min_score);
+    if ( min_score == DBL_MAX ) {
+      NODELET_INFO("could get valid scorePointcloudAlignment()");
+      geometry_msgs::PoseStamped empty_pose;
+      empty_pose.header = header;
+      pub_result_pose_.publish(empty_pose);
+
+      result.header = header;
+      result.score = min_score;
+      result.name = "nan";
+      return result;
+    }
     if (pub_result_cloud_.getNumSubscribers() > 0) {
       sensor_msgs::PointCloud2 ros_final;
       pcl::toROSMsg(*best_transformed_cloud, ros_final);

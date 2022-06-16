@@ -2,15 +2,17 @@
 
   <include file="$(find jsk_perception)/sample/sample_robot_to_mask_image.launch">
     <arg name="gui" value="false"/>
+    <arg name="rosbag_play_args" value="-r 0.25 --clock --loop" />
   </include>
 
   <test test-name="test_robot_to_mask_image"
         name="test_polygon_robot_to_mask_image"
         pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="120.0"
         retry="3">
     <rosparam>
       topic_0: /robot_to_mask_image/output
-      timeout_0: 30
+      timeout_0: 120
     </rosparam>
   </test>
 

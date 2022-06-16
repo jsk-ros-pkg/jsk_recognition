@@ -174,7 +174,7 @@ class SSDObjectDetector(ConnectionBasedTransport):
             xmin = max(0, int(np.floor(bbox[1])))
             ymax = min(H, int(np.ceil(bbox[2])))
             xmax = min(W, int(np.ceil(bbox[3])))
-            indices = [range(W*y+xmin, W*y+xmax) for y in range(ymin, ymax)]
+            indices = [list(range(W*y+xmin, W*y+xmax)) for y in range(ymin, ymax)]
             indices = np.array(indices, dtype=np.int32).flatten()
             indices_msg = PointIndices(header=msg.header, indices=indices)
             cluster_indices_msg.cluster_indices.append(indices_msg)

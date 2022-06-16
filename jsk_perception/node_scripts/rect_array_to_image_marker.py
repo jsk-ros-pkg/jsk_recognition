@@ -24,7 +24,7 @@ class RectArrayToImageMarker(ConnectionBasedTransport):
         marker.type = ImageMarker2.LINE_LIST
         n_colors = min(len(msg.rects), 256)
         cmap = jsk_recognition_utils.color.labelcolormap(n_colors)
-        for rect, rect_i in zip(msg.rects, range(n_colors)):
+        for rect, rect_i in zip(msg.rects, list(range(n_colors))):
             points = [(rect.x, rect.y),
                       (rect.x, rect.y + rect.height),
                       (rect.x + rect.width, rect.y + rect.height),

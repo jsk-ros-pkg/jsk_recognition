@@ -111,7 +111,7 @@ def main():
     knn.fit(X, y)
     y_pred = knn.predict(X)
     # validation: must be all 1.0
-    print(classification_report(y, y_pred, labels=range(len(target_names)),
+    print(classification_report(y, y_pred, labels=list(range(len(target_names))),
                                 target_names=target_names))
 
 

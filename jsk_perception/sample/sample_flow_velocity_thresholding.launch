@@ -1,11 +1,14 @@
 <launch>
 
   <arg name="gui" default="true" />
+  <arg name="rosbag_play_args" default="--clock" />
+  <arg name="flow_velocity_thresholding_window_size" default="16" />
+  <arg name="flow_velocity_thresholding_threshold" default="5.0" />
 
   <param name="/use_sim_time" value="true" />
   <node name="rosbag_play"
         pkg="rosbag" type="play"
-        args="$(find jsk_perception)/sample/data/2016-10-15-23-21-42_moving_bottle.bag --clock"
+        args="$(find jsk_perception)/sample/data/2016-10-15-23-21-42_moving_bottle.bag $(arg rosbag_play_args)"
         required="true">
   </node>
 
@@ -22,13 +25,13 @@
   <node name="flow_velocity_thresholding"
         pkg="jsk_perception" type="flow_velocity_thresholding">
     <remap from="~input/flows" to="fback_flow/flows" />
-    <rosparam>
+    <rosparam subst_value="true">
       approximate_sync: false
       use_camera_info: false
       image_height: 480
       image_width: 640
-      window_size: 16
-      threshold: 5.0
+      window_size: $(arg flow_velocity_thresholding_window_size)
+      threshold: $(arg flow_velocity_thresholding_threshold)
     </rosparam>
   </node>
 

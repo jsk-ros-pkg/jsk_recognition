@@ -69,7 +69,7 @@ class ObjectProjection(metaclass.AutoReloader):
         newKK = array(KK)
         newKK[0,2] -= offset[0]
         newKK[1,2] -= offset[1]
-        inds = array(range(width*height))
+        inds = array(list(range(width*height)))
         imagepoints = array((mod(inds,width),floor(inds/width)))
         camerapoints = transpose(dot(linalg.inv(newKK), r_[imagepoints,ones((1,imagepoints.shape[1]))]))
         hitindices,hitpositions = self.Get3DPointsFromImageRays(camerapoints, Tcamera)

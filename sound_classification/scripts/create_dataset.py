@@ -113,7 +113,7 @@ def split():
         # copy train and test data
         # resize and augment data (multiple args.augment times)
         image_num_per_class = min(args.number, file_num)
-        selected_images = random.sample(range(file_num), image_num_per_class)
+        selected_images = random.sample(list(range(file_num)), image_num_per_class)
         for i, file_name in enumerate(np.array(file_names)[selected_images]):
             if file_name.endswith('.png') is not True:
                 continue

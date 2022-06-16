@@ -6,10 +6,11 @@
 
   <test test-name="test_bounding_rect_mask_image"
         name="test_bounding_rect_mask_image"
-        pkg="jsk_tools" type="test_topic_published.py">
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
     <rosparam>
       topic_0: /bounding_rect_mask_image/output
-      timeout_0: 10
+      timeout_0: 30
     </rosparam>
   </test>
 

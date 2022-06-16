@@ -58,10 +58,8 @@ namespace jsk_pcl_ros
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     nonplane_pub_ = advertise<pcl::PointCloud<pcl::PointXYZRGB> >(*pnh_, "output_nonplane_cloud", 1);
     pub_indices_ = advertise<PCLIndicesMsg>(*pnh_, "output/indices", 1);
-    if (!pnh_->getParam("max_queue_size", maximum_queue_size_)) {
-      maximum_queue_size_ = 100;
-    }
 
+    pnh_->param("max_queue_size", maximum_queue_size_, 100);
     pnh_->param("use_coefficients", use_coefficients_, false);
     pnh_->param("use_sensor_frame", use_sensor_frame_, false);
     if (use_sensor_frame_) {

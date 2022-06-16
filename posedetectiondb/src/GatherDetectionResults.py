@@ -78,7 +78,7 @@ class VisibilityModel(metaclass.AutoReloader):
         kdtree = pyANN.KDTree(self.measurements/bandwidth)
         sampledists = zeros(samplepoints.shape[0])
         goodpoints = []
-        for i in xrange(samplepoints.shape[0]):
+        for i in range(samplepoints.shape[0]):
             neighs,dists,kball = kdtree.kFRSearchArray(samplepoints[i:(i+1),:],5.0**2,32,0.0001)
             sampledists[i] = sum(exp(-dists[neighs>=0]))
         uniformpoints = samplepoints[sampledists>bandthresh,:]*bandwidth
@@ -90,7 +90,7 @@ class VisibilityModel(metaclass.AutoReloader):
         """rawposes is Nx7"""
         iter = 1
         poses = array(rawposes)
-        indices = range(poses.shape[0])
+        indices = list(range(poses.shape[0]))
         N = poses.shape[0]
         nochange=0
         while N > nsize:

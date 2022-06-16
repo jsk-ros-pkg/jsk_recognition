@@ -17,6 +17,8 @@ add_message_files(
   ColorHistogram.msg
   DepthCalibrationParameter.msg
   DepthErrorResult.msg
+  ExifTags.msg
+  ExifGPSInfo.msg
   HeightmapConfig.msg
   Histogram.msg
   HistogramWithRangeBin.msg

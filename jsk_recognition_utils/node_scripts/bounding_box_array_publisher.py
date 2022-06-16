@@ -2,6 +2,10 @@
 
 import sys
 
+from distutils.version import LooseVersion
+
+import pkg_resources
+
 from geometry_msgs.msg import Point
 from geometry_msgs.msg import Quaternion
 from geometry_msgs.msg import Vector3
@@ -47,8 +51,16 @@ class BoundingBoxArrayPublisher(object):
         self.pub = rospy.Publisher('~output', BoundingBoxArray, queue_size=1)
 
         rate = rospy.get_param('~rate', 1)
-        self.timer = rospy.Timer(rospy.Duration(1. / rate), self.publish,
-                                 reset=True)
+        kwargs = dict(
+            period=rospy.Duration(1. / rate),
+            callback=self.publish,
+        )
+        if (LooseVersion(pkg_resources.get_distribution('rospy').version) >=
+                LooseVersion('1.12.0')):
+            # on >=kinetic, it raises ROSTimeMovedBackwardsException
+            # when we use rosbag play --loop.
+            kwargs['reset'] = True
+        self.timer = rospy.Timer(**kwargs)
 
     def publish(self, event):
         bbox_array_msg = BoundingBoxArray()

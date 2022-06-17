@@ -43,7 +43,7 @@ class Drawer3DCircle:
     point_array = PointArrayStamped()
     point_array.header.frame_id = self.frame_id
     point_array.header.stamp = now
-    for i in range(self.RESOLUTION + 1) + [0]:
+    for i in list(range(self.RESOLUTION + 1)) + [0]:
       theta = 2 * math.pi / self.RESOLUTION * i
       x = self.radius * math.cos(theta)
       y = self.radius * math.sin(theta)

@@ -1,9 +1,15 @@
 <launch>
 
   <arg name="gui" default="true" />
+  <arg name="rosbag_play_args" default="--clock" />
+  <arg name="flow_velocity_thresholding_window_size" default="16" />
+  <arg name="flow_velocity_thresholding_threshold" default="5.0" />
 
   <include file="$(find jsk_perception)/sample/sample_flow_velocity_thresholding.launch">
     <arg name="gui" value="false" />
+    <arg name="rosbag_play_args" value="$(arg rosbag_play_args)" />
+    <arg name="flow_velocity_thresholding_window_size" value="$(arg flow_velocity_thresholding_window_size)" />
+    <arg name="flow_velocity_thresholding_threshold" value="$(arg flow_velocity_thresholding_threshold)" />
   </include>
 
   <node name="erode_mask_image"

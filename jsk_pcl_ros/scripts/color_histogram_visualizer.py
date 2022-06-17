@@ -111,7 +111,7 @@ class ColorHistogramVisualizer(ConnectionBasedTransport):
             plt.subplot(gs[1], facecolor='silver')
         else:  # matplotlib version < 2.0.0
             plt.subplot(gs[1], axisbg='silver')
-        bars = plt.bar(range(2), hist[-2:], label=["white", "black"],
+        bars = plt.bar(list(range(2)), hist[-2:], label=["white", "black"],
                        width=1.0, linewidth=2.0)
         bars[0].set_facecolor((1.0, 1.0, 1.0, 1.0))
         bars[1].set_facecolor((0.0, 0.0, 0.0, 1.0))

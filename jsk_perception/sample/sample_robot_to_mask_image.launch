@@ -1,7 +1,10 @@
 <launch>
   <arg name="gui" default="true"/>
+  <arg name="rosbag_play_args" default="--clock --loop" />
 
-  <include file="$(find jsk_perception)/sample/include/play_rosbag_pr2_self_see.xml"/>
+  <include file="$(find jsk_perception)/sample/include/play_rosbag_pr2_self_see.xml">
+    <arg name="rosbag_play_args" value="$(arg rosbag_play_args)" />
+  </include>
 
   <node name="robot_to_mask_image"
         pkg="nodelet" type="nodelet"

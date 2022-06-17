@@ -302,6 +302,14 @@ namespace jsk_pcl_ros
 
     if (m_compressMap)
       m_octree->prune();
+
+#ifdef COLOR_OCTOMAP_SERVER
+    if (colors)
+      {
+        delete[] colors;
+        colors = NULL;
+      }
+#endif
   }
 
   void OctomapServerContact::insertContactSensor(const jsk_recognition_msgs::ContactSensorArray::ConstPtr& msg) {

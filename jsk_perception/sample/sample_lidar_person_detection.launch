@@ -1,0 +1,20 @@
+<launch>
+
+  <arg name="panoramic_scan" default="false" doc="Set to true if the scan covers 360 degree" />
+  <arg name="stride" default="1" doc="Use this to skip laser points" />
+  <arg name="conf_thresh" default="0.8" doc="Threshold for confidence" />
+
+  <node name="dr_spaam_lidar_person_detection"
+        pkg="jsk_perception" type="lidar_person_detection_node.py"
+        output="screen">
+    <remap from="~input" to="/base_scan/throttled" />
+    <rosparam subst_value="true" >
+      weight_file: "$(find jsk_perception)/trained_data/lidar_person_detection/ckpt_jrdb_ann_dr_spaam_e20.pth"
+      detector_model: "DR-SPAAM"
+      conf_thresh: $(arg conf_thresh)
+      stride: $(arg stride)
+      panoramic_scan: $(arg panoramic_scan)
+    </rosparam>
+  </node>
+
+</launch>

@@ -141,6 +141,7 @@ generate_dynamic_reconfigure_options(
   cfg/OverlayImageColorOnMono.cfg
   cfg/SelectiveSearch.cfg
   cfg/LabelToMaskImage.cfg
+  cfg/LidarPersonDetection.cfg
   cfg/FlowVelocityThresholding.cfg
   cfg/FilterMaskImageWithSize.cfg
   cfg/FastRCNN.cfg
@@ -196,6 +197,12 @@ if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/node_scripts/deep_sort/deep_sort/READM
   message(WARNING "node_scripts/deep_sort/deep_sort is not exists, download this")
   execute_process(COMMAND git submodule init deep_sort   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/node_scripts/deep_sort)
   execute_process(COMMAND git submodule update deep_sort WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/node_scripts/deep_sort)
+endif()
+
+if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/node_scripts/dr_spaam_libs/dr_spaam/README.md)
+  message(WARNING "node_scripts/dr_spaam_libs/dr_spaam is not exists, download this")
+  execute_process(COMMAND git submodule init dr_spaam WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/node_scripts/dr_spaam_libs)
+  execute_process(COMMAND git submodule update dr_spaam WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/node_scripts/dr_spaam_libs)
 endif()
 
 # Build nodelet executables

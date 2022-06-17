@@ -316,7 +316,15 @@ def main():
         path='trained_data/craft_refiner_CTW1500.pth',
         url='https://drive.google.com/uc?id=1XSaFwBkOaFOdtk4Ane3DFyJGPRw6v5bO',
         md5='3d48f83540567d2a43d2f6ca4b4d9f13',
-        quiet=quiet,
+        quiet=quiet)
+
+    # lidar person detection
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/lidar_person_detection/'
+        'ckpt_jrdb_ann_dr_spaam_e20.pth',
+        url='https://drive.google.com/uc?id=1d1L2FlUY1kEhVJxobzkuIDRe4cxT9ijS',
+        md5='eed48a0f5ef8c215c49510a283fc1d0c',
     )
 
 

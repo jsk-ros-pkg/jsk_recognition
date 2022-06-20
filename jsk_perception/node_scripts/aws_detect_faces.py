@@ -9,6 +9,8 @@
 # Author: Kei Okada <k-okada@jsk.t.u-tokyo.ac.jp>
 #
 
+from __future__ import division
+
 import rospy
 from dynamic_reconfigure.server import Server
 from jsk_perception.cfg import AWSDetectFacesConfig
@@ -109,7 +111,7 @@ class DetectFaces(ConnectionBasedTransport):
         #
         # c.f. https://answers.ros.org/question/220502/image-subscriber-lag-despite-queue-1/
         #
-        self.buff_size = rospy.get_param('~buff_size', 640 * 480 / 5 * 10)
+        self.buff_size = rospy.get_param('~buff_size', 640 * 480 // 5 * 10)
         rospy.loginfo("rospy.Subscriber buffer size : {}".format(self.buff_size))
 
     def subscribe(self):
@@ -158,9 +160,14 @@ class DetectFaces(ConnectionBasedTransport):
         rospy.loginfo("    {}".format(text))
         if self.use_window:
             cv2.putText(img, text,
-                        (bbox.x + bbox.height / 2 + 8, bbox.y - bbox.width / 2 + self.offset), cv2.FONT_HERSHEY_PLAIN,
+                        (bbox.x + bbox.height // 2 + 8, bbox.y - bbox.width // 2 + self.offset), cv2.FONT_HERSHEY_PLAIN,
                         fontScale=1, color=(0, 255, 0), thickness=1, lineType=cv2.LINE_AA)
             self.offset += 16
+
+    @property
+    def visualize(self):
+        return self.use_window \
+            or self.image_pub.get_num_connections() > 0
 
     def image_callback(self, image):
         start_time = rospy.Time.now()
@@ -172,7 +179,10 @@ class DetectFaces(ConnectionBasedTransport):
             img = img[:, :, ::-1]
 
         img_gray = None
-        if self.use_window:
+        img_width = img.shape[1]
+        img_height = img.shape[0]
+        visualize = self.visualize
+        if visualize:
             img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             img_gray = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2BGR)
 
@@ -204,18 +214,18 @@ class DetectFaces(ConnectionBasedTransport):
             face_msg = Face()
             bbox_msg = Rect()  # Rect data type, x-y is center point
             if 'BoundingBox' in face:
-                top = int(face['BoundingBox']['Top'] * img_gray.shape[0])
-                left = int(face['BoundingBox']['Left'] * img_gray.shape[1])
-                width = int(face['BoundingBox']['Width'] * img_gray.shape[1])
-                height = int(face['BoundingBox']['Height'] * img_gray.shape[0])
-                bbox_msg.x = left + width / 2
-                bbox_msg.y = top + height / 2
+                top = int(face['BoundingBox']['Top'] * img_height)
+                left = int(face['BoundingBox']['Left'] * img_width)
+                width = int(face['BoundingBox']['Width'] * img_width)
+                height = int(face['BoundingBox']['Height'] * img_height)
+                bbox_msg.x = left + width // 2
+                bbox_msg.y = top + height // 2
                 bbox_msg.width = width
                 bbox_msg.height = height
 
                 face_msg.face = bbox_msg
 
-                if self.use_window:
+                if visualize:
                     cv2.rectangle(img_gray, (left, top), (left + width, top + height), color=(0, 255, 0), thickness=2)
 
             # Indicates the location of landmarks on the face.
@@ -225,13 +235,13 @@ class DetectFaces(ConnectionBasedTransport):
                 landmark_msg.poses = []
                 for i in range(len(face['Landmarks'])):
                     landmark = face['Landmarks'][i]
-                    px = int(landmark['X'] * img_gray.shape[1])
-                    py = int(landmark['Y'] * img_gray.shape[0])
+                    px = int(landmark['X'] * img_width)
+                    py = int(landmark['Y'] * img_height)
 
                     landmark_msg.limb_names.append(landmark['Type'])
                     landmark_msg.poses.append(Pose(position=Point(x=px, y=py)))
 
-                    if self.use_window:
+                    if visualize:
                         cv2.circle(img_gray, (px, py), 1, COLORS[i % (len(COLORS))], thickness=-1)
 
                 landmarks_msgs.poses.append(landmark_msg)
@@ -240,31 +250,31 @@ class DetectFaces(ConnectionBasedTransport):
                 eye_right_msg = Rect()
                 landmark = next((x for x in face['Landmarks'] if x['Type'] == 'eyeLeft'), False)
                 if landmark:
-                    eye_left_msg.x = int(landmark['X'] * img_gray.shape[1])
-                    eye_left_msg.y = int(landmark['Y'] * img_gray.shape[0])
+                    eye_left_msg.x = int(landmark['X'] * img_width)
+                    eye_left_msg.y = int(landmark['Y'] * img_height)
 
                 landmark1 = next((x for x in face['Landmarks'] if x['Type'] == 'leftEyeLeft'), False)
                 landmark2 = next((x for x in face['Landmarks'] if x['Type'] == 'leftEyeRight'), False)
                 if landmark1 and landmark2:
-                    eye_left_msg.width = int((landmark2['X'] - landmark1['X']) * img_gray.shape[1])
+                    eye_left_msg.width = int((landmark2['X'] - landmark1['X']) * img_width)
                 landmark1 = next((x for x in face['Landmarks'] if x['Type'] == 'leftEyeUp'), False)
                 landmark2 = next((x for x in face['Landmarks'] if x['Type'] == 'leftEyeDown'), False)
                 if landmark1 and landmark2:
-                    eye_left_msg.height = int((landmark2['Y'] - landmark1['Y']) * img_gray.shape[0])
+                    eye_left_msg.height = int((landmark2['Y'] - landmark1['Y']) * img_height)
 
                 landmark = next((x for x in face['Landmarks'] if x['Type'] == 'eyeRight'), False)
                 if landmark:
-                    eye_right_msg.x = int(landmark['X'] * img_gray.shape[1])
-                    eye_right_msg.y = int(landmark['Y'] * img_gray.shape[0])
+                    eye_right_msg.x = int(landmark['X'] * img_width)
+                    eye_right_msg.y = int(landmark['Y'] * img_height)
 
                 landmark1 = next((x for x in face['Landmarks'] if x['Type'] == 'rightEyeLeft'), False)
                 landmark2 = next((x for x in face['Landmarks'] if x['Type'] == 'rightEyeRight'), False)
                 if landmark1 and landmark2:
-                    eye_right_msg.width = int((landmark2['X'] - landmark1['X']) * img_gray.shape[1])
+                    eye_right_msg.width = int((landmark2['X'] - landmark1['X']) * img_width)
                 landmark1 = next((x for x in face['Landmarks'] if x['Type'] == 'rightEyeUp'), False)
                 landmark2 = next((x for x in face['Landmarks'] if x['Type'] == 'rightEyeDown'), False)
                 if landmark1 and landmark2:
-                    eye_right_msg.height = int((landmark2['Y'] - landmark1['Y']) * img_gray.shape[0])
+                    eye_right_msg.height = int((landmark2['Y'] - landmark1['Y']) * img_height)
 
                 face_msg.eyes = [eye_left_msg, eye_right_msg]
 
@@ -345,7 +355,9 @@ class DetectFaces(ConnectionBasedTransport):
             cv2.imshow(image._connection_header['topic'], img_gray)
             cv2.waitKey(1)
 
-        self.image_pub.publish(self.bridge.cv2_to_imgmsg(img_gray, encoding='bgr8'))
+        if self.image_pub.get_num_connections() > 0:
+            self.image_pub.publish(self.bridge.cv2_to_imgmsg(
+                img_gray, encoding='bgr8'))
 
         self.faces_pub.publish(face_msgs)
         self.poses_pub.publish(pose_msgs)

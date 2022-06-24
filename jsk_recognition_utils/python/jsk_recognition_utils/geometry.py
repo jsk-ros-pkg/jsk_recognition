@@ -1,3 +1,36 @@
+import numpy as np
+from tf.transformations import unit_vector as normalize_vector
+
+
+def outer_product_matrix(v):
+    return np.array([[0, -v[2], v[1]],
+                     [v[2], 0, -v[0]],
+                     [-v[1], v[0], 0]])
+
+
+def cross_product(a, b):
+    return np.dot(outer_product_matrix(a), b)
+
+
+def rotation_matrix_from_axis(
+        first_axis=(1, 0, 0), second_axis=(0, 1, 0), axes='xy'):
+    if axes not in ['xy', 'yx', 'xz', 'zx', 'yz', 'zy']:
+        raise ValueError("Valid axes are 'xy', 'yx', 'xz', 'zx', 'yz', 'zy'.")
+    e1 = normalize_vector(first_axis)
+    e2 = normalize_vector(second_axis - np.dot(second_axis, e1) * e1)
+    if axes in ['xy', 'zx', 'yz']:
+        third_axis = cross_product(e1, e2)
+    else:
+        third_axis = cross_product(e2, e1)
+    e3 = normalize_vector(
+        third_axis - np.dot(third_axis, e1) * e1 - np.dot(third_axis, e2) * e2)
+    first_index = ord(axes[0]) - ord('x')
+    second_index = ord(axes[1]) - ord('x')
+    third_index = ((first_index + 1) ^ (second_index + 1)) - 1
+    indices = [first_index, second_index, third_index]
+    return np.vstack([e1, e2, e3])[np.argsort(indices)].T
+
+
 def get_overlap_of_aabb(box1, box2, return_volumes=False):
     x11, y11, z11, x12, y12, z12 = box1
     dim_x1 = x12 - x11

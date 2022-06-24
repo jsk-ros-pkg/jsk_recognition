@@ -147,6 +147,14 @@ def main():
             'sample/data/sample_mask_rcnn_73b2_kitchen_japanese_label.bag',
         ],
     )
+    # lidar person detection
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/2022-06-24-20-26-33-people_lidar_in_lab.bag',
+        url='https://drive.google.com/uc?id=16MRv5YqPm_pzlSMkn0C3nWQ9txaglBMw',
+        md5='36a1951e90c550cc537f4e07004d87e8',
+        extract=False,
+    )
 
 
 if __name__ == '__main__':

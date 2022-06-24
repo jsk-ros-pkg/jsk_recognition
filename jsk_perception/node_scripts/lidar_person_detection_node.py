@@ -135,6 +135,7 @@ def detections_to_pose_array(dets_xy, dets_cls):
         p.position.x = d_xy[0]
         p.position.y = d_xy[1]
         p.position.z = 0.0
+        p.orientation.w = 1.0
         pose_array.poses.append(p)
 
     return pose_array

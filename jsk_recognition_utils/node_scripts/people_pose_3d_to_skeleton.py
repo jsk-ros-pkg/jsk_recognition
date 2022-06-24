@@ -14,8 +14,8 @@ class PeoplePose3DtoSkeleton(ConnectionBasedTransport):
     
     def __init__(self):
         super(self.__class__, self).__init__()
-        self.limb_sequence = rospy.get_param('~limb_sequence')
-        self.index2limbname = rospy.get_param('~index2limbname')
+        self.limb_sequence = rospy.get_param('~limb_connection')
+        self.index2limbname = rospy.get_param('~limb_name')
         self.pub = self.advertise('~output', HumanSkeletonArray, queue_size=1)
 
     def subscribe(self):

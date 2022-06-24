@@ -6,11 +6,13 @@ from geometry_msgs.msg import Pose
 from geometry_msgs.msg import PoseArray
 from jsk_recognition_utils.color import labelcolormap
 from jsk_recognition_utils.visualization_marker import make_human_marker
+from jsk_recognition_utils.geometry import rotation_matrix_from_axis
 from jsk_topic_tools import ConnectionBasedTransport
 import numpy as np
 import PyKDL
 import rospy
 from sensor_msgs.msg import LaserScan
+from tf.transformations import quaternion_from_matrix as matrix2quaternion
 import tf2_geometry_msgs
 import tf2_ros
 from visualization_msgs.msg import Marker
@@ -19,6 +21,7 @@ from visualization_msgs.msg import MarkerArray
 from jsk_perception.cfg import LidarPersonDetectionConfig as Config
 
 from dr_spaam_libs.detector import DRSpaamDetector
+from dr_spaam_libs.tracker import TrackingExtension
 
 
 N = 256
@@ -38,8 +41,10 @@ class LidarPersonDetectionNode(ConnectionBasedTransport):
         self._srv = ReconfigureServer(Config, self.config_callback)
         self._tf_buffer = tf2_ros.Buffer(cache_time=rospy.Duration(30.0))
         self._tf_listener = tf2_ros.TransformListener(self._tf_buffer)
+        self._last_time = rospy.Time.now()
         self._duration_timeout = rospy.get_param('~duration_timeout', 0.05)
 
+        self._tracker = TrackingExtension()
         self._detector = DRSpaamDetector(
             self.weight_file,
             model=self.detector_model,
@@ -71,6 +76,17 @@ class LidarPersonDetectionNode(ConnectionBasedTransport):
         self._scan_sub.unregister()
 
     def _scan_callback(self, msg):
+        now = rospy.Time.now()
+        if now < self._last_time:
+            rospy.logwarn(
+                "Detected jump back in time of {}s. Clearing TF buffer."
+                .format((self._last_time - now).to_sec()))
+            self._tf_buffer.clear()
+            if self._tracker:
+                del self._tracker
+                self._tracker = TrackingExtension()
+        self._last_time = now
+
         if not self._detector.is_ready():
             self._detector.set_laser_fov(
                 np.rad2deg(msg.angle_increment * len(msg.ranges)))
@@ -81,6 +97,8 @@ class LidarPersonDetectionNode(ConnectionBasedTransport):
         scan[np.isnan(scan)] = 29.99
 
         dets_xy, dets_cls, instance_mask, sim_matrix = self._detector(scan)
+        if self._tracker:
+            self._tracker(dets_xy, dets_cls, instance_mask, sim_matrix)
 
         # confidence threshold
         conf_mask = (dets_cls >= self.conf_thresh).reshape(-1)
@@ -89,7 +107,11 @@ class LidarPersonDetectionNode(ConnectionBasedTransport):
 
         # convert to ros msg and publish
         if self._dets_pub.get_num_connections() > 0:
-            dets_msg = detections_to_pose_array(dets_xy, dets_cls)
+            tracks, tracks_cls, track_ids = self._tracker.get_tracklets(
+                only_latest_track=True)
+            dets_msg = detections_to_pose_array(
+                tracks, tracks_cls, track_ids,
+                conf_thresh=self.conf_thresh)
             dets_msg.header = msg.header
             self._dets_pub.publish(dets_msg)
 
@@ -97,6 +119,7 @@ class LidarPersonDetectionNode(ConnectionBasedTransport):
             marker_array = MarkerArray()
             marker_frame_id = msg.header.frame_id
             base_to_laser = None
+
             if self.base_link is not None:
                 try:
                     base_to_laser = tf2_geometry_msgs.transform_to_kdl(
@@ -131,16 +154,42 @@ class LidarPersonDetectionNode(ConnectionBasedTransport):
             self._rviz_pub.publish(marker_array)
 
 
-def detections_to_pose_array(dets_xy, dets_cls):
+def detections_to_pose_array(tracks, tracks_cls, track_ids,
+                             conf_thresh=0.8):
     pose_array = PoseArray()
-    for d_xy, d_cls in zip(dets_xy, dets_cls):
+    for track, tc, track_id in zip(tracks, tracks_cls, track_ids):
         # Detector uses following frame convention:
         # x forward, y rightward, z downward, phi is angle w.r.t. x-axis
-        p = Pose()
-        p.position.x = d_xy[0]
-        p.position.y = d_xy[1]
-        p.position.z = 0.0
-        p.orientation.w = 1.0
+        if tc < conf_thresh:
+            continue
+        if len(track) > 1:
+            p = Pose()
+            p.position.x = track[-1][0]
+            p.position.y = track[-1][1]
+            p.position.z = 0.0
+
+            x_axis = np.array([track[-1][0] - track[-2][0],
+                               track[-1][1] - track[-2][1],
+                               0.0], 'f')
+            z_axis = (0, 0, 1)
+            if np.linalg.norm(x_axis, ord=2) == 0:
+                # invalid x_axis. x_axis shoule not be 0 vector.
+                p.orientation.w = 1.0
+            else:
+                rotation = np.eye(4)
+                rotation[:3, :3] = rotation_matrix_from_axis(
+                    x_axis, z_axis, axes='xz')
+                q_xyzw = matrix2quaternion(rotation)
+                p.orientation.x = q_xyzw[0]
+                p.orientation.y = q_xyzw[1]
+                p.orientation.z = q_xyzw[2]
+                p.orientation.w = q_xyzw[3]
+        else:
+            p = Pose()
+            p.position.x = track[0][0]
+            p.position.y = track[0][1]
+            p.position.z = 0.0
+            p.orientation.w = 1.0
         pose_array.poses.append(p)
 
     return pose_array

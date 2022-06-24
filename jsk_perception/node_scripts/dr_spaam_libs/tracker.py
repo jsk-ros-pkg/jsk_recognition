@@ -63,14 +63,10 @@ class TrackingExtension(object):
                 dets_to_tracks.append(len(self._tracks) - 1)
 
         # tracklet age
+        # pop_inds = []
         for i in range(len(self._tracks_age)):
             self._tracks_age[i] += 1
-
-        # # prune inactive tracks
-        # pop_inds = []
-        # for i in range(len(self._tracks_age)):
-        #     self._tracks_age[i] = self._tracks_age[i] + 1
-        #     if self._tracks_age[i] > self._track_len:
+        #     if self._tracks_age[i] > self._max_track_age:
         #         pop_inds.append(i)
 
         # if len(pop_inds) > 0:
@@ -91,9 +87,13 @@ class TrackingExtension(object):
         self._prev_instance_mask = instance_mask
         self._prev_dets_to_tracks = dets_to_tracks
 
-    def get_tracklets(self):
+    def get_tracklets(self, only_latest_track=False):
+        if only_latest_track is True:
+            ids = self._prev_dets_to_tracks
+        else:
+            ids = range(len(self._tracks))
         tracks, tracks_cls, track_ids = [], [], []
-        for i in range(len(self._tracks)):
+        for i in ids:
             if self._tracks_age[i] < self._max_track_age:
                 tracks.append(np.stack(self._tracks[i], axis=0))
                 tracks_cls.append(np.array(self._tracks_cls[i]).mean())

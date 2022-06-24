@@ -1,16 +1,28 @@
 #!/usr/bin/env python
 
-import numpy as np
-import rospy
-
-from sensor_msgs.msg import LaserScan
-from geometry_msgs.msg import Point, Pose, PoseArray
-from visualization_msgs.msg import Marker
 from dynamic_reconfigure.server import Server as ReconfigureServer
-from jsk_perception.cfg import LidarPersonDetectionConfig as Config
+from geometry_msgs.msg import Point
+from geometry_msgs.msg import Pose
+from geometry_msgs.msg import PoseArray
+from jsk_recognition_utils.color import labelcolormap
+from jsk_recognition_utils.visualization_marker import make_human_marker
 from jsk_topic_tools import ConnectionBasedTransport
+import numpy as np
+import PyKDL
+import rospy
+from sensor_msgs.msg import LaserScan
+import tf2_geometry_msgs
+import tf2_ros
+from visualization_msgs.msg import Marker
+from visualization_msgs.msg import MarkerArray
+
+from jsk_perception.cfg import LidarPersonDetectionConfig as Config
 
 from dr_spaam_libs.detector import DRSpaamDetector
+
+
+N = 256
+colors = labelcolormap(N=N)
 
 
 class LidarPersonDetectionNode(ConnectionBasedTransport):
@@ -19,10 +31,14 @@ class LidarPersonDetectionNode(ConnectionBasedTransport):
         super(LidarPersonDetectionNode, self).__init__()
         self.weight_file = rospy.get_param("~weight_file")
         self.stride = rospy.get_param("~stride", 1)
+        self.base_link = rospy.get_param("~base_link", None)
         self.detector_model = rospy.get_param("~detector_model", 'DR-SPAAM')
         self.panoramic_scan = rospy.get_param("~panoramic_scan", False)
 
         self._srv = ReconfigureServer(Config, self.config_callback)
+        self._tf_buffer = tf2_ros.Buffer(cache_time=rospy.Duration(30.0))
+        self._tf_listener = tf2_ros.TransformListener(self._tf_buffer)
+        self._duration_timeout = rospy.get_param('~duration_timeout', 0.05)
 
         self._detector = DRSpaamDetector(
             self.weight_file,
@@ -36,10 +52,14 @@ class LidarPersonDetectionNode(ConnectionBasedTransport):
         self._dets_pub = self.advertise(
             '~output', PoseArray, queue_size=1)
         self._rviz_pub = self.advertise(
-            '~output/marker', Marker, queue_size=1)
+            '~output/markers', MarkerArray, queue_size=1)
 
     def config_callback(self, config, level):
         self.conf_thresh = config.conf_thresh
+        self.color_alpha = config.color_alpha
+        self.people_head_radius = config.people_head_radius
+        self.people_body_radius = config.people_body_radius
+        self.people_height = config.people_height
         return config
 
     def subscribe(self):
@@ -74,56 +94,41 @@ class LidarPersonDetectionNode(ConnectionBasedTransport):
             self._dets_pub.publish(dets_msg)
 
         if self._rviz_pub.get_num_connections() > 0:
-            rviz_msg = detections_to_rviz_marker(dets_xy, dets_cls)
-            rviz_msg.header = msg.header
-            self._rviz_pub.publish(rviz_msg)
+            marker_array = MarkerArray()
+            marker_frame_id = msg.header.frame_id
+            base_to_laser = None
+            if self.base_link is not None:
+                try:
+                    base_to_laser = tf2_geometry_msgs.transform_to_kdl(
+                        self._tf_buffer.lookup_transform(
+                            # remove '/' for lookupTransform
+                            self.base_link.lstrip('/'),
+                            msg.header.frame_id.lstrip('/'),
+                            msg.header.stamp,
+                            timeout=rospy.Duration(self._duration_timeout)))
+                    marker_frame_id = self.base_link
+                except (tf2_ros.LookupException, tf2_ros.ConnectivityException,
+                        tf2_ros.ExtrapolationException) as e:
+                    rospy.logwarn('{}'.format(e))
+                    return
 
-
-def detections_to_rviz_marker(dets_xy, dets_cls):
-    """
-    @brief     Convert detection to RViz marker msg. Each detection is marked as
-               a circle approximated by line segments.
-    """
-    msg = Marker()
-    msg.action = Marker.ADD
-    msg.ns = "dr_spaam_ros"
-    msg.id = 0
-    msg.type = Marker.LINE_LIST
-
-    # set quaternion so that RViz does not give warning
-    msg.pose.orientation.x = 0.0
-    msg.pose.orientation.y = 0.0
-    msg.pose.orientation.z = 0.0
-    msg.pose.orientation.w = 1.0
-
-    msg.scale.x = 0.03  # line width
-    # red color
-    msg.color.r = 1.0
-    msg.color.a = 1.0
-
-    # circle
-    r = 0.4
-    ang = np.linspace(0, 2 * np.pi, 20)
-    xy_offsets = r * np.stack((np.cos(ang), np.sin(ang)), axis=1)
-
-    # to msg
-    for d_xy, d_cls in zip(dets_xy, dets_cls):
-        for i in range(len(xy_offsets) - 1):
-            # start point of a segment
-            p0 = Point()
-            p0.x = d_xy[0] + xy_offsets[i, 0]
-            p0.y = d_xy[1] + xy_offsets[i, 1]
-            p0.z = 0.0
-            msg.points.append(p0)
-
-            # end point
-            p1 = Point()
-            p1.x = d_xy[0] + xy_offsets[i + 1, 0]
-            p1.y = d_xy[1] + xy_offsets[i + 1, 1]
-            p1.z = 0.0
-            msg.points.append(p1)
-
-    return msg
+            for d_xy in dets_xy:
+                if base_to_laser is not None:
+                    d_xy = base_to_laser * PyKDL.Vector(
+                        d_xy[0], d_xy[1], 0.0)
+                color = colors[(len(marker_array.markers) // 2) % N]
+                color = list(color) + [self.color_alpha]
+                markers = make_human_marker(
+                    pos=(d_xy[0], d_xy[1], 0.0),
+                    head_radius=self.people_head_radius,
+                    body_radius=self.people_body_radius,
+                    height=self.people_height,
+                    frame_id=marker_frame_id.lstrip('/'),
+                    stamp=msg.header.stamp,
+                    id=len(marker_array.markers),
+                    color=color)
+                marker_array.markers.extend(markers)
+            self._rviz_pub.publish(marker_array)
 
 
 def detections_to_pose_array(dets_xy, dets_cls):

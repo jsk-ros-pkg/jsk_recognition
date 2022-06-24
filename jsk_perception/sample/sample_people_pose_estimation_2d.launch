@@ -26,7 +26,7 @@
       </rosparam>
     </node>
     <node name="people_pose_2d_to_3d"
-          pkg="jsk_perception" type="people_pose_2d_to_3d.py"
+          pkg="jsk_recognition_utils" type="people_pose_2d_to_3d.py"
           output="screen">
       <remap from="~input/pose" to="people_pose_estimation_2d/output/poses" />
       <remap from="~input/info" to="$(arg INPUT_CAMERA_INFO)" />

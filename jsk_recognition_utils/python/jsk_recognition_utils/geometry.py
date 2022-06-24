@@ -17,7 +17,16 @@ def rotation_matrix_from_axis(
     if axes not in ['xy', 'yx', 'xz', 'zx', 'yz', 'zy']:
         raise ValueError("Valid axes are 'xy', 'yx', 'xz', 'zx', 'yz', 'zy'.")
     e1 = normalize_vector(first_axis)
+    if np.linalg.norm(e1, ord=2) == 0:
+        raise ValueError(
+            'Invalid first_axis value. '
+            'Norm of axis should be greater than 0.0. Get first_axis: ({})'.
+            format(first_axis))
     e2 = normalize_vector(second_axis - np.dot(second_axis, e1) * e1)
+    if np.linalg.norm(e2, ord=2) == 0:
+        raise ValueError(
+            'Invalid second_axis({}) with respect to first_axis({}).'
+            .format(first_axis, second_axis))
     if axes in ['xy', 'zx', 'yz']:
         third_axis = cross_product(e1, e2)
     else:

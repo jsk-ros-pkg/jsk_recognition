@@ -2,11 +2,17 @@
   <arg name="gui" default="true" />
   <arg name="gpu" default="-1" />
   <arg name="coral" default="false" />
+  <arg name="launch_coral_device" default="true" />
+  <arg name="CORAL_DEPTH_IMAGE" default="/kinect_head/depth_registered/hw_registered/image_rect_raw" />
+  <arg name="CORAL_CAMERA_INFO" default="/kinect_head/rgb/camera_info" />
 
   <include file="$(find jsk_perception)/sample/sample_people_pose_estimation_2d.launch" >
     <arg name="gui" value="false" />
     <arg name="gpu" value="$(arg gpu)" />
     <arg name="coral" value="$(arg coral)" />
+    <arg name="launch_coral_device" value="$(arg launch_coral_device)" />
+    <arg name="CORAL_DEPTH_IMAGE" value="$(arg CORAL_DEPTH_IMAGE)" />
+    <arg name="CORAL_CAMERA_INFO" value="$(arg CORAL_CAMERA_INFO)" />
   </include>
   
   <!-- Coral TPU -->

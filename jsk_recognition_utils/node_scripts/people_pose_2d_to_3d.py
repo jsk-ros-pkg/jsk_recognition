@@ -112,7 +112,7 @@ class PeoplePose2Dto3D(ConnectionBasedTransport):
                     z = float(depth_img[int(position.y)][int(position.x)])
                 else:
                     continue
-                if np.isnan(z):
+                if np.isnan(z) or z <= 0:
                     continue
                 x = (position.x - cx) * z / fx
                 y = (position.y - cy) * z / fy

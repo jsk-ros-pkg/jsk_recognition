@@ -276,7 +276,7 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
                     z = float(depth_img[int(v)][int(u)])
                 else:
                     continue
-                if np.isnan(z):
+                if np.isnan(z) or z <= 0:
                     continue
                 x = (u - camera_model.cx()) * z / camera_model.fx()
                 y = (v - camera_model.cy()) * z / camera_model.fy()

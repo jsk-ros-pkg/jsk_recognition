@@ -1,7 +1,7 @@
 <launch>
 
   <arg name="gui" default="true" doc="If this value is true, visualize with rviz." />
-  <arg name="base_link" default="/base_link" doc="base_link of robot." />
+  <arg name="map_link" default="/map" doc="map frame id" />
   <arg name="panoramic_scan" default="false" doc="Set to true if the scan covers 360 degree" />
   <arg name="stride" default="1" doc="Use this to skip laser points" />
   <arg name="conf_thresh" default="0.8" doc="Threshold for confidence" />
@@ -13,7 +13,7 @@
         output="screen">
     <remap from="~input" to="/base_scan" />
     <rosparam subst_value="true" >
-      base_link: $(arg base_link)
+      map_link: $(arg map_link)
       weight_file: "$(find jsk_perception)/trained_data/lidar_person_detection/ckpt_jrdb_ann_dr_spaam_e20.pth"
       detector_model: "DR-SPAAM"
       conf_thresh: $(arg conf_thresh)

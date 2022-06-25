@@ -21,10 +21,12 @@ from visualization_msgs.msg import MarkerArray
 from jsk_perception.cfg import LidarPersonDetectionConfig as Config
 
 from dr_spaam_libs.detector import DRSpaamDetector
-
+from jsk_recognition_utils.trackers import Sort
+from jsk_recognition_utils.trackers.kalman_tracker import KalmanPositionTracker
+from jsk_recognition_utils.geometry import euclidean_distances
 
 N = 256
-colors = labelcolormap(N=N)
+colors = labelcolormap(N=N) / 255.0
 
 
 class LidarPersonDetectionNode(ConnectionBasedTransport):
@@ -33,17 +35,19 @@ class LidarPersonDetectionNode(ConnectionBasedTransport):
         super(LidarPersonDetectionNode, self).__init__()
         self.weight_file = rospy.get_param("~weight_file")
         self.stride = rospy.get_param("~stride", 1)
-        self.base_link = rospy.get_param("~base_link", None)
+        self.map_link = rospy.get_param("~map_link", None)
         self.detector_model = rospy.get_param("~detector_model", 'DR-SPAAM')
         self.panoramic_scan = rospy.get_param("~panoramic_scan", False)
 
-        self._srv = ReconfigureServer(Config, self.config_callback)
         self._tf_buffer = tf2_ros.Buffer(cache_time=rospy.Duration(30.0))
         self._tf_listener = tf2_ros.TransformListener(self._tf_buffer)
         self._last_time = rospy.Time.now()
         self._duration_timeout = rospy.get_param('~duration_timeout', 0.05)
 
-        self._tracker = TrackingExtension()
+        self._tracker = Sort(
+            tracker_class=KalmanPositionTracker,
+            distance_metric=euclidean_distances,
+            max_distance=Config.defaults['max_distance'])
         self._detector = DRSpaamDetector(
             self.weight_file,
             model=self.detector_model,
@@ -51,6 +55,8 @@ class LidarPersonDetectionNode(ConnectionBasedTransport):
             stride=self.stride,
             panoramic_scan=self.panoramic_scan,
         )
+
+        self._srv = ReconfigureServer(Config, self.config_callback)
 
         # Publisher
         self._dets_pub = self.advertise(
@@ -60,6 +66,9 @@ class LidarPersonDetectionNode(ConnectionBasedTransport):
 
     def config_callback(self, config, level):
         self.conf_thresh = config.conf_thresh
+        self.max_distance = config.max_distance
+        self._tracker.max_distance = config.max_distance
+        self.n_previous = config.n_previous
         self.color_alpha = config.color_alpha
         self.people_head_radius = config.people_head_radius
         self.people_body_radius = config.people_body_radius
@@ -74,7 +83,24 @@ class LidarPersonDetectionNode(ConnectionBasedTransport):
     def unsubscribe(self):
         self._scan_sub.unregister()
 
+    def _lookup_transform(self, from_frame_id, to_frame_id, stamp):
+        transform = None
+        try:
+            transform = tf2_geometry_msgs.transform_to_kdl(
+                self._tf_buffer.lookup_transform(
+                    from_frame_id.lstrip('/'),
+                    to_frame_id.lstrip('/'),
+                    stamp,
+                    timeout=rospy.Duration(self._duration_timeout)))
+        except (tf2_ros.LookupException, tf2_ros.ConnectivityException,
+                tf2_ros.ExtrapolationException) as e:
+            rospy.logwarn('{}'.format(e))
+        return transform
+
     def _scan_callback(self, msg):
+        frame_id = self.map_link or msg.header.frame_id
+        frame_id = frame_id.lstrip('/')
+
         now = rospy.Time.now()
         if now < self._last_time:
             rospy.logwarn(
@@ -82,8 +108,12 @@ class LidarPersonDetectionNode(ConnectionBasedTransport):
                 .format((self._last_time - now).to_sec()))
             self._tf_buffer.clear()
             if self._tracker:
+                max_distance = self._tracker.max_distance
                 del self._tracker
-                self._tracker = TrackingExtension()
+                self._tracker = Sort(
+                    tracker_class=KalmanPositionTracker,
+                    distance_metric=euclidean_distances,
+                    max_distance=max_distance)
         self._last_time = now
 
         if not self._detector.is_ready():
@@ -95,50 +125,50 @@ class LidarPersonDetectionNode(ConnectionBasedTransport):
         scan[np.isinf(scan)] = 29.99
         scan[np.isnan(scan)] = 29.99
 
-        dets_xy, dets_cls, instance_mask, sim_matrix = self._detector(scan)
-        if self._tracker:
-            self._tracker(dets_xy, dets_cls, instance_mask, sim_matrix)
+        dets_xy, dets_cls, _, _ = self._detector(scan)
 
         # confidence threshold
         conf_mask = (dets_cls >= self.conf_thresh).reshape(-1)
         dets_xy = dets_xy[conf_mask]
         dets_cls = dets_cls[conf_mask]
 
+        if self.map_link is not None:
+            base_to_laser = self._lookup_transform(
+                self.map_link,
+                msg.header.frame_id,
+                msg.header.stamp)
+            if base_to_laser is None:
+                return
+            new_dets_xy = np.empty((len(dets_xy), 3), 'f')
+            for i, (x, y) in enumerate(dets_xy):
+                base_to_target = base_to_laser * PyKDL.Vector(x, y, 0.0)
+                new_dets_xy[i] = np.array(
+                    [base_to_target.x(), base_to_target.y(),
+                     base_to_target.z()])
+            dets_xy = new_dets_xy
+
+        if self._tracker:
+            self._tracker.update(
+                np.array([[dets_xy[i][0], dets_xy[i][1], 0.0]
+                          for i in range(len(dets_xy))]))
+
+        tracks, track_ids = self._tracker.get_tracklets()
+
         # convert to ros msg and publish
         if self._dets_pub.get_num_connections() > 0:
-            tracks, tracks_cls, track_ids = self._tracker.get_tracklets(
-                only_latest_track=True)
             dets_msg = detections_to_pose_array(
-                tracks, tracks_cls, track_ids,
-                conf_thresh=self.conf_thresh)
-            dets_msg.header = msg.header
+                tracks, track_ids, self.n_previous)
+            dets_msg.header.stamp = msg.header.stamp
+            dets_msg.header.frame_id = frame_id
             self._dets_pub.publish(dets_msg)
 
         if self._rviz_pub.get_num_connections() > 0:
             marker_array = MarkerArray()
-            marker_frame_id = msg.header.frame_id
-            base_to_laser = None
-
-            if self.base_link is not None:
-                try:
-                    base_to_laser = tf2_geometry_msgs.transform_to_kdl(
-                        self._tf_buffer.lookup_transform(
-                            # remove '/' for lookupTransform
-                            self.base_link.lstrip('/'),
-                            msg.header.frame_id.lstrip('/'),
-                            msg.header.stamp,
-                            timeout=rospy.Duration(self._duration_timeout)))
-                    marker_frame_id = self.base_link
-                except (tf2_ros.LookupException, tf2_ros.ConnectivityException,
-                        tf2_ros.ExtrapolationException) as e:
-                    rospy.logwarn('{}'.format(e))
-                    return
-
-            for d_xy in dets_xy:
-                if base_to_laser is not None:
-                    d_xy = base_to_laser * PyKDL.Vector(
-                        d_xy[0], d_xy[1], 0.0)
-                color = colors[(len(marker_array.markers) // 2) % N]
+            marker_frame_id = self.map_link or msg.header.frame_id
+            tracks, track_ids = self._tracker.get_tracklets()
+            for track, track_id in zip(tracks, track_ids):
+                d_xy = track[-1]
+                color = colors[track_id % N]
                 color = list(color) + [self.color_alpha]
                 markers = make_human_marker(
                     pos=(d_xy[0], d_xy[1], 0.0),
@@ -153,23 +183,20 @@ class LidarPersonDetectionNode(ConnectionBasedTransport):
             self._rviz_pub.publish(marker_array)
 
 
-def detections_to_pose_array(tracks, tracks_cls, track_ids,
-                             conf_thresh=0.8):
+def detections_to_pose_array(tracks, track_ids, n_previous):
     pose_array = PoseArray()
-    for track, tc, track_id in zip(tracks, tracks_cls, track_ids):
+    for track, track_id in zip(tracks, track_ids):
         # Detector uses following frame convention:
         # x forward, y rightward, z downward, phi is angle w.r.t. x-axis
-        if tc < conf_thresh:
-            continue
         if len(track) > 1:
             p = Pose()
             p.position.x = track[-1][0]
             p.position.y = track[-1][1]
             p.position.z = 0.0
 
-            x_axis = np.array([track[-1][0] - track[-2][0],
-                               track[-1][1] - track[-2][1],
-                               0.0], 'f')
+            tmp = np.diff(track[-n_previous:], axis=0)
+            tmp = np.mean(tmp, axis=0)
+            x_axis = np.array([tmp[0], tmp[1], 0.0], 'f')
             z_axis = (0, 0, 1)
             if np.linalg.norm(x_axis, ord=2) == 0:
                 # invalid x_axis. x_axis shoule not be 0 vector.

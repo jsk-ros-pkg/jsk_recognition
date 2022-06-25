@@ -21,7 +21,6 @@ from visualization_msgs.msg import MarkerArray
 from jsk_perception.cfg import LidarPersonDetectionConfig as Config
 
 from dr_spaam_libs.detector import DRSpaamDetector
-from dr_spaam_libs.tracker import TrackingExtension
 
 
 N = 256

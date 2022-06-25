@@ -46,6 +46,7 @@
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-skimage</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-skimage</exec_depend>
   <exec_depend>python-fcn-pip</exec_depend>
+  <exec_depend>python-filterpy-pip</exec_depend>
   <exec_depend>python-shapely</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>std_msgs</exec_depend>

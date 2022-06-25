@@ -10,18 +10,22 @@ from dr_spaam.utils import utils as u
 class DRSpaamDetector(object):
 
     def __init__(
-        self, ckpt_file, model="DROW3", gpu=True, stride=1, panoramic_scan=False
+        self, ckpt_file, model="DROW3", gpu=-1, stride=1, panoramic_scan=False
     ):
         """A warpper class around DROW3 or DR-SPAAM network for end-to-end inference.
 
         Args:
             ckpt_file (str): Path to checkpoint
             model (str): Model name, "DROW3" or "DR-SPAAM".
-            gpu (bool): True to use GPU. Defaults to True.
+            gpu (Int): If greater equal than 0, use gpu.
             stride (int): Downsample scans for faster inference.
             panoramic_scan (bool): True if the scan covers 360 degree.
         """
-        self._gpu = gpu
+        if gpu >= 0:
+            torch.backends.cudnn.benchmark = True
+            self.device = torch.device('cuda:{}'.format(gpu))
+        else:
+            self.device = torch.device('cpu')
         self._stride = stride
         self._use_dr_spaam = model == "DR-SPAAM"
 
@@ -55,9 +59,7 @@ class DRSpaamDetector(object):
         self._model.load_state_dict(ckpt["model_state"])
 
         self._model.eval()
-        if gpu:
-            torch.backends.cudnn.benchmark = True
-            self._model = self._model.cuda()
+        self._model = self._model.to(self.device)
 
     def __call__(self, scan):
         if self._scan_phi is None:
@@ -81,9 +83,7 @@ class DRSpaamDetector(object):
             area_mode=True,
         )
         ct = torch.from_numpy(ct).float()
-
-        if self._gpu:
-            ct = ct.cuda()
+        ct = ct.to(self.device)
 
         # inference
         sim = None

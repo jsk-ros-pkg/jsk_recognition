@@ -56,6 +56,10 @@ In order to use this feature, you need to install `pytorch <https://pytorch.org/
 
   Set to true if the scan covers 360 degree.
 
+* `~gpu` (`Int`, default: `-1`)
+
+  Index of gpu used for prediction. Set `-1` for using CPU.
+
 * `~max_distance` (`Double`, default: `0.5`)
 
   Threshold for tracking max distance.

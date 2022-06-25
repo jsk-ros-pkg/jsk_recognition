@@ -5,6 +5,7 @@
   <arg name="panoramic_scan" default="false" doc="Set to true if the scan covers 360 degree" />
   <arg name="stride" default="1" doc="Use this to skip laser points" />
   <arg name="conf_thresh" default="0.8" doc="Threshold for confidence" />
+  <arg name="gpu" default="-1" doc="If this value is greater than or equal to 0, the gpu corresponding to that number will be used." />
 
   <include file="$(find jsk_perception)/sample/include/play_rosbag_lidar_people.xml" />
 
@@ -19,6 +20,7 @@
       conf_thresh: $(arg conf_thresh)
       stride: $(arg stride)
       panoramic_scan: $(arg panoramic_scan)
+      gpu: $(arg gpu)
     </rosparam>
   </node>
 

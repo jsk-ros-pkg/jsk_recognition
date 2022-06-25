@@ -38,6 +38,7 @@ class LidarPersonDetectionNode(ConnectionBasedTransport):
         self.map_link = rospy.get_param("~map_link", None)
         self.detector_model = rospy.get_param("~detector_model", 'DR-SPAAM')
         self.panoramic_scan = rospy.get_param("~panoramic_scan", False)
+        gpu = rospy.get_param('~gpu', -1)
 
         self._tf_buffer = tf2_ros.Buffer(cache_time=rospy.Duration(30.0))
         self._tf_listener = tf2_ros.TransformListener(self._tf_buffer)
@@ -51,7 +52,7 @@ class LidarPersonDetectionNode(ConnectionBasedTransport):
         self._detector = DRSpaamDetector(
             self.weight_file,
             model=self.detector_model,
-            gpu=False,
+            gpu=gpu,
             stride=self.stride,
             panoramic_scan=self.panoramic_scan,
         )

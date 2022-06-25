@@ -68,3 +68,36 @@ def get_overlap_of_aabb(box1, box2, return_volumes=False):
         return iu, intersect, union
     else:
         return iu
+
+
+def pairwise_distances(a, b):
+    """Compute pair-wise distance between points in `a` and `b`.
+
+    Parameters
+    ----------
+    a : array_like
+        An NxM matrix of N samples of dimensionality M.
+    b : array_like
+        An LxM matrix of L samples of dimensionality M.
+
+    Returns
+    -------
+    ndarray
+        Returns a matrix of size len(a), len(b) such that eleement (i, j)
+        contains the distance between `a[i]` and `b[j]`.
+    """
+    a, b = np.asarray(a), np.asarray(b)
+    if len(a) == 0 or len(b) == 0:
+        return np.zeros((len(a), len(b)))
+    a2, b2 = np.square(a).sum(axis=1), np.square(b).sum(axis=1)
+    r2 = -2. * np.dot(a, b.T) + a2[:, None] + b2[None, :]
+    r2 = np.clip(r2, 0., float(np.inf))
+    return np.sqrt(r2)
+
+
+def euclidean_distances(a, b, a_indices=None, b_indices=None):
+    if a is None:
+        a_indices = np.arange(len(a))
+    if b is None:
+        b_indices = np.arange(len(b))
+    return pairwise_distances(a[a_indices], b[b_indices])

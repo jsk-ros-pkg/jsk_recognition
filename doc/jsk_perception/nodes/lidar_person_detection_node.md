@@ -38,7 +38,7 @@ In order to use this feature, you need to install `pytorch <https://pytorch.org/
 
 * `~weight_file` (`String`, required)
 
-  Threshold for confidence.
+  Trained model's weight file path.
 
 * `~detector_model` (`String`, default: `DR-SPAAM`)
 
@@ -50,7 +50,7 @@ In order to use this feature, you need to install `pytorch <https://pytorch.org/
 
 * `~panoramic_scan` (`Bool`, default: `false`)
 
-  Use this to skip laser points.
+  Set to true if the scan covers 360 degree.
 
 * `~base_link` (`String`, default: `None` optional)
 

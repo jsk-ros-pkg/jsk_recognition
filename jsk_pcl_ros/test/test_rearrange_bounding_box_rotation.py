@@ -35,4 +35,4 @@ class TestRearrangeBoundingBoxRotation(unittest.TestCase):
 
 if __name__ == '__main__':
     import rostest
-    rostest.run(PKG, NAME, TestRearrangeBoundingBoxRotation, sys.argv)
+    rostest.run(PKG, NAME, TestRearrangeBoundingBoxRotation)

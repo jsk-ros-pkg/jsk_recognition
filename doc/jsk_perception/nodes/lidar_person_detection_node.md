@@ -22,9 +22,13 @@ In order to use this feature, you need to install `pytorch <https://pytorch.org/
 
   Position of detected people.
 
+  Based on the result of tracking, the direction of movement is the x direction.
+
 * `~output/markers` (`visualization_msgs/MarkerArray`)
 
   MakerArray of detected people.
+
+  The color of the marker is determined based on the tracking result.
 
 ## Parameters
 
@@ -52,9 +56,23 @@ In order to use this feature, you need to install `pytorch <https://pytorch.org/
 
   Set to true if the scan covers 360 degree.
 
-* `~base_link` (`String`, default: `None` optional)
+* `~max_distance` (`Double`, default: `0.5`)
 
-  If this value is specified, markers are published in `~base_link` frame.
+  Threshold for tracking max distance.
+
+  If the position in the previous frame is farther than this distance, it will be excluded from the tracking candidates.
+
+* `~n_previous` (`Int`, default: `10`)
+
+  Determine the moving direction from the previous position and the current position.
+
+* `~map_link` (`String`, default: `None` optional)
+
+  If this value is specified, markers are published in `~map_link` frame.
+
+* `~duration_timeout` (`Double`, default: `0.05`)
+
+  Duration of timeout for lookup transform in case of specifying `~map_link`.
 
 * `~color_alpha` (`Double`, default: `0.8`)
 

@@ -38,8 +38,8 @@
  */
 
 
-#ifndef CONTAINER_OCCUPANCY_NODELET_H_
-#define CONTAINER_OCCUPANCY_NODELET_H_
+#ifndef CONTAINER_OCCUPANCY_DETECTOR_H_
+#define CONTAINER_OCCUPANCY_DETECTOR_H_
 
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl_ros/transforms.h>
@@ -120,4 +120,4 @@ namespace jsk_pcl_ros{
   };
 }
 
-#endif // CONTAINER_OCCUPANCY_NODELET_H_
+#endif // CONTAINER_OCCUPANCY_DETECTOR_H_

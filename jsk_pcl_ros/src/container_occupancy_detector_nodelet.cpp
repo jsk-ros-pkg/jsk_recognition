@@ -70,7 +70,6 @@ namespace jsk_pcl_ros{
         const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& point_indices_msg
     ){
         boost::mutex::scoped_lock lock(mutex_);
-        // vital_checker_->poke(); TODO fix
         if (!boxes_msg->boxes.empty()){
             // if boxes exist
             if(pointsTransform(boxes_msg, points_msg)){
@@ -100,7 +99,7 @@ namespace jsk_pcl_ros{
                         Eigen::Vector3d eigen_point_(pcl_xyz_ptr_->at(*index).x,
                                                      pcl_xyz_ptr_->at(*index).y,
                                                      pcl_xyz_ptr_->at(*index).z);
-                        Eigen::Vector3d rotated_point_ = q_.conjugate() * (eigen_point_ - t_); // TODO check this rotation correct
+                        Eigen::Vector3d rotated_point_ = q_.conjugate() * (eigen_point_ - t_);
                         float rate_ = (rotated_point_.z() - buttom_.z()) / (top_.z() - buttom_.z()); // remove points under the box
                         if(rate_ > 0){
                             sum_occupancy_ += rate_;

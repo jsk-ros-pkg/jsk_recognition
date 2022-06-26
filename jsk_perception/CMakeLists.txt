@@ -447,7 +447,7 @@ catkin_install_python(
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/scripts/)
 file(GLOB NODE_SCRIPTS_FILES node_scripts/*.py)
 catkin_install_python(
-  PROGRAMS ${NODE_SCRIPTS_FILES}
+  PROGRAMS ${NODE_SCRIPTS_FILES} node_scripts/apply_context_to_label_probability
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/node_scripts/)
 install(FILES requirements.txt
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}

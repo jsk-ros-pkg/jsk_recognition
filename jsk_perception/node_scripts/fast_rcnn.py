@@ -33,7 +33,7 @@ import cv2
 from distutils.version import LooseVersion
 import numpy as np
 
-import cv_bridge
+from jsk_recognition_utils import cv_bridge
 from dynamic_reconfigure.server import Server
 from jsk_perception.cfg import FastRCNNConfig as Config
 from jsk_recognition_msgs.msg import Rect, RectArray

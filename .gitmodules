@@ -8,3 +8,6 @@
 [submodule "jsk_perception/node_scripts/deep_sort/deep_sort"]
 	path = jsk_perception/node_scripts/deep_sort/deep_sort
 	url = https://github.com/nwojke/deep_sort.git
+[submodule "jsk_perception/node_scripts/rembg_libs/rembg"]
+	path = jsk_perception/node_scripts/rembg_libs/rembg
+	url = https://github.com/danielgatis/rembg

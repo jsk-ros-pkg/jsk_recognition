@@ -2,16 +2,19 @@
 
 from __future__ import division
 
+import os
 import os.path as osp
+import sys
 
 import cv2
-import cv_bridge
 import genpy
 import numpy as np
 import rospy
 from sensor_msgs.msg import CameraInfo
 from sensor_msgs.msg import Image
 import yaml
+
+from jsk_recognition_utils import cv_bridge
 
 
 class SampleImagePublisher(object):
@@ -41,7 +44,7 @@ class SampleImagePublisher(object):
 
         # read camera_info from file
         with open(info_file, 'r') as f:
-            info = yaml.load(f)
+            info = yaml.load(f, Loader=yaml.SafeLoader)
         self.infomsg = CameraInfo()
         genpy.message.fill_message_args(self.infomsg, info)
 

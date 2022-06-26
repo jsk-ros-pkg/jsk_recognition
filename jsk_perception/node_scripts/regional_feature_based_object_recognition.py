@@ -29,7 +29,7 @@ from chainer import cuda
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 
-import cv_bridge
+from jsk_recognition_utils import cv_bridge
 from jsk_recognition_msgs.msg import ClassificationResult
 from jsk_recognition_utils.chainermodels import ResNet152
 from jsk_recognition_utils.chainermodels import ResNet152Feature
@@ -73,6 +73,9 @@ class RegionalFeatureBasedObjectRecognition(ConnectionBasedTransport):
         rospy.loginfo('Fitting KNN from db')
         db = np.load(db_file)
         X, y, self.target_names = db['X'], db['y'], db['target_names']
+        self.target_names = np.array(
+            [name.decode('utf-8')
+             for name in self.target_names])
         self.knn = KNeighborsClassifier(n_neighbors=10)
         self.knn.fit(X, y)
         rospy.loginfo('Finished fitting KNN from db')

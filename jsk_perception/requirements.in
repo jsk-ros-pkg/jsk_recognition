@@ -1,0 +1,5 @@
+chainer==6.7.0
+chainercv
+dlib
+pymatting==1.1.7
+onnxruntime==1.10.0

@@ -4,31 +4,20 @@ from __future__ import print_function
 
 from distutils.version import LooseVersion
 
+import os
 import itertools, pkg_resources, sys
-if LooseVersion(pkg_resources.get_distribution("chainer").version) >= LooseVersion('7.0.0') and \
-        sys.version_info.major == 2:
-    print('''Please install chainer < 7.0.0:
 
-    sudo pip install chainer==6.7.0
-
-c.f https://github.com/jsk-ros-pkg/jsk_recognition/pull/2485
-''', file=sys.stderr)
-    sys.exit(1)
-if [p for p in list(itertools.chain(*[pkg_resources.find_distributions(_) for _ in sys.path])) if "cupy-" in p.project_name or "cupy" == p.project_name ] == []:
-    print('''Please install CuPy
-
-    sudo pip install cupy-cuda[your cuda version]
-i.e.
-    sudo pip install cupy-cuda91
-
-''', file=sys.stderr)
-    # sys.exit(1)
 import chainer
 from chainer import cuda
 import chainer.serializers as S
 import fcn
 
-import cv_bridge
+# cv_bridge_python3 import
+if os.environ['ROS_PYTHON_VERSION'] == '2':
+    sys.path.insert(0, '/opt/ros/'
+                    + os.environ['ROS_DISTRO']
+                    + '/lib/python3/dist-packages/')
+from jsk_recognition_utils import cv_bridge
 from jsk_topic_tools import ConnectionBasedTransport
 import message_filters
 import numpy as np

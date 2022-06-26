@@ -20,12 +20,13 @@ from skimage.morphology.convex_hull import convex_hull_image
 from skimage.segmentation import slic
 from skimage.util import img_as_uint
 
-import cv_bridge
 from jsk_topic_tools import ConnectionBasedTransport
 from jsk_topic_tools import warn_no_remap
 import message_filters
 import rospy
 from sensor_msgs.msg import Image
+
+from jsk_recognition_utils import cv_bridge
 
 if LooseVersion(skimage.__version__) >= '0.13.0':
     from skimage.future.graph import show_rag
@@ -76,7 +77,7 @@ def rag_solidity(labels, connectivity=2):
     for n in graph:
         mask = (labels == n)
         solidity = 1. * mask.sum() / convex_hull_image(mask).sum()
-        graph.node[n].update({'labels': [n],
+        graph.nodes[n].update({'labels': [n],
                               'solidity': solidity,
                               'mask': mask})
 
@@ -85,10 +86,10 @@ def rag_solidity(labels, connectivity=2):
     else:
         edges_iter = graph.edges_iter(data=True)
     for x, y, d in edges_iter:
-        new_mask = np.logical_or(graph.node[x]['mask'], graph.node[y]['mask'])
+        new_mask = np.logical_or(graph.nodes[x]['mask'], graph.nodes[y]['mask'])
         new_solidity = 1. * new_mask.sum() / convex_hull_image(new_mask).sum()
-        org_solidity = np.mean([graph.node[x]['solidity'],
-                                graph.node[y]['solidity']])
+        org_solidity = np.mean([graph.nodes[x]['solidity'],
+                                graph.nodes[y]['solidity']])
         d['weight'] = org_solidity / new_solidity
 
     return graph
@@ -100,10 +101,10 @@ def rag_solidity(labels, connectivity=2):
 
 def _solidity_weight_func(graph, src, dst, n):
     """Callback to handle merging nodes by recomputing solidity."""
-    org_solidity = np.mean([graph.node[src]['solidity'],
-                            graph.node[dst]['solidity']])
-    new_mask1 = np.logical_or(graph.node[src]['mask'], graph.node[n]['mask'])
-    new_mask2 = np.logical_or(graph.node[dst]['mask'], graph.node[n]['mask'])
+    org_solidity = np.mean([graph.nodes[src]['solidity'],
+                            graph.nodes[dst]['solidity']])
+    new_mask1 = np.logical_or(graph.nodes[src]['mask'], graph.nodes[n]['mask'])
+    new_mask2 = np.logical_or(graph.nodes[dst]['mask'], graph.nodes[n]['mask'])
     new_solidity1 = 1. * new_mask1.sum() / convex_hull_image(new_mask1).sum()
     new_solidity2 = 1. * new_mask2.sum() / convex_hull_image(new_mask2).sum()
     weight1 = org_solidity / new_solidity1
@@ -113,9 +114,9 @@ def _solidity_weight_func(graph, src, dst, n):
 
 def _solidity_merge_func(graph, src, dst):
     """Callback called before merging two nodes of a solidity graph."""
-    new_mask = np.logical_or(graph.node[src]['mask'], graph.node[dst]['mask'])
-    graph.node[dst]['mask'] = new_mask
-    graph.node[dst]['solidity'] = \
+    new_mask = np.logical_or(graph.nodes[src]['mask'], graph.nodes[dst]['mask'])
+    graph.nodes[dst]['mask'] = new_mask
+    graph.nodes[dst]['solidity'] = \
         1. * np.sum(new_mask) / np.sum(convex_hull_image(new_mask))
 
 

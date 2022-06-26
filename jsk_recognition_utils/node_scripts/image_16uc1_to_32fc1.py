@@ -4,12 +4,16 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
+import sys
+
 import numpy as np
 
-import cv_bridge
 from jsk_topic_tools import ConnectionBasedTransport
 import rospy
 from sensor_msgs.msg import Image
+
+from jsk_recognition_utils import cv_bridge
 
 
 class Image16UC1To32FC1(ConnectionBasedTransport):

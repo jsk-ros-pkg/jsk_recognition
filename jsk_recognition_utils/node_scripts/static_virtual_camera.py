@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+import os
+import sys
+
 import cv2
 import numpy as np
 try:
@@ -9,10 +12,11 @@ except ImportError:
     from scipy.misc import lena
     img = cv2.cvtColor(lena().astype(np.uint8), cv2.COLOR_GRAY2BGR)
 
-import cv_bridge
 import rospy
 from sensor_msgs.msg import Image, CompressedImage
 from sensor_msgs.msg import CameraInfo
+
+from jsk_recognition_utils import cv_bridge
 
 
 def timer_cb(event):

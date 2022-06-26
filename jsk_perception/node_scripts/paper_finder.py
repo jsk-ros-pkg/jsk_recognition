@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 
 import cv2
-import cv_bridge
+from jsk_recognition_utils import cv_bridge
 import geometry_msgs.msg
 from image_geometry.cameramodels import PinholeCameraModel
 from jsk_recognition_msgs.msg import BoundingBox

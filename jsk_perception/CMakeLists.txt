@@ -16,6 +16,7 @@ endif()
 
 find_package(catkin REQUIRED COMPONENTS
   angles
+  catkin_virtualenv
   cmake_modules
   cv_bridge
   dynamic_reconfigure
@@ -38,6 +39,11 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   tf)
+
+if (${catkin_virtualenv_VERSION} VERSION_LESS "0.3.0")
+  message(STATUS "jsk_perception requires catkin_virtualenv >= 0.3.0")
+  return()
+endif()
 
 find_package(roseus)
 
@@ -180,6 +186,13 @@ catkin_package(
   LIBRARIES ${PROJECT_NAME} oriented_gradient
 )
 
+catkin_generate_virtualenv(
+  INPUT_REQUIREMENTS requirements.in
+  PYTHON_INTERPRETER python3
+  USE_SYSTEM_PACKAGES TRUE
+  ISOLATE_REQUIREMENTS FALSE
+  CHECK_VENV FALSE
+)
 
 # ------------------------------------------------------------------------------------
 # Build
@@ -194,6 +207,12 @@ if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/node_scripts/deep_sort/deep_sort/READM
   message(WARNING "node_scripts/deep_sort/deep_sort is not exists, download this")
   execute_process(COMMAND git submodule init deep_sort   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/node_scripts/deep_sort)
   execute_process(COMMAND git submodule update deep_sort WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/node_scripts/deep_sort)
+endif()
+
+if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/node_scripts/rembg_libs/rembg/README.md)
+  message(WARNING "node_scripts/rembg_libs/rembg is not exists, download this")
+  execute_process(COMMAND git submodule init rembg WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/node_scripts/rembg_libs)
+  execute_process(COMMAND git submodule update rembg WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/node_scripts/rembg_libs)
 endif()
 
 # Build nodelet executables
@@ -431,8 +450,15 @@ install(PROGRAMS scripts/setup_opencv_learning_data.sh
 file(GLOB SCRIPT_PROGRAMS scripts/*.py)
 catkin_install_python(
   PROGRAMS ${SCRIPT_PROGRAMS}
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/scripts/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/scripts/)
+file(GLOB NODE_SCRIPTS_FILES node_scripts/*.py)
+catkin_install_python(
+  PROGRAMS ${NODE_SCRIPTS_FILES} node_scripts/apply_context_to_label_probability
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/node_scripts/)
+install(FILES requirements.txt
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
+
 endif()
 
 

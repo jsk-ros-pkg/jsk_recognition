@@ -35,12 +35,13 @@ from chainer.serializers import load_npz
 import chainer.functions as F
 import chainer.links as L
 
-import cv_bridge
+from jsk_recognition_utils import cv_bridge
 from dynamic_reconfigure.server import Server
 from jsk_topic_tools import ConnectionBasedTransport
 import message_filters
 import rospy
-import tf.transformations as T
+from jsk_recognition_utils import tf
+T = tf.transformations
 
 from geometry_msgs.msg import PoseArray
 from jsk_perception.cfg import FacePoseEstimationConfig as Config

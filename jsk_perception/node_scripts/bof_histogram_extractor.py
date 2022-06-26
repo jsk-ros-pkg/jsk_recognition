@@ -5,14 +5,17 @@ Extract BoF histogram in realtime.
 """
 
 import gzip
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except:
+    import pickle
 from distutils.version import StrictVersion
 from pkg_resources import get_distribution
 
 import numpy as np
 from sklearn.preprocessing import normalize
 
-import cv_bridge
+from jsk_recognition_utils import cv_bridge
 from jsk_recognition_msgs.msg import VectorArray
 from jsk_recognition_utils import decompose_descriptors_with_label
 from jsk_topic_tools import ConnectionBasedTransport
@@ -34,7 +37,13 @@ class BoFHistogramExtractor(ConnectionBasedTransport):
         if bof_data is None:
             quit()
         with gzip.open(bof_data, 'rb') as f:
-            self.bof = pickle.load(f)
+            try:
+                self.bof = pickle.load(f)
+            except UnicodeDecodeError:
+                # load pyhon2's pickle in python3
+                f.seek(0)
+                self.bof = pickle.load(f, encoding='latin1')
+            self.bof.nn.n_samples_fit_ = 1
         if (StrictVersion(get_distribution('scikit-learn').version) >=
                 StrictVersion('0.17.0')):
             if 'n_jobs' not in self.bof.nn.__dict__ or not isinstance(self.bof.nn.n_jobs, int):
@@ -79,8 +88,8 @@ class BoFHistogramExtractor(ConnectionBasedTransport):
         decomposed = decompose_descriptors_with_label(
             descriptors=desc, positions=pos, label_img=label,
             skip_zero_label=True)
-        X = np.array(decomposed.values())
-        if X.size == 0:
+        X = decomposed.values()
+        if len(X) == 0:
             return
         X = self.bof.transform(X)
         normalize(X, copy=False)

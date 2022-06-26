@@ -13,7 +13,8 @@
   </node>
 
   <node name="image_16uc1_to_32fc1"
-        pkg="jsk_recognition_utils" type="image_16uc1_to_32fc1.py">
+        pkg="jsk_recognition_utils" type="image_16uc1_to_32fc1.py"
+        output="screen" >
     <remap from="~input" to="sample_image_publisher/output/image_raw"/>
   </node>
 

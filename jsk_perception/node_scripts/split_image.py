@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import cv_bridge
+from jsk_recognition_utils import cv_bridge
 import rospy
 from sensor_msgs.msg import Image
 from jsk_topic_tools import ConnectionBasedTransport

@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
+import os
+import sys
+
 import dynamic_reconfigure.server
 import geometry_msgs.msg
 import jsk_recognition_msgs.msg
@@ -10,8 +13,12 @@ import rospy
 import shapely.geometry
 from jsk_recognition_utils.cfg import PolygonArrayToBoxArrayConfig
 from jsk_topic_tools import ConnectionBasedTransport
-from tf.transformations import quaternion_from_matrix as matrix2quaternion
-from tf.transformations import unit_vector as normalize_vector
+
+from jsk_recognition_utils import tf
+
+
+matrix2quaternion = tf.transformations.quaternion_from_matrix
+normalize_vector = tf.transformations.unit_vector
 
 
 def outer_product_matrix(v):

@@ -1,0 +1,48 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py"
+        clear_params="true">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/food-1.jpg
+      rate: 30
+    </rosparam>
+  </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
+
+  <node name="remove_background"
+        pkg="jsk_perception" type="remove_background.py"
+        clear_params="true" >
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <rosparam subst_value="true" >
+      pretrained_model: $(find jsk_perception)/trained_data/rembg/u2net/u2net.onnx
+    </rosparam>
+  </node>
+
+  <node name="apply_mask_image"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_perception/ApplyMaskImage">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~input/mask" to="remove_background/output" />
+    <rosparam>
+      approximate_sync: false
+      clip: false
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view00"
+          pkg="image_view" type="image_view"
+          clear_params="true">
+      <remap from="image" to="remove_background/output" />
+    </node>
+    <node name="image_view01"
+          pkg="image_view" type="image_view"
+          clear_params="true">
+      <remap from="image" to="apply_mask_image/output" />
+    </node>
+  </group>
+
+</launch>

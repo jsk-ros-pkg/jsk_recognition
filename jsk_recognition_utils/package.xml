@@ -48,6 +48,7 @@
   <exec_depend>pcl_msgs</exec_depend>
   <exec_depend>pcl_ros</exec_depend>
   <exec_depend version_lt="7.0.0">python-chainer-pip</exec_depend>
+  <exec_depend>python3-sip</exec_depend>
   <exec_depend>python3-skimage</exec_depend>
   <exec_depend>python3-sklearn</exec_depend>
   <exec_depend>python-fcn-pip</exec_depend>

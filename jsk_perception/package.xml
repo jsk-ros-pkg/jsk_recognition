@@ -41,6 +41,8 @@
   <build_depend>opencv_apps</build_depend>
   <build_depend>python3</build_depend>
   <build_depend>python3-opencv</build_depend>
+  <build_depend condition="$ROS_PYTHON_VERSION == 2">python3-gnupg</build_depend>
+  <build_depend condition="$ROS_PYTHON_VERSION == 2">python3-pycryptodome</build_depend>
   <build_depend>pcl_ros</build_depend>
   <build_depend>posedetection_msgs</build_depend>
   <build_depend>roscpp</build_depend>

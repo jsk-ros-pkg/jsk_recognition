@@ -209,6 +209,12 @@ if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/node_scripts/deep_sort/deep_sort/READM
   execute_process(COMMAND git submodule update deep_sort WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/node_scripts/deep_sort)
 endif()
 
+if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/node_scripts/rembg_libs/rembg/README.md)
+  message(WARNING "node_scripts/rembg_libs/rembg is not exists, download this")
+  execute_process(COMMAND git submodule init rembg WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/node_scripts/rembg_libs)
+  execute_process(COMMAND git submodule update rembg WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/node_scripts/rembg_libs)
+endif()
+
 # Build nodelet executables
 include_directories(include ${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} slic ${libcmt_INCLUDE_DIRS})
 if(robot_self_filter_FOUND)

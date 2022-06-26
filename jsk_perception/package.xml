@@ -41,6 +41,8 @@
   <build_depend>opencv_apps</build_depend>
   <build_depend>python3</build_depend>
   <build_depend>python3-opencv</build_depend>
+  <build_depend condition="$ROS_PYTHON_VERSION == 2">python3-gnupg</build_depend>
+  <build_depend condition="$ROS_PYTHON_VERSION == 2">python3-pycryptodome</build_depend>
   <build_depend>pcl_ros</build_depend>
   <build_depend>posedetection_msgs</build_depend>
   <build_depend>roscpp</build_depend>
@@ -93,10 +95,12 @@
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-chainer-mask-rcnn-pip</exec_depend>
   <!-- }} install chainer -->
   <exec_depend>python-dlib</exec_depend>  <!-- pip -->
+  <build_depend condition="$ROS_PYTHON_VERSION == 2">python3-gnupg</build_depend>
   <!-- install fcn {{ -->
   <exec_depend>leveldb</exec_depend>
   <exec_depend>python-fcn-pip</exec_depend>  <!-- pip -->
   <!-- }} install fcn -->
+  <build_depend condition="$ROS_PYTHON_VERSION == 2">python3-pycryptodome</build_depend>
   <exec_depend>python3-sklearn</exec_depend>
   <exec_depend>python3-yaml</exec_depend>
   <exec_depend>rosbag</exec_depend>

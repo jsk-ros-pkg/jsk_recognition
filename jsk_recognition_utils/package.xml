@@ -41,7 +41,9 @@
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>image_geometry</exec_depend>
   <exec_depend>image_view</exec_depend>
+  <exec_depend>jsk_python_orocos_kdl_python3</exec_depend>
   <exec_depend>jsk_recognition_msgs</exec_depend>
+  <exec_depend>jsk_tf2_py_python3</exec_depend>
   <exec_depend>jsk_topic_tools</exec_depend>
   <exec_depend>pcl_msgs</exec_depend>
   <exec_depend>pcl_ros</exec_depend>
@@ -52,6 +54,7 @@
   <exec_depend>python3-shapely</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>std_msgs</exec_depend>
+  <exec_depend>tf2_geometry_msgs</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
   <exec_depend>tf_conversions</exec_depend>
   <exec_depend>tf</exec_depend>

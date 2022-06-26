@@ -16,9 +16,7 @@ def make_sphere(radius=0.1,
     header.frame_id = frame_id
     header.stamp = stamp
 
-    mesh_marker = Marker(type=Marker.ARROW, header=header, id=id)
-
-    mesh_marker.type = visualization_msgs.msg.Marker.SPHERE
+    mesh_marker = Marker(type=Marker.SPHERE, header=header, id=id)
     mesh_marker.pose.position.x = pos[0]
     mesh_marker.pose.position.y = pos[1]
     mesh_marker.pose.position.z = pos[2]

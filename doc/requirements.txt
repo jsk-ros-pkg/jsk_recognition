@@ -5,3 +5,4 @@ sphinx-markdown-tables==0.0.9
 sphinx_rtd_theme==0.4.3
 sphinx-autobuild==0.5.0
 livereload==2.4.0
+Jinja2==3.0.3

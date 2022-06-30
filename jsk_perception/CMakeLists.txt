@@ -106,6 +106,7 @@ add_custom_target(${PROJECT_NAME}_install_trained_data ALL COMMAND python$ENV{RO
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(
   cfg/ConcaveHullMaskImage.cfg
+  cfg/CRAFT.cfg
   cfg/RectArrayActualSizeFilter.cfg
   cfg/PolygonArrayColorLikelihood.cfg
   cfg/PolygonArrayColorHistogram.cfg
@@ -136,6 +137,7 @@ generate_dynamic_reconfigure_options(
   cfg/GaussianBlur.cfg
   cfg/KMeans.cfg
   cfg/ImageTimeDiff.cfg
+  cfg/OCR.cfg
   cfg/OverlayImageColorOnMono.cfg
   cfg/SelectiveSearch.cfg
   cfg/LabelToMaskImage.cfg
@@ -482,7 +484,9 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/consensus_tracking.test)
     jsk_add_rostest(test/convex_hull_mask_image.test)
     if("$ENV{ROS_DISTRO}" STRGREATER "indigo")
+      jsk_add_rostest(test/craft_node.test)
       jsk_add_rostest(test/deep_sort_tracker.test)
+      jsk_add_rostest(test/ocr_node.test)
     endif()
     jsk_add_rostest(test/draw_rects.test)
     jsk_add_rostest(test/draw_rects_py.test)

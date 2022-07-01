@@ -124,7 +124,7 @@ class RectArrayInPanoramaToBoundingBoxArray(object):
                         msg_rects.rects):
 
             if label_name not in self._dimensions_labels:
-                rospy.logwarn('height for label "{}" (id:{}) is not specified'.format(label_name,label_id))
+                rospy.logdebug('height for label "{}" (id:{}) is not specified'.format(label_name,label_id))
                 continue
 
             (theta_a, phi_a) = transformPanoramaPoint(

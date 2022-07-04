@@ -81,7 +81,7 @@ class RectArrayInPanoramaToBoundingBoxArray(object):
                 break
             except (rospy.ROSException, rospy.ROSInterruptException) as e:
                 # For melodic or newer
-                # https://wiki.ros.org/rospy/Overview/Logging#Logging_Once
+                # https://wiki.ros.org/rospy/Overview/Logging#Logging_Periodically
                 try:
                     rospy.logwarn_throttle_identical(
                         600, 'subscribing topic seems not to be pulished. waiting... Error: {}'.format(e))

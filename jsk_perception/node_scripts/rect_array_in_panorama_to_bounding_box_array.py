@@ -124,7 +124,14 @@ class RectArrayInPanoramaToBoundingBoxArray(object):
                         msg_rects.rects):
 
             if label_name not in self._dimensions_labels:
-                rospy.logdebug('height for label "{}" (id:{}) is not specified'.format(label_name,label_id))
+                # For melodic or newer
+                # https://wiki.ros.org/rospy/Overview/Logging#Logging_Periodically
+                try:
+                    rospy.logwarn_throttle_identical(
+                        600, 'height for label "{}" (id:{}) is not specified'.format(label_name,label_id))
+                # For kinetic or older (logwarn_throttle_identical is not defined)
+                except AttributeError:
+                    rospy.logwarn('height for label "{}" (id:{}) is not specified'.format(label_name,label_id))
                 continue
 
             (theta_a, phi_a) = transformPanoramaPoint(

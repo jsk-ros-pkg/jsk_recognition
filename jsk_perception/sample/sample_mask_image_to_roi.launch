@@ -1,5 +1,6 @@
 <launch>
   <arg name="gui" default="true"/>
+  <arg name="launch_manager" default="true" />
 
   <node name="image_publisher"
         pkg="jsk_perception" type="image_publisher.py">
@@ -14,9 +15,16 @@
   </node>
   <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
+  <arg name="MANAGER" default="sample_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet" args="manager"
+        if="$(arg launch_manager)"
+        output="screen" />
+
   <node name="mask_image_to_roi"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_perception/MaskImageToROI">
+        args="load jsk_perception/MaskImageToROI $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input" to="$(arg INPUT_IMAGE)"/>
     <remap from="~input/camera_info" to="$(arg INPUT_IMAGE)/camera_info"/>
   </node>

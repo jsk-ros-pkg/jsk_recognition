@@ -25,6 +25,10 @@
       timeout_6: 30
       topic_6: /right_hand_right_camera/depth_image_creator/output_disp
       timeout_6: 30
+      check_after_kill_node: true
+      node_names:
+        - /depth_image_creator
+        - /right_hand_right_camera/depth_image_creator
     </rosparam>
   </test>
 

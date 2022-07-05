@@ -56,6 +56,7 @@ namespace jsk_perception
       sensor_msgs::Image, sensor_msgs::Image > ApproximateSyncPolicy;
     typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::Image > SyncPolicy;
     OverlayImageColorOnMono(): DiagnosticNodelet("OverlayImageColorOnMono") {}
+    virtual ~OverlayImageColorOnMono();
   protected:
 
     virtual void onInit();

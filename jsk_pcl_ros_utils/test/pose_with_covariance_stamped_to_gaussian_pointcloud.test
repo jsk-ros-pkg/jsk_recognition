@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /pose_with_covariance_stamped_to_gaussian_pointcloud/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [pose_with_covariance_stamped_to_gaussian_pointcloud,]
     </rosparam>
   </test>
 

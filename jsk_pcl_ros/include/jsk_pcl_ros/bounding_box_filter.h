@@ -63,6 +63,7 @@ namespace jsk_pcl_ros
       > SyncPolicy;
 
     BoundingBoxFilter() : DiagnosticNodelet("BoundingBoxFilter") {}
+    virtual ~BoundingBoxFilter();
 
   protected:
     ////////////////////////////////////////////////////////

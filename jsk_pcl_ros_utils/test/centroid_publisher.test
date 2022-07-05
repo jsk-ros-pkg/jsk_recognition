@@ -17,6 +17,8 @@
       timeout_2: 20
       topic_3: /centroid_publisher_nan_input/output/pose
       timeout_3: 20
+      check_after_kill_node: true
+      node_names: []
     </rosparam>
   </test>
 

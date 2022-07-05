@@ -38,7 +38,8 @@
 
   <node name="plane_reasoner"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl_utils/PlaneReasoner /sample_manager">
+        args="load jsk_pcl_utils/PlaneReasoner /sample_manager"
+        respawn="true">
     <remap from="~input" to="/right_hand_camera/depth_registered/points"/>
     <remap from="~input_inliers" to="sample_cluster_indices_publisher_from_polygons/output"/>
     <remap from="~input_coefficients" to="static_polygon_array_publisher/output_coefficients"/>

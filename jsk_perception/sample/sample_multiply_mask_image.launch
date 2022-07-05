@@ -5,9 +5,12 @@
   <include file="$(find jsk_perception)/sample/sample_add_mask_image.launch">
     <arg name="gui" default="false" />
   </include>
+  <arg name="MANAGER" value="/sample_manager" />
 
   <node name="multiply_mask_image"
-        pkg="jsk_perception" type="multiply_mask_image">
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/MultiplyMaskImage $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input/src1" to="mask_image_generator0/output" />
     <remap from="~input/src2" to="mask_image_generator1/output" />
   </node>

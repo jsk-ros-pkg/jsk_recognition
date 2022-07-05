@@ -61,7 +61,7 @@ namespace jsk_pcl_ros {
     sensor_msgs::PointCloud2,
     sensor_msgs::PointCloud2> SyncPolicy;
     HintedPlaneDetector(): DiagnosticNodelet("HintedPlaneDetector") {}
-    
+    virtual ~HintedPlaneDetector();
   protected:
     virtual void onInit();
     virtual void subscribe();

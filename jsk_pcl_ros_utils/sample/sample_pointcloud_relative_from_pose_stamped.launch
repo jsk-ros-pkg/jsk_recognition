@@ -7,6 +7,10 @@
               '{header: {stamp: now, frame_id: map},
                 pose: {position: {x: 0.5, y: 0.2}, orientation: {w: 1.0}}}'"/>
 
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
   <node name="pcd_to_pointcloud"
         pkg="pcl_ros" type="pcd_to_pointcloud"
         args="$(find jsk_pcl_ros_utils)/sample/data/bunny.pcd 0.1">
@@ -18,7 +22,8 @@
 
   <node name="pointcloud_relative_from_pose_stamped"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl_utils/PointCloudRelativeFromPoseStamped">
+        args="load jsk_pcl_utils/PointCloudRelativeFromPoseStamped sample_manager"
+        respawn="true">
     <remap from="~input" to="pcd_to_pointcloud/output"/>
     <remap from="~input/pose" to="pose_publisher/output"/>
     <rosparam>

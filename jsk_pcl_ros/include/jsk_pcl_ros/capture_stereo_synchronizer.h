@@ -68,6 +68,7 @@ namespace jsk_pcl_ros
       stereo_msgs::DisparityImage // stereo disparity
       > SyncPolicy;
     CaptureStereoSynchronizer(): DiagnosticNodelet("CaptureStereoSynchronizer") { }
+    virtual ~CaptureStereoSynchronizer();
   protected:
     ////////////////////////////////////////////////////////
     // methods

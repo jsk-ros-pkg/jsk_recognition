@@ -89,6 +89,7 @@ namespace jsk_pcl_ros
       jsk_recognition_msgs::ModelCoefficientsArray,
       jsk_recognition_msgs::ClusterPointIndices > SyncPolicy;
     EnvironmentPlaneModeling(): DiagnosticNodelet("EnvironmentPlaneModeling") {}
+    virtual ~EnvironmentPlaneModeling();
   protected:
     virtual void onInit();
 

@@ -15,6 +15,9 @@
       timeout_1: 30
       topic_2: /edgebased_cube_finder/debug_filtered_cloud
       timeout_2: 30
+      check_after_kill_node: true
+      node_names:
+        - edgebased_cube_finder
     </rosparam>
   </test>
 

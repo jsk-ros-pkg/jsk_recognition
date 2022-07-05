@@ -59,7 +59,8 @@
   <!-- multi-channel mask -> cluster point indices -> point indices -> mask -->
   <node name="mask_image_to_point_indices2"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl_utils/MaskImageToPointIndices sample_manager">
+        args="load jsk_pcl_utils/MaskImageToPointIndices sample_manager"
+        respawn="true" >
     <remap from="~input" to="color_image_publisher/output"/>
     <rosparam>
       use_multi_channels: true

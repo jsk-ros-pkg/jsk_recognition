@@ -65,6 +65,7 @@ namespace jsk_pcl_ros
     sensor_msgs::PointCloud2> ASyncPolicy;
     typedef HintedStickFinderConfig Config;
     HintedStickFinder(): DiagnosticNodelet("HintedStickFinder") {}
+    virtual ~HintedStickFinder();
   protected:
 
     virtual void onInit();

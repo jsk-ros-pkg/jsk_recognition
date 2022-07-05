@@ -1,19 +1,30 @@
 <launch>
 
   <arg name="gui" default="true" />
+  <arg name="launch_manager" default="true" />
+
+  <arg name="MANAGER" default="sample_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet" args="manager"
+        if="$(arg launch_manager)"
+        output="screen" />
 
   <include file="$(find jsk_perception)/sample/sample_selective_search.launch">
     <arg name="gui" value="$(arg gui)" />
   </include>
 
   <node name="rect_array_to_density_image"
-        pkg="jsk_perception" type="rect_array_to_density_image">
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/RectArrayToDensityImage $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input/image" to="image_publisher/output" />
     <remap from="~input/rect_array" to="selective_search/output" />
   </node>
 
   <node name="colorize_float_image"
-        pkg="jsk_perception" type="colorize_float_image">
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/ColorizeFloatImage $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input" to="rect_array_to_density_image/output" />
   </node>
 

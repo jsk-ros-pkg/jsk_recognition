@@ -21,7 +21,8 @@
 
   <node name="normal_concatenater"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl_utils/NormalConcatenater /sample_manager">
+        args="load jsk_pcl_utils/NormalConcatenater /sample_manager"
+        respawn="true" >
     <remap from="~input" to="/right_hand_camera/depth_registered/points"/>
     <remap from="~normal" to="normal_estimation/output"/>
     <rosparam>

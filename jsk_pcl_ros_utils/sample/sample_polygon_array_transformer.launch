@@ -30,7 +30,8 @@
 
   <node name="polygon_array_transformer"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl_utils/PolygonArrayTransformer sample_manager">
+        args="load jsk_pcl_utils/PolygonArrayTransformer sample_manager"
+        respawn="true">
     <remap from="~input_polygons" to="static_polygon_array_publisher/output_polygons"/>
     <remap from="~input_coefficients" to="static_polygon_array_publisher/output_coefficients"/>
     <rosparam>

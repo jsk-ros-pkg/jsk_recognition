@@ -19,6 +19,8 @@
       timeout_3: 30
       topic_4: /handle_estimator/output_selected_preapproach
       timeout_4: 30
+      check_after_kill_node: true
+      node_names: [handle_estimator,]
     </rosparam>
   </test>
 

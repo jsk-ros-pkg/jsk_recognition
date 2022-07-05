@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /hsi_color_filter/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [hsi_color_filter,]
     </rosparam>
   </test>
 

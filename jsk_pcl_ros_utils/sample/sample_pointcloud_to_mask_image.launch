@@ -6,14 +6,19 @@
   <arg name="INPUT_DEPTH" default="/right_hand_camera/depth_registered/hw_registered/image_rect" />
 
   <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml" />
+  <arg name="MANAGER" value="/right_hand_camera/right_hand_camera_nodelet_manager" />
 
   <node name="pointcloud_to_mask_image"
-        pkg="jsk_pcl_ros_utils" type="pointcloud_to_mask_image">
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PointCloudToMaskImage $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input" to="$(arg INPUT_CLOUD)" />
   </node>
 
   <node name="depth_to_mask_image"
-        pkg="jsk_pcl_ros_utils" type="pointcloud_to_mask_image">
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PointCloudToMaskImage $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input/depth" to="$(arg INPUT_DEPTH)" />
     <rosparam>
       z_near: 0.5

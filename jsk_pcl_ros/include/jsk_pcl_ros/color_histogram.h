@@ -65,6 +65,7 @@ namespace jsk_pcl_ros
     typedef ColorHistogramConfig Config;
 
     ColorHistogram() : DiagnosticNodelet("ColorHistogram") {}
+    virtual ~ColorHistogram();
   protected:
     virtual void onInit();
     virtual void configCallback(Config& config, uint32_t level);

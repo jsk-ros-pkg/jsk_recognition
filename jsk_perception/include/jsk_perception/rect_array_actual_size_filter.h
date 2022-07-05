@@ -66,6 +66,7 @@ namespace jsk_perception
       sensor_msgs::CameraInfo> ApproxSyncPolicy;
 
     RectArrayActualSizeFilter(): DiagnosticNodelet("RectArrayActualSizeFilter") {}
+    virtual ~RectArrayActualSizeFilter();
   protected:
     virtual void onInit();
     virtual void subscribe();

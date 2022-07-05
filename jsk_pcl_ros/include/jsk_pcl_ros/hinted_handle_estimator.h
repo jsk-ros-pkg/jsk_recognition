@@ -131,6 +131,7 @@ namespace jsk_pcl_ros
   {
   public:
     HintedHandleEstimator(): DiagnosticNodelet("HintedHandleEstimator") {}
+    virtual ~HintedHandleEstimator();
     typedef message_filters::sync_policies::ApproximateTime<
       sensor_msgs::PointCloud2,
       geometry_msgs::PointStamped 

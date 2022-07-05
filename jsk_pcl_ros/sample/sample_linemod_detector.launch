@@ -2,10 +2,12 @@
   <arg name="gui" default="true"/>
 
   <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml"/>
+  <arg name="MANAGER" value="/kinect_head/kinect_head_nodelet_manager" />
 
   <node name="linemod_detector"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/LINEMODDetector">
+        args="load jsk_pcl/LINEMODDetector $(arg MANAGER)"
+        respawn="true">
     <remap from="~input" to="/kinect_head/depth_registered/points"/>
     <rosparam subst_value="true">
       template_file: $(find jsk_pcl_ros)/trained_data/linemod_template/kettle

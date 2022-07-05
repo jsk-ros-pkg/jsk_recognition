@@ -58,6 +58,7 @@ namespace jsk_perception
     sensor_msgs::Image > ApproxSyncPolicy;
     
     AddMaskImage(): DiagnosticNodelet("AddMaskImage") {}
+    virtual ~AddMaskImage();
   protected:
     virtual void onInit();
     virtual void subscribe();

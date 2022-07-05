@@ -9,6 +9,10 @@
     </rosparam>
   </node>
   <arg name="INPUT_IMAGE" default="image_publisher/output" />
+  <arg name="MANAGER" value="sample_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
 
   <node name="selective_search"
         pkg="jsk_perception" type="selective_search.py">
@@ -16,7 +20,9 @@
   </node>
 
   <node name="draw_rects"
-        pkg="jsk_perception" type="draw_rects">
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/DrawRects $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <remap from="~input/rects" to="selective_search/output" />
   </node>

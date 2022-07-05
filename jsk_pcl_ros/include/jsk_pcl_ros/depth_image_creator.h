@@ -119,6 +119,7 @@ namespace jsk_pcl_ros
     void subscribe();
     void unsubscribe();
   public:
+    virtual ~DepthImageCreator();
   };
 }
 

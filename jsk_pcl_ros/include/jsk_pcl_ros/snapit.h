@@ -62,7 +62,7 @@ namespace jsk_pcl_ros
       jsk_recognition_msgs::PolygonArray,
       jsk_recognition_msgs::ModelCoefficientsArray> SyncPolygonPolicy;
     SnapIt(): DiagnosticNodelet("SnapIt") {}
-    
+    virtual ~SnapIt();
   protected:
     ////////////////////////////////////////////////////////
     // methods

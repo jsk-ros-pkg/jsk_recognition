@@ -4,6 +4,7 @@
   <include file="$(find jsk_perception)/sample/sample_polygon_array_color_histogram.launch">
     <arg name="gui" value="false"/>
   </include>
+  <arg name="MANAGER" value="sample_manager" />
 
   <node name="unwrap_histogram_with_range_array_reference"
         pkg="jsk_perception" type="unwrap_histogram_with_range_array.py">
@@ -15,7 +16,8 @@
 
   <node name="polygon_array_color_likelihood"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_perception/PolygonArrayColorLikelihood">
+        args="load jsk_perception/PolygonArrayColorLikelihood $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input/polygons" to="polygon_array_publisher/output"/>
     <remap from="~input/histograms" to="polygon_array_color_histogram/output"/>
     <remap from="~input/reference" to="unwrap_histogram_with_range_array_reference/output"/>

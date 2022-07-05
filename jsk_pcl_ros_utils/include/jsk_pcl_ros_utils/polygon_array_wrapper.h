@@ -53,7 +53,7 @@ namespace jsk_pcl_ros_utils
   public:
     typedef message_filters::sync_policies::ExactTime<
       geometry_msgs::PolygonStamped, pcl_msgs::ModelCoefficients> SyncPolicy;
-
+    virtual ~PolygonArrayWrapper();
   protected:
     virtual void onInit();
     virtual void subscribe();

@@ -55,7 +55,7 @@ namespace jsk_pcl_ros
     sensor_msgs::Image,
     sensor_msgs::CameraInfo > SyncPolicy;
     ROIClipper(): DiagnosticNodelet("ROIClipper") {}
-    
+    virtual ~ROIClipper();
   protected:
     virtual void onInit();
     virtual void clip(const sensor_msgs::Image::ConstPtr& image_msg,

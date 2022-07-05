@@ -53,6 +53,7 @@ namespace jsk_pcl_ros
   public:
     FuseImages(const std::string& name, const std::string& encoding):
       DiagnosticNodelet(name), encoding_(encoding) {}
+    virtual ~FuseImages();
   protected:
     virtual void onInit();
     virtual void subscribe();

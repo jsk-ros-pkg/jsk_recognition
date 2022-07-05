@@ -59,6 +59,7 @@ namespace jsk_perception
     sensor_msgs::Image > SyncPolicy;
     typedef SingleChannelHistogramConfig Config;
     SingleChannelHistogram(): DiagnosticNodelet("SingleChannelHistogram") {}
+    virtual ~SingleChannelHistogram();
   protected:
     virtual void onInit();
     virtual void subscribe();

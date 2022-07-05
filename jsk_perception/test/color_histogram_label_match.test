@@ -15,6 +15,8 @@
       timeout_1: 30
       topic_2: /color_histogram_label_match/debug
       timeout_2: 30
+      check_after_kill_node: true
+      node_names: [color_histogram_label_match, single_channel_histogram]
     </rosparam>
   </test>
 

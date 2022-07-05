@@ -65,7 +65,7 @@ namespace jsk_pcl_ros_utils
       jsk_recognition_msgs::ModelCoefficientsArray
       > SyncPolicy;
     PlaneConcatenator(): DiagnosticNodelet("PlaneConcatenator") {}
-    
+    virtual ~PlaneConcatenator();
   protected:
     ////////////////////////////////////////////////////////
     // methods

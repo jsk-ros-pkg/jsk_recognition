@@ -69,6 +69,7 @@ namespace jsk_pcl_ros{
       jsk_recognition_msgs::ClusterPointIndices
       > SyncPolicy;
       ContainerOccupancyDetector() : DiagnosticNodelet("ContainerOccupancyDetector") {}
+      virtual ~ContainerOccupancyDetector();
 
     protected:
       ////////////////////////////////////////////////////////

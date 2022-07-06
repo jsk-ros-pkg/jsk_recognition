@@ -7,7 +7,8 @@
 
   <node name="line_segment_collector"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/LineSegmentCollector line_segment_manager">
+        args="load jsk_pcl/LineSegmentCollector line_segment_manager"
+        respawn="true">
     <remap from="~input" to="voxelgrid/output"/>
     <remap from="~input_indices" to="line_segment_detector/output/inliers"/>
     <remap from="~input_coefficients" to="line_segment_detector/output/coefficients"/>

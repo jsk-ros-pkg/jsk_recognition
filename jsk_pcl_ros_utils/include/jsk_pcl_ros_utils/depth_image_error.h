@@ -67,6 +67,7 @@ namespace jsk_pcl_ros_utils
     sensor_msgs::CameraInfo
      > SyncPolicy;
     ros::Publisher depth_error_publisher_;
+    virtual ~DepthImageError();
   protected:
     virtual void onInit();
     virtual void calcError(const sensor_msgs::Image::ConstPtr& depth_image,

@@ -95,7 +95,8 @@
   <group ns="right_hand_camera">
     <node name="fuse_rgb_images"
           pkg="nodelet" type="nodelet"
-          args="load jsk_pcl/FuseRGBImages /$(arg MANAGER)">
+          args="load jsk_pcl/FuseRGBImages /$(arg MANAGER)"
+          respawn="true" >
       <rosparam>
         approximate_sync: true
         queue_size: 50
@@ -108,7 +109,8 @@
     </node>
     <node name="fuse_depth_images"
           pkg="nodelet" type="nodelet"
-          args="load jsk_pcl/FuseDepthImages /$(arg MANAGER)">
+          args="load jsk_pcl/FuseDepthImages /$(arg MANAGER)"
+          respawn="true" >
       <rosparam>
         approximate_sync: true
         queue_size: 50

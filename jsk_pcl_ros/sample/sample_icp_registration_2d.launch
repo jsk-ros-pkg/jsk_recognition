@@ -214,7 +214,8 @@
 
   <node name="icp_registration"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/ICPRegistration $(arg manager)">
+        args="load jsk_pcl/ICPRegistration $(arg manager)"
+        respawn="true" >
     <remap from="~input" to="tf_transform_cloud/output"/>
     <remap from="~input_reference" to="downsample_reference/output"/>
     <rosparam>

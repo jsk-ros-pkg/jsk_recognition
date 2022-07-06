@@ -1,5 +1,13 @@
 <launch>
   <arg name="gui" default="true" />
+  <arg name="MANAGER" default="nodelet_manager" />
+  <arg name="launch_manager" default="true" />
+
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet"
+        args="manager"
+        if="$(arg launch_manager)"
+        output="screen" />
 
   <node name="pose_publisher"
         pkg="rostopic" type="rostopic"
@@ -9,7 +17,8 @@
 
   <node name="pcd_reader_with_pose"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl_utils/PCDReaderWithPose">
+        args="load jsk_pcl_utils/PCDReaderWithPose $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input" to="pose_publisher/output"/>
     <rosparam subst_value="true">
       pcd_file: $(find jsk_pcl_ros_utils)/sample/data/bunny.pcd

@@ -52,6 +52,7 @@ namespace jsk_perception
   {
   public:
     FilterMaskImageWithSize(): DiagnosticNodelet("FilterMaskImageWithSize") {}
+    virtual ~FilterMaskImageWithSize();
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::Image, sensor_msgs::Image > SyncPolicy;
     typedef message_filters::sync_policies::ApproximateTime<

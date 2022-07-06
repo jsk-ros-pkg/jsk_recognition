@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /mask_image_cluster_filter/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [mask_image_cluster_filter,]
     </rosparam>
   </test>
 

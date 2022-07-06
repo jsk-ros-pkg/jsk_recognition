@@ -55,6 +55,7 @@ namespace jsk_perception
     typedef boost::shared_ptr<PolygonArrayColorLikelihood> Ptr;
     typedef PolygonArrayColorLikelihoodConfig Config;
     PolygonArrayColorLikelihood(): DiagnosticNodelet("PolygonArrayColorLikelihood") {}
+    virtual ~PolygonArrayColorLikelihood();
     typedef message_filters::sync_policies::ExactTime<
       jsk_recognition_msgs::PolygonArray,
       jsk_recognition_msgs::HistogramWithRangeArray > SyncPolicy;

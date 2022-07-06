@@ -25,6 +25,8 @@
       timeout_6: 30
       topic_7: /capture_stereo_synchronizer/output/count
       timeout_7: 30
+      check_after_kill_node: true
+      node_names: [capture_stereo_synchronizer,]
     </rosparam>
   </test>
 

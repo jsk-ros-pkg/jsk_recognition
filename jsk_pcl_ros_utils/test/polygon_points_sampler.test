@@ -13,6 +13,8 @@
       timeout_0: 30
       topic_1: /polygon_points_sampler/output_xyz
       timeout_1: 30
+      check_after_kill_node: true
+      node_names: [polygon_points_sampler,]
     </rosparam>
   </test>
 

@@ -61,6 +61,7 @@ namespace jsk_pcl_ros_utils
       jsk_recognition_msgs::ClusterPointIndices,
       jsk_recognition_msgs::ModelCoefficientsArray > SyncPolicy;
     PolygonFlipper(): DiagnosticNodelet("PolygonFlipper") {}
+    virtual ~PolygonFlipper();
   protected:
     virtual void onInit();
     virtual void subscribe();

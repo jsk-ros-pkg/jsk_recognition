@@ -51,6 +51,7 @@ namespace jsk_pcl_ros
   {
   public:
     typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, jsk_recognition_msgs::ClusterPointIndices, jsk_recognition_msgs::Int32Stamped> SyncPolicy;
+    virtual ~SelectedClusterPublisher();
   protected:
     ros::Publisher pub_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;

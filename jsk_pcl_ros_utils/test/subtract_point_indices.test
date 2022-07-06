@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /subtract_point_indices/output
       timeout_0: 10
+      check_after_kill_node: true
+      node_names: [subtract_point_indices,]
     </rosparam>
   </test>
 

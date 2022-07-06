@@ -67,7 +67,7 @@ namespace jsk_pcl_ros
       : DiagnosticNodelet("RegionGrowingMultiplePlaneSegmentation"), 
         timer_(10), 
         done_initialization_(false) {}
-    
+    virtual ~RegionGrowingMultiplePlaneSegmentation();
   protected:
     ////////////////////////////////////////////////////////
     // methods

@@ -59,6 +59,7 @@ namespace jsk_pcl_ros_utils
       jsk_recognition_msgs::ModelCoefficientsArray>
     SyncPolicy;
     PolygonArrayLikelihoodFilter(): DiagnosticNodelet("PolygonArrayLikelihoodFilter") {}
+    virtual ~PolygonArrayLikelihoodFilter();
   protected:
     virtual void onInit();
     virtual void subscribe();

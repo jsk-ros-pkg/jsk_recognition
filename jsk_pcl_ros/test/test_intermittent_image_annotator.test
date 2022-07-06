@@ -19,6 +19,8 @@
       timeout_3: 30
       topic_4: /intermittent_image_annotator/output/marker
       timeout_4: 30
+      check_after_kill_node: true
+      node_names: [intermittent_image_annotator,]
     </rosparam>
   </test>
 

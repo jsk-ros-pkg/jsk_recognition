@@ -76,6 +76,7 @@ namespace jsk_pcl_ros_utils
     
     
     PlaneReasoner(): DiagnosticNodelet("PlaneReasoner") { }
+    virtual ~PlaneReasoner();
 
   protected:
     ////////////////////////////////////////////////////////

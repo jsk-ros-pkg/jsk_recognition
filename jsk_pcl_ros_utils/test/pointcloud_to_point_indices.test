@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /pointcloud_to_point_indices/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [pointcloud_to_point_indices,]
     </rosparam>
   </test>
 

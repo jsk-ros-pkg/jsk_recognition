@@ -5,7 +5,8 @@
 
   <node name="moving_least_square_smoothing"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/MovingLeastSquareSmoothing">
+        args="load jsk_pcl/MovingLeastSquareSmoothing /camera/camera_nodelet_manager"
+        respawn="true" >
     <remap from="~input" to="/camera/depth_registered/points"/>
     <rosparam>
       search_radius: 0.01

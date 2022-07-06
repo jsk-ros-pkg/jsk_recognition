@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /transform_pointcloud_in_bounding_box/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [transform_pointcloud_in_bounding_box,]
     </rosparam>
   </test>
 

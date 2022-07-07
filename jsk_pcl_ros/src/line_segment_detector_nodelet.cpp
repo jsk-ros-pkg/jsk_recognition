@@ -205,6 +205,7 @@ namespace jsk_pcl_ros
     const pcl::PointCloud<PointT>::Ptr& cloud,
     const std::vector<LineSegment::Ptr>& segments)
   {
+    vital_checker_->poke();
     std::vector<pcl::PointIndices::Ptr> indices;
     std::vector<pcl::ModelCoefficients::Ptr> coefficients;
     visualization_msgs::Marker marker;

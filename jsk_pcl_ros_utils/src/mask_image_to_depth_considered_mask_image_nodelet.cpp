@@ -157,7 +157,6 @@ namespace jsk_pcl_ros_utils
     boost::mutex::scoped_lock lock(mutex_);
     if (point_cloud2_msg->width == image_msg->width && point_cloud2_msg->height == image_msg->height) {
       if (in_the_order_of_depth_ == true) {
-        vital_checker_->poke();
         pcl::PointCloud<pcl::PointXYZ>::Ptr
           cloud (new pcl::PointCloud<pcl::PointXYZ>);
         pcl::fromROSMsg(*point_cloud2_msg, *cloud);
@@ -237,6 +236,7 @@ namespace jsk_pcl_ros_utils
           cv_bridge::CvImage mask_bridge(point_cloud2_msg->header,
                                          sensor_msgs::image_encodings::MONO8,
                                          mask_image);
+          vital_checker_->poke();
           pub_.publish(mask_bridge.toImageMsg());
           if (use_mask_region_ == false || region_width_ == 0 | region_height_ == 0) {
             applypub_.publish(mask_bridge.toImageMsg());
@@ -295,6 +295,7 @@ namespace jsk_pcl_ros_utils
         cv_bridge::CvImage mask_bridge(point_cloud2_msg->header,
                                        sensor_msgs::image_encodings::MONO8,
                                        tmp_mask);
+        vital_checker_->poke();
         pub_.publish(mask_bridge.toImageMsg());
         if (use_mask_region_ == false || region_width_ == 0 | region_height_ == 0) {
           applypub_.publish(mask_bridge.toImageMsg());

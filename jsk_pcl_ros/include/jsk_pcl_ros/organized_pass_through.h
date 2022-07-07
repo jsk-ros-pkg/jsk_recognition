@@ -50,7 +50,8 @@ namespace jsk_pcl_ros
   public:
     typedef jsk_pcl_ros::OrganizedPassThroughConfig Config;
     typedef pcl::PointXYZRGB PointT;
-    OrganizedPassThrough();
+    OrganizedPassThrough(): DiagnosticNodelet("OrganizedPassThrough") {}
+
   protected:
     ////////////////////////////////////////////////////////
     // methods

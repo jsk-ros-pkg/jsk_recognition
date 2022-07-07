@@ -157,7 +157,7 @@ namespace jsk_pcl_ros
     // Maximum allowable difference between two consecutive transformations
     align.setTransformationEpsilon(transformation_epsilon_);
     align.align (*object_aligned);
-  
+    vital_checker_->poke();
     if (align.hasConverged ())
     {
       // Print results

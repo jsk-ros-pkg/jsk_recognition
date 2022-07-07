@@ -131,6 +131,7 @@ namespace jsk_perception
     internal_msg.header = boxes_msg->header;
     internal_msg.boxes = *boxes_msg;
     internal_msg.camera_info = *info_msg;
+    vital_checker_->poke();
     pub_internal_.publish(internal_msg);
   }
 

@@ -45,7 +45,7 @@ namespace jsk_pcl_ros
 {
   void EdgeDepthRefinement::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    DiagnosticNodelet::onInit();
 
     ////////////////////////////////////////////////////////
     // publishers
@@ -397,6 +397,7 @@ namespace jsk_pcl_ros
       output_edge_msg.end_point.z = coefficients[i]->values[2] + coefficients[i]->values[5];
       output_ros_edges_msg.segments.push_back(output_edge_msg);
     }
+    vital_checker_->poke();
     pub.publish(output_ros_msg);
     pub_coefficients.publish(output_ros_coefficients_msg);
     pub_edges.publish(output_ros_edges_msg);

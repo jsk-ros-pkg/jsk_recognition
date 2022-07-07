@@ -144,6 +144,7 @@ namespace jsk_pcl_ros
     NODELET_INFO("likelihood: %f", l);
     std_msgs::Float32 float_msg;
     float_msg.data = l;
+    vital_checker_->poke();
     pub_.publish(float_msg);
   }
 

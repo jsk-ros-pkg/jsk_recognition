@@ -179,6 +179,7 @@ namespace jsk_pcl_ros
     sensor_msgs::PointCloud2 ros_all_cloud;
     pcl::toROSMsg(all_cloud_, ros_all_cloud);
     ros_all_cloud.header = cloud_msg->header;
+    vital_checker_->poke();
     pub_cloud_non_registered_.publish(ros_all_cloud);
   }
 

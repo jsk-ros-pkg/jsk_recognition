@@ -37,7 +37,7 @@
 namespace jsk_pcl_ros
 {
   void RearrangeBoundingBox::onInit () {
-    ConnectionBasedNodelet::onInit();
+    DiagnosticNodelet::onInit();
 
     pnh_->param("offset_x", offset_x_, 0.0);
     pnh_->param("offset_y", offset_y_, 0.0);
@@ -86,6 +86,7 @@ namespace jsk_pcl_ros
 
   void RearrangeBoundingBox::rearrangeBoundingBoxCallback(const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& box_array) {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
     jsk_recognition_msgs::BoundingBoxArray bba;
     bba.header = box_array->header;
     bba.boxes = box_array->boxes;

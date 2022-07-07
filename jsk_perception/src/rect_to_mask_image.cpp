@@ -84,6 +84,7 @@ namespace jsk_perception
       double height = std::min(max_y - min_y, camera_info_->height - min_y);
       cv::Rect region(min_x, min_y, width, height);
       cv::rectangle(mask_image, region, cv::Scalar(255), CV_FILLED);
+      vital_checker_->poke();
       pub_.publish(cv_bridge::CvImage(
                      rect_msg->header,
                      sensor_msgs::image_encodings::MONO8,

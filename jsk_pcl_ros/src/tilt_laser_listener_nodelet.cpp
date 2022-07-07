@@ -162,12 +162,8 @@ namespace jsk_pcl_ros
         stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
                      getName() + " running");
       }
-      
     }
-    else {
-      jsk_topic_tools::addDiagnosticErrorSummary(
-        name_, vital_checker_, stat, diagnostic_error_level_);
-    }
+    DiagnosticNodelet::updateDiagnostic(stat);
   }
 
   void TiltLaserListener::cloudCallback(

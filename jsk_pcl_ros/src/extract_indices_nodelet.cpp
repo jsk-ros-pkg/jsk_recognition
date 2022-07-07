@@ -98,7 +98,6 @@ namespace jsk_pcl_ros
     const PCLIndicesMsg::ConstPtr& indices_msg,
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
-    vital_checker_->poke();
 
     pcl::PCLPointCloud2::Ptr input(new pcl::PCLPointCloud2);
     pcl_conversions::toPCL(*cloud_msg, *input);
@@ -134,6 +133,7 @@ namespace jsk_pcl_ros
     pcl_conversions::moveFromPCL(output, out_cloud_msg);
 
     out_cloud_msg.header = cloud_msg->header;
+    vital_checker_->poke();
     pub_.publish(out_cloud_msg);
   }
 }

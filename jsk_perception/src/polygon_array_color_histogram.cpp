@@ -169,6 +169,7 @@ namespace jsk_perception
             hist, pixel_min_value_, pixel_max_value_);
         histogram_array.histograms.push_back(histogram);
       }
+      vital_checker_->poke();
       pub_debug_polygon_.publish(cv_bridge::CvImage(image_msg->header,
                                                     sensor_msgs::image_encodings::RGB8,
                                                     debug_polygon_image).toImageMsg());

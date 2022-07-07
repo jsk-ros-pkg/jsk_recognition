@@ -155,6 +155,7 @@ namespace jsk_perception
     }
     // publish proposals
     rects_msg.header = img_msg->header;
+    vital_checker_->poke();
     pub_rects_.publish(rects_msg);
     // publish objectness
     pub_objectness_.publish(

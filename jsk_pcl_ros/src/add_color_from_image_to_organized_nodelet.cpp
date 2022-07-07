@@ -80,7 +80,6 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
     const sensor_msgs::Image::ConstPtr& image_msg)
   {
-    vital_checker_->poke();
     if (cloud_msg->header.frame_id != image_msg->header.frame_id)
     {
       NODELET_FATAL("frame_id does not match: [%s, %s]",
@@ -126,6 +125,7 @@ namespace jsk_pcl_ros
     sensor_msgs::PointCloud2 ros_cloud;
     pcl::toROSMsg(*rgb_cloud, ros_cloud);
     ros_cloud.header = cloud_msg->header;
+    vital_checker_->poke();
     pub_.publish(ros_cloud);
   }
 }

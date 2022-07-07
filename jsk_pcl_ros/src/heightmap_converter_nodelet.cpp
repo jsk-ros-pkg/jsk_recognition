@@ -82,7 +82,6 @@ namespace jsk_pcl_ros
   void HeightmapConverter::convert(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    vital_checker_->poke();
     std_msgs::Header msg_header(msg->header);
     pcl::PointCloud<pcl::PointXYZ> transformed_cloud;
     if (use_projected_center_) {
@@ -164,6 +163,7 @@ namespace jsk_pcl_ros
     cv_bridge::CvImage height_map_image(msg_header,
                                         sensor_msgs::image_encodings::TYPE_32FC2,
                                         height_map);
+    vital_checker_->poke();
     pub_.publish(height_map_image.toImageMsg());
   }
 

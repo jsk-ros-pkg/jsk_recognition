@@ -66,7 +66,6 @@ namespace jsk_pcl_ros_utils
 
   void NormalFlipToFrame::flip(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
-    vital_checker_->poke();
     pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr cloud
       (new pcl::PointCloud<pcl::PointXYZRGBNormal>);
     pcl::fromROSMsg(*cloud_msg, *cloud);
@@ -125,6 +124,7 @@ namespace jsk_pcl_ros_utils
       sensor_msgs::PointCloud2 ros_cloud;
       pcl::toROSMsg(*flipped_cloud, ros_cloud);
       ros_cloud.header = cloud_msg->header;
+      vital_checker_->poke();
       pub_.publish(ros_cloud);
     }
     catch (tf2::ConnectivityException &e)

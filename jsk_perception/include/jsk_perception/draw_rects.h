@@ -50,7 +50,7 @@
 
 #include <cv_bridge/cv_bridge.h>
 #include <dynamic_reconfigure/server.h>
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <message_filters/pass_through.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
@@ -66,7 +66,7 @@
 
 namespace jsk_perception
 {
-  class DrawRects : public jsk_topic_tools::ConnectionBasedNodelet
+  class DrawRects : public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef DrawRectsConfig Config;
@@ -79,7 +79,7 @@ namespace jsk_perception
     jsk_recognition_msgs::RectArray,
     jsk_recognition_msgs::ClassificationResult> AsyncPolicy;
 
-    DrawRects(){}
+    DrawRects(): DiagnosticNodelet("DrawRects") {}
     virtual ~DrawRects();
   protected:
     virtual void onInit();

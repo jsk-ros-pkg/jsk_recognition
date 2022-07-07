@@ -98,6 +98,7 @@ namespace jsk_perception
     cv::Mat hue = hsv_planes[0];
     cv::Mat saturation = hsv_planes[1];
     cv::Mat value = hsv_planes[2];
+    vital_checker_->poke();
     pub_h_.publish(cv_bridge::CvImage(
                      image_msg->header,
                      sensor_msgs::image_encodings::MONO8,

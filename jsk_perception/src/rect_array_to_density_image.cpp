@@ -91,7 +91,6 @@ namespace jsk_perception
     const sensor_msgs::Image::ConstPtr& image_msg,
     const jsk_recognition_msgs::RectArray::ConstPtr& rects_msg)
   {
-    vital_checker_->poke();
     cv::Mat density_image = cv::Mat::zeros(image_msg->height, image_msg->width, CV_32FC1);
 
     // Compute density
@@ -111,6 +110,7 @@ namespace jsk_perception
     cv::Mat(density_image - min_image_value).convertTo(
         density_image, CV_32FC1, 1. / (max_image_value - min_image_value));
 
+    vital_checker_->poke();
     pub_.publish(cv_bridge::CvImage(
                     image_msg->header,
                     "32FC1",

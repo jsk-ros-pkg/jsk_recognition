@@ -175,6 +175,7 @@ namespace jsk_perception
           }
         }
 
+        vital_checker_->poke();
         pub_undistorted_image_.publish(
                                        cv_bridge::CvImage(
                                                           image_msg->header,
@@ -209,6 +210,7 @@ namespace jsk_perception
             }
           }
         }
+        vital_checker_->poke();
         pub_undistorted_image_.publish(
                                        cv_bridge::CvImage(
                                                           image_msg->header,
@@ -248,6 +250,7 @@ namespace jsk_perception
           }
         }
       }
+      vital_checker_->poke();
       pub_undistorted_image_.publish(
                                      cv_bridge::CvImage(
                                                         image_msg->header,

@@ -77,7 +77,6 @@ namespace jsk_perception
     const geometry_msgs::PolygonStamped::ConstPtr& polygon_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    vital_checker_->poke();
     if (camera_info_) {
       if (polygon_msg->header.frame_id != camera_info_->header.frame_id) {
         NODELET_ERROR("frame_id of polygon (%s) and camera (%s) are not same.",
@@ -99,6 +98,7 @@ namespace jsk_perception
         }
         cv::fillConvexPoly(mask_image, &(points[0]), points.size(), cv::Scalar(255));
       }
+      vital_checker_->poke();
       pub_.publish(cv_bridge::CvImage(polygon_msg->header,
                                       sensor_msgs::image_encodings::MONO8,
                                       mask_image).toImageMsg());

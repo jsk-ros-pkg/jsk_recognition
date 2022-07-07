@@ -41,7 +41,7 @@ namespace jsk_pcl_ros
 {
   void ParallelEdgeFinder::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    DiagnosticNodelet::onInit();
     
     ////////////////////////////////////////////////////////
     // publishers
@@ -101,6 +101,7 @@ namespace jsk_pcl_ros
     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& input_coefficients)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
     ////////////////////////////////////////////////////////
     // first, build Line instances
     ////////////////////////////////////////////////////////

@@ -50,11 +50,11 @@
 #include <dynamic_reconfigure/server.h>
 #include <jsk_pcl_ros/ColorHistogramMatcherConfig.h>
 
-#include "jsk_topic_tools/connection_based_nodelet.h"
+#include "jsk_topic_tools/diagnostic_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class ColorHistogramMatcher : public jsk_topic_tools::ConnectionBasedNodelet
+  class ColorHistogramMatcher : public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime< sensor_msgs::PointCloud2,
@@ -66,6 +66,7 @@ namespace jsk_pcl_ros
       USE_VALUE,
       USE_HUE_AND_SATURATION
     };
+    ColorHistogramMatcher(): DiagnosticNodelet("ColorHistogramMatcher") {}
     virtual ~ColorHistogramMatcher();
   protected:
     virtual void onInit();

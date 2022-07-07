@@ -86,6 +86,7 @@ namespace jsk_perception
     cv::Mat y = ycc_planes[0];
     cv::Mat cr = ycc_planes[1];
     cv::Mat cb = ycc_planes[2];
+    vital_checker_->poke();
     pub_y_.publish(cv_bridge::CvImage(
                      image_msg->header,
                      sensor_msgs::image_encodings::MONO8,

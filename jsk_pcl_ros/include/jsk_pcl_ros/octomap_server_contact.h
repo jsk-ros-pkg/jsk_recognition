@@ -53,7 +53,8 @@ namespace jsk_pcl_ros
                                public jsk_topic_tools::DiagnosticNodelet
   {
    public:
-     OctomapServerContact(const ros::NodeHandle& privateNh = ros::NodeHandle("~"));
+    OctomapServerContact(): DiagnosticNodelet("OctomapServerContact") {}
+    OctomapServerContact(const ros::NodeHandle &privateNh);
      virtual ~OctomapServerContact();
 
      virtual void insertProximityCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud);

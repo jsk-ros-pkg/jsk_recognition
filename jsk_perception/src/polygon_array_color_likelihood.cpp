@@ -252,6 +252,7 @@ namespace jsk_perception
         new_msg.likelihood[i] *= d;
       }
     }
+    vital_checker_->poke();
     pub_.publish(new_msg);
   }
 }

@@ -110,6 +110,7 @@ namespace jsk_perception
       ++label_first;
     }
 
+    vital_checker_->poke();
     pub_.publish(cv_bridge::CvImage(
                   image_msg->header,
                   image_msg->encoding,

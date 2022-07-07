@@ -45,7 +45,7 @@ namespace jsk_pcl_ros
 {
   void MultiPlaneSACSegmentation::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    DiagnosticNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&MultiPlaneSACSegmentation::configCallback, this, _1, _2);
@@ -278,6 +278,7 @@ namespace jsk_pcl_ros
     const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& clusters)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
     pcl::PointCloud<PointT>::Ptr input (new pcl::PointCloud<PointT>);
     pcl::fromROSMsg(*msg, *input);
     std::vector<pcl::PointIndices::Ptr> cluster_indices
@@ -347,6 +348,7 @@ namespace jsk_pcl_ros
     const sensor_msgs::Imu::ConstPtr& imu_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
     pcl::PointCloud<PointT>::Ptr input (new pcl::PointCloud<PointT>);
     pcl::PointCloud<pcl::Normal>::Ptr
       normal (new pcl::PointCloud<pcl::Normal>);
@@ -394,6 +396,7 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& msg_normal)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
     pcl::PointCloud<PointT>::Ptr input (new pcl::PointCloud<PointT>);
     pcl::PointCloud<pcl::Normal>::Ptr normal (new pcl::PointCloud<pcl::Normal>);
     pcl::fromROSMsg(*msg, *input);

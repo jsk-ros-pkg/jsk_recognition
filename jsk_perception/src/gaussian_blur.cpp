@@ -92,6 +92,7 @@ namespace jsk_perception
     } else {
       cv::GaussianBlur(image, applied_image, cv::Size(kernel_size_+1, kernel_size_+1), sigma_x_, sigma_y_);
     }
+    vital_checker_->poke();
     pub_.publish(cv_bridge::CvImage(
                      image_msg->header,
                      image_msg->encoding,

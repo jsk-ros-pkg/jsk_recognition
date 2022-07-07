@@ -61,7 +61,6 @@ namespace jsk_pcl_ros_utils
   void ColorizeHeight2DMapping::colorize(
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
-    vital_checker_->poke();
     pcl::PointCloud<pcl::PointXYZ> cloud;
     pcl::fromROSMsg(*msg, cloud);
 
@@ -81,6 +80,7 @@ namespace jsk_pcl_ros_utils
     sensor_msgs::PointCloud2 ros_cloud;
     pcl::toROSMsg(colorized_cloud, ros_cloud);
     ros_cloud.header = msg->header;
+    vital_checker_->poke();
     pub_.publish(ros_cloud);
   }
 }

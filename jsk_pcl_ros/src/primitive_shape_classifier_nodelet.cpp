@@ -160,6 +160,7 @@ namespace jsk_pcl_ros
                                     const jsk_recognition_msgs::PolygonArray::ConstPtr& ros_polygons)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
 
     if (!checkFrameId(ros_cloud, ros_normal, ros_indices, ros_polygons)) return;
 

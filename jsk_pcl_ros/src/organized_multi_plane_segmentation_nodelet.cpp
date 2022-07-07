@@ -64,7 +64,7 @@ namespace jsk_pcl_ros
 
   void OrganizedMultiPlaneSegmentation::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    DiagnosticNodelet::onInit();
     previous_checked_connection_status_for_plane_ = jsk_topic_tools::NOT_SUBSCRIBED;
     previous_checked_connection_status_for_normal_ = jsk_topic_tools::NOT_SUBSCRIBED;
     pcl::console::setVerbosityLevel(pcl::console::L_ERROR);

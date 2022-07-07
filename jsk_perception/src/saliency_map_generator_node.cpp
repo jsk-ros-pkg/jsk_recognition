@@ -42,7 +42,7 @@ namespace jsk_perception
       if (this->counter_ == 0) {
          this->start_ = omp_get_wtime();
       }
-      
+
       cv::Mat saliency_map;
       this->computeSaliencyImpl(image, saliency_map);
       cv::cvtColor(saliency_map, saliency_map, CV_GRAY2BGR);
@@ -63,6 +63,7 @@ namespace jsk_perception
       cv_bridge::CvImage pub_img(image_msg->header,
                                  image_msg->encoding,
                                  saliency_map);
+      vital_checker_->poke();
       this->pub_image_.publish(pub_img.toImageMsg());
    }
 

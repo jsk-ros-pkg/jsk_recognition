@@ -42,14 +42,15 @@
 #include <pcl_ros/pcl_nodelet.h>
 #include <dynamic_reconfigure/server.h>
 #include "jsk_pcl_ros/NormalEstimationIntegralImageConfig.h"
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 
 namespace jsk_pcl_ros
 {
   class NormalEstimationIntegralImage:
-    public jsk_topic_tools::ConnectionBasedNodelet
+    public jsk_topic_tools::DiagnosticNodelet
   {
   public:
+    NormalEstimationIntegralImage(): DiagnosticNodelet("NormalEstimationIntegralImage") {}
     typedef jsk_pcl_ros::NormalEstimationIntegralImageConfig Config;    
   protected:
     ros::Subscriber sub_input_;

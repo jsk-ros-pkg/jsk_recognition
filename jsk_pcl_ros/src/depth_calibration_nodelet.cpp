@@ -163,6 +163,7 @@ namespace jsk_pcl_ros
       }
     }
     sensor_msgs::Image::Ptr ros_image = cv_bridge::CvImage(msg->header, "32FC1", output_image).toImageMsg();
+    vital_checker_->poke();
     pub_.publish(ros_image);
   }
 

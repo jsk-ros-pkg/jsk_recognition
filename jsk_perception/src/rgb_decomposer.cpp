@@ -82,6 +82,7 @@ namespace jsk_perception
     cv::Mat red = bgr_planes[2];
     cv::Mat blue = bgr_planes[0];
     cv::Mat green = bgr_planes[1];
+    vital_checker_->poke();
     pub_r_.publish(cv_bridge::CvImage(
                      image_msg->header,
                      sensor_msgs::image_encodings::MONO8,

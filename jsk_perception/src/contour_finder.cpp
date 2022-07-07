@@ -97,6 +97,7 @@ namespace jsk_perception
     cv::convexHull(cv::Mat(all_contours), convex_contours[0]);
     cv::Mat convex_image = cv::Mat::zeros(input.size(), CV_8UC1);
     cv::drawContours(convex_image, convex_contours, 0, cv::Scalar(255), CV_FILLED);
+    vital_checker_->poke();
     pub_convex_image_.publish(
       cv_bridge::CvImage(
         image_msg->header,

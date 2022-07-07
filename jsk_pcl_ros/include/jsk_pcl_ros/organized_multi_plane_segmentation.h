@@ -54,15 +54,16 @@
 
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <jsk_topic_tools/diagnostic_utils.h>
 
 namespace jsk_pcl_ros
 {
   class OrganizedMultiPlaneSegmentation:
-    public jsk_topic_tools::ConnectionBasedNodelet
+    public jsk_topic_tools::DiagnosticNodelet
   {
   public:
+    OrganizedMultiPlaneSegmentation(): DiagnosticNodelet("OrganizedMultiPlaneSegmentation") {}
     typedef pcl::PointXYZRGBA PointT;
     typedef std::vector<pcl::PlanarRegion<PointT>,
                         Eigen::aligned_allocator<pcl::PlanarRegion<PointT> > >

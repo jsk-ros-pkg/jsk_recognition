@@ -73,6 +73,7 @@ namespace jsk_perception
                   info_msg->roi.width,
                   info_msg->roi.height);
     cv::rectangle(mask_image, rect, cv::Scalar(255), CV_FILLED);
+    vital_checker_->poke();
     pub_.publish(cv_bridge::CvImage(
                    info_msg->header,
                    sensor_msgs::image_encodings::MONO8,

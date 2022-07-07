@@ -78,8 +78,6 @@ namespace jsk_pcl_ros_utils
 
   void CentroidPublisher::extractPolygons(const jsk_recognition_msgs::PolygonArray::ConstPtr& input)
   {
-    vital_checker_->poke();
-
     int size = std::min(100, (int)input->polygons.size());
 
     geometry_msgs::PoseArray pose_array;
@@ -113,7 +111,7 @@ namespace jsk_pcl_ros_utils
       pose_array.poses[i].orientation.z = q.z();
       pose_array.poses[i].orientation.w = q.w();
     }
-
+    vital_checker_->poke();
     pub_pose_array_.publish(pose_array);
   }
 

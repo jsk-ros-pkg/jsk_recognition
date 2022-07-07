@@ -59,10 +59,10 @@ namespace jsk_pcl_ros_utils
   void PointIndicesToClusterPointIndices::convert(
     const PCLIndicesMsg::ConstPtr& indices_msg)
   {
-    vital_checker_->poke();
     jsk_recognition_msgs::ClusterPointIndices cluster_indices_msg;
     cluster_indices_msg.header = indices_msg->header;
     cluster_indices_msg.cluster_indices.push_back(*indices_msg);
+    vital_checker_->poke();
     pub_.publish(cluster_indices_msg);
   }
 }

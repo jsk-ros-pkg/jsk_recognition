@@ -78,6 +78,7 @@ namespace jsk_perception
        out_msg->header = cv_ptr->header;
        out_msg->encoding = sensor_msgs::image_encodings::TYPE_32FC1;
        out_msg->image = image.clone();
+       vital_checker_->poke();
        this->pub_image_.publish(out_msg->toImageMsg());
     }
 

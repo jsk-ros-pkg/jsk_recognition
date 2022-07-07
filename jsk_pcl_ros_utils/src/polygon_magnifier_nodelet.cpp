@@ -73,7 +73,6 @@ namespace jsk_pcl_ros_utils
     const jsk_recognition_msgs::PolygonArray::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    vital_checker_->poke();
 
     jsk_recognition_msgs::PolygonArray ret_polygon_array = *msg;
 
@@ -91,6 +90,7 @@ namespace jsk_pcl_ros_utils
 
       ret_polygon_array.polygons[i].polygon = magnified_poly->toROSMsg();
     }
+    vital_checker_->poke();
     pub_.publish(ret_polygon_array);
   }
 }

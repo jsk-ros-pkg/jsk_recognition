@@ -46,12 +46,12 @@
 #include <jsk_pcl_ros_utils/PolygonArrayUnwrapperConfig.h>
 #include <jsk_recognition_msgs/PolygonArray.h>
 #include <jsk_recognition_msgs/ModelCoefficientsArray.h>
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 
 
 namespace jsk_pcl_ros_utils
 {
-  class PolygonArrayUnwrapper: public jsk_topic_tools::ConnectionBasedNodelet
+  class PolygonArrayUnwrapper: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef PolygonArrayUnwrapperConfig Config;
@@ -59,6 +59,7 @@ namespace jsk_pcl_ros_utils
     jsk_recognition_msgs::PolygonArray,
     jsk_recognition_msgs::ModelCoefficientsArray>
     SyncPolicy;
+    PolygonArrayUnwrapper() : DiagnosticNodelet("PolygonArrayUnwrapper") {}
     virtual ~PolygonArrayUnwrapper();
 
   protected:

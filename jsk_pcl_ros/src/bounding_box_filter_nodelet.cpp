@@ -162,6 +162,7 @@ namespace jsk_pcl_ros
     }
 
     // publish
+    vital_checker_->poke();
     filtered_box_pub_.publish(filtered_box_array);
 
     // for diagnostic
@@ -182,7 +183,6 @@ namespace jsk_pcl_ros
         "the size of message ~input_box and ~input_indices are different");
       return;
     }
-    vital_checker_->poke();
 
     jsk_recognition_msgs::BoundingBoxArray filtered_box_array;
     jsk_recognition_msgs::ClusterPointIndices filtered_indices;
@@ -199,6 +199,7 @@ namespace jsk_pcl_ros
     }
 
     // publish
+    vital_checker_->poke();
     filtered_box_pub_.publish(filtered_box_array);
     filtered_indices_pub_.publish(filtered_indices);
 

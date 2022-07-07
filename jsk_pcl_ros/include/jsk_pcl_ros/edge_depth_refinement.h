@@ -53,11 +53,11 @@
 #include <dynamic_reconfigure/server.h>
 #include <boost/tuple/tuple.hpp>
 
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 
 namespace jsk_pcl_ros
 {
-  class EdgeDepthRefinement: public jsk_topic_tools::ConnectionBasedNodelet
+  class EdgeDepthRefinement: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime<
@@ -65,6 +65,7 @@ namespace jsk_pcl_ros
     jsk_recognition_msgs::ClusterPointIndices > SyncPolicy;
     typedef pcl::PointXYZRGB PointT;
     typedef jsk_pcl_ros::EdgeDepthRefinementConfig Config;
+    EdgeDepthRefinement(): DiagnosticNodelet("EdgeDepthRefinement") {}
     virtual ~EdgeDepthRefinement();
   protected:
     ////////////////////////////////////////////////////////

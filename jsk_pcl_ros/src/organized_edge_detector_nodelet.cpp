@@ -51,7 +51,7 @@ namespace jsk_pcl_ros
 {
   void OrganizedEdgeDetector::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    DiagnosticNodelet::onInit();
 
     ////////////////////////////////////////////////////////
     // setup dynamic reconfigure
@@ -316,6 +316,7 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
     if (msg->height == 1) {
       NODELET_ERROR("[OrganizedEdgeDetector] organized pointcloud is required");
       return;

@@ -162,6 +162,7 @@ namespace jsk_pcl_ros
     std::vector<Eigen::Matrix4f,
                 Eigen::aligned_allocator<Eigen::Matrix4f> > rototranslations;
     gc_clusterer.recognize(rototranslations, clustered_corrs);
+    vital_checker_->poke();
     if (rototranslations.size() > 0) {
       NODELET_INFO("detected %lu objects", rototranslations.size());
       Eigen::Matrix4f result_mat = rototranslations[0];

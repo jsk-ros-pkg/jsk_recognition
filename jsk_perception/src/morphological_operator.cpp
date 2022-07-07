@@ -101,6 +101,7 @@ namespace jsk_perception
       cv::Size(2 * size_ + 1, 2 * size_+1),
       cv::Point(size_, size_));
     apply(image, output_image, element);
+    vital_checker_->poke();
     pub_.publish(
       cv_bridge::CvImage(image_msg->header,
                          sensor_msgs::image_encodings::MONO8,

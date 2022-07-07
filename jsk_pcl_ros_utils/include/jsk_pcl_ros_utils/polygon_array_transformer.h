@@ -52,16 +52,17 @@
 #include <message_filters/synchronizer.h>
 
 #include "jsk_recognition_utils/pcl_conversion_util.h"
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 
 namespace jsk_pcl_ros_utils
 {
-  class PolygonArrayTransformer: public jsk_topic_tools::ConnectionBasedNodelet
+  class PolygonArrayTransformer: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime<
     jsk_recognition_msgs::PolygonArray,
     jsk_recognition_msgs::ModelCoefficientsArray > SyncPolicy;
+    PolygonArrayTransformer() : DiagnosticNodelet("PolygonArrayTransformer") {}
     virtual ~PolygonArrayTransformer();
   protected:
     virtual void onInit();

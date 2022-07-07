@@ -67,7 +67,6 @@ namespace jsk_perception
   void MaskImageToROI::infoCallback(
     const sensor_msgs::CameraInfo::ConstPtr& info_msg)
   {
-    vital_checker_->poke();
     boost::mutex::scoped_lock lock(mutex_);
     latest_camera_info_ = info_msg;
   }
@@ -75,7 +74,6 @@ namespace jsk_perception
   void MaskImageToROI::convert(
     const sensor_msgs::Image::ConstPtr& mask_msg)
   {
-    vital_checker_->poke();
     boost::mutex::scoped_lock lock(mutex_);
     if (latest_camera_info_) {
       sensor_msgs::CameraInfo camera_info(*latest_camera_info_);
@@ -96,6 +94,7 @@ namespace jsk_perception
       camera_info.roi.width = mask_rect.width;
       camera_info.roi.height = mask_rect.height;
       camera_info.header = mask_msg->header;
+      vital_checker_->poke();
       pub_.publish(camera_info);
     }
     else {

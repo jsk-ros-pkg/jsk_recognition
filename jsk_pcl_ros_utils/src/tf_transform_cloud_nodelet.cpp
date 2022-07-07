@@ -43,7 +43,6 @@ namespace jsk_pcl_ros_utils
 {
   void TfTransformCloud::transform(const sensor_msgs::PointCloud2ConstPtr &input)
   {
-    vital_checker_->poke();
     sensor_msgs::PointCloud2 output;
     try
     {
@@ -53,12 +52,14 @@ namespace jsk_pcl_ros_utils
         if (pcl_ros::transformPointCloud(target_frame_id_, latest_pointcloud, output,
                                          *tf_listener_)) {
           output.header.stamp = input->header.stamp;
+          vital_checker_->poke();
           pub_cloud_.publish(output);
         }
       }
       else {
         if (pcl_ros::transformPointCloud(target_frame_id_, *input, output,
                                          *tf_listener_)) {
+          vital_checker_->poke();
           pub_cloud_.publish(output);
         }
       }

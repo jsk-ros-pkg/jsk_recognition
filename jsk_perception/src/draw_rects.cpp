@@ -49,7 +49,7 @@ namespace jsk_perception
 
   void DrawRects::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    DiagnosticNodelet::onInit();
 
     srv_ = boost::make_shared<dynamic_reconfigure::Server<Config> >(*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
@@ -193,6 +193,7 @@ namespace jsk_perception
       }
     }
 
+    vital_checker_->poke();
     pub_image_.publish(*cv_bridge::CvImage(image->header, enc::BGR8, img).toImageMsg());
   }
 

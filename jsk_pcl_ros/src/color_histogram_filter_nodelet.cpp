@@ -143,6 +143,7 @@ namespace jsk_pcl_ros
       }
     }
 
+    vital_checker_->poke();
     pub_histogram_.publish(out_hist);
     pub_indices_.publish(out_indices);
   }

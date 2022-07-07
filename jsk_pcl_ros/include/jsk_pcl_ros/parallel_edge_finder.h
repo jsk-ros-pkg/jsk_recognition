@@ -50,17 +50,18 @@
 #include <message_filters/synchronizer.h>
 #include "jsk_recognition_utils/geo_util.h"
 
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 
 namespace jsk_pcl_ros
 {
-  class ParallelEdgeFinder: public jsk_topic_tools::ConnectionBasedNodelet
+  class ParallelEdgeFinder: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime<
     jsk_recognition_msgs::ClusterPointIndices,
     jsk_recognition_msgs::ModelCoefficientsArray > SyncPolicy;
     typedef jsk_pcl_ros::ParallelEdgeFinderConfig Config;
+    ParallelEdgeFinder() : DiagnosticNodelet("ParallelEdgeFinder"){}
     virtual ~ParallelEdgeFinder();
   protected:
     ////////////////////////////////////////////////////////

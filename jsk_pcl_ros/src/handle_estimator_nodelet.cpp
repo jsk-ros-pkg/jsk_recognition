@@ -44,7 +44,7 @@ namespace jsk_pcl_ros
 {
   void HandleEstimator::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    DiagnosticNodelet::onInit();
     output_buf.resize(100);
 
     pnh_->param("gripper_size", gripper_size_, 0.08); // defaults to pr2 gripper size
@@ -210,6 +210,7 @@ namespace jsk_pcl_ros
     best.header = pose_array.header;
     best.pose = pose_array.poses[pose_array.poses.size() / 2];
     pub_best_.publish(best);
+    vital_checker_->poke();
 
     output_buf.push_front(boost::make_tuple(pose_array, prepose_array));
   }
@@ -276,6 +277,7 @@ namespace jsk_pcl_ros
     best.header = pose_array.header;
     best.pose = pose_array.poses[pose_array.poses.size() / 2];
     pub_best_.publish(best);
+    vital_checker_->poke();
 
     output_buf.push_front(boost::make_tuple(pose_array, prepose_array));
   }
@@ -294,6 +296,7 @@ namespace jsk_pcl_ros
 
 	ps.header = prepose_array.header;
 	ps.pose = prepose_array.poses[index->data];
+  vital_checker_->poke();
 	pub_selected_preapproach_.publish(ps);
 	break;
       }

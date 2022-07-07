@@ -113,7 +113,6 @@ namespace jsk_pcl_ros_utils
     const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg,
     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg)
   {
-    vital_checker_->poke();
     if (polygons_msg->polygons.size() != coefficients_msg->coefficients.size()) {
       NODELET_ERROR("The size of polygons and coefficients are not same");
       return;
@@ -184,6 +183,7 @@ namespace jsk_pcl_ros_utils
           }
         }
       }
+      vital_checker_->poke();
       pub_polygons_.publish(flipped_polygons);
       pub_coefficients_.publish(flipped_coefficients);
       if (use_indices_)

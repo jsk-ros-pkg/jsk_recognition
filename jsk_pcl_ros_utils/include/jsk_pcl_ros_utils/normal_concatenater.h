@@ -48,15 +48,16 @@
 #include <pcl/point_types.h>
 #include <pcl/common/centroid.h>
 #include <pcl/filters/extract_indices.h>
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 
 namespace jsk_pcl_ros_utils
 {
-  class NormalConcatenater: public jsk_topic_tools::ConnectionBasedNodelet
+  class NormalConcatenater: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> SyncPolicy;
     typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> ASyncPolicy;
+    NormalConcatenater(): DiagnosticNodelet("NormalConcatenater") { }
     virtual ~NormalConcatenater();
   protected:
     ros::Publisher pub_;

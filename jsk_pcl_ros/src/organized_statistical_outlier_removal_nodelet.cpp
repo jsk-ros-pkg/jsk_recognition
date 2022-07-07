@@ -41,11 +41,6 @@
 
 namespace jsk_pcl_ros
 {
-  OrganizedStatisticalOutlierRemoval::OrganizedStatisticalOutlierRemoval():
-    DiagnosticNodelet("OrganizedStatisticalOutlierRemoval")
-  {
-
-  }
 
   void OrganizedStatisticalOutlierRemoval::onInit()
   {

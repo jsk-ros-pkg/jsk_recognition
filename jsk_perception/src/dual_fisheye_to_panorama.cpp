@@ -123,6 +123,7 @@ namespace jsk_perception
     cv::Mat pano;
     pano = stitcher_->stitch(img_l, img_r);
 
+    vital_checker_->poke();
     pub_panorama_image_.publish(cv_bridge::CvImage(image_msg->header,
                                                    image_msg->encoding,
                                                    pano).toImageMsg());

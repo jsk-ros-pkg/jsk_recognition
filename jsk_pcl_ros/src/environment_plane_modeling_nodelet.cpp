@@ -283,6 +283,7 @@ namespace jsk_pcl_ros
       std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> convexes = convertToConvexPolygons(cloud, indices_msg, coefficients_msg);
       // magnify convexes
       std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> magnified_convexes = magnifyConvexes(convexes);
+      vital_checker_->poke();
       publishConvexPolygonsBoundaries(pub_debug_convex_point_cloud_, cloud_msg->header, magnified_convexes);
       // Publish magnified convexes for debug
       publishConvexPolygons(pub_debug_magnified_polygons_, cloud_msg->header, magnified_convexes);

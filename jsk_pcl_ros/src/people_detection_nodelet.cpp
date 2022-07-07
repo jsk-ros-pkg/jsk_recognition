@@ -119,6 +119,7 @@ namespace jsk_pcl_ros {
   void PeopleDetection::detect(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg) {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr input_cloud(
       new pcl::PointCloud<pcl::PointXYZRGBA>);
     pcl::fromROSMsg(*cloud_msg, *input_cloud);

@@ -94,7 +94,6 @@ namespace jsk_perception
 #if CV_MAJOR_VERSION >= 3
     ROS_ERROR("cvSnakeImage is not supported in OpenCV3");
 #else
-    vital_checker_->poke();
     boost::mutex::scoped_lock lock(mutex_);
     cv::Mat input = cv_bridge::toCvCopy(
       image_msg, sensor_msgs::image_encodings::MONO8)->image;
@@ -138,6 +137,7 @@ namespace jsk_perception
       cv::circle(debug_image, points[i], 2, cv::Scalar(100, 0, 0), 1);
     }
 
+    vital_checker_->poke();
     pub_debug_.publish(cv_bridge::CvImage(
                          image_msg->header,
                          sensor_msgs::image_encodings::BGR8,

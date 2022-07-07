@@ -45,7 +45,7 @@ namespace jsk_pcl_ros
 {
   void BilateralFilter::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    DiagnosticNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&BilateralFilter::configCallback, this, _1, _2);
@@ -83,6 +83,7 @@ namespace jsk_pcl_ros
     pcl::toROSMsg(*output, ros_output);
     ros_output.header = msg->header;
     // hmm,,, is it keep organized??
+    vital_checker_->poke();
     pub_.publish(ros_output);
   }
 

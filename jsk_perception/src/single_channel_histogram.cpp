@@ -122,6 +122,7 @@ namespace jsk_perception
     for (int i = 0; i < hist_size_; i++) {
       histogram.histogram.push_back(hist.at<float>(0, i));
     }
+    vital_checker_->poke();
     pub_.publish(histogram);
   }
   

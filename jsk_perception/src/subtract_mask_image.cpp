@@ -95,7 +95,6 @@ namespace jsk_perception
     const sensor_msgs::Image::ConstPtr& src1_msg,
     const sensor_msgs::Image::ConstPtr& src2_msg)
   {
-    vital_checker_->poke();
 
     if (src1_msg->width != src2_msg->width || src1_msg->height != src2_msg->height)
     {
@@ -113,6 +112,7 @@ namespace jsk_perception
 
     cv::Mat result = cv::Mat::zeros(mask1.size(), mask1.type());
     mask1.copyTo(result, mask2_not);
+    vital_checker_->poke();
     pub_.publish(
       cv_bridge::CvImage(src1_msg->header, enc::MONO8, result).toImageMsg());
   }

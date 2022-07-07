@@ -85,7 +85,6 @@ namespace jsk_perception
   void ProjectImagePoint::project(
     const geometry_msgs::PointStamped::ConstPtr& msg)
   {
-    vital_checker_->poke();
     boost::mutex::scoped_lock lock(mutex_);
     if (!camera_info_) {
       NODELET_WARN(
@@ -102,6 +101,7 @@ namespace jsk_perception
     vector.vector.x = ray.x;
     vector.vector.y = ray.y;
     vector.vector.z = ray.z;
+    vital_checker_->poke();
     pub_vector_.publish(vector);
     if (ray.z == 0.0) {
       NODELET_ERROR("Z value of projected ray is 0");

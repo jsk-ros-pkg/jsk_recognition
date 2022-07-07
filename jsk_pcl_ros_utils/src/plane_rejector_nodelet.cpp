@@ -43,21 +43,10 @@ namespace jsk_pcl_ros_utils
 {
   void PlaneRejector::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    DiagnosticNodelet::onInit();
     tf_success_.reset(new jsk_recognition_utils::SeriesedBoolean(30));
     listener_ = jsk_recognition_utils::TfListenerSingleton::getInstance();
-    double vital_rate;
-    pnh_->param("vital_rate", vital_rate, 1.0);
-    vital_checker_.reset(
-      new jsk_topic_tools::VitalChecker(1 / vital_rate));
-    
-    diagnostic_updater_.reset(new diagnostic_updater::Updater);
-    diagnostic_updater_->setHardwareID(getName());
-    diagnostic_updater_->add(
-      getName() + "::PlaneRejector",
-      boost::bind(
-        &PlaneRejector::updateDiagnosticsPlaneRejector,
-        this, _1));
+
     if (!pnh_->getParam("processing_frame_id", processing_frame_id_)) {
       NODELET_FATAL("You need to specify ~processing_frame_id");
       return;
@@ -94,11 +83,6 @@ namespace jsk_pcl_ros_utils
     }
     else {
     }
-    diagnostics_timer_ = pnh_->createTimer(
-      ros::Duration(1.0),
-      boost::bind(&PlaneRejector::updateDiagnostics,
-                  this,
-                  _1));
     onInitPostProcess();
   }
 
@@ -139,7 +123,7 @@ namespace jsk_pcl_ros_utils
     sub_coefficients_.unsubscribe();
   }
   
-  void PlaneRejector::updateDiagnosticsPlaneRejector(
+  void PlaneRejector::updateDiagnostic(
     diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
     bool alivep = vital_checker_->isAlive();
@@ -164,19 +148,9 @@ namespace jsk_pcl_ros_utils
                 % (reference_axis_[2])).str());
       stat.add("Processing Frame ID", processing_frame_id_);
     }
-    else {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR,
-                   "PlaneRejector not running");
-    }
-    
+    DiagnosticNodelet::updateDiagnostic(stat);
   }
-  
-  void PlaneRejector::updateDiagnostics(const ros::TimerEvent& event)
-  {
-    boost::mutex::scoped_lock lock(mutex_);
-    diagnostic_updater_->update();
-  }
-  
+
   void PlaneRejector::configCallback (Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mutex_);
@@ -197,7 +171,6 @@ namespace jsk_pcl_ros_utils
     const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& inliers)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    vital_checker_->poke();
     jsk_recognition_msgs::PolygonArray result_polygons;
     jsk_recognition_msgs::ModelCoefficientsArray result_coefficients;
     jsk_recognition_msgs::ClusterPointIndices result_inliers;
@@ -250,6 +223,7 @@ namespace jsk_pcl_ros_utils
     }
     rejected_plane_counter_.add(rejected_plane_counter);
     passed_plane_counter_.add(passed_plane_counter);
+    vital_checker_->poke();
     polygons_pub_.publish(result_polygons);
     coefficients_pub_.publish(result_coefficients);
     if (use_inliers_) {

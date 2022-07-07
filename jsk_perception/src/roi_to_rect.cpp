@@ -62,7 +62,6 @@ namespace jsk_perception
   void ROIToRect::convert(
     const sensor_msgs::CameraInfo::ConstPtr& roi_msg)
   {
-    vital_checker_->poke();
     geometry_msgs::PolygonStamped rect;
     rect.header = roi_msg->header;
     geometry_msgs::Point32 top_left_pt, top_right_pt, bottom_left_pt, bottom_right_pt;
@@ -78,6 +77,7 @@ namespace jsk_perception
     rect.polygon.points.push_back(bottom_left_pt);
     rect.polygon.points.push_back(bottom_right_pt);
     rect.polygon.points.push_back(top_right_pt);
+    vital_checker_->poke();
     pub_.publish(rect);
   }
 }

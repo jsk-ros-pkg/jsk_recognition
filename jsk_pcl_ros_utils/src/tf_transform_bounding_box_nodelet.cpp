@@ -84,7 +84,6 @@ namespace jsk_pcl_ros_utils
   void TfTransformBoundingBox::transform(
     const jsk_recognition_msgs::BoundingBox::ConstPtr& msg)
   {
-    vital_checker_->poke();
     try
     {
       jsk_recognition_msgs::BoundingBox transformed_box;
@@ -106,6 +105,7 @@ namespace jsk_pcl_ros_utils
       tf::transformTFToEigen(tf_transform, transform);
       Eigen::Affine3f new_pose = transform * pose;
       tf::poseEigenToMsg(new_pose, transformed_box.pose);
+      vital_checker_->poke();
       pub_.publish(transformed_box);
     }
     catch (tf2::ConnectivityException &e)

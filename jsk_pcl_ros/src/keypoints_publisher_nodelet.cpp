@@ -47,7 +47,7 @@ namespace jsk_pcl_ros
 {
   void KeypointsPublisher::onInit(void)
   {
-    ConnectionBasedNodelet::onInit();
+    DiagnosticNodelet::onInit();
     
     input_.reset(new pcl::PointCloud<pcl::PointXYZ>);
     keypoints_pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "nerf_keypoints", 10);
@@ -98,6 +98,7 @@ namespace jsk_pcl_ros
     sensor_msgs::PointCloud2 resMsg;
     pcl::toROSMsg(result, resMsg);
     resMsg.header = input_header_;
+    vital_checker_->poke();
     keypoints_pub_.publish(resMsg);
   }
   

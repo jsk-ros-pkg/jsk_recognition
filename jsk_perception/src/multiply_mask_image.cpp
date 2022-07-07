@@ -98,6 +98,7 @@ namespace jsk_perception
       src2_msg, src2_msg->encoding)->image;
     cv::Mat result;
     cv::bitwise_and(src1, src2, result);
+    vital_checker_->poke();
     pub_.publish(
       cv_bridge::CvImage(src1_msg->header,
                          sensor_msgs::image_encodings::MONO8,

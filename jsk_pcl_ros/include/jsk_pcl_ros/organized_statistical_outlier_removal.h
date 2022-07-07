@@ -51,7 +51,7 @@ namespace jsk_pcl_ros
   public:
     typedef jsk_pcl_ros::OrganizedStatisticalOutlierRemovalConfig Config;
     typedef pcl::PointXYZRGB PointT;
-    OrganizedStatisticalOutlierRemoval();
+    OrganizedStatisticalOutlierRemoval() : DiagnosticNodelet("OrganizedStatisticalOutlierRemoval") {};
   protected:
     ////////////////////////////////////////////////////////
     // methods

@@ -113,13 +113,13 @@ namespace jsk_pcl_ros_utils
     cv_bridge::CvImage mask_bridge(indices_msg->header,
                                    sensor_msgs::image_encodings::MONO8,
                                    mask_image);
+    vital_checker_->poke();
     pub_.publish(mask_bridge.toImageMsg());
   }
 
   void PointIndicesToMaskImage::mask(
     const PCLIndicesMsg::ConstPtr& indices_msg)
   {
-    vital_checker_->poke();
     convertAndPublish(indices_msg, width_, height_);
   }
 
@@ -127,7 +127,6 @@ namespace jsk_pcl_ros_utils
     const PCLIndicesMsg::ConstPtr& indices_msg,
     const sensor_msgs::Image::ConstPtr& image_msg)
   {
-    vital_checker_->poke();
     convertAndPublish(indices_msg, image_msg->width, image_msg->height);
   }
 }

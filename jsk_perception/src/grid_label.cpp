@@ -116,6 +116,7 @@ namespace jsk_perception
         ++counter;
       }
     }
+    vital_checker_->poke();
     pub_.publish(cv_bridge::CvImage(header,
                                     sensor_msgs::image_encodings::TYPE_32SC1,
                                     label).toImageMsg());

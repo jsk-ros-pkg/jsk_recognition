@@ -317,6 +317,7 @@ namespace jsk_pcl_ros
       jsk_recognition_utils::pointFromVectorToXYZ(dimensions_[i], box.dimensions);
       box_array.boxes.push_back(box);
     }
+    vital_checker_->poke();
     pub_bounding_box_array_.publish(box_array);
   }
 
@@ -369,6 +370,7 @@ namespace jsk_pcl_ros
     roi.roi.width = roi_region.width;
     roi.roi.height = roi_region.height;
     roi.roi.do_rectify = true;
+    vital_checker_->poke();
     pub_camera_info_.publish(roi);
     // mask computation
     mask = cv::Mat::zeros(msg->height, msg->width, CV_8UC1);
@@ -383,7 +385,6 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     NODELET_DEBUG("clipPointcloud");
-    vital_checker_->poke();
     try {
       // 1. transform pointcloud
       // 2. crop by boundingbox
@@ -456,6 +457,7 @@ namespace jsk_pcl_ros
       PCLIndicesMsg indices_msg;
       pcl_conversions::fromPCL(*all_indices, indices_msg);
       cluster_indices_msg.header = indices_msg.header = msg->header;
+      vital_checker_->poke();
       pub_indices_.publish(indices_msg);
       pub_cluster_indices_.publish(cluster_indices_msg);
       publishBoundingBox(msg->header);
@@ -468,7 +470,6 @@ namespace jsk_pcl_ros
   void AttentionClipper::clip(const sensor_msgs::CameraInfo::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    vital_checker_->poke();
     // resolve tf for all interest
     try {
       image_geometry::PinholeCameraModel model;
@@ -514,6 +515,7 @@ namespace jsk_pcl_ros
       cv_bridge::CvImage mask_bridge(msg->header,
                                      sensor_msgs::image_encodings::MONO8,
                                      all_mask_image);
+      vital_checker_->poke();
       pub_mask_.publish(mask_bridge.toImageMsg());
       //publishBoundingBox(msg->header);
     }

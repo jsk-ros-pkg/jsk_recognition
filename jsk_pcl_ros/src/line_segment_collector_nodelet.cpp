@@ -355,6 +355,7 @@ namespace jsk_pcl_ros
       const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
     //NODELET_INFO("buffer length: %lu", pointclouds_buffer_.size());
     pointclouds_buffer_.push_back(cloud_msg);
     indices_buffer_.push_back(indices_msg);

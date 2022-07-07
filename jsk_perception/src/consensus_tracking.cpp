@@ -163,6 +163,7 @@ namespace jsk_perception
     cv::fillConvexPoly(mask, vertices, 4, cv::Scalar(255));
 
     // Publish all.
+    vital_checker_->poke();
     pub_mask_image_.publish(cv_bridge::CvImage(image_msg->header,
                                                sensor_msgs::image_encodings::MONO8,
                                                mask).toImageMsg());

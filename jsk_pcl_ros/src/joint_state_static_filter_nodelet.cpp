@@ -43,10 +43,6 @@ namespace jsk_pcl_ros
   {
     DiagnosticNodelet::onInit();
 
-    double vital_rate;
-    pnh_->param("vital_rate", vital_rate, 1.0);
-    joint_vital_.reset(
-      new jsk_topic_tools::VitalChecker(1 / vital_rate));
     if (!jsk_topic_tools::readVectorParameter(*pnh_,
                                               "joint_names",
                                               joint_names_) ||
@@ -88,7 +84,6 @@ namespace jsk_pcl_ros
     else {
       ROS_DEBUG("not static");
     }
-    diagnostic_updater_->update();
   }
 
   std::vector<double>
@@ -143,7 +138,7 @@ namespace jsk_pcl_ros
       NODELET_DEBUG("cannot find the joints from the input message");
       return;
     }
-    joint_vital_->poke();
+    vital_checker_->poke();
 
     // check the previous state...
     if (previous_joints_.size() > 0) {
@@ -162,26 +157,6 @@ namespace jsk_pcl_ros
                         msg->header.stamp, true));
     }
     previous_joints_ = joints;
-  }
-  
-  void JointStateStaticFilter::updateDiagnostic(
-    diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-    if (vital_checker_->isAlive()) {
-      if (joint_vital_->isAlive()) {
-        stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
-                     name_ + " running");
-      }
-      else {
-        jsk_topic_tools::addDiagnosticErrorSummary(
-          name_, joint_vital_, stat, diagnostic_error_level_);
-      }
-    }
-    else {
-      jsk_topic_tools::addDiagnosticErrorSummary(
-        name_, vital_checker_, stat, diagnostic_error_level_);
-    }
-
   }
 }
 

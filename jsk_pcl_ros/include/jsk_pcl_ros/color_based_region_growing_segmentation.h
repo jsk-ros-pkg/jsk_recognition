@@ -47,13 +47,14 @@
 
 #include <dynamic_reconfigure/server.h>
 #include "jsk_pcl_ros/ColorBasedRegionGrowingSegmentationConfig.h"
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 namespace jsk_pcl_ros
 {
   class ColorBasedRegionGrowingSegmentation:
-    public jsk_topic_tools::ConnectionBasedNodelet
+    public jsk_topic_tools::DiagnosticNodelet
   {
   public:
+    ColorBasedRegionGrowingSegmentation(): DiagnosticNodelet("ColorBasedRegionGrowingSegmentation") {}
   protected:
     ros::Publisher pub_;
     ros::Subscriber sub_;

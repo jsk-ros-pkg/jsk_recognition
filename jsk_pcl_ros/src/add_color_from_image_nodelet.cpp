@@ -93,7 +93,6 @@ namespace jsk_pcl_ros
                     info_msg->header.frame_id.c_str());
       return;
     }
-    vital_checker_->poke();
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud
       (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*cloud_msg, *cloud);
@@ -130,6 +129,7 @@ namespace jsk_pcl_ros
     sensor_msgs::PointCloud2 ros_cloud;
     pcl::toROSMsg(*rgb_cloud, ros_cloud);
     ros_cloud.header = cloud_msg->header;
+    vital_checker_->poke();
     pub_.publish(ros_cloud);
   }
 }

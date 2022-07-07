@@ -116,6 +116,7 @@ namespace jsk_pcl_ros
       const sensor_msgs::PointCloud2::ConstPtr &bkgd_msg,
       const geometry_msgs::PoseStamped::ConstPtr &pose_msg)
    {
+      vital_checker_->poke();
       pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
       pcl::fromROSMsg(*cloud_msg, *cloud);
       pcl::PointCloud<PointT>::Ptr bkgd_cloud (new pcl::PointCloud<PointT>);
@@ -174,6 +175,7 @@ namespace jsk_pcl_ros
    void TargetAdaptiveTracking::callback(
       const sensor_msgs::PointCloud2::ConstPtr &cloud_msg,
       const geometry_msgs::PoseStamped::ConstPtr &pose_msg) {
+      vital_checker_->poke();
       if (this->object_reference_->empty())
       {
          ROS_WARN("No Model To Track Selected");

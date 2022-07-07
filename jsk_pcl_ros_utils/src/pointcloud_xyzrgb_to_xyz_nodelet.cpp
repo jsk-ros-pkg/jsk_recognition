@@ -60,7 +60,6 @@ void PointCloudXYZRGBToXYZ::unsubscribe()
 
 void PointCloudXYZRGBToXYZ::convert(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
 {
-  vital_checker_->poke();
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_xyzrgb(new pcl::PointCloud<pcl::PointXYZRGB>);
   pcl::fromROSMsg(*cloud_msg, *cloud_xyzrgb);
 
@@ -79,6 +78,7 @@ void PointCloudXYZRGBToXYZ::convert(const sensor_msgs::PointCloud2::ConstPtr& cl
   sensor_msgs::PointCloud2 out_cloud_msg;
   pcl::toROSMsg(*cloud_xyz, out_cloud_msg);
   out_cloud_msg.header = cloud_msg->header;
+  vital_checker_->poke();
   pub_.publish(out_cloud_msg);
 }
 

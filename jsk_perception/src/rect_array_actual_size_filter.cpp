@@ -165,7 +165,7 @@ namespace jsk_perception
         return;
       }
     }
-    
+    vital_checker_->poke();
     pub_.publish(result_msg);
   }
 

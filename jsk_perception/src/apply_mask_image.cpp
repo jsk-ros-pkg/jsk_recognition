@@ -113,7 +113,6 @@ namespace jsk_perception
     const sensor_msgs::Image::ConstPtr& image_msg,
     const sensor_msgs::Image::ConstPtr& mask_msg)
   {
-    vital_checker_->poke();
     cv::Mat image;
     if (jsk_recognition_utils::isBGRA(image_msg->encoding)) {
       cv::Mat tmp_image = cv_bridge::toCvShare(image_msg, image_msg->encoding)->image;
@@ -158,6 +157,7 @@ namespace jsk_perception
       cv::bitwise_not(mask, mask);
     }
 
+    vital_checker_->poke();
     pub_mask_.publish(cv_bridge::CvImage(
                         mask_msg->header,
                         "mono8",

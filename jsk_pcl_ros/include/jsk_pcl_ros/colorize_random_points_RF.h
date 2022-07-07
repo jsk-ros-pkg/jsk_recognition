@@ -54,11 +54,13 @@
 #include <ml_classifiers/ClassDataPoint.h>
 #include <math.h>
 #include <stdlib.h>
-#include "jsk_topic_tools/connection_based_nodelet.h"
+#include "jsk_topic_tools/diagnostic_nodelet.h"
 namespace jsk_pcl_ros
 {
-  class ColorizeMapRandomForest: public jsk_topic_tools::ConnectionBasedNodelet
+  class ColorizeMapRandomForest: public jsk_topic_tools::DiagnosticNodelet
   {
+  public:
+    ColorizeMapRandomForest() : DiagnosticNodelet("ColorizeMapRandomForest") {}
   protected:
     ros::Subscriber sub_input_;
     ros::Publisher pub_;

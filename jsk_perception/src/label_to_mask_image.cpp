@@ -95,6 +95,7 @@ namespace jsk_perception
         }
       }
     }
+    vital_checker_->poke();
     pub_.publish(cv_bridge::CvImage(
           label_msg->header,
           sensor_msgs::image_encodings::MONO8,

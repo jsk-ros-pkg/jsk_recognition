@@ -72,6 +72,7 @@ namespace jsk_perception
     cv::Mat output_image;
     jsk_recognition_utils::labelToRGB(label_image, output_image);
     cv::cvtColor(output_image, output_image, CV_RGB2BGR);
+    vital_checker_->poke();
     pub_.publish(
       cv_bridge::CvImage(
         label_image_msg->header,

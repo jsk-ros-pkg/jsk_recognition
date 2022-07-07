@@ -48,7 +48,7 @@
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl/octree/octree.h>
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 
 namespace jsk_pcl_ros
 {
@@ -67,10 +67,11 @@ namespace jsk_pcl_ros
    ISSN={1050-4729}, 
    month={May},}
    */
-  class OctreeChangePublisher: public jsk_topic_tools::ConnectionBasedNodelet
+  class OctreeChangePublisher: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef OctreeChangePublisherConfig Config;
+    OctreeChangePublisher(): DiagnosticNodelet("OctreeChangePublisher") {}
   protected:
     int counter_;
     int noise_filter_;

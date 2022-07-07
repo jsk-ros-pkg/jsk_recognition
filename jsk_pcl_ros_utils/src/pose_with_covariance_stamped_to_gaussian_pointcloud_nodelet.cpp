@@ -81,7 +81,6 @@ namespace jsk_pcl_ros_utils
   void PoseWithCovarianceStampedToGaussianPointCloud::convert(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    vital_checker_->poke();
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
     Eigen::Vector2f mean;
     Eigen::Matrix2f S;
@@ -154,6 +153,7 @@ namespace jsk_pcl_ros_utils
     sensor_msgs::PointCloud2 ros_cloud;
     pcl::toROSMsg(*cloud, ros_cloud);
     ros_cloud.header = msg->header;
+    vital_checker_->poke();
     pub_.publish(ros_cloud);
   }
   

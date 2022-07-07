@@ -69,7 +69,6 @@ namespace jsk_pcl_ros_utils
   void MaskImageToPointIndices::indices(
     const sensor_msgs::Image::ConstPtr& image_msg)
   {
-    vital_checker_->poke();
     if (use_multi_channels_) {
       cv_bridge::CvImageConstPtr cv_ptr = cv_bridge::toCvShare(image_msg);
       cv::Mat image = cv_ptr->image;
@@ -88,6 +87,7 @@ namespace jsk_pcl_ros_utils
             }
           }
         }
+        vital_checker_->poke();
         pub_.publish(cluster_msg);
       } else {
         if (target_channel_ > image.channels() - 1) {
@@ -104,6 +104,7 @@ namespace jsk_pcl_ros_utils
             }
           }
         }
+        vital_checker_->poke();
         pub_.publish(indices_msg);
       }
     } else {
@@ -119,6 +120,7 @@ namespace jsk_pcl_ros_utils
           }
         }
       }
+      vital_checker_->poke();
       pub_.publish(indices_msg);
     }
   }

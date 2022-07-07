@@ -87,6 +87,7 @@ namespace jsk_perception
       roi.roi.y_offset = (int)min_y;
       roi.roi.height = height;
       roi.roi.width = width;
+      vital_checker_->poke();
       pub_.publish(roi);
     }
     else {

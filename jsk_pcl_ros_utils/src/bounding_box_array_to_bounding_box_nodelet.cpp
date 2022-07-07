@@ -75,8 +75,6 @@ namespace jsk_pcl_ros_utils
   void BoundingBoxArrayToBoundingBox::convert(
     const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& bbox_array_msg)
   {
-    vital_checker_->poke();
-
     jsk_recognition_msgs::BoundingBox bbox_msg;
     bbox_msg.header = bbox_array_msg->header;
 
@@ -89,6 +87,7 @@ namespace jsk_pcl_ros_utils
       NODELET_ERROR_THROTTLE(10, "Invalid ~index %d is specified for array size %d.", index_, array_size);
     }
 
+    vital_checker_->poke();
     pub_.publish(bbox_msg);
   }
 

@@ -147,6 +147,7 @@ namespace jsk_pcl_ros
   (const sensor_msgs::PointCloud2::ConstPtr& input_cloud,
    const sensor_msgs::PointCloud2::ConstPtr& input_reference_cloud)
   {
+    vital_checker_->poke();
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ> ());
     pcl::fromROSMsg(*input_cloud, *cloud);
 
@@ -212,6 +213,7 @@ namespace jsk_pcl_ros
   (const sensor_msgs::PointCloud2::ConstPtr& input_cloud,
    const jsk_recognition_msgs::PointsArray::ConstPtr& input_reference_points_array)
   {
+    vital_checker_->poke();
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ> ());
     pcl::fromROSMsg(*input_cloud, *cloud);
 

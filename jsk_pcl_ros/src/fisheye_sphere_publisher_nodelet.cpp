@@ -80,6 +80,7 @@ namespace jsk_pcl_ros
     pcl::toROSMsg(pointcloud, pc2);
     pc2.header.frame_id = "fisheye";
     pc2.header.stamp = ros::Time::now();
+    vital_checker_->poke();
     pub_sphere_.publish(pc2);
   }
 

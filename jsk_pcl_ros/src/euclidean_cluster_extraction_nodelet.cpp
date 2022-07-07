@@ -216,7 +216,6 @@ namespace jsk_pcl_ros
   void EuclideanClustering::extract(
     const sensor_msgs::PointCloud2ConstPtr &input)
   {
-    vital_checker_->poke();
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud
       (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*input, *cloud);
@@ -268,6 +267,7 @@ namespace jsk_pcl_ros
       result.cluster_indices[i].indices = clustered_indices[i].indices;
     }
 
+    vital_checker_->poke();
     result_pub_.publish(result);
     
     jsk_recognition_msgs::Int32Stamped::Ptr cluster_num_msg (new jsk_recognition_msgs::Int32Stamped);
@@ -311,6 +311,7 @@ namespace jsk_pcl_ros
       result.cluster_indices[i].indices = clustered_indices[i].indices;
     }
 
+    vital_checker_->poke();
     result_pub_.publish(result);
 
     jsk_recognition_msgs::Int32Stamped::Ptr cluster_num_msg (new jsk_recognition_msgs::Int32Stamped);

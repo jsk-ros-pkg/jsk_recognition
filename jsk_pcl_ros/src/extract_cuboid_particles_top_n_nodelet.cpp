@@ -72,7 +72,6 @@ namespace jsk_pcl_ros
 
   void ExtractCuboidParticlesTopN::extract(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
-    vital_checker_->poke();
     boost::mutex::scoped_lock lock(mutex_);
     typename pcl::PointCloud<pcl::tracking::ParticleCuboid>::Ptr cloud(new pcl::PointCloud<pcl::tracking::ParticleCuboid>);
     typename pcl::PointCloud<pcl::tracking::ParticleCuboid>::Ptr cloud_filtered(new pcl::PointCloud<pcl::tracking::ParticleCuboid>);
@@ -94,6 +93,7 @@ namespace jsk_pcl_ros
     ex.setInputCloud(cloud);
     ex.setIndices(indices);
     ex.filter(*cloud_filtered);
+    vital_checker_->poke();
     publishPointIndices(pub_, *indices, msg->header);
     publishBoxArray(*cloud_filtered, msg->header);
     publishPoseArray(*cloud_filtered, msg->header);

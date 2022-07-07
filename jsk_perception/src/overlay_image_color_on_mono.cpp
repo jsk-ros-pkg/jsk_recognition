@@ -130,6 +130,7 @@ namespace jsk_perception
                                                         color[2] * color_alpha_ + mono * (1 - color_alpha_));
       }
     }
+    vital_checker_->poke();
     pub_.publish(cv_bridge::CvImage(color_imgmsg->header,
                                     color_imgmsg->encoding,
                                     overlayed_image).toImageMsg());

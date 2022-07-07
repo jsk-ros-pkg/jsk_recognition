@@ -166,12 +166,14 @@ namespace jsk_pcl_ros
       result.label_proba.push_back(0.0);
     }
 
+    vital_checker_->poke();
     pub_class_.publish(result);
   }
 
   void ColorHistogramClassifier::features(const jsk_recognition_msgs::ColorHistogramArray::ConstPtr& histograms)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
 
     jsk_recognition_msgs::ClassificationResult result;
     result.header = histograms->header;
@@ -204,6 +206,7 @@ namespace jsk_pcl_ros
       }
     }
 
+    vital_checker_->poke();
     pub_class_.publish(result);
   }
 }

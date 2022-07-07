@@ -46,7 +46,7 @@ namespace jsk_pcl_ros
 
   void ColorBasedRegionGrowingSegmentation::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    DiagnosticNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f=
       boost::bind (&ColorBasedRegionGrowingSegmentation::configCallback, this, _1, _2);
@@ -114,6 +114,7 @@ namespace jsk_pcl_ros
       indices.indices = clusters[i].indices;
       output.cluster_indices.push_back(indices);
     }
+    vital_checker_->poke();
     pub_.publish(output);
   }
 }

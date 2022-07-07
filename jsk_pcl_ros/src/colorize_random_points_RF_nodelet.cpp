@@ -39,7 +39,7 @@ namespace jsk_pcl_ros
 {
   void ColorizeMapRandomForest::onInit(void)
   {
-    ConnectionBasedNodelet::onInit();
+    DiagnosticNodelet::onInit();
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     
     srand(time(NULL));
@@ -238,6 +238,7 @@ namespace jsk_pcl_ros
     pcl::toROSMsg(*cloud_normals, _pointcloud2);
     _pointcloud2.header = pc.header;
     _pointcloud2.is_dense = false;
+    vital_checker_->poke();
     pub_.publish(_pointcloud2);
   }
 }

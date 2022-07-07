@@ -110,6 +110,7 @@ namespace jsk_pcl_ros
           }
         }
       }
+      vital_checker_->poke();
       pub_.publish(indices);
     }
   }

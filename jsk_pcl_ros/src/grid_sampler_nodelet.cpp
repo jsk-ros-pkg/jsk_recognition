@@ -42,7 +42,7 @@ namespace jsk_pcl_ros
 {
   void GridSampler::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    DiagnosticNodelet::onInit();
     pub_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output", 1);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&GridSampler::configCallback, this, _1, _2);
@@ -166,6 +166,7 @@ namespace jsk_pcl_ros
         }
       }
     }
+    vital_checker_->poke();
     pub_.publish(output);
   }
 }

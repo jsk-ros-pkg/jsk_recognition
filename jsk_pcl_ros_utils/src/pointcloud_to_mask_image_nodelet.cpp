@@ -82,7 +82,6 @@ namespace jsk_pcl_ros_utils
   {
     boost::mutex::scoped_lock lock(mutex_);
 
-    vital_checker_->poke();
     pcl::PointCloud<pcl::PointXYZ>::Ptr pc(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*cloud_msg, *pc);
 
@@ -110,13 +109,13 @@ namespace jsk_pcl_ros_utils
     cv_bridge::CvImage mask_bridge(cloud_msg->header,
                                    sensor_msgs::image_encodings::MONO8,
                                    mask_image);
+    vital_checker_->poke();
     pub_.publish(mask_bridge.toImageMsg());
   }
 
   void PointCloudToMaskImage::convert(const sensor_msgs::Image::ConstPtr& image_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    vital_checker_->poke();
 
     cv_bridge::CvImage::Ptr depth_img;
     try {
@@ -162,6 +161,7 @@ namespace jsk_pcl_ros_utils
       return;
     }
 
+    vital_checker_->poke();
     pub_.publish(mask_img->toImageMsg());
   }
 }

@@ -43,7 +43,7 @@
 
 void jsk_pcl_ros::DepthImageCreator::onInit () {
   NODELET_INFO("[%s::onInit]", getName().c_str());
-  ConnectionBasedNodelet::onInit();
+  DiagnosticNodelet::onInit();
   tf_listener_ = TfListenerSingleton::getInstance();
   // scale_depth
   pnh_->param("scale_depth", scale_depth, 1.0);
@@ -322,6 +322,7 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
     cv::resize(depth_mat, depth_mat, cv::Size(info->width, info->height));
   }
 
+  vital_checker_->poke();
   if (proc_image) {
     pub_image_.publish(cv_bridge::CvImage(info->header,
                                           sensor_msgs::image_encodings::RGB8,

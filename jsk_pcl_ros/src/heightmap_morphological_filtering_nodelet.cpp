@@ -93,7 +93,6 @@ namespace jsk_pcl_ros
     const sensor_msgs::Image::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    vital_checker_->poke();
     cv::Mat input = cv_bridge::toCvShare(
       msg, sensor_msgs::image_encodings::TYPE_32FC2)->image;
 
@@ -199,6 +198,7 @@ namespace jsk_pcl_ros
       cv::merge(ret_images, filtered_image);
     }
 
+    vital_checker_->poke();
     pub_.publish(cv_bridge::CvImage(
                    msg->header,
                    sensor_msgs::image_encodings::TYPE_32FC2,

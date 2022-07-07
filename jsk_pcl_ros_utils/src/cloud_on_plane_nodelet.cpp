@@ -101,7 +101,6 @@ namespace jsk_pcl_ros_utils
                                const jsk_recognition_msgs::PolygonArray::ConstPtr& polygon_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    vital_checker_->poke();
     // check header
     if (!jsk_recognition_utils::isSameFrameId(*cloud_msg, *polygon_msg)) {
       NODELET_ERROR("frame_id does not match: cloud: %s, polygon: %s",
@@ -137,6 +136,7 @@ namespace jsk_pcl_ros_utils
     jsk_recognition_msgs::BoolStamped bool_stamped;
     bool_stamped.header = header;
     bool_stamped.data = v;
+    vital_checker_->poke();
     pub_.publish(bool_stamped);
   }
 }

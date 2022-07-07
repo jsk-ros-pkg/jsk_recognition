@@ -134,7 +134,6 @@ namespace jsk_pcl_ros_utils
                                 << coefficients->coefficients.size());
       return;
     }
-    vital_checker_->poke();
 
     bool use_labels = polygons->polygons.size() == polygons->labels.size();
 
@@ -165,6 +164,7 @@ namespace jsk_pcl_ros_utils
     }
 
     ret_polygons.header = polygons->header;
+    vital_checker_->poke();
     pub_polygons_.publish(ret_polygons);
     if (use_coefficients_) {
       ret_coefficients.header = coefficients->header;

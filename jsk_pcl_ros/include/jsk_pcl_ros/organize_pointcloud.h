@@ -47,13 +47,14 @@
 #include <pcl/filters/extract_indices.h>
 #include <pcl/range_image/range_image.h>
 
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 
 namespace jsk_pcl_ros
 {
-  class OrganizePointCloud: public jsk_topic_tools::ConnectionBasedNodelet
+  class OrganizePointCloud: public jsk_topic_tools::DiagnosticNodelet
   {
   protected:
+    OrganizePointCloud(): DiagnosticNodelet("OrganizePointCloud") {}
     double angular_resolution, angle_width, angle_height;
     int min_points;
     ros::Subscriber sub_;

@@ -76,7 +76,6 @@ namespace jsk_perception
 
   void ConcaveHullMaskImage::concave(const sensor_msgs::Image::ConstPtr& mask_msg)
   {
-    vital_checker_->poke();
     cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(mask_msg, sensor_msgs::image_encodings::MONO8);
     cv::Mat mask = cv_ptr->image;
 
@@ -133,6 +132,7 @@ namespace jsk_perception
       cv::drawContours(concave_hull_mask, smoothed_contours, i, cv::Scalar(255), CV_FILLED);
     }
 
+    vital_checker_->poke();
     pub_.publish(cv_bridge::CvImage(mask_msg->header,
                                     sensor_msgs::image_encodings::MONO8,
                                     concave_hull_mask).toImageMsg());

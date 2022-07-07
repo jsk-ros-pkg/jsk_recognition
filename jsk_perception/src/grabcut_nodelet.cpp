@@ -88,15 +88,6 @@ namespace jsk_perception
     sub_background_.unsubscribe();
   }
 
-  void GrabCut::updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-    // foreground and background is not continuous,
-    // so just say OK
-    stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
-                 "GrabCut running");
-  }
-
   void GrabCut::segment(
     const sensor_msgs::Image::ConstPtr& image_msg,
     const sensor_msgs::Image::ConstPtr& foreground_msg,
@@ -174,6 +165,7 @@ namespace jsk_perception
       image_msg->header, sensor_msgs::image_encodings::MONO8, fgd_mask);
     cv_bridge::CvImage bg_mask_bridge(
       image_msg->header, sensor_msgs::image_encodings::MONO8, bgd_mask);
+    vital_checker_->poke();
     pub_foreground_.publish(fg_bridge.toImageMsg());
     pub_background_.publish(bg_bridge.toImageMsg());
     pub_foreground_mask_.publish(fg_mask_bridge.toImageMsg());

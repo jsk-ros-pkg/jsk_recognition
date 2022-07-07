@@ -63,7 +63,6 @@ namespace jsk_pcl_ros_utils
   void PointCloudToClusterPointIndices::convert(
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
-    vital_checker_->poke();
     pcl::PointCloud<pcl::PointXYZRGB> cloud;
     pcl::fromROSMsg(*msg, cloud);
     int point_num = msg->width * msg->height;
@@ -80,6 +79,7 @@ namespace jsk_pcl_ros_utils
     indices.header = msg->header;
     cluster_indices.header = msg->header;
     cluster_indices.cluster_indices.push_back(indices);
+    vital_checker_->poke();
     pub_.publish(cluster_indices);
   }
 }

@@ -48,7 +48,7 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 #include "jsk_pcl_ros/tf_listener_singleton.h"
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <jsk_recognition_msgs/PointsArray.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <jsk_recognition_utils/time_util.h>
@@ -56,7 +56,7 @@
 
 namespace jsk_pcl_ros
 {
-  class ICPRegistration: public jsk_topic_tools::ConnectionBasedNodelet
+  class ICPRegistration: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef pcl::PointXYZRGBNormal PointT;
@@ -71,7 +71,7 @@ namespace jsk_pcl_ros
       sensor_msgs::PointCloud2,
       sensor_msgs::PointCloud2
       > ReferenceSyncPolicy;
-    ICPRegistration(): timer_(10), done_init_(false) { }
+    ICPRegistration(): DiagnosticNodelet("ICPRegistration"), timer_(10), done_init_(false) { }
     virtual ~ICPRegistration();
   protected:
     ////////////////////////////////////////////////////////

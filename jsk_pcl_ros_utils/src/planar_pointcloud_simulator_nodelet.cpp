@@ -106,13 +106,13 @@ namespace jsk_pcl_ros_utils
     const sensor_msgs::CameraInfo::ConstPtr& info_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    vital_checker_->poke();
     pcl::PointCloud<pcl::PointXYZ>::Ptr
       cloud(new pcl::PointCloud<pcl::PointXYZ>);
     impl_.generate(*info_msg, distance_, *cloud);
     sensor_msgs::PointCloud2 ros_cloud;
     pcl::toROSMsg(*cloud, ros_cloud);
     ros_cloud.header = info_msg->header;
+    vital_checker_->poke();
     pub_.publish(ros_cloud);
   }
   

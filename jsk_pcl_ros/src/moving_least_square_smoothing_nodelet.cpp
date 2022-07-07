@@ -45,6 +45,7 @@ namespace jsk_pcl_ros
   void MovingLeastSquareSmoothing::smooth(const sensor_msgs::PointCloud2ConstPtr& input)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr result_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::fromROSMsg(*input, *cloud);

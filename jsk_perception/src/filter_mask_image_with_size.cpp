@@ -158,6 +158,7 @@ namespace jsk_perception
         (min_size_ <= size_input) && (size_input <= max_size_) &&
         (min_relative_size_ <= size_relative) && (size_relative <= max_relative_size_))
     {
+      vital_checker_->poke();
       pub_.publish(input_msg);
     }
   }

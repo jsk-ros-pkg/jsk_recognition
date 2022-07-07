@@ -263,6 +263,7 @@ namespace jsk_pcl_ros
     validateInput(in8, height, width, inputs);
 
     cv::Mat out = fuseInputs(inputs);
+    vital_checker_->poke();
     pub_out_.publish(cv_bridge::CvImage(in1->header, encoding_, out).toImageMsg());
   }
 

@@ -277,6 +277,7 @@ namespace jsk_pcl_ros
     handle_pose_stamped.pose.orientation.w = min_qua.getW();
     std_msgs::Float64 min_width_msg;
     min_width_msg.data = min_width;
+    vital_checker_->poke();
     pub_pose_.publish(handle_pose_stamped);
     pub_debug_marker_.publish(debug_hand_marker);
     pub_debug_marker_array_.publish(make_handle_array(handle_pose_stamped, handle));

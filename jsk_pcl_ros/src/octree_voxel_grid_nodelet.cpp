@@ -122,6 +122,7 @@ namespace jsk_pcl_ros
   void OctreeVoxelGrid::generateVoxelCloud(const sensor_msgs::PointCloud2ConstPtr& input_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
     if (resolution_ == 0.0) {
       pub_cloud_.publish(input_msg);
       

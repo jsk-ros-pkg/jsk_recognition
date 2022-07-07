@@ -91,6 +91,7 @@ namespace jsk_perception
                   cv::Point(min_x, min_y),
                   cv::Point(max_x, max_y),
                   cv::Scalar(255), CV_FILLED);
+    vital_checker_->poke();
     pub_.publish(cv_bridge::CvImage(msg->header,
                                     sensor_msgs::image_encodings::MONO8,
                                     mask_image).toImageMsg());

@@ -90,7 +90,7 @@ namespace jsk_perception
       } catch (cv_bridge::Exception& e) {
          ROS_ERROR("cv_bridge exception: %s", e.what());
          return;
-      }      
+      }
       cv::Mat image;
       cv::Size isize = cv_ptr->image.size();
       // control params
@@ -128,6 +128,7 @@ namespace jsk_perception
          out_msg->header = msg->header;
          out_msg->encoding = sensor_msgs::image_encodings::BGR8;
          out_msg->image = bimg.clone();
+         vital_checker_->poke();
          this->pub_rects_.publish(jsk_rect_array);
          this->pub_image_.publish(out_msg->toImageMsg());
       } else if (this->run_type_.compare("BOOTSTRAPER") == 0) {
@@ -150,6 +151,7 @@ namespace jsk_perception
             }
          }
       } else {
+        vital_checker_->poke();
          this->pub_image_.publish(cv_ptr->toImageMsg());
          ROS_ERROR("NODELET RUNTYPE IS NOT SET.");
          std::_Exit(EXIT_FAILURE);

@@ -64,7 +64,6 @@ namespace jsk_perception
   void MaskImageToRect::convert(
     const sensor_msgs::Image::ConstPtr& mask_msg)
   {
-    vital_checker_->poke();
     std::vector<cv::Point> indices;
     cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(
       mask_msg, sensor_msgs::image_encodings::MONO8);
@@ -87,6 +86,7 @@ namespace jsk_perception
       rect.height = mask_rect.height;
       rects.rects.push_back(rect);
     }
+    vital_checker_->poke();
     pub_.publish(rects);
   }
 }

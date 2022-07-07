@@ -63,7 +63,6 @@ namespace jsk_perception
 
   void RobotToMaskImage::infoCallback(const sensor_msgs::CameraInfo::ConstPtr& info_msg)
   {
-    vital_checker_->poke();
     if (info_msg) {
       image_geometry::PinholeCameraModel model;
       model.fromCameraInfo(info_msg);
@@ -111,6 +110,7 @@ namespace jsk_perception
       cv::Mat_<double> D = model.distortionCoeffs();
       camera_info_msg.D.resize(D.rows * D.cols);
       for (size_t i = 0; i < D.rows; ++i) for (size_t j = 0; j < D.cols; ++j) camera_info_msg.D[i * D.cols + j] = D(i, j);
+      vital_checker_->poke();
       pub_.publish(cv_bridge::CvImage(info_msg->header,
                                       sensor_msgs::image_encodings::MONO8,
                                       mask_image).toImageMsg());

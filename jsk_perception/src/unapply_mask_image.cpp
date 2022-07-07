@@ -92,7 +92,6 @@ namespace jsk_perception
     const sensor_msgs::Image::ConstPtr& image_msg,
     const sensor_msgs::Image::ConstPtr& mask_msg)
   {
-    vital_checker_->poke();
     cv::Mat image = cv_bridge::toCvShare(image_msg,
                                          image_msg->encoding)->image;
     cv::Mat mask = cv_bridge::toCvShare(mask_msg,
@@ -126,6 +125,7 @@ namespace jsk_perception
         }
       }
     }
+    vital_checker_->poke();
     pub_image_.publish(cv_bridge::CvImage(
                          image_msg->header,
                          image_msg->encoding,

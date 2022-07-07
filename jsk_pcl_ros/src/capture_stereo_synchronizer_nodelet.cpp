@@ -162,6 +162,7 @@ namespace jsk_pcl_ros
     }
     std_msgs::Int32 count;
     count.data = counter_;
+    vital_checker_->poke();
     pub_count_.publish(count);
   }
 }

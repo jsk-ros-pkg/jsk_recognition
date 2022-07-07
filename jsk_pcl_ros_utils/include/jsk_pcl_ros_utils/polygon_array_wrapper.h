@@ -44,15 +44,16 @@
 #include <geometry_msgs/PolygonStamped.h>
 #include <jsk_recognition_msgs/PolygonArray.h>
 #include <jsk_recognition_msgs/ModelCoefficientsArray.h>
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 
 namespace jsk_pcl_ros_utils
 {
-  class PolygonArrayWrapper: public jsk_topic_tools::ConnectionBasedNodelet
+  class PolygonArrayWrapper: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime<
       geometry_msgs::PolygonStamped, pcl_msgs::ModelCoefficients> SyncPolicy;
+    PolygonArrayWrapper() : DiagnosticNodelet("PolygonArrayWrapper") {}
     virtual ~PolygonArrayWrapper();
   protected:
     virtual void onInit();

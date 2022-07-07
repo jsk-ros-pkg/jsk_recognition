@@ -124,6 +124,7 @@ namespace jsk_pcl_ros
   void CollisionDetector::pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
     NODELET_DEBUG("update pointcloud.");
 
     pcl::fromROSMsg(*msg, cloud_);

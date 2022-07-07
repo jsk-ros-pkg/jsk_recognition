@@ -60,12 +60,12 @@
 #include <std_srvs/Empty.h>
 #include <boost/thread/mutex.hpp>
 
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 #include "jsk_pcl_ros/tf_listener_singleton.h"
 
 namespace jsk_pcl_ros
 {
-  class DepthImageCreator : public jsk_topic_tools::ConnectionBasedNodelet
+  class DepthImageCreator : public jsk_topic_tools::DiagnosticNodelet
   {
   protected:
     message_filters::Subscriber<sensor_msgs::CameraInfo> sub_info_;
@@ -119,6 +119,7 @@ namespace jsk_pcl_ros
     void subscribe();
     void unsubscribe();
   public:
+    DepthImageCreator(): DiagnosticNodelet("DepthImageCreator") {}
     virtual ~DepthImageCreator();
   };
 }

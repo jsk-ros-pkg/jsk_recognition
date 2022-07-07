@@ -464,6 +464,7 @@ namespace jsk_pcl_ros
   }
 
   void OctomapServerContact::publishAll(const ros::Time& rostime) {
+    vital_checker_->poke();
     ros::WallTime startTime = ros::WallTime::now();
     size_t octomapSize = m_octreeContact->size();
     // TODO: estimate num occ. voxels for size of arrays (reserve)

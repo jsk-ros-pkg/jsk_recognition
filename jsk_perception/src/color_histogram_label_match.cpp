@@ -292,6 +292,7 @@ namespace jsk_perception
                                             CV_8UC1);
     threshold_image.convertTo(threshold_uchar_image, 8, 255.0);
     // convert image from float to uchar
+    vital_checker_->poke();
     pub_result_.publish(
       cv_bridge::CvImage(image_msg->header,
                          sensor_msgs::image_encodings::MONO8,

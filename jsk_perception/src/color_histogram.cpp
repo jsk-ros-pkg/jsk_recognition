@@ -233,7 +233,6 @@ namespace jsk_perception
     const sensor_msgs::Image::ConstPtr& image,
     const geometry_msgs::PolygonStamped::ConstPtr& rectangle)
   {
-    vital_checker_->poke();
     boost::mutex::scoped_lock lock(mutex_);
     try
     {
@@ -254,6 +253,7 @@ namespace jsk_perception
       else {
         roi_image.copyTo(bgr_image);
       }
+      vital_checker_->poke();
       image_pub_.publish(cv_bridge::CvImage(
                            image->header,
                            sensor_msgs::image_encodings::BGR8,
@@ -285,6 +285,7 @@ namespace jsk_perception
         = cv_bridge::CvImage(image->header,
                              sensor_msgs::image_encodings::BGR8,
                              masked_image).toImageMsg();
+      vital_checker_->poke();
       image_pub_.publish(ros_masked_image);
       
       processBGR(bgr_image, mask_image, image->header);

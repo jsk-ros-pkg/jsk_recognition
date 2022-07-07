@@ -102,8 +102,7 @@ namespace jsk_pcl_ros_utils
     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_array_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    vital_checker_->poke();
-    
+
     size_t nr_cluster = polygon_array_msg->polygons.size();
     pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
     pcl::fromROSMsg(*cloud_msg, *cloud);
@@ -197,7 +196,7 @@ namespace jsk_pcl_ros_utils
     // new_ros_coefficients.coefficients
     //   = pcl_conversions::convertToROSModelCoefficients(
     //     new_refined_coefficients, cloud_msg->header);
-
+    vital_checker_->poke();
     pub_indices_.publish(new_ros_indices);
     pub_polygon_.publish(new_ros_polygons);
     pub_coefficients_.publish(new_ros_coefficients);

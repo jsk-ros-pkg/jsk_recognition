@@ -77,7 +77,6 @@ namespace jsk_perception
     const jsk_recognition_msgs::PolygonArray::ConstPtr& polygon_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    vital_checker_->poke();
     if (camera_info_) {
       image_geometry::PinholeCameraModel model;
       model.fromCameraInfo(camera_info_);
@@ -106,6 +105,7 @@ namespace jsk_perception
           }
         }
       }
+      vital_checker_->poke();
       pub_.publish(cv_bridge::CvImage(polygon_msg->header,
                                       sensor_msgs::image_encodings::TYPE_32SC1,
                                       mask_image).toImageMsg());

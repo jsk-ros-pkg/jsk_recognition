@@ -68,6 +68,7 @@ namespace jsk_pcl_ros
   void VoxelGridLargeScale::filter(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
     if (leaf_size_ == 0.0) {
       pub_.publish(msg);
     }

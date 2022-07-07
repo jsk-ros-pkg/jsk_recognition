@@ -42,14 +42,15 @@
 #include <sensor_msgs/PointCloud2.h>
 
 #include <jsk_pcl_ros/GridSamplerConfig.h>
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 
 namespace jsk_pcl_ros
 {
-  class GridSampler: public jsk_topic_tools::ConnectionBasedNodelet
+  class GridSampler: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef jsk_pcl_ros::GridSamplerConfig Config;
+    GridSampler(): DiagnosticNodelet("GridSampler") {}
   protected:
     virtual void onInit();
     virtual void sample(const sensor_msgs::PointCloud2::ConstPtr& msg);

@@ -55,18 +55,19 @@
 #include <jsk_recognition_msgs/Int32Stamped.h>
 #include <std_msgs/Header.h>
 #include "jsk_recognition_utils/pcl_conversion_util.h"
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 
 namespace jsk_pcl_ros_utils
 {
 
   class StaticPolygonArrayPublisher:
-    public jsk_topic_tools::ConnectionBasedNodelet
+    public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef message_filters::sync_policies::ApproximateTime<
     sensor_msgs::PointCloud2,
     jsk_recognition_msgs::Int32Stamped > SyncPolicy;
+    StaticPolygonArrayPublisher() : DiagnosticNodelet("StaticPolygonArrayPublisher") {}
     virtual ~StaticPolygonArrayPublisher();
 
   protected:

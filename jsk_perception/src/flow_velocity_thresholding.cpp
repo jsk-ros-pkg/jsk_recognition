@@ -137,8 +137,6 @@ namespace jsk_perception
     const int image_height,
     const int image_width)
   {
-    vital_checker_->poke();
-
     cv::Mat mask = cv::Mat::zeros(image_height, image_width, CV_8UC1);
 
     for (size_t i=0; i<flow_msg->flow.size(); i++)
@@ -157,6 +155,7 @@ namespace jsk_perception
       }
     }
 
+    vital_checker_->poke();
     pub_.publish(cv_bridge::CvImage(
                     flow_msg->header,
                     sensor_msgs::image_encodings::MONO8,

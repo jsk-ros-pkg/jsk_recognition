@@ -150,6 +150,7 @@ namespace jsk_pcl_ros
         return;
       }
     }
+    vital_checker_->poke();
     pub_histogram_.publish(histogram_array);
   }
 }

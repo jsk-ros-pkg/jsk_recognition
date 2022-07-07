@@ -95,6 +95,7 @@ namespace jsk_pcl_ros_utils
       if(label_msg->labels[i].id == label_value_)
         filtered_msg.cluster_indices.push_back(cluster_msg->cluster_indices[i]);
     }
+    vital_checker_->poke();
     pub_.publish(filtered_msg);
   }
 

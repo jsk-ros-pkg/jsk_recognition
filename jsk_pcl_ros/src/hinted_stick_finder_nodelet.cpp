@@ -253,6 +253,7 @@ namespace jsk_pcl_ros
     seg.setProbability(min_probability_);
     seg.setInputCloud(filtered_cloud);
     seg.setInputNormals(cloud_normals);
+    vital_checker_->poke();
     for (size_t i = 0; i < cylinder_fitting_trial_; i++) {
       seg.segment(*inliers, *coefficients);
       if (inliers->indices.size() > min_inliers_) {
@@ -331,6 +332,7 @@ namespace jsk_pcl_ros
     output_indices.header = cloud->header;
     PCLIndicesMsg ros_indices;
     pcl_conversions::fromPCL(output_indices, ros_indices);
+    vital_checker_->poke();
     pub_line_filtered_indices_.publish(ros_indices);
   }
 

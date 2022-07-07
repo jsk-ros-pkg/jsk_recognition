@@ -61,8 +61,6 @@ namespace jsk_pcl_ros_utils
   void MarkerArrayVoxelToPointCloud::convert(
     const visualization_msgs::MarkerArray::ConstPtr& marker_array_msg)
   {
-    vital_checker_->poke();
-
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
     cloud->is_dense = true;
     for (size_t i=0; i<marker_array_msg->markers.size(); i++) {
@@ -82,6 +80,7 @@ namespace jsk_pcl_ros_utils
     sensor_msgs::PointCloud2 ros_cloud;
     pcl::toROSMsg(*cloud, ros_cloud);
     ros_cloud.header = marker_array_msg->markers[0].header;
+    vital_checker_->poke();
     pub_.publish(ros_cloud);
   }
 

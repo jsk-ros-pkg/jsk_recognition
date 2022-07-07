@@ -36,7 +36,7 @@
 #ifndef JSK_PCL_ROS_REARRANGE_BOUNDING_BOX_H
 #define JSK_PCL_ROS_REARRANGE_BOUNDING_BOX_H
 
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <jsk_recognition_msgs/BoundingBoxArray.h>
 
 #include <dynamic_reconfigure/server.h>
@@ -46,11 +46,11 @@
 
 namespace jsk_pcl_ros
 {
-  class RearrangeBoundingBox : public jsk_topic_tools::ConnectionBasedNodelet
+  class RearrangeBoundingBox : public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    RearrangeBoundingBox() { }
     typedef jsk_pcl_ros::RearrangeBoundingBoxConfig Config;
+    RearrangeBoundingBox() : DiagnosticNodelet("RearrangeBoundingBox") {}
 
   protected:
     ////////////////////////////////////////////////////////

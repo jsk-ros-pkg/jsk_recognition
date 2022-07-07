@@ -151,6 +151,7 @@ namespace jsk_pcl_ros
     drawAngle(min_area_rect_image, min_search_point, min_angle,
               min_x, min_y, model, plane, cv::Scalar(0, 255, 255));
     // convert the points into 3-D
+    vital_checker_->poke();
     pub_min_area_rect_image_.publish(
       cv_bridge::CvImage(image_msg->header,
                          sensor_msgs::image_encodings::BGR8,

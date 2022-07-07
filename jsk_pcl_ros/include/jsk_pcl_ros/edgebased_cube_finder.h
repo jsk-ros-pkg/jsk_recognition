@@ -60,7 +60,7 @@
 #include <jsk_pcl_ros/EdgebasedCubeFinderConfig.h>
 #include <dynamic_reconfigure/server.h>
 
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 
 namespace jsk_pcl_ros
 {
@@ -154,9 +154,10 @@ namespace jsk_pcl_ros
   private:
   };
   
-  class EdgebasedCubeFinder: public jsk_topic_tools::ConnectionBasedNodelet
+  class EdgebasedCubeFinder: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
+    EdgebasedCubeFinder(): DiagnosticNodelet("EdgebasedCubeFinder") {}
     typedef message_filters::sync_policies::ExactTime<
     sensor_msgs::PointCloud2,
     jsk_recognition_msgs::ParallelEdgeArray > SyncPolicy;

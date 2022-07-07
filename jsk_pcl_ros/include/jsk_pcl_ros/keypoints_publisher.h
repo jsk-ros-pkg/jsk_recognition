@@ -5,13 +5,14 @@
 #include <pcl/point_types.h>
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl/point_cloud.h>
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 
 namespace jsk_pcl_ros
 {
-  class KeypointsPublisher: public jsk_topic_tools::ConnectionBasedNodelet
+  class KeypointsPublisher: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
+    KeypointsPublisher(): DiagnosticNodelet("KeypointsPublisher") {}
     virtual void onInit();
   protected:
     virtual void inputCallback(const sensor_msgs::PointCloud2::ConstPtr& input);

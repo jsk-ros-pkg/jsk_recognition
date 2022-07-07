@@ -40,7 +40,7 @@ namespace jsk_pcl_ros_utils
 {
   void PolygonArrayUnwrapper::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    DiagnosticNodelet::onInit();
     pub_polygon_ = advertise<geometry_msgs::PolygonStamped>(
       *pnh_, "output_polygon", 1);
     pub_coefficients_
@@ -108,6 +108,7 @@ namespace jsk_pcl_ros_utils
       }
       geometry_msgs::PolygonStamped polygon_msg = polygons->polygons[selected_index];
       pcl_msgs::ModelCoefficients coefficients_msg = coefficients->coefficients[selected_index];
+      vital_checker_->poke();
       pub_polygon_.publish(polygon_msg);
       pub_coefficients_.publish(coefficients_msg);
     }

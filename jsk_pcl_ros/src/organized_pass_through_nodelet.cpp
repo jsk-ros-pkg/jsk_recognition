@@ -40,12 +40,6 @@
 
 namespace jsk_pcl_ros
 {
-  OrganizedPassThrough::OrganizedPassThrough():
-    DiagnosticNodelet("OrganizedPassThrough")
-  {
-    
-  }
-  
   void OrganizedPassThrough::onInit()
   {
     DiagnosticNodelet::onInit();

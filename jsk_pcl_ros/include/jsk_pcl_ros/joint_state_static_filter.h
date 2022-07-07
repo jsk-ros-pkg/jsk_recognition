@@ -43,7 +43,6 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/JointState.h>
 #include <boost/circular_buffer.hpp>
-#include <jsk_topic_tools/vital_checker.h>
 
 namespace jsk_pcl_ros
 {
@@ -63,8 +62,6 @@ namespace jsk_pcl_ros
     virtual void filter(const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual void jointStateCallback(const sensor_msgs::JointState::ConstPtr& msg);
     virtual bool isStatic(const ros::Time& stamp);
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual std::vector<double> filterJointState(
       const sensor_msgs::JointState::ConstPtr& msg);
     virtual void subscribe();
@@ -77,7 +74,6 @@ namespace jsk_pcl_ros
     ros::Publisher pub_;
     boost::circular_buffer<StampedBool> buf_;
     std::vector<double> previous_joints_;
-    jsk_topic_tools::VitalChecker::Ptr joint_vital_;
     boost::mutex mutex_;
     ////////////////////////////////////////////////////////
     // parameters

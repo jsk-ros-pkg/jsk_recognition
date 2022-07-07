@@ -85,7 +85,6 @@ namespace jsk_pcl_ros_utils
   void TfTransformBoundingBoxArray::transform(
     const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& msg)
   {
-    vital_checker_->poke();
     try
     {
       jsk_recognition_msgs::BoundingBoxArray transformed_box;
@@ -112,6 +111,7 @@ namespace jsk_pcl_ros_utils
         box.header.frame_id = target_frame_id_;
         transformed_box.boxes.push_back(box);
       }
+      vital_checker_->poke();
       pub_.publish(transformed_box);
     }
     catch (tf2::ConnectivityException &e)

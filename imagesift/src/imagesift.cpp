@@ -223,12 +223,12 @@ namespace imagesift
     void SiftNode::imageCb(const sensor_msgs::ImageConstPtr& msg_ptr,
                            const sensor_msgs::ImageConstPtr& mask_ptr)
     {
-        vital_checker_->poke();
         if(_pubFeatures.getNumSubscribers()==0 && _pubSift.getNumSubscribers()==0) {
             ROS_DEBUG("number of subscribers is 0, ignoring image");
             return;
         }
         detect(_sift_msg.features,*msg_ptr, mask_ptr);
+        vital_checker_->poke();
         _pubFeatures.publish(_sift_msg.features);
 
         if(!_bInfoInitialized) {

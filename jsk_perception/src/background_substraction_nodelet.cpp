@@ -101,7 +101,6 @@ namespace jsk_perception
   void BackgroundSubstraction::substract(
     const sensor_msgs::Image::ConstPtr& image_msg)
   {
-    vital_checker_->poke();
     boost::mutex::scoped_lock lock(mutex_);
     cv_bridge::CvImagePtr cv_ptr
       = cv_bridge::toCvCopy(image_msg, sensor_msgs::image_encodings::BGR8);
@@ -117,6 +116,7 @@ namespace jsk_perception
       = cv_bridge::CvImage(image_msg->header,
                            sensor_msgs::image_encodings::MONO8,
                            fg).toImageMsg();
+    vital_checker_->poke();
     image_pub_.publish(diff_image);
   }
 }

@@ -40,7 +40,7 @@ namespace jsk_pcl_ros_utils
 {
   void PolygonAppender::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    DiagnosticNodelet::onInit();
     pub_polygon_ = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "output", 1);
     pub_coefficients_ = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(*pnh_,
       "output_coefficients", 1);
@@ -119,6 +119,7 @@ namespace jsk_pcl_ros_utils
         new_array.polygons.push_back(polygon);
       }
     }
+    vital_checker_->poke();
     pub_polygon_.publish(new_array);
 
     jsk_recognition_msgs::ModelCoefficientsArray coefficients_new_array;

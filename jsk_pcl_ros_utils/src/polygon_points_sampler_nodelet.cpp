@@ -117,7 +117,6 @@ namespace jsk_pcl_ros_utils
     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    vital_checker_->poke();
     // check frame_ids
     if (!isValidMessage(polygon_msg, coefficients_msg)) {
       return;
@@ -143,6 +142,7 @@ namespace jsk_pcl_ros_utils
     sensor_msgs::PointCloud2 ros_cloud;
     pcl::toROSMsg(*cloud, ros_cloud);
     ros_cloud.header = polygon_msg->header;
+    vital_checker_->poke();
     pub_.publish(ros_cloud);
     sensor_msgs::PointCloud2 ros_xyz_cloud;
     pcl::toROSMsg(*xyz_cloud, ros_xyz_cloud);

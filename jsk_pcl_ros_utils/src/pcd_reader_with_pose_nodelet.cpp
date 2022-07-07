@@ -69,7 +69,6 @@ namespace jsk_pcl_ros_utils
   void PCDReaderWithPose::poseCallback(
     const geometry_msgs::PoseStamped::ConstPtr& pose_stamped)
   {
-    vital_checker_->poke();
     ros::Time now = ros::Time::now();
     Eigen::Affine3f pose_eigen;
     tf::poseMsgToEigen(pose_stamped->pose, pose_eigen);
@@ -77,6 +76,7 @@ namespace jsk_pcl_ros_utils
     Eigen::Matrix4f transform = pose_eigen.matrix();
     pcl_ros::transformPointCloud(transform ,template_cloud_, ros_out);
     ros_out.header = pose_stamped->header;
+    vital_checker_->poke();
     pub_cloud_.publish(ros_out);
   }
 }

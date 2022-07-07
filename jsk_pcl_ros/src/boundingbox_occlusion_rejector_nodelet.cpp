@@ -156,6 +156,7 @@ namespace jsk_pcl_ros
     for (size_t i = 0; i < candidate_indices.size(); i++) {
       rejected_boxes.boxes.push_back(candidate_boxes_msg->boxes[candidate_indices[i]]);
     }
+    vital_checker_->poke();
     pub_.publish(rejected_boxes);
   }
 

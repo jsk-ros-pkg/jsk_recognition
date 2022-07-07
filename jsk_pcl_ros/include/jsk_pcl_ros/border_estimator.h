@@ -49,19 +49,20 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 
-#include "jsk_topic_tools/connection_based_nodelet.h"
+#include "jsk_topic_tools/diagnostic_nodelet.h"
 
 #include <jsk_pcl_ros/BorderEstimatorConfig.h>
 #include <dynamic_reconfigure/server.h>
 
 namespace jsk_pcl_ros
 {
-  class BorderEstimator: public jsk_topic_tools::ConnectionBasedNodelet
+  class BorderEstimator: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef message_filters::sync_policies::ApproximateTime<
     sensor_msgs::PointCloud2, sensor_msgs::CameraInfo> SyncPolicy;
     typedef BorderEstimatorConfig Config;
+    BorderEstimator(): DiagnosticNodelet("BorderEstimator") {}
     virtual ~BorderEstimator();
   protected:
     virtual void onInit();

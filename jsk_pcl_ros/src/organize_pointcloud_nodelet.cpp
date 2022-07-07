@@ -42,6 +42,7 @@ namespace jsk_pcl_ros
 {
   void OrganizePointCloud::extract(const sensor_msgs::PointCloud2ConstPtr &input)
   {
+    vital_checker_->poke();
     // skip empty cloud
     ROS_INFO_STREAM("received input clouds, convert range image, resolution: " << angular_resolution << ", width(deg): " << angle_width << ", height(deg):" << angle_height << ", min_points:" << min_points);
 
@@ -75,7 +76,7 @@ namespace jsk_pcl_ros
 
   void OrganizePointCloud::onInit(void)
   {
-    ConnectionBasedNodelet::onInit();
+    DiagnosticNodelet::onInit();
     
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     pnh_->param<double>("angular_resolution", angular_resolution, 1.0);

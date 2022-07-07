@@ -345,6 +345,7 @@ namespace jsk_pcl_ros {
       = jsk_recognition_utils::convexFromCoefficientsAndInliers<pcl::PointNormal>(
         input_cloud, density_filtered_indices, plane_coefficients);
     // publish to ROS
+    vital_checker_->poke();
     publishPolygon(convex, pub_polygon_, pub_polygon_array_,
                    input_cloud->header);
     PCLIndicesMsg ros_inliers;
@@ -387,6 +388,7 @@ namespace jsk_pcl_ros {
     seg.setMaxIterations (hint_max_iteration_);
     seg.setInputCloud(hint_cloud);
     seg.segment(*hint_inliers, *hint_coefficients);
+    vital_checker_->poke();
     if (hint_inliers->indices.size() > hint_min_size_) { // good!
       convex = jsk_recognition_utils::convexFromCoefficientsAndInliers<pcl::PointXYZ>(
         hint_cloud, hint_inliers, hint_coefficients);

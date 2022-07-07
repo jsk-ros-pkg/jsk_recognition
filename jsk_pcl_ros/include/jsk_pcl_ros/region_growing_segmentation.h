@@ -47,13 +47,14 @@
 
 #include <dynamic_reconfigure/server.h>
 #include "jsk_pcl_ros/RegionGrowingSegmentationConfig.h"
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 namespace jsk_pcl_ros
 {
   class RegionGrowingSegmentation:
-    public jsk_topic_tools::ConnectionBasedNodelet
+    public jsk_topic_tools::DiagnosticNodelet
   {
   public:
+    RegionGrowingSegmentation() : DiagnosticNodelet("RegionGrowingSegmentation") {}
   protected:
     ros::Publisher pub_;
     ros::Subscriber sub_;

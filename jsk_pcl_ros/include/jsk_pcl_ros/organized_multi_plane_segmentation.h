@@ -187,6 +187,16 @@ namespace jsk_pcl_ros
     bool estimate_normal_;
     bool publish_normal_;
 
+    /** @brief
+     * Previous checked status of connection.
+     */
+    jsk_topic_tools::ConnectionStatus previous_checked_connection_status_for_normal_;
+
+    /** @brief
+     * Previous checked status of connection for plane segmentation.
+     */
+    jsk_topic_tools::ConnectionStatus previous_checked_connection_status_for_plane_;
+
     ////////////////////////////////////////////////////////
     // parameters for RANSAC refinement
     ////////////////////////////////////////////////////////

@@ -64,6 +64,7 @@ namespace jsk_pcl_ros_utils
       jsk_recognition_msgs::PolygonArray
       > SyncPolicy;
     typedef ColorizeDistanceFromPlaneConfig Config;
+    virtual ~ColorizeDistanceFromPlane();
   protected:
     ////////////////////////////////////////////////////////
     // methods

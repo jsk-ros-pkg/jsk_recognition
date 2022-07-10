@@ -80,6 +80,7 @@ namespace jsk_perception
     jsk_recognition_msgs::ClassificationResult> AsyncPolicy;
 
     DrawRects(){}
+    virtual ~DrawRects();
   protected:
     virtual void onInit();
     virtual void subscribe();

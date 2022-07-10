@@ -85,7 +85,7 @@ namespace jsk_pcl_ros
     typedef jsk_pcl_ros::KinfuConfig Config;
 
     Kinfu(): ConnectionBasedNodelet(), frame_idx_(0) {}
-    ~Kinfu() {}
+    virtual ~Kinfu();
   protected:
     virtual void onInit();
     virtual void subscribe();

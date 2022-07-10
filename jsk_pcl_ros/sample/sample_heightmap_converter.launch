@@ -9,7 +9,8 @@
 
   <node name="heightmap_converter"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/HeightmapConverter sample_manager">
+        args="load jsk_pcl/HeightmapConverter sample_manager"
+        respawn="true">
     <remap from="~input" to="/kinect_head/depth_registered/points"/>
     <rosparam>
       use_projected_center: true

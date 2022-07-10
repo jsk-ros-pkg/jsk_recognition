@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /polygon_to_mask_image/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [polygon_to_mask_image,]
     </rosparam>
   </test>
 

@@ -74,6 +74,7 @@ namespace jsk_pcl_ros
     typedef jsk_pcl_ros::MultiPlaneExtractionConfig Config;
 
     MultiPlaneExtraction(): DiagnosticNodelet("MultiPlaneExtraction") { }
+    virtual ~MultiPlaneExtraction();
   protected:
     ////////////////////////////////////////////////////////
     // methods

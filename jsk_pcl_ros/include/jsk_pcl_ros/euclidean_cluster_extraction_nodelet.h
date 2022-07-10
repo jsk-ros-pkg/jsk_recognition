@@ -84,6 +84,7 @@ namespace jsk_pcl_ros
                         Eigen::aligned_allocator<Eigen::Vector4f> >
     Vector4fVector;
     EuclideanClustering() : DiagnosticNodelet("EuclideanClustering") {}
+    virtual ~EuclideanClustering();
   protected:
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;

@@ -54,6 +54,7 @@ namespace jsk_pcl_ros
   {
   public:
     MaskImageClusterFilter(): DiagnosticNodelet("MaskImageClusterFilter") {}
+    virtual ~MaskImageClusterFilter();
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
       jsk_recognition_msgs::ClusterPointIndices > SyncPolicy;

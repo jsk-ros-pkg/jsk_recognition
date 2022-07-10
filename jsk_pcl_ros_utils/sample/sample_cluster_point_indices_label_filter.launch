@@ -6,9 +6,12 @@
   <arg name="INPUT_LABELS" default="/mask_rcnn_instance_segmentation/output/labels" />
 
   <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_hsr_multiobjects_in_shelf.xml" />
+  <arg name="MANAGER" value="/head_rgbd_sensor_remote/head_rgbd_sensor_remote_nodelet_manager" />
 
   <node name="cluster_point_indices_label_filter"
-	pkg="jsk_pcl_ros_utils" type="cluster_point_indices_label_filter">
+	      pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/ClusterPointIndicesLabelFilter $(arg MANAGER)"
+        respawn="true">
     <remap from="~input/indices" to="$(arg INPUT_INDICES)"/>
     <remap from="~input/labels" to="$(arg INPUT_LABELS)"/>
     <remap from="~output" to="mask_rcnn_instance_segmentation/output/filtered_cluster_indices"/>

@@ -60,6 +60,7 @@ namespace jsk_pcl_ros
     pcl_msgs::ModelCoefficients > SyncPolicy;
 
     FindObjectOnPlane(): DiagnosticNodelet("FindObjectOnPlane") {}
+    virtual ~FindObjectOnPlane();
   protected:
     virtual void onInit();
     virtual void subscribe();

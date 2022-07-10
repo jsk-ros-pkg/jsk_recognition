@@ -2,10 +2,12 @@
   <arg name="gui" default="true"/>
 
   <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml"/>
+  <arg name="MANAGER" value="/kinect_head/kinect_head_nodelet_manager" />
 
   <node name="depth_calibration"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/DepthCalibration">
+        args="load jsk_pcl/DepthCalibration $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input" to="/kinect_head/depth_registered/hw_registered/image_rect"/>
     <remap from="~camera_info" to="/kinect_head/depth_registered/camera_info"/>
     <rosparam>

@@ -10,6 +10,8 @@
     <rosparam>
       topic_0: /icp_registration/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [icp_registration,]
     </rosparam>
   </test>
 </launch>

@@ -15,6 +15,10 @@
       timeout_1: 30
       topic_2: /bounding_box_filter_without_indices/output_box
       timeout_2: 30
+      check_after_kill_node: true
+      node_names:
+        - bounding_box_filter
+        - bounding_box_filter_without_indices
     </rosparam>
   </test>
 

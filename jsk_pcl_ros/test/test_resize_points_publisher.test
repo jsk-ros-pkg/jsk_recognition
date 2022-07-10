@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /resize_points_publisher/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [resize_points_publisher,]
     </rosparam>
   </test>
 

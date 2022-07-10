@@ -13,6 +13,8 @@
       timeout_0: 30
       topic_1: /project_image_point/output/ray
       timeout_1: 30
+      check_after_kill_node: true
+      node_names: [project_image_point,]
     </rosparam>
   </test>
 

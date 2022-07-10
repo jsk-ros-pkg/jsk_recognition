@@ -70,6 +70,7 @@ namespace jsk_pcl_ros
     typedef pcl::PointXYZRGBA PointT;
 
     PrimitiveShapeClassifier() : DiagnosticNodelet("PrimitiveShapeClassifier") {}
+    virtual ~PrimitiveShapeClassifier();
   protected:
     virtual void onInit();
     virtual void subscribe();

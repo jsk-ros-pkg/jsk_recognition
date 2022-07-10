@@ -61,6 +61,7 @@ namespace jsk_pcl_ros_utils
     PCLIndicesMsg > ASyncPolicy;
   
     AddPointIndices(): DiagnosticNodelet("AddPointIndices") {}
+    virtual ~AddPointIndices();
 
   protected:
     virtual void onInit();

@@ -20,7 +20,8 @@
 
   <node name="hsi_color_filter"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/HSIColorFilter hsi_filter_manager">
+        args="load jsk_pcl/HSIColorFilter hsi_filter_manager"
+        respawn="true">
     <remap from="~input" to="$(arg INPUT_CLOUD)" />
     <rosparam>
       use_indices: false

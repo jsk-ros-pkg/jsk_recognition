@@ -7,7 +7,8 @@
 
   <node name="target_adaptive_tracking"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/TargetAdaptiveTracking sample_manager">
+        args="load jsk_pcl/TargetAdaptiveTracking sample_manager"
+        respawn="true" >
     <!-- For initializing -->
     <remap from="~input_obj_cloud" to="voxel_grid_reference/output"/>
     <remap from="~input_bkgd_cloud" to="voxel_grid_target/output"/>

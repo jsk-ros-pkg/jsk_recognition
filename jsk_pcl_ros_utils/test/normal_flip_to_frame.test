@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /normal_flip_to_frame/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [normal_flip_to_frame,]
     </rosparam>
   </test>
 

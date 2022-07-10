@@ -82,7 +82,8 @@
 
   <node name="feature_registration"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/FeatureRegistration sample_manager">
+        args="load jsk_pcl/FeatureRegistration sample_manager"
+        respawn="true" >
     <remap from="~input" to="normal_estimation_omp_target/output_with_xyz"/>
     <remap from="~input/feature" to="fpfh_estimation_omp_target/output"/>
     <remap from="~input/reference/cloud" to="normal_estimation_omp_reference/output_with_xyz"/>

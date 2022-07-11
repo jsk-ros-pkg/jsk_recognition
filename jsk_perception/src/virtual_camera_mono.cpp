@@ -94,6 +94,7 @@ namespace jsk_perception
   void VirtualCameraMono::imageCb(const sensor_msgs::ImageConstPtr& image_msg,
                const sensor_msgs::CameraInfoConstPtr& info_msg)
   {
+    vital_checker_->poke();
     cv_bridge::CvImagePtr cv_ptr;
     cv::Mat image;
     try {

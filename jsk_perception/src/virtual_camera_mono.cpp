@@ -1,3 +1,5 @@
+#include "jsk_perception/virtual_camera_mono.h"
+
 #include <jsk_topic_tools/log_utils.h>
 #include <jsk_topic_tools/rosparam_utils.h>
 #include <cv_bridge/cv_bridge.h>
@@ -5,22 +7,21 @@
 #include <vector>
 #include <geometry_msgs/Polygon.h>
 
-#include "jsk_perception/virtual_camera_mono.h"
 namespace jsk_perception
 {
   void VirtualCameraMono::onInit()
   {
     DiagnosticNodelet::onInit();
-    pnh_->param("frame_id", trans_.frame_id_, std::string("/elevator_inside_panel"));
-    pnh_->param("child_frame_id", trans_.child_frame_id_, std::string("/virtual_camera_frame"));
-    ROS_INFO("VirutalCmaeraMono(%s) frame_id: %s, chid_frame_id: %s", ros::this_node::getName().c_str(), trans_.frame_id_.c_str(), trans_.child_frame_id_.c_str());
-
     pub_ = advertiseCamera(*pnh_, "image", 1, false);
 
     dynamic_reconfigure::Server<jsk_perception::VirtualCameraMonoConfig>::CallbackType f =
       boost::bind(&VirtualCameraMono::configCb, this, _1, _2);
     srv_ = boost::make_shared<dynamic_reconfigure::Server<jsk_perception::VirtualCameraMonoConfig> >(*pnh_);
     srv_->setCallback(f);
+
+    pnh_->param("frame_id", trans_.frame_id_, std::string("/elevator_inside_panel"));
+    pnh_->param("child_frame_id", trans_.child_frame_id_, std::string("/virtual_camera_frame"));
+    ROS_INFO("VirutalCmaeraMono(%s) frame_id: %s, chid_frame_id: %s", ros::this_node::getName().c_str(), trans_.frame_id_.c_str(), trans_.child_frame_id_.c_str());
 
     std::vector<double> initial_pos, initial_rot;
     if (jsk_topic_tools::readVectorParameter(*pnh_, "initial_pos", initial_pos)) {
@@ -80,7 +81,7 @@ namespace jsk_perception
   void VirtualCameraMono::subscribe()
   {
     ROS_INFO("Subscribing to image topic");
-    it_.reset(new image_transport::ImageTransport(*pnh_));
+    it_.reset(new image_transport::ImageTransport(*nh_));
     sub_ = it_->subscribeCamera("image", 1, &VirtualCameraMono::imageCb, this);
     ros::V_string names = boost::assign::list_of("image");
     jsk_topic_tools::warnNoRemap(names);
@@ -89,7 +90,6 @@ namespace jsk_perception
   void VirtualCameraMono::unsubscribe()
   {
     ROS_INFO("Unsubscibing from image topic");
-    // sub_.unsubscribe();
     sub_.shutdown();
   }
 

@@ -2,8 +2,9 @@
 #define JSK_PERCEPTION_VIRTUAL_CAMERA_MONO_H_
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
-#include <dynamic_reconfigure/server.h>
 #include <jsk_perception/VirtualCameraMonoConfig.h>
+
+#include <dynamic_reconfigure/server.h>
 #include <image_transport/image_transport.h>
 #include <image_geometry/pinhole_camera_model.h>
 #include <tf/transform_listener.h>
@@ -23,7 +24,6 @@ namespace jsk_perception
   {
   public:
     typedef VirtualCameraMonoConfig Config;
-    typedef boost::shared_ptr<VirtualCameraMono> Ptr;
     VirtualCameraMono() : DiagnosticNodelet("VirtualCameraMono") {}
 
   protected:
@@ -50,7 +50,6 @@ namespace jsk_perception
     ros::Subscriber sub_trans_, sub_poly_;
     
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
-    boost::mutex mutex_;
     boost::shared_ptr<image_transport::ImageTransport> it_;
     tf::TransformListener tf_listener_;
     image_geometry::PinholeCameraModel cam_model_;
@@ -59,7 +58,6 @@ namespace jsk_perception
     tf::StampedTransform trans_; // transform to virtual camera
     geometry_msgs::PolygonStamped poly_; // target polygon to transform image
     int interpolation_method_;
-
     
   private:
     

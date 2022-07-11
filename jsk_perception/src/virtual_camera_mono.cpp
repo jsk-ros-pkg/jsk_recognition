@@ -1,11 +1,9 @@
 #include "jsk_perception/virtual_camera_mono.h"
 
-#include <jsk_topic_tools/log_utils.h>
 #include <jsk_topic_tools/rosparam_utils.h>
 #include <cv_bridge/cv_bridge.h>
 #include <string>
 #include <vector>
-#include <geometry_msgs/Polygon.h>
 
 namespace jsk_perception
 {

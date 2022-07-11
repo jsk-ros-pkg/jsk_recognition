@@ -27,9 +27,7 @@ namespace jsk_perception
     VirtualCameraMono() : DiagnosticNodelet("VirtualCameraMono") {}
 
   protected:
-    ////////////////////////////////////////////////////////
-    // methods
-    ////////////////////////////////////////////////////////
+
     virtual void onInit();
     virtual void configCb (Config &config, uint32_t level);    
     virtual void subscribe();
@@ -42,9 +40,6 @@ namespace jsk_perception
 		      tf::StampedTransform& trans, geometry_msgs::PolygonStamped& poly,
                                                    image_geometry::PinholeCameraModel& cam_model_);
 
-    ////////////////////////////////////////////////////////
-    // parameters
-    ////////////////////////////////////////////////////////
     image_transport::CameraSubscriber sub_;
     image_transport::CameraPublisher pub_;
     ros::Subscriber sub_trans_, sub_poly_;

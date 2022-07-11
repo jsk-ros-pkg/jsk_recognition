@@ -305,6 +305,8 @@ if(robot_self_filter_FOUND)
   jsk_add_nodelet(src/robot_to_mask_image.cpp "jsk_perception/RobotToMaskImage" "robot_to_mask_image")
 endif()
 
+jsk_add_nodelet(src/virtual_camera_mono.cpp "jsk_perception/VirtualCameraMono" "virtual_camera_mono")
+
 # compiling jsk_perception library for nodelet
 if(TARGET JSK_NODELET_${PROJECT_NAME}_dual_fisheye_to_panorama)
   add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
@@ -345,7 +347,6 @@ target_link_libraries(oriented_gradient ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 jsk_add_node(src/camshiftdemo.cpp camshiftdemo)
 jsk_add_node(src/linemod.cpp linemod)
-jsk_add_node(src/virtual_camera_mono.cpp virtual_camera_mono)
 jsk_add_node(src/point_pose_extractor.cpp point_pose_extractor)
 jsk_add_node(src/white_balance_converter.cpp white_balance_converter)
 jsk_add_node(src/rectangle_detector.cpp rectangle_detector)

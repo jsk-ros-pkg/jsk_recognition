@@ -10,7 +10,7 @@ namespace jsk_perception
   void VirtualCameraMono::onInit()
   {
     DiagnosticNodelet::onInit();
-    pub_ = advertiseCamera(*pnh_, "image", 1, false);
+    pub_ = advertiseCamera(*pnh_, "image", 1);
 
     dynamic_reconfigure::Server<jsk_perception::VirtualCameraMonoConfig>::CallbackType f =
       boost::bind(&VirtualCameraMono::configCb, this, _1, _2);

@@ -66,10 +66,19 @@ namespace jsk_perception
       image_geometry::PinholeCameraModel model;
       model.fromCameraInfo(info_msg);
 
-      cv::Mat mask_image = cv::Mat::zeros(info_msg->height, info_msg->width, CV_8UC1);
+      int height = info_msg->height;
+      int width = info_msg->width;
+      if(info_msg->binning_y > 0) {
+        height /= info_msg->binning_y;
+      }
+      if(info_msg->binning_x > 0) {
+        width /= info_msg->binning_x;
+      }
+
+      cv::Mat mask_image = cv::Mat::zeros(height, width, CV_8UC1);
       self_mask_->assumeFrame(info_msg->header);
-      for (int u = 0; u < info_msg->width; u++) {
-        for (int v = 0; v < info_msg->height; v++) {
+      for (int u = 0; u < width; u++) {
+        for (int v = 0; v < height; v++) {
           // project to 3d
           cv::Point uv(u, v);
           cv::Point3d p = model.projectPixelTo3dRay(uv);

@@ -55,6 +55,7 @@ namespace jsk_perception
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::Image, jsk_recognition_msgs::RectArray > SyncPolicy;
     RectArrayToDensityImage(): DiagnosticNodelet("RectArrayToDensityImage") {}
+    virtual ~RectArrayToDensityImage();
   protected:
 
     virtual void onInit();

@@ -50,7 +50,19 @@ namespace jsk_pcl_ros_utils
     pnh_->param<bool>("approximate_sync", approximate_sync_, false);
     onInitPostProcess();
   }
-  
+
+  PointCloudRelativeFromPoseStamped::~PointCloudRelativeFromPoseStamped() {
+    // message_filters::Synchronizer needs to be called reset
+    // before message_filters::Subscriber is freed.
+    // Calling reset fixes the following error on shutdown of the nodelet:
+    // terminate called after throwing an instance of
+    // 'boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >'
+    //     what():  boost: mutex lock failed in pthread_mutex_lock: Invalid argument
+    // Also see https://github.com/ros/ros_comm/issues/720 .
+    sync_.reset();
+    async_.reset();
+  }
+
   void PointCloudRelativeFromPoseStamped::subscribe()
   {
     sub_cloud_.subscribe(*pnh_, "input", 1);

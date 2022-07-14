@@ -65,6 +65,7 @@ namespace imagesift
       sensor_msgs::Image > SyncPolicy;
     ros::WallTime lasttime;
     SiftNode(): DiagnosticNodelet("SiftNode") {}
+    virtual ~SiftNode();
   protected:
     bool _bInfoInitialized;
     bool _useMask;

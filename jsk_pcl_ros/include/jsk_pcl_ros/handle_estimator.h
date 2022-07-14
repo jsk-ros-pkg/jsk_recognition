@@ -67,7 +67,8 @@ namespace jsk_pcl_ros
       HANDLE_SMALL_ENOUGH_LIE_ON_PLANE_Y_LONGEST,
       HANDLE_SMALL_ENOUGH_LIE_ON_PLANE_X_LONGEST
     };
-    
+    virtual ~HandleEstimator();
+
   protected:
     virtual void onInit();
     virtual void estimate(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,

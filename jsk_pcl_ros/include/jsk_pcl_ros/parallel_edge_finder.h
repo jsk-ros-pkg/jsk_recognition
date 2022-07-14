@@ -61,6 +61,7 @@ namespace jsk_pcl_ros
     jsk_recognition_msgs::ClusterPointIndices,
     jsk_recognition_msgs::ModelCoefficientsArray > SyncPolicy;
     typedef jsk_pcl_ros::ParallelEdgeFinderConfig Config;
+    virtual ~ParallelEdgeFinder();
   protected:
     ////////////////////////////////////////////////////////
     // methods

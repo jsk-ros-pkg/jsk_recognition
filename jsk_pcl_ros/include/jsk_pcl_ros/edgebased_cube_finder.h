@@ -169,7 +169,7 @@ namespace jsk_pcl_ros
       B_PERPENDICULAR,
       C_PERPENDICULAR
     };
-    
+    virtual ~EdgebasedCubeFinder();
   protected:
     
     

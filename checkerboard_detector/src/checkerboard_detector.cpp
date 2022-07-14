@@ -712,7 +712,7 @@ public:
                 max_diff_norm = diff_norm;
             }
         }
-        ROS_DEBUG("max error of cells: %d", max_diff_norm/cell_size);
+        ROS_DEBUG("max error of cells: %f", max_diff_norm/cell_size);
         if (max_diff_norm/cell_size > 0.02) { // 2%
             ROS_WARN("Large error %f detected, please check (1): checker board is on plane, (2): you uses rectified image", max_diff_norm/cell_size);
         }

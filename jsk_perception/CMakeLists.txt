@@ -106,6 +106,7 @@ add_custom_target(${PROJECT_NAME}_install_trained_data ALL COMMAND python$ENV{RO
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(
   cfg/ConcaveHullMaskImage.cfg
+  cfg/CRAFT.cfg
   cfg/RectArrayActualSizeFilter.cfg
   cfg/PolygonArrayColorLikelihood.cfg
   cfg/PolygonArrayColorHistogram.cfg
@@ -136,6 +137,7 @@ generate_dynamic_reconfigure_options(
   cfg/GaussianBlur.cfg
   cfg/KMeans.cfg
   cfg/ImageTimeDiff.cfg
+  cfg/OCR.cfg
   cfg/OverlayImageColorOnMono.cfg
   cfg/SelectiveSearch.cfg
   cfg/LabelToMaskImage.cfg
@@ -303,6 +305,8 @@ if(robot_self_filter_FOUND)
   jsk_add_nodelet(src/robot_to_mask_image.cpp "jsk_perception/RobotToMaskImage" "robot_to_mask_image")
 endif()
 
+jsk_add_nodelet(src/virtual_camera_mono.cpp "jsk_perception/VirtualCameraMono" "virtual_camera_mono")
+
 # compiling jsk_perception library for nodelet
 if(TARGET JSK_NODELET_${PROJECT_NAME}_dual_fisheye_to_panorama)
   add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
@@ -343,7 +347,6 @@ target_link_libraries(oriented_gradient ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 jsk_add_node(src/camshiftdemo.cpp camshiftdemo)
 jsk_add_node(src/linemod.cpp linemod)
-jsk_add_node(src/virtual_camera_mono.cpp virtual_camera_mono)
 jsk_add_node(src/point_pose_extractor.cpp point_pose_extractor)
 jsk_add_node(src/white_balance_converter.cpp white_balance_converter)
 jsk_add_node(src/rectangle_detector.cpp rectangle_detector)
@@ -482,7 +485,9 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/consensus_tracking.test)
     jsk_add_rostest(test/convex_hull_mask_image.test)
     if("$ENV{ROS_DISTRO}" STRGREATER "indigo")
+      jsk_add_rostest(test/craft_node.test)
       jsk_add_rostest(test/deep_sort_tracker.test)
+      jsk_add_rostest(test/ocr_node.test)
     endif()
     jsk_add_rostest(test/draw_rects.test)
     jsk_add_rostest(test/draw_rects_py.test)

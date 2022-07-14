@@ -17,6 +17,8 @@
       timeout_2: 30
       topic_3: /normal_estimation_omp/output/average_time
       timeout_3: 30
+      check_after_kill_node: true
+      node_names: [normal_estimation_omp,]
     </rosparam>
   </test>
 

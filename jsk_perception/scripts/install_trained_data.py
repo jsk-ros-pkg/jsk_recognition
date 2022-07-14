@@ -301,6 +301,24 @@ def main():
         md5='9f39d3baa43cf1c962c8f752c009eb14',
     )
 
+    # optical character recognition
+    # craft
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/craft_mlt_25k.pth',
+        url='https://drive.google.com/uc?id=1Jk4eGD7crsqCCg9C9VjCLkMN3ze8kutZ',
+        md5='2f8227d2def4037cdb3b34389dcf9ec1',
+        quiet=quiet,
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/craft_refiner_CTW1500.pth',
+        url='https://drive.google.com/uc?id=1XSaFwBkOaFOdtk4Ane3DFyJGPRw6v5bO',
+        md5='3d48f83540567d2a43d2f6ca4b4d9f13',
+        quiet=quiet,
+    )
+
 
 if __name__ == '__main__':
     main()

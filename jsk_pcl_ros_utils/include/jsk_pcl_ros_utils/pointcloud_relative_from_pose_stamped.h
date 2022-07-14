@@ -57,6 +57,7 @@ namespace jsk_pcl_ros_utils
     sensor_msgs::PointCloud2,
     geometry_msgs::PoseStamped > ApproximateSyncPolicy;
     PointCloudRelativeFromPoseStamped(): DiagnosticNodelet("PointCloudRelativeFromPoseStamped") {}
+    virtual ~PointCloudRelativeFromPoseStamped();
   protected:
     virtual void onInit();
     virtual void subscribe();

@@ -120,6 +120,7 @@ namespace jsk_pcl_ros
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
       PCLIndicesMsg> SyncPolicy;
+    virtual ~LINEMODTrainer();
   protected:
     ////////////////////////////////////////////////////////
     // methods

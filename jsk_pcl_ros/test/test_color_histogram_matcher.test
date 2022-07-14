@@ -19,6 +19,8 @@
       timeout_3: 30
       topic_4: /color_histogram_matcher/best_match
       timeout_4: 30
+      check_after_kill_node: true
+      node_names: [color_histogram_matcher,]
     </rosparam>
   </test>
 

@@ -52,6 +52,7 @@ namespace jsk_perception
   {
   public:
     FlowVelocityThresholding(): DiagnosticNodelet("FlowVelocityThresholding") {}
+    virtual ~FlowVelocityThresholding();
     typedef jsk_perception::FlowVelocityThresholdingConfig Config;
     typedef message_filters::sync_policies::ApproximateTime<
       opencv_apps::FlowArrayStamped,

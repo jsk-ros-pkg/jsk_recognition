@@ -1,6 +1,13 @@
 <launch>
 
   <arg name="gui" default="true" />
+  <arg name="launch_manager" default="true" />
+
+  <arg name="MANAGER" default="sample_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet" args="manager"
+        if="$(arg launch_manager)"
+        output="screen" />
 
   <node name="image_publisher"
         pkg="jsk_perception" type="image_publisher.py">
@@ -24,7 +31,8 @@
 
   <node name="apply_mask_image"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_perception/ApplyMaskImage">
+        args="load jsk_perception/ApplyMaskImage $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <remap from="~input/mask" to="$(arg MASK_IMAGE)" />
     <rosparam>

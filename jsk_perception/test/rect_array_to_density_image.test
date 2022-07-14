@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /rect_array_to_density_image/output
       timeout_0: 10
+      check_after_kill_node: true
+      node_names: [rect_array_to_density_image,]
     </rosparam>
   </test>
 

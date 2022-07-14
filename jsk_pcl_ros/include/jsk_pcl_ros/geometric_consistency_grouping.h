@@ -67,6 +67,7 @@ namespace jsk_pcl_ros
       sensor_msgs::PointCloud2> SyncPolicy;
     GeometricConsistencyGrouping():
       DiagnosticNodelet("GeometricConsistencyGrouping") {}
+    virtual ~GeometricConsistencyGrouping();
   protected:
     virtual void onInit();
     virtual void subscribe();

@@ -13,6 +13,12 @@ Convert robot model into mask image.
 
   Mask image to fill `~input` polygon.
 
+  The size of the output image will be resized to fit the `roi` and `binnning`.
+
+* `~output/info` (`sensor_msgs/CameraInfo`)
+
+  `CameraInfo` for the output image.
+
 ## Parameters
 * `~max_robot_dist` (Double, default: `10`)
 

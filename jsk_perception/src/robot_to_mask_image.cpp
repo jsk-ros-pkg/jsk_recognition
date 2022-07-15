@@ -46,6 +46,7 @@ namespace jsk_perception
     initSelfMask(*pnh_);
     pnh_->param("max_robot_dist", max_robot_dist_, 10.0);
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
+    pub_camera_info_ = advertise<sensor_msgs::CameraInfo>(*pnh_, "output/info", 1);
   }
 
   void RobotToMaskImage::subscribe()
@@ -90,9 +91,29 @@ namespace jsk_perception
           }
         }
       }
+      sensor_msgs::CameraInfo camera_info_msg;
+      camera_info_msg.header = info_msg->header;
+      camera_info_msg.width = width;
+      camera_info_msg.height = height;
+      camera_info_msg.distortion_model = info_msg->distortion_model;
+      camera_info_msg.roi.x_offset = 0;
+      camera_info_msg.roi.y_offset = 0;
+      camera_info_msg.roi.width = width;
+      camera_info_msg.roi.height = height;
+      camera_info_msg.roi.do_rectify = info_msg->roi.do_rectify;
+      cv::Matx33d K = model.intrinsicMatrix();
+      for (size_t i = 0; i < 3; ++i) for (size_t j = 0; j < 3; ++j) camera_info_msg.K[i * 3 + j] = K(i, j);
+      cv::Matx33d R = model.rotationMatrix();
+      for (size_t i = 0; i < 3; ++i) for (size_t j = 0; j < 3; ++j) camera_info_msg.R[i * 3 + j] = R(i, j);
+      cv::Matx34d P = model.projectionMatrix();
+      for (size_t i = 0; i < 3; ++i) for (size_t j = 0; j < 4; ++j) camera_info_msg.P[i * 4 + j] = P(i, j);
+      cv::Mat_<double> D = model.distortionCoeffs();
+      camera_info_msg.D.resize(D.rows * D.cols);
+      for (size_t i = 0; i < D.rows; ++i) for (size_t j = 0; j < D.cols; ++j) camera_info_msg.D[i * D.cols + j] = D(i, j);
       pub_.publish(cv_bridge::CvImage(info_msg->header,
                                       sensor_msgs::image_encodings::MONO8,
                                       mask_image).toImageMsg());
+      pub_camera_info_.publish(camera_info_msg);
     }
   }
 

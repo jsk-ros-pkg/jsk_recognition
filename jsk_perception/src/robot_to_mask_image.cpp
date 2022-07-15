@@ -66,12 +66,13 @@ namespace jsk_perception
       image_geometry::PinholeCameraModel model;
       model.fromCameraInfo(info_msg);
 
-      int height = info_msg->height;
-      int width = info_msg->width;
-      if(info_msg->binning_y > 0) {
+      sensor_msgs::RegionOfInterest roi = info_msg->roi;
+      int height = roi.height ? roi.height : info_msg->height;
+      int width = roi.width ? roi.width : info_msg->width;
+      if (info_msg->binning_y > 0) {
         height /= info_msg->binning_y;
       }
-      if(info_msg->binning_x > 0) {
+      if (info_msg->binning_x > 0) {
         width /= info_msg->binning_x;
       }
 

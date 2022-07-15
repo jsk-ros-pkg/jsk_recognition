@@ -43,6 +43,8 @@ namespace jsk_pcl_ros{
 
     void ContainerOccupancyDetector::onInit(){
         jsk_topic_tools::ConnectionBasedNodelet::onInit();
+        pnh_->param("approximate_sync", approximate_sync_, false);
+        pnh_->param("queue_size", queue_size_, 100);
         boxes_occupancy_pub_
             = advertise<jsk_recognition_msgs::BoundingBoxArray>(*pnh_, "container/occupancies", 1);
         tf_listener_ = new tf2_ros::TransformListener(tf_buffer_);
@@ -64,9 +66,15 @@ namespace jsk_pcl_ros{
         sub_boxes_.subscribe(*pnh_, "container/boxes", 1);
         sub_points_.subscribe(*pnh_, "container/points", 1);
         sub_point_indices_.subscribe(*pnh_, "container/point_indices", 1);
-        sync_ = std::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-        sync_->connectInput(sub_boxes_, sub_points_, sub_point_indices_);
-        sync_->registerCallback(boost::bind(&ContainerOccupancyDetector::calculate, this, _1, _2, _3));
+        if(approximate_sync_){
+            ap_sync_ = std::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
+            ap_sync_ -> connectInput(sub_boxes_, sub_points_, sub_point_indices_);
+            ap_sync_ -> registerCallback(boost::bind(&ContainerOccupancyDetector::calculate, this, _1, _2, _3));
+        }else{
+            sync_ = std::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+            sync_->connectInput(sub_boxes_, sub_points_, sub_point_indices_);
+            sync_->registerCallback(boost::bind(&ContainerOccupancyDetector::calculate, this, _1, _2, _3));
+        }
     }
 
     void ContainerOccupancyDetector::unsubscribe(){

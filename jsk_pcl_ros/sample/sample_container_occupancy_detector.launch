@@ -2,6 +2,7 @@
 <launch>
   <arg name="gui" default="true" />
   <arg name="topic_tools_start_delay" default="2.0" />
+  <arg name="approximate_sync" default="false" />
 
   <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_fetch_trashbin.xml" />
 
@@ -24,6 +25,7 @@
     <arg name="POINTCLOUD_INPUT" value="/head_camera/depth_registered/quater/throttled/points" />
     <arg name="CONTAINER_BOXES_INPUT" value="trashbin_boxes" />
     <arg name="manager" value="container_occupancy_nodelet_manager"/>
+    <arg name="approximate_sync" value="$(arg approximate_sync)" />
   </include>
 
   <!-- for visualizing occupancy rate in rviz -->

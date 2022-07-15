@@ -4,6 +4,8 @@
   <arg name="CONTAINER_BOXES_INPUT" default="container/boxes" />
   <arg name="DEFAULT_NAMESPACE" default="container_occupancy_detector" />
   <arg name="manager" default="manager" />
+  <arg name="approximate_sync" default="false" />
+  <arg name="queue_size" default="100" />
 
   <node pkg="nodelet" type="nodelet" name="$(arg manager)"
         args="manager" output="screen" />
@@ -52,6 +54,10 @@
     <remap from="~container/points" to="$(arg POINTCLOUD_INPUT)" />
     <remap from="~container/point_indices"
            to="$(arg DEFAULT_NAMESPACE)/attention_clipper/rescaled_containers/cluster_point_indices" />
+    <rosparam>
+      approximate_sync: $(arg approximate_sync)
+      queue_size: $(arg queue_size)
+    </rosparam>
   </node>
 
 </launch>

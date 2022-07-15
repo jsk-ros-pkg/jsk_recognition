@@ -61,64 +61,72 @@
 
 namespace jsk_pcl_ros{
 
-  class ContainerOccupancyDetector: public jsk_topic_tools::DiagnosticNodelet{
-    public:
-      typedef message_filters::sync_policies::ExactTime<
-      jsk_recognition_msgs::BoundingBoxArray,
-      sensor_msgs::PointCloud2,
-      jsk_recognition_msgs::ClusterPointIndices
-      > SyncPolicy;
-      ContainerOccupancyDetector() : DiagnosticNodelet("ContainerOccupancyDetector") {}
-      virtual ~ContainerOccupancyDetector();
+      class ContainerOccupancyDetector: public jsk_topic_tools::DiagnosticNodelet{
+            public:
+                  typedef message_filters::sync_policies::ExactTime<
+                  jsk_recognition_msgs::BoundingBoxArray,
+                  sensor_msgs::PointCloud2,
+                  jsk_recognition_msgs::ClusterPointIndices
+                  > SyncPolicy;
+                  typedef message_filters::sync_policies::ApproximateTime<
+                  jsk_recognition_msgs::BoundingBoxArray,
+                  sensor_msgs::PointCloud2,
+                  jsk_recognition_msgs::ClusterPointIndices
+                  > ApproximateSyncPolicy;
+                  ContainerOccupancyDetector() : DiagnosticNodelet("ContainerOccupancyDetector") {}
+                  virtual ~ContainerOccupancyDetector();
 
-    protected:
-      ////////////////////////////////////////////////////////
-      // methods
-      ////////////////////////////////////////////////////////
-      virtual void onInit();
-      virtual void calculate(
-        const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& boxes_msg,
-        const sensor_msgs::PointCloud2::ConstPtr& points_msg,
-        const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& point_indices_msg);
-      virtual void updateDiagnostic(
-        diagnostic_updater::DiagnosticStatusWrapper &stat);
-      virtual void subscribe();
-      virtual void unsubscribe();
-      virtual bool pointsTransform(
-        const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& boxes_msg,
-        const sensor_msgs::PointCloud2::ConstPtr& points_msg);
+            protected:
+                  ////////////////////////////////////////////////////////
+                  // methods
+                  ////////////////////////////////////////////////////////
+                  virtual void onInit();
+                  virtual void calculate(
+                        const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& boxes_msg,
+                        const sensor_msgs::PointCloud2::ConstPtr& points_msg,
+                        const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& point_indices_msg);
+                  virtual void updateDiagnostic(
+                        diagnostic_updater::DiagnosticStatusWrapper &stat);
+                  virtual void subscribe();
+                  virtual void unsubscribe();
+                  virtual bool pointsTransform(
+                        const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& boxes_msg,
+                        const sensor_msgs::PointCloud2::ConstPtr& points_msg);
 
-      ////////////////////////////////////////////////////////
-      // ROS varariables
-      ////////////////////////////////////////////////////////
-      message_filters::Subscriber<jsk_recognition_msgs::BoundingBoxArray> sub_boxes_;
-      message_filters::Subscriber<sensor_msgs::PointCloud2> sub_points_;
-      message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_point_indices_;
-      std::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
-      ros::Publisher boxes_occupancy_pub_;
-      boost::mutex mutex_;
-      tf2_ros::Buffer tf_buffer_;
-      tf2_ros::TransformListener* tf_listener_;
-      sensor_msgs::PointCloud2::Ptr transformed_points_msg_ =
-        boost::shared_ptr<sensor_msgs::PointCloud2>(new sensor_msgs::PointCloud2);
-      pcl::PCLPointCloud2Ptr pcl_pc2_ptr_ =
-        boost::shared_ptr<pcl::PCLPointCloud2>(new pcl::PCLPointCloud2);
-      pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_xyz_ptr_ =
-        boost::shared_ptr<pcl::PointCloud<pcl::PointXYZ>>(new pcl::PointCloud<pcl::PointXYZ>);
+                  ////////////////////////////////////////////////////////
+                  // ROS varariables
+                  ////////////////////////////////////////////////////////
+                  message_filters::Subscriber<jsk_recognition_msgs::BoundingBoxArray> sub_boxes_;
+                  message_filters::Subscriber<sensor_msgs::PointCloud2> sub_points_;
+                  message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_point_indices_;
+                  std::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+                  std::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> >ap_sync_;
+                  ros::Publisher boxes_occupancy_pub_;
+                  boost::mutex mutex_;
+                  tf2_ros::Buffer tf_buffer_;
+                  tf2_ros::TransformListener* tf_listener_;
+                  sensor_msgs::PointCloud2::Ptr transformed_points_msg_ =
+                        boost::shared_ptr<sensor_msgs::PointCloud2>(new sensor_msgs::PointCloud2);
+                  pcl::PCLPointCloud2Ptr pcl_pc2_ptr_ =
+                        boost::shared_ptr<pcl::PCLPointCloud2>(new pcl::PCLPointCloud2);
+                  pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_xyz_ptr_ =
+                        boost::shared_ptr<pcl::PointCloud<pcl::PointXYZ>>(new pcl::PointCloud<pcl::PointXYZ>);
 
-      ////////////////////////////////////////////////////////
-      // Diagnostics Variables
-      ////////////////////////////////////////////////////////
-      jsk_recognition_utils::Counter remove_counter_;
-      jsk_recognition_utils::Counter pass_counter_;
+                  ////////////////////////////////////////////////////////
+                  // Diagnostics Variables
+                  ////////////////////////////////////////////////////////
+                  jsk_recognition_utils::Counter remove_counter_;
+                  jsk_recognition_utils::Counter pass_counter_;
 
-      ////////////////////////////////////////////////////////
-      // Parameters
-      ////////////////////////////////////////////////////////
+                  ////////////////////////////////////////////////////////
+                  // Parameters
+                  ////////////////////////////////////////////////////////
+                  int queue_size_;
+                  bool approximate_sync_;
 
-    private:
+            private:
 
-  };
+      };
 }
 
 #endif // CONTAINER_OCCUPANCY_DETECTOR_H_

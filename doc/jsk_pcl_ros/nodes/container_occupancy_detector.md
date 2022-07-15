@@ -22,6 +22,16 @@ The indices of point cloud in each box.
 
 Containers' occupancies.
 
+## Parameters
+* `~approximate_sync` (Bool, default: `false`)
+
+  Approximately synchronize inputs if it's true.
+
+* `~queue_size` (Int, default: `100`)
+
+  How many messages you allow about the subscriber to keep in the queue.
+  This should be big when there is much difference about delay between two topics.
+
 ## For use
 It is strongly recommended to use with original launch file like
 

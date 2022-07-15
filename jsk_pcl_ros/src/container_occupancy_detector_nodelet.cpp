@@ -42,7 +42,7 @@
 namespace jsk_pcl_ros{
 
     void ContainerOccupancyDetector::onInit(){
-        jsk_topic_tools::ConnectionBasedNodelet::onInit();
+        jsk_topic_tools::DiagnosticNodelet::onInit();
         pnh_->param("approximate_sync", approximate_sync_, false);
         pnh_->param("queue_size", queue_size_, 100);
         boxes_occupancy_pub_
@@ -59,7 +59,11 @@ namespace jsk_pcl_ros{
         // 'boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >'
         //     what():  boost: mutex lock failed in pthread_mutex_lock: Invalid argument
         // Also see https://github.com/ros/ros_comm/issues/720 .
-        sync_.reset();
+        if(approximate_sync_){
+            ap_sync_.reset();
+        }else{
+            sync_.reset();
+        }
     }
 
     void ContainerOccupancyDetector::subscribe(){
@@ -127,6 +131,7 @@ namespace jsk_pcl_ros{
                     }
                     result_.boxes.at(i_box).value = sum_occupancy_ / float(n_points_);
                 }
+                vital_checker_->poke();
                 boxes_occupancy_pub_.publish(result_);
             }else{
                 NODELET_WARN("Failed to transform point cloud\n");

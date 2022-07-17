@@ -178,7 +178,7 @@ class ImagePublisher(object):
             if getCvType(encoding) == cv2.CV_16UC1:
                 # 16UC1
                 img = img.astype(np.float32)
-                img = img / 255 * (2 ** 16)
+                img = np.clip(img / 255.0 * (2 ** 16 - 1), 0, 2 ** 16 - 1)
                 img = img.astype(np.uint16)
             elif getCvType(encoding) == cv2.CV_32FC1:
                 # 32FC1

@@ -167,7 +167,8 @@ class ImagePublisher(object):
     def cv2_to_imgmsg(self, img, encoding):
         bridge = cv_bridge.CvBridge()
         # resolve encoding
-        if getCvType(encoding) in [cv2.CV_8UC1, cv2.CV_16UC1, cv2.CV_32FC1]:
+        cv_type = getCvType(encoding)
+        if cv_type in [cv2.CV_8UC1, cv2.CV_16UC1, cv2.CV_32FC1]:
             # mono8
             if len(img.shape) == 3:
                 if img.shape[2] == 4:
@@ -175,23 +176,23 @@ class ImagePublisher(object):
                 else:
                     code = cv2.COLOR_BGR2GRAY
                 img = cv2.cvtColor(img, code)
-            if getCvType(encoding) == cv2.CV_16UC1:
+            if cv_type == cv2.CV_16UC1:
                 # 16UC1
                 img = img.astype(np.float32)
                 img = np.clip(img / 255.0 * (2 ** 16 - 1), 0, 2 ** 16 - 1)
                 img = img.astype(np.uint16)
-            elif getCvType(encoding) == cv2.CV_32FC1:
+            elif cv_type == cv2.CV_32FC1:
                 # 32FC1
                 img = img.astype(np.float32)
                 img /= 255
-        elif getCvType(encoding) == cv2.CV_8UC3 and len(img.shape) == 3:
+        elif cv_type == cv2.CV_8UC3 and len(img.shape) == 3:
             # 8UC3
             # BGRA, BGR -> BGR
             img = img[:, :, :3]
             # BGR -> RGB
             if encoding == 'rgb8':
                 img = img[:, :, ::-1]
-        elif getCvType(encoding) == cv2.CV_16UC3 and len(img.shape) == 3:
+        elif cv_type == cv2.CV_16UC3 and len(img.shape) == 3:
             # 16UC3
             # BGRA, BGR -> BGR
             img = img[:, :, :3]
@@ -202,13 +203,13 @@ class ImagePublisher(object):
             # BGR -> RGB
             if encoding == 'rgb16':
                 img = img[:, :, ::-1]
-        elif (getCvType(encoding) == cv2.CV_8UC4 and
+        elif (cv_type == cv2.CV_8UC4 and
                 len(img.shape) == 3 and img.shape[2] == 4):
             # 8UC4
             if encoding == 'rgba8':
                 # BGRA -> RGBA
                 img = img[:, :, [2, 1, 0, 3]]
-        elif (getCvType(encoding) == cv2.CV_16UC4 and
+        elif (cv_type == cv2.CV_16UC4 and
                 len(img.shape) == 3 and img.shape[2] == 4):
             # convert to 16UC4 image.
             img = img.astype(np.float32)

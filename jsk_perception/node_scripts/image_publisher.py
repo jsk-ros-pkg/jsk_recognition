@@ -189,12 +189,32 @@ class ImagePublisher(object):
             # BGRA, BGR -> BGR
             img = img[:, :, :3]
             # BGR -> RGB
-            if encoding in ('rgb8', 'rgb16'):
+            if encoding == 'rgb8':
+                img = img[:, :, ::-1]
+        elif getCvType(encoding) == cv2.CV_16UC3 and len(img.shape) == 3:
+            # 16UC3
+            # BGRA, BGR -> BGR
+            img = img[:, :, :3]
+            # convert to 16UC3 image.
+            img = img.astype(np.float32)
+            img = np.clip(img / 255.0 * (2 ** 16 - 1), 0, 2 ** 16 - 1)
+            img = img.astype(np.uint16)
+            # BGR -> RGB
+            if encoding == 'rgb16':
                 img = img[:, :, ::-1]
         elif (getCvType(encoding) == cv2.CV_8UC4 and
                 len(img.shape) == 3 and img.shape[2] == 4):
             # 8UC4
-            if encoding in ('rgba8', 'rgba16'):
+            if encoding == 'rgba8':
+                # BGRA -> RGBA
+                img = img[:, :, [2, 1, 0, 3]]
+        elif (getCvType(encoding) == cv2.CV_16UC4 and
+                len(img.shape) == 3 and img.shape[2] == 4):
+            # convert to 16UC4 image.
+            img = img.astype(np.float32)
+            img = np.clip(img / 255.0 * (2 ** 16 - 1), 0, 2 ** 16 - 1)
+            img = img.astype(np.uint16)
+            if encoding == 'rgba16':
                 # BGRA -> RGBA
                 img = img[:, :, [2, 1, 0, 3]]
         else:

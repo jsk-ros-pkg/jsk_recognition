@@ -64,7 +64,7 @@
       encoding: bgra8
       publish_info: true
       fovx: 84.1
-      fovy: 53.8
+      fovy: 84.1  <!-- shape of sample_alpha.png is (256, 256). Keep the focal lengths equal. -->
     </rosparam>
   </node>
 
@@ -77,7 +77,7 @@
       encoding: bgra16
       publish_info: true
       fovx: 84.1
-      fovy: 53.8
+      fovy: 84.1  <!-- shape of sample_alpha.png is (256, 256). Keep the focal lengths equal. -->
     </rosparam>
   </node>
 
@@ -90,7 +90,7 @@
       encoding: rgba8
       publish_info: true
       fovx: 84.1
-      fovy: 53.8
+      fovy: 84.1  <!-- shape of sample_alpha.png is (256, 256). Keep the focal lengths equal. -->
     </rosparam>
   </node>
 
@@ -103,7 +103,7 @@
       encoding: rgba16
       publish_info: true
       fovx: 84.1
-      fovy: 53.8
+      fovy: 84.1  <!-- shape of sample_alpha.png is (256, 256). Keep the focal lengths equal. -->
     </rosparam>
   </node>
 

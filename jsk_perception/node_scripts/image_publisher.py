@@ -170,6 +170,7 @@ class ImagePublisher(object):
         bridge = cv_bridge.CvBridge()
         # resolve encoding
         cv_type = getCvType(encoding)
+        dst_format = self.dst_format
         if cv_type in [cv2.CV_8UC1, cv2.CV_16UC1, cv2.CV_32FC1]:
             # mono8
             if len(img.shape) == 3:
@@ -180,6 +181,8 @@ class ImagePublisher(object):
                 img = cv2.cvtColor(img, code)
             if cv_type == cv2.CV_16UC1:
                 # 16UC1
+                # png compression on 16-bit images
+                dst_format = 'png'
                 img = img.astype(np.float32)
                 img = np.clip(img / 255.0 * (2 ** 16 - 1), 0, 2 ** 16 - 1)
                 img = img.astype(np.uint16)
@@ -195,6 +198,8 @@ class ImagePublisher(object):
             if encoding == 'rgb8':
                 img = img[:, :, ::-1]
         elif cv_type == cv2.CV_16UC3 and len(img.shape) == 3:
+            # png compression on 16-bit images
+            dst_format = 'png'
             # 16UC3
             # BGRA, BGR -> BGR
             img = img[:, :, :3]
@@ -223,8 +228,13 @@ class ImagePublisher(object):
         else:
             rospy.logerr('unsupported encoding: {0}'.format(encoding))
             return
-        return bridge.cv2_to_imgmsg(img, encoding=encoding), \
-            bridge.cv2_to_compressed_imgmsg(img, dst_format=self.dst_format)
+        compmsg = bridge.cv2_to_compressed_imgmsg(img, dst_format=dst_format)
+        # compressed format is separated by ';'.
+        # https://github.com/ros-perception/image_transport_plugins/blob/f0afd122ed9a66ff3362dc7937e6d465e3c3ccf7/compressed_depth_image_transport/src/codec.cpp#L234
+        compmsg.format = '{}; compressed {}'.format(
+            encoding, dst_format)
+        return bridge.cv2_to_imgmsg(img, encoding=encoding), compmsg
+
 
 
 if __name__ == '__main__':

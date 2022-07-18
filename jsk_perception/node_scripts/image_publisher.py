@@ -21,6 +21,9 @@ from PIL import ExifTags as PIL_ExifTags
 from jsk_recognition_msgs.msg import ExifTags, ExifGPSInfo
 import imghdr
 
+from jsk_recognition_utils.depth import depth_to_compressed_depth
+
+
 class ImagePublisher(object):
 
     def __init__(self):
@@ -39,6 +42,10 @@ class ImagePublisher(object):
             ImagePublisherConfig, self._cb_dyn_reconfig)
         self.pub = rospy.Publisher('~output', Image, queue_size=1)
         self.pub_compressed = rospy.Publisher('{}/compressed'.format(rospy.resolve_name('~output')), CompressedImage, queue_size=1)
+        if self.encoding == '32FC1':
+            self.pub_compressed = rospy.Publisher(
+                '{}/compressedDepth'.format(rospy.resolve_name('~output')),
+                CompressedImage, queue_size=1)
         self.publish_info = rospy.get_param('~publish_info', True)
         if self.publish_info:
             self.pub_info = rospy.Publisher(
@@ -189,7 +196,9 @@ class ImagePublisher(object):
             elif cv_type == cv2.CV_32FC1:
                 # 32FC1
                 img = img.astype(np.float32)
-                img /= 255
+                img /= 255.0
+                comp_depth_msg = depth_to_compressed_depth(img)
+                return bridge.cv2_to_imgmsg(img, encoding=encoding), comp_depth_msg
         elif cv_type == cv2.CV_8UC3 and len(img.shape) == 3:
             # 8UC3
             # BGRA, BGR -> BGR

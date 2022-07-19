@@ -199,10 +199,13 @@ class ImagePublisher(object):
                 img /= 255.0
                 comp_depth_msg = depth_to_compressed_depth(img)
                 return bridge.cv2_to_imgmsg(img, encoding=encoding), comp_depth_msg
+            comp_img = img
+            target_format = encoding
         elif cv_type == cv2.CV_8UC3 and len(img.shape) == 3:
             # 8UC3
             # BGRA, BGR -> BGR
-            img = img[:, :, :3]
+            img = comp_img = img[:, :, :3]
+            target_format = 'bgr8'
             # BGR -> RGB
             if encoding == 'rgb8':
                 img = img[:, :, ::-1]
@@ -215,12 +218,15 @@ class ImagePublisher(object):
             # convert to 16UC3 image.
             img = img.astype(np.float32)
             img = np.clip(img / 255.0 * (2 ** 16 - 1), 0, 2 ** 16 - 1)
-            img = img.astype(np.uint16)
+            img = comp_img = img.astype(np.uint16)
+            target_format = 'bgr16'
             # BGR -> RGB
             if encoding == 'rgb16':
                 img = img[:, :, ::-1]
         elif (cv_type == cv2.CV_8UC4 and
                 len(img.shape) == 3 and img.shape[2] == 4):
+            comp_img = img[:, :, :3]
+            target_format = 'bgr8'
             # 8UC4
             if encoding == 'rgba8':
                 # BGRA -> RGBA
@@ -231,17 +237,19 @@ class ImagePublisher(object):
             img = img.astype(np.float32)
             img = np.clip(img / 255.0 * (2 ** 16 - 1), 0, 2 ** 16 - 1)
             img = img.astype(np.uint16)
+            comp_img = img[:, :, :3]
+            target_format = 'bgr16'
             if encoding == 'rgba16':
                 # BGRA -> RGBA
                 img = img[:, :, [2, 1, 0, 3]]
         else:
             rospy.logerr('unsupported encoding: {0}'.format(encoding))
             return
-        compmsg = bridge.cv2_to_compressed_imgmsg(img, dst_format=dst_format)
+        compmsg = bridge.cv2_to_compressed_imgmsg(comp_img, dst_format=dst_format)
         # compressed format is separated by ';'.
-        # https://github.com/ros-perception/image_transport_plugins/blob/f0afd122ed9a66ff3362dc7937e6d465e3c3ccf7/compressed_depth_image_transport/src/codec.cpp#L234
-        compmsg.format = '{}; compressed {}'.format(
-            encoding, dst_format)
+        # https://github.com/ros-perception/image_transport_plugins/blob/f0afd122ed9a66ff3362dc7937e6d465e3c3ccf7/compressed_image_transport/src/compressed_publisher.cpp#L116-L128
+        compmsg.format = '{}; {} compressed {}'.format(
+            encoding, dst_format, target_format)
         return bridge.cv2_to_imgmsg(img, encoding=encoding), compmsg
 
 

@@ -11,7 +11,8 @@
 
   <node name="plane_supported_cuboid_estimator"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/PlaneSupportedCuboidEstimator /sample_manager">
+        args="load jsk_pcl/PlaneSupportedCuboidEstimator /sample_manager"
+        respawn="true">
     <param name="sensor_frame" value="sensor_frame"/>
     <remap from="~input" to="sample_simulate_tabletop_cloud/output"/>
     <remap from="~fast_input" to="sample_simulate_tabletop_cloud/output"/>
@@ -45,7 +46,8 @@
 
   <node name="interactive_cuboid_likelihood"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/InteractiveCuboidLikelihood /sample_manager">
+        args="load jsk_pcl/InteractiveCuboidLikelihood /sample_manager"
+        respawn="true" >
     <remap from="~input" to="plane_supported_cuboid_estimator/output/candidate_cloud"/>
     <param name="sensor_frame" value="sensor_frame"/>
   </node>

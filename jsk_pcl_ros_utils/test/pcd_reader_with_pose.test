@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /pcd_reader_with_pose/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [pcd_reader_with_pose,]
     </rosparam>
   </test>
 

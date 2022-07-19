@@ -1,12 +1,21 @@
 <launch>
   <arg name="gui" default="true"/>
+  <arg name="MANAGER" default="nodelet_manager" />
+  <arg name="launch_manager" default="true" />
+
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet"
+        args="manager"
+        if="$(arg launch_manager)"
+        output="screen" />
 
   <node name="sample_camera_info_and_pointcloud_publisher"
         pkg="jsk_pcl_ros_utils" type="sample_camera_info_and_pointcloud_publisher.py"/>
 
   <node name="planar_pointcloud_simulator"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl_utils/PlanarPointCloudSimulator">
+        args="load jsk_pcl_utils/PlanarPointCloudSimulator $(arg MANAGER)"
+        respawn="true">
     <remap from="~input" to="sample_camera_info_and_pointcloud_publisher/info"/>
     <rosparam>
       distance: 2.0

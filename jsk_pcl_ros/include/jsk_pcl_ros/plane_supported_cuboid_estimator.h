@@ -277,7 +277,7 @@ namespace jsk_pcl_ros
       jsk_recognition_msgs::ModelCoefficientsArray> PolygonSyncPolicy;
     
     PlaneSupportedCuboidEstimator(): DiagnosticNodelet("PlaneSupportedCuboidEstimator") {}
-
+    virtual ~PlaneSupportedCuboidEstimator();
   protected:
     virtual void onInit();
     virtual void subscribe();

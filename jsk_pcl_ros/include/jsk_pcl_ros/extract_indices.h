@@ -58,6 +58,7 @@ namespace jsk_pcl_ros
       sensor_msgs::PointCloud2 > ApproximateSyncPolicy;
 
     ExtractIndices(): DiagnosticNodelet("ExtractIndices") {}
+    virtual ~ExtractIndices();
   protected:
     virtual void onInit();
     virtual void subscribe();

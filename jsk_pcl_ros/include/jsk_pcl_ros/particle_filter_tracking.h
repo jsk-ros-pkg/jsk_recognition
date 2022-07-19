@@ -549,6 +549,7 @@ namespace jsk_pcl_ros
     typedef ParticleFilterTracker<PointT, ParticleXYZRPY>::PointCloudStatePtr
     PointCloudStatePtr;
     ParticleFilterTracking(): timer_(10), distance_error_buffer_(100), angle_error_buffer_(100), no_move_buffer_(10) {}
+    virtual ~ParticleFilterTracking();
   protected:
     pcl::PointCloud<PointT>::Ptr cloud_pass_;
     pcl::PointCloud<PointT>::Ptr cloud_pass_downsampled_;

@@ -65,6 +65,7 @@ namespace jsk_pcl_ros
     jsk_recognition_msgs::ClusterPointIndices > SyncPolicy;
     typedef pcl::PointXYZRGB PointT;
     typedef jsk_pcl_ros::EdgeDepthRefinementConfig Config;
+    virtual ~EdgeDepthRefinement();
   protected:
     ////////////////////////////////////////////////////////
     // methods

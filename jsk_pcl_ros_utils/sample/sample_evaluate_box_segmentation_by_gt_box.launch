@@ -39,7 +39,8 @@
   </node>
 
   <node name="evaluate_box_segmentation_by_gt_box"
-        pkg="jsk_pcl_ros_utils" type="evaluate_box_segmentation_by_gt_box.py">
+        pkg="jsk_pcl_ros_utils" type="evaluate_box_segmentation_by_gt_box.py"
+        respawn="true">
     <remap from="~input/box_gt" to="boxes_to_gt_box/output" />
     <remap from="~input/box" to="boxes_to_box/output" />
   </node>

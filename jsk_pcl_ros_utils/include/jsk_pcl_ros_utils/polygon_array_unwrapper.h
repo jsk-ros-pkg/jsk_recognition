@@ -59,6 +59,7 @@ namespace jsk_pcl_ros_utils
     jsk_recognition_msgs::PolygonArray,
     jsk_recognition_msgs::ModelCoefficientsArray>
     SyncPolicy;
+    virtual ~PolygonArrayUnwrapper();
 
   protected:
     virtual void onInit();

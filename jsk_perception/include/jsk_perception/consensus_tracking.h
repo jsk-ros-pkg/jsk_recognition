@@ -53,6 +53,7 @@ namespace jsk_perception
     ConsensusTracking() :
       DiagnosticNodelet("ConsensusTracking"),
       window_initialized_(false) {}
+    virtual ~ConsensusTracking();
     typedef message_filters::sync_policies::ApproximateTime<
       sensor_msgs::Image,
       geometry_msgs::PolygonStamped> ApproximateSyncPolicy;

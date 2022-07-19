@@ -65,6 +65,16 @@ namespace jsk_pcl_ros
     typedef typename pcl::ConditionBase<pcl::PointXYZRGB>::Ptr ConditionPtr;
     typedef typename pcl::ComparisonBase<pcl::PointXYZRGB>::Ptr ComparisonPtr;
     typedef PackedComparison Comparison;
+    ~ColorFilter() {
+      // message_filters::Synchronizer needs to be called reset
+      // before message_filters::Subscriber is freed.
+      // Calling reset fixes the following error on shutdown of the nodelet:
+      // terminate called after throwing an instance of
+      // 'boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >'
+      //     what():  boost: mutex lock failed in pthread_mutex_lock: Invalid argument
+      // Also see https://github.com/ros/ros_comm/issues/720 .
+      sync_.reset();
+    }
 
   protected:
     boost::mutex mutex_;

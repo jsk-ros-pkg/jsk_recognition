@@ -59,6 +59,7 @@ namespace jsk_perception
     jsk_recognition_msgs::PolygonArray > ApproximateSyncPolicy;
     typedef jsk_perception::PolygonArrayColorHistogramConfig Config;
     PolygonArrayColorHistogram(): DiagnosticNodelet("PolygonArrayColorHistogram") {}
+    virtual ~PolygonArrayColorHistogram();
   protected:
     virtual void onInit();
     virtual void subscribe();

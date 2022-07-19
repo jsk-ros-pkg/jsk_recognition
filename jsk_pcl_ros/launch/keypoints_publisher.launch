@@ -12,7 +12,8 @@
     <node pkg="nodelet" type="nodelet"
           name="keypoints_publisher"
           args="load jsk_pcl/KeypointsPublisher $(arg manager)"
-          output="screen" clear_params="true">
+          output="screen" clear_params="true"
+          respawn="true">
       <remap from="~input" to="$(arg input_point)" />
     </node>
   </group>                      <!-- pcl_nodelet -->

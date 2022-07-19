@@ -8,7 +8,7 @@ from PIL import ImageFont
 
 def put_text_to_image(
         img, text, pos, font_path, font_size, color, background_color=None,
-        offset_x=0, offset_y=0):
+        offset_x=0, offset_y=0, loc='top'):
     """Put text to image using pillow.
 
     You can put text to an image including non-ASCII characters.
@@ -33,6 +33,8 @@ def put_text_to_image(
         x position offset.
     offset_y : float
         y position offset.
+    loc : str
+        location.
     """
     if sys.version_info < (3, 0):
         text = text.decode('utf-8')
@@ -41,7 +43,12 @@ def put_text_to_image(
     text_w, text_h = dummy_draw.textsize(text, font=pil_font)
     text_bottom_offset = int(0.1 * text_h)
     x, y = pos
-    offset_y = (text_h+text_bottom_offset) + offset_y
+    if loc == 'top':
+        offset_y = (text_h + text_bottom_offset) + offset_y
+    elif loc == 'center':
+        offset_y = offset_y
+    else:
+        raise NotImplementedError('loc {} not implemented.'.format(loc))
     x0 = x - offset_x
     y0 = y - offset_y
     img_h, img_w = img.shape[:2]
@@ -70,10 +77,11 @@ def put_text_to_image(
     text_area[y1-y0:y2-y0, x1-x0:x2-x0] = img[y1:y2, x1:x2]
 
     # convert pil image to cv2 image.
-    pil_img = Image.fromarray(text_area)
-    draw = ImageDraw.Draw(pil_img)
-    draw.text(xy=(0, 0), text=text, fill=color, font=pil_font)
+    if not (text_area.shape[0] == 0 or text_area.shape[0] == 0):
+        pil_img = Image.fromarray(text_area)
+        draw = ImageDraw.Draw(pil_img)
+        draw.text(xy=(0, 0), text=text, fill=color, font=pil_font)
 
-    text_area = np.array(pil_img, dtype=np.uint8)
-    img[y1:y2, x1:x2] = text_area[y1-y0:y2-y0, x1-x0:x2-x0]
+        text_area = np.array(pil_img, dtype=np.uint8)
+        img[y1:y2, x1:x2] = text_area[y1-y0:y2-y0, x1-x0:x2-x0]
     return img

@@ -2,6 +2,12 @@
 
   <arg name="gui" default="true" />
 
+  <arg name="MANAGER" value="sample_nodelet_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet"
+        args="manager"
+        output="screen"/>
+
   <node name="pcd_to_pointcloud"
         pkg="pcl_ros" type="pcd_to_pointcloud"
         args="$(find jsk_pcl_ros_utils)/sample/data/bunny.pcd 0.1">
@@ -25,7 +31,8 @@
 
   <node name="transform_pointcloud_in_bounding_box"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl_utils/TransformPointcloudInBoundingBox">
+        args="load jsk_pcl_utils/TransformPointcloudInBoundingBox $(arg MANAGER)"
+        respawn="true">
     <remap from="~input" to="pcd_to_pointcloud/output"/>
     <remap from="~input_box" to="sample_bounding_box_publisher_from_pointcloud/output"/>
   </node>

@@ -13,6 +13,8 @@
       timeout_0: 30
       topic_1: /consensus_tracking/debug/image
       timeout_1: 30
+      check_after_kill_node: true
+      node_names: [consensus_tracking,]
     </rosparam>
   </test>
 

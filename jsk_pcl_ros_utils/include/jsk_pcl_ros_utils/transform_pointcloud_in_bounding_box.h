@@ -90,6 +90,7 @@ namespace jsk_pcl_ros_utils
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
       jsk_recognition_msgs::BoundingBox > SyncPolicy;
+    virtual ~TransformPointcloudInBoundingBox();
   protected:
     ////////////////////////////////////////////////////////
     // methods

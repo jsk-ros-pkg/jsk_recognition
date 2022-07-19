@@ -69,6 +69,7 @@ namespace jsk_pcl_ros
   {
   public:
     ClusterPointIndicesDecomposer(): DiagnosticNodelet("ClusterPointIndicesDecomposer") { }
+    virtual ~ClusterPointIndicesDecomposer();
     typedef jsk_pcl_ros::ClusterPointIndicesDecomposerConfig Config;
     typedef message_filters::sync_policies::ExactTime<
     sensor_msgs::PointCloud2,

@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /background_subtraction/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [background_subtraction,]
     </rosparam>
   </test>
 

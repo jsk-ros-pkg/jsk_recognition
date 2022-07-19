@@ -1,5 +1,12 @@
 <launch>
   <arg name="gui" default="true"/>
+  <arg name="launch_manager" default="true" />
+
+  <arg name="MANAGER" default="sample_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet" args="manager"
+        if="$(arg launch_manager)"
+        output="screen" />
 
   <node name="camera_info_publisher"
         pkg="rostopic" type="rostopic"
@@ -14,7 +21,8 @@
 
   <node name="roi_to_mask_image"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_perception/ROIToMaskImage">
+        args="load jsk_perception/ROIToMaskImage $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input" to="camera/rgb/camera_info"/>
   </node>
 

@@ -61,6 +61,7 @@ namespace jsk_pcl_ros_utils
     typedef jsk_pcl_ros_utils::MaskImageToDepthConsideredMaskImageConfig Config;
 
     MaskImageToDepthConsideredMaskImage(): DiagnosticNodelet("MaskImageToDepthConsideredMaskImage") { }
+    virtual ~MaskImageToDepthConsideredMaskImage();
   protected:
     ////////////////////////////////////////////////////////
     // methods

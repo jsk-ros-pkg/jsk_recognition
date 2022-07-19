@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /pointcloud_relative_from_pose_stamped/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [pointcloud_relative_from_pose_stamped,]
     </rosparam>
   </test>
 

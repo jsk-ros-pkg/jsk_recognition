@@ -66,6 +66,7 @@ namespace jsk_pcl_ros_utils
       jsk_recognition_msgs::PolygonArray> ApproximateSyncPolicy;
 
     CloudOnPlane(): DiagnosticNodelet("CloudOnPlane") {}
+    virtual ~CloudOnPlane();
   protected:
     virtual void onInit();
     virtual void subscribe();

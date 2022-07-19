@@ -37,7 +37,8 @@
 
   <node name="joint_state_static_filter"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/JointStateStaticFilter">
+        args="load jsk_pcl/JointStateStaticFilter /sample_manager"
+        respawn="true">
     <remap from="~input" to="/kinect_head/depth_registered/points"/>
     <remap from="~input_joint_state" to="/joint_states"/>
     <rosparam command="load" file="$(find jsk_pcl_ros)/config/pr2_sensor_joint.yaml"/>

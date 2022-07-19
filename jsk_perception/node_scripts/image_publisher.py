@@ -239,9 +239,9 @@ class ImagePublisher(object):
             return
         compmsg = bridge.cv2_to_compressed_imgmsg(img, dst_format=dst_format)
         # compressed format is separated by ';'.
-        # https://github.com/ros-perception/image_transport_plugins/blob/f0afd122ed9a66ff3362dc7937e6d465e3c3ccf7/compressed_depth_image_transport/src/codec.cpp#L234
-        compmsg.format = '{}; compressed {}'.format(
-            encoding, dst_format)
+        # https://github.com/ros-perception/image_transport_plugins/blob/f0afd122ed9a66ff3362dc7937e6d465e3c3ccf7/compressed_image_transport/src/compressed_publisher.cpp#L116-L128
+        compmsg.format = '{}; {} compressed {}'.format(
+            encoding, dst_format, encoding)
         return bridge.cv2_to_imgmsg(img, encoding=encoding), compmsg
 
 

@@ -26,19 +26,6 @@ import math
 
 class AutoCheckIn(object):
 
-    def _get_id_token_by_cognito(self, username, password):
-        client = boto3.client('cognito-idp', self.REGION)
-        rospy.loginfo("Initiate User Auth for {}".format(username))
-        response = client.initiate_auth(
-            ClientId=self.COGNITO_USERPOOL_CLIENT_ID,
-            AuthFlow='USER_PASSWORD_AUTH',
-            AuthParameters={
-                'USERNAME': username,
-                'PASSWORD': password
-            }
-        )
-        return response['AuthenticationResult']['IdToken']
-
     def __init__(self):
         rospy.init_node('aws_auto_checkin_service')
         rospy.loginfo("ROS node initialized as {}".format(rospy.get_name()))
@@ -50,21 +37,39 @@ class AutoCheckIn(object):
                 env = json.load(env_json)
         except IOError:
             rospy.logerr('Cannot open "{}".\nCopy "default.env.json" file as a new file called "env.json" and edit parameters in it.'.format(env_path))
-            raise
+            sys.exit(1)
 
         try:
-            self.API_ENDPOINT = env['ApiEndpoint']
             self.FACE_AREA_THRESHOLD = env['FaceAreaThreshold']
-            self.NAME_TTL_SEC = env['NameTtlSec']
             self.FACE_SIMILARITY_THRESHOLD = env['FaceSimilarityThreshold']
-            self.COGNITO_USERPOOL_ID = env['CognitoUserPoolId']
-            self.COGNITO_USERPOOL_CLIENT_ID = env['CognitoUserPoolClientId']
-            self.REGION = env['Region']
+            self.COLLECTION_ID = "auto-check-in-app-face-collection"
+            self.MAX_FACES = 1
+            region_name = env['Region']
         except KeyError:
             print('Invalid config file')
             raise
 
-        self.id_token = self._get_id_token_by_cognito(env['UserName'], env['UserPassword'])
+        aws_credentials_path = rospy.get_param('~aws_credentials_path', '/tmp/aws.json')
+        rospy.loginfo("Loading AWS credentials from {}".format(aws_credentials_path))
+        try:
+            with open(aws_credentials_path) as aws_json:
+                aws_credentials = json.load(aws_json)
+        except IOError:
+            rospy.logerr('Cannot open "{}".\n Please put region/aws_access_key_id/aws_secret_access_key to aws.json.'.format(aws_credentials_path))
+            sys.exit(1)
+
+        try:
+            aws_access_key_id = aws_credentials['aws_access_key_id']
+            aws_secret_access_key = aws_credentials['aws_secret_access_key']
+        except KeyError:
+            print('Invalid config file')
+            raise
+
+        self.rekognition = boto3.client(
+            'rekognition',
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            region_name=region_name)
 
         self.use_window = rospy.get_param('~use_window', False)
         rospy.loginfo("Launch image window : {}".format(self.use_window))
@@ -90,32 +95,12 @@ class AutoCheckIn(object):
 
         # Call API
         try:
-            endpoint = 'https://' + self.API_ENDPOINT
-            t = datetime.datetime.utcnow()
-            amz_date = t.strftime('%Y%m%dT%H%M%SZ')
-            headers = {
-                'Content-Type': 'image/jpg',
-                'X-Amz-Date':amz_date,
-                'Authorization': self.id_token
-            }
-            request_parameters = encoded_face_image.tostring()
-            res = requests.post(endpoint, data=request_parameters, headers=headers).json()
-            rospy.loginfo("responce : {}".format(res))
-            # renponse samples:
-            #      {'result': 'OK', 'name': 'hoge', 'similarity': 95.15}
-            #      {'result': 'NO_MATCH', 'name': '', 'similarity': 0}
-            #      {'result': 'INVALID', 'name': '', 'similarity': 0}
-
-            result = res['result']
+            res = self.rekognition.search_faces_by_image(
+                CollectionId=self.COLLECTION_ID, Image={'Bytes': encoded_face_image.tobytes()},
+                FaceMatchThreshold=self.FACE_SIMILARITY_THRESHOLD, MaxFaces=self.MAX_FACES)
+            return res
         except Exception as e:
             print(e)
-
-        else:
-            if result == 'OK':
-                name = res['name']
-                similarity = res['similarity']
-                if similarity > self.FACE_SIMILARITY_THRESHOLD:
-                    return res
 
         return None
 
@@ -145,9 +130,13 @@ class AutoCheckIn(object):
 
             ret = self.findface(img[cy-h/2:cy+h/2,cx-w/2:cx+w/2])
             if ret != None:
-                faces.faces.append(Face(face=Rect(cx, cy, w, h),
-                                        label=ret['name'],
-                                        confidence=ret['similarity']))
+                if ret['FaceMatches'] != []:
+                    rospy.loginfo(ret)
+                    rospy.loginfo("FaceId: {}\n Similarity: {}".format(ret['FaceMatches'][0]['Face']['FaceId'], \
+                                                                       ret['FaceMatches'][0]['Similarity']))
+                    faces.faces.append(Face(face=Rect(cx, cy, w, h),
+                                            label=ret['FaceMatches'][0]['Face']['FaceId'],
+                                            confidence=ret['FaceMatches'][0]['Similarity']))
 
             if self.use_window: # copy colored face rectangle to img_gray
                 img_gray[cy-h/2:cy+h/2,cx-h/2:cx+w/2] = img[cy-h/2:cy+h/2,cx-w/2:cx+w/2]

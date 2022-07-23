@@ -45,6 +45,7 @@ class AutoCheckIn(ConnectionBasedTransport):
             self.FACE_AREA_THRESHOLD = env['FaceAreaThreshold']
             self.FACE_SIMILARITY_THRESHOLD = env['FaceSimilarityThreshold']
             self.COLLECTION_ID = "auto-check-in-app-face-collection"
+            self.DYNAMODB_TABLE = env['DynamodbTable']
             self.MAX_FACES = 1
             region_name = env['Region']
         except KeyError:
@@ -72,6 +73,13 @@ class AutoCheckIn(ConnectionBasedTransport):
             aws_access_key_id=aws_access_key_id,
             aws_secret_access_key=aws_secret_access_key,
             region_name=region_name)
+
+        self.dynamodb =  boto3.resource(
+            'dynamodb',
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            region_name=region_name)
+        self.dynamodb_table = self.dynamodb.Table(self.DYNAMODB_TABLE)
 
         self.use_window = rospy.get_param('~use_window', False)
         rospy.loginfo("Launch image window : {}".format(self.use_window))
@@ -149,10 +157,13 @@ class AutoCheckIn(ConnectionBasedTransport):
             if ret != None:
                 if ret['FaceMatches'] != []:
                     rospy.loginfo(ret)
-                    rospy.loginfo("FaceId: {}\n Similarity: {}".format(ret['FaceMatches'][0]['Face']['FaceId'], \
+                    face_id = self.dynamodb_table.get_item(
+                        Key={'RekognitionId':
+                             ret['FaceMatches'][0]['Face']['FaceId']})['Item']['Name']
+                    rospy.loginfo("FaceId: {}\n Similarity: {}".format(face_id, \
                                                                        ret['FaceMatches'][0]['Similarity']))
                     faces.faces.append(Face(face=Rect(cx, cy, w, h),
-                                            label=ret['FaceMatches'][0]['Face']['FaceId'],
+                                            label=face_id,
                                             confidence=ret['FaceMatches'][0]['Similarity']))
 
             if self.use_window: # copy colored face rectangle to img_gray

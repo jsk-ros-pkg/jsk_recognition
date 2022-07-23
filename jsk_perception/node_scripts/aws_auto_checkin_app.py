@@ -9,11 +9,15 @@
 ## Author: Yuli-disney <yulikamiya@gmail.com>
 ##         Kei Okada <kei.okada@gmail.com>
 
+from __future__ import division
+
 import rospy
 
 import message_filters
 from sensor_msgs.msg import CompressedImage
 from opencv_apps.msg import FaceArrayStamped, Face, Rect
+from jsk_recognition_msgs.msg import RectArray
+from jsk_recognition_msgs.msg import ClassificationResult
 
 import numpy as np
 
@@ -84,7 +88,18 @@ class AutoCheckIn(ConnectionBasedTransport):
         self.use_window = rospy.get_param('~use_window', False)
         rospy.loginfo("Launch image window : {}".format(self.use_window))
 
+        self.classifier_name = rospy.get_param(
+            "~classifier_name", rospy.get_name())
+        self.target_names = self.get_label_names()
+        self.target_name_to_label_index = {}
+        for i, name in enumerate(self.target_names):
+            self.target_name_to_label_index[name] = i
+
         self.name_pub = self.advertise('face_name', FaceArrayStamped, queue_size=1)
+        self.pub_rects = self.advertise("~output/rects", RectArray,
+                                        queue_size=1)
+        self.pub_class = self.advertise("~output/class", ClassificationResult,
+                                        queue_size=1)
 
     def subscribe(self):
         self.image_sub = message_filters.Subscriber('{}/compressed'.format(rospy.resolve_name('image')), CompressedImage)
@@ -105,6 +120,10 @@ class AutoCheckIn(ConnectionBasedTransport):
     def unsubscribe(self):
         for sub in self.subs:
             sub.unregister()
+
+    def get_label_names(self):
+        items = self.dynamodb_table.scan()['Items']
+        return list(set([item["Name"] for item in items]))
 
     def findface(self, face_image):
         area = face_image.shape[0] * face_image.shape[1]
@@ -153,7 +172,7 @@ class AutoCheckIn(ConnectionBasedTransport):
                 rospy.logerr(e)
                 return
 
-            ret = self.findface(img[cy-h/2:cy+h/2,cx-w/2:cx+w/2])
+            ret = self.findface(img[cy-h//2:cy+h//2,cx-w//2:cx+w//2])
             if ret != None:
                 if ret['FaceMatches'] != []:
                     face_id = self.dynamodb_table.get_item(
@@ -161,14 +180,30 @@ class AutoCheckIn(ConnectionBasedTransport):
                              ret['FaceMatches'][0]['Face']['FaceId']})['Item']['Name']
                     rospy.loginfo("FaceId: {}\n Similarity: {}".format(face_id, \
                                                                        ret['FaceMatches'][0]['Similarity']))
-                    faces.faces.append(Face(face=Rect(cx, cy, w, h),
+                    faces.faces.append(Face(face=Rect(cx - w // 2, cy - h // 2, w, h),
                                             label=face_id,
-                                            confidence=ret['FaceMatches'][0]['Similarity']))
+                                            confidence=ret['FaceMatches'][0]['Similarity'] / 100.0))
 
             if self.use_window: # copy colored face rectangle to img_gray
-                img_gray[cy-h/2:cy+h/2,cx-h/2:cx+w/2] = img[cy-h/2:cy+h/2,cx-w/2:cx+w/2]
+                img_gray[cy-h//2:cy+h//2,cx-h//2:cx+w//2] = img[cy-h//2:cy+h//2,cx-w//2:cx+w//2]
 
         self.name_pub.publish(faces)
+
+        cls_msg = ClassificationResult(
+            header=image.header,
+            classifier=self.classifier_name,
+            target_names=self.target_names,
+            labels=[self.target_name_to_label_index[face.label]
+                    for face in faces.faces],
+            label_names=[face.label for face in faces.faces],
+            label_proba=[face.confidence for face in faces.faces],
+        )
+
+        rects_msg = RectArray(header=image.header)
+        for face in faces.faces:
+            rects_msg.rects.append(face.face)
+        self.pub_rects.publish(rects_msg)
+        self.pub_class.publish(cls_msg)
 
         if self.use_window:
             cv2.imshow(image._connection_header['topic'], img_gray)

@@ -74,6 +74,7 @@
   <exec_depend>jsk_recognition_msgs</exec_depend>
   <exec_depend>jsk_recognition_utils</exec_depend>
   <exec_depend>jsk_rqt_plugins</exec_depend>
+  <exec_depend>jsk_tools</exec_depend>
   <exec_depend>jsk_topic_tools</exec_depend>
   <exec_depend>libcmt</exec_depend>
   <exec_depend>libuvc_camera</exec_depend>

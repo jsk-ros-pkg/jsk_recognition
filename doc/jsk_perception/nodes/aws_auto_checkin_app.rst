@@ -15,7 +15,7 @@ Subscribing Topic
 
 * ``image/compressed`` (``sensor_msgs/CompressedImage``)
 
-  Input jpeg image.
+  Input image.
   This topic name is resolved from ``image``.
 
 * ``face_roi`` (``opencv_apps/FaceArrayStamped``)
@@ -38,7 +38,7 @@ Publishing Topic
 
 * ``~output/rects`` (``jsk_recognition_msgs/RectArray``)
 
-  Rectangles of matched faces
+  Rectangles of matched faces.
 
 * ``~output/class`` (``jsk_recognition_msgs/ClassificationResult``)
 
@@ -51,6 +51,21 @@ Parameters
 
   Show input image on the window, if it is true.
 
+* ``~approximate_sync`` (Bool, default: `True`)
+
+  Approximately synchronize inputs if it's true.
+
+* ``~queue_size`` (Int, default: `100`)
+
+  How many messages you allow about the subscriber to keep in the queue.
+  This should be big when there is much difference about delay between two topics.
+
+* ``~slop`` (Float, default: `1.0`)
+
+  Maximum allowed time for approximate synchronization in [sec].
+
+  This parameter is enabled only when `~approximate_sync` is True.
+
 * ``~classifier_name`` (String, default: ``rospy.get_name()``)
 
   Classifier name written to ``classifier`` field of ``~output/class``.
@@ -58,6 +73,8 @@ Parameters
 * ``~env_path`` (String, default: ``env.json``)
 
   Json file for environment variables.
+
+  See `DynamoDB <https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html>`_ for how to obtain DynamoDB Table name and `Rekognition <https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/rekognition.html>`_ for CollectionId.
 
 .. code-block:: json
 
@@ -73,14 +90,13 @@ Parameters
 * ``~aws_credentials_path`` (String, Default: ``aws.json``)
 
   Json file for aws access key and secret key to run AWS Rekognition.
-  see `Set up an AWS account and create an IAM user
+  See `Set up an AWS account and create an IAM user
   <https://docs.aws.amazon.com/rekognition/latest/dg/setting-up.html>`_
   for how to obtain keys.
 
 .. code-block:: json
 
   {
-      "region" : "xxxxxxxxxxxxxxxxxxxx",
       "aws_access_key_id" : "####################",
       "aws_secret_access_key" : "********************"
   }

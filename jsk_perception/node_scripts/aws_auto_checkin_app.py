@@ -71,8 +71,6 @@ class AutoCheckIn(object):
 
         self.name_pub = rospy.Publisher('face_name', FaceArrayStamped, queue_size=1)
         self.image_sub = message_filters.Subscriber('{}/compressed'.format(rospy.resolve_name('image')), CompressedImage)
-        # we wan to use RegionOfInterest, but it message_filters requires
-        # header information, so use CameraInfo
         self.roi_sub = message_filters.Subscriber('face_roi', FaceArrayStamped)
         self.ts = message_filters.ApproximateTimeSynchronizer([self.image_sub, self.roi_sub], 10, 1, allow_headerless = True)
         self.ts.registerCallback(self.callback)
@@ -125,7 +123,7 @@ class AutoCheckIn(object):
         # decode compressed image
         np_arr = np.fromstring(image.data, np.uint8)
         img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        if image.format != "rgb8; jpeg compressed bgr8":
+        if image.format.find("compressed rgb") > -1:
             img = img[:, :, ::-1]
 
         if self.use_window:

@@ -14,9 +14,10 @@ Subscribing Topic
 -----------------
 
 
-* ``~image`` (``sensor_msgs/Image``)
+* ``image/compressed`` (``sensor_msgs/CompressedImage``)
 
-  Raw image.
+  Input image.
+  This topic name is resolved from ``image``.
 
 * ``~face_roi`` (``opencv_apps/FaceArrayStamped``)
 

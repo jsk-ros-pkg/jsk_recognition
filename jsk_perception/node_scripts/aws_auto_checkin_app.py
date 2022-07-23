@@ -172,7 +172,9 @@ class AutoCheckIn(ConnectionBasedTransport):
                 rospy.logerr(e)
                 return
 
-            ret = self.findface(img[cy-h//2:cy+h//2,cx-w//2:cx+w//2])
+            image_roi_slice = np.index_exp[cy - h // 2:cy + h // 2,
+                                           cx - w // 2:cx + w // 2]
+            ret = self.findface(img[image_roi_slice])
             if ret != None:
                 if ret['FaceMatches'] != []:
                     face_id = self.dynamodb_table.get_item(
@@ -185,7 +187,7 @@ class AutoCheckIn(ConnectionBasedTransport):
                                             confidence=ret['FaceMatches'][0]['Similarity'] / 100.0))
 
             if self.use_window: # copy colored face rectangle to img_gray
-                img_gray[cy-h//2:cy+h//2,cx-h//2:cx+w//2] = img[cy-h//2:cy+h//2,cx-w//2:cx+w//2]
+                img_gray[image_roi_slice] = img[image_roi_slice]
 
         self.name_pub.publish(faces)
 

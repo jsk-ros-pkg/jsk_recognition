@@ -44,9 +44,9 @@ class AutoCheckIn(ConnectionBasedTransport):
         try:
             self.FACE_AREA_THRESHOLD = env['FaceAreaThreshold']
             self.FACE_SIMILARITY_THRESHOLD = env['FaceSimilarityThreshold']
-            self.COLLECTION_ID = "auto-check-in-app-face-collection"
+            self.COLLECTION_ID = env['CollectionId']
             self.DYNAMODB_TABLE = env['DynamodbTable']
-            self.MAX_FACES = 1
+            self.MAX_FACES = env['MaxFaces']
             region_name = env['Region']
         except KeyError:
             print('Invalid config file')
@@ -156,7 +156,6 @@ class AutoCheckIn(ConnectionBasedTransport):
             ret = self.findface(img[cy-h/2:cy+h/2,cx-w/2:cx+w/2])
             if ret != None:
                 if ret['FaceMatches'] != []:
-                    rospy.loginfo(ret)
                     face_id = self.dynamodb_table.get_item(
                         Key={'RekognitionId':
                              ret['FaceMatches'][0]['Face']['FaceId']})['Item']['Name']

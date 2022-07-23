@@ -1,19 +1,22 @@
 <launch>
+  <arg name="gui" default="true" />
   <arg name="use_window" default="true" />
 
   <include file="$(find jsk_perception)/sample/include/play_rosbag_people.xml" />
 
+  <arg name="INPUT_IMAGE" default="/camera/rgb/image_raw" />
+
   <!-- face_detection.cpp -->
   <include file="$(find opencv_apps)/launch/face_detection.launch" >
     <arg name="debug_view" value="$(arg use_window)" />
-    <arg name="image" value="/camera/rgb/image_raw" />
+    <arg name="image" value="$(arg INPUT_IMAGE)" />
   </include>
 
   <node name="aws_auto_checkin_app"
         pkg="jsk_perception" type="aws_auto_checkin_app.py"
         output="screen"
         clear_params="true" >
-    <remap from="image" to="/camera/rgb/image_raw" />
+    <remap from="image" to="$(arg INPUT_IMAGE)" />
     <remap from="face_roi" to="/face_detection/faces" />
     <rosparam subst_value="true">
       use_window: $(arg use_window)
@@ -22,5 +25,29 @@
       queue_size: 100
     </rosparam>
   </node>
+
+  <group ns="aws_auto_checkin_app" >
+    <node name="draw_rects"
+          pkg="jsk_perception" type="draw_rects.py"
+          output="screen"
+          clear_params="true" >
+      <remap from="~input" to="$(arg INPUT_IMAGE)" />
+      <remap from="~input/rects" to="output/rects" />
+      <remap from="~input/class" to="output/class" />
+      <rosparam subst_value="true">
+        font_path: $(find jsk_recognition_utils)/font_data/NotoSansJP-Regular.otf
+        use_classification_result: true
+        label_size: 16
+        queue_size: 100
+      </rosparam>
+    </node>
+  </group>
+
+  <group if="$(arg gui)" >
+    <node name="image_view00"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="aws_auto_checkin_app/draw_rects/output" />
+    </node>
+  </group>
 
 </launch>

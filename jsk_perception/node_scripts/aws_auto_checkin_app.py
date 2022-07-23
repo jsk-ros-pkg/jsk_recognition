@@ -56,7 +56,7 @@ class AutoCheckIn(ConnectionBasedTransport):
             print('Invalid config file')
             raise
 
-        aws_credentials_path = rospy.get_param('~aws_credentials_path', '/tmp/aws.json')
+        aws_credentials_path = rospy.get_param('~aws_credentials_path', 'aws.json')
         rospy.loginfo("Loading AWS credentials from {}".format(aws_credentials_path))
         try:
             with open(aws_credentials_path) as aws_json:

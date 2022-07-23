@@ -28,6 +28,7 @@
     <rosparam subst_value="true">
       use_window: $(arg use_window)
       env_path: /tmp/env.json
+      aws_credentials_path: /tmp/aws.json
       approximate_sync: false
       queue_size: 100
     </rosparam>

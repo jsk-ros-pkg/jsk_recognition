@@ -67,7 +67,7 @@ Parameters
     "CollectionId": "%%COLLECTION_ID%%",
     "FaceAreaThreshold": 1e4,
     "FaceSimilarityThreshold": 90,
-    "MaxFaces": 1,
+    "MaxFaces": 1
   }
 
 * ``~aws_credentials_path`` (String, Default: ``aws.json``)

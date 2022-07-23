@@ -1,7 +1,14 @@
 <launch>
   <arg name="use_window" default="true" />
+  <arg name="use_usb_cam" default="false" doc="set true to use USB camera image as input"/>
 
-  <include file="$(find jsk_perception)/sample/include/play_rosbag_people.xml" />
+  <node name="usb_cam" pkg="usb_cam" type="usb_cam_node"
+        if="$(arg use_usb_cam)" >
+    <remap from="/usb_cam/image_raw" to="/camera/rgb/image_raw" />
+  </node>
+
+  <include file="$(find jsk_perception)/sample/include/play_rosbag_people.xml"
+           unless="$(arg use_usb_cam)" />
 
   <!-- face_detection.cpp -->
   <include file="$(find opencv_apps)/launch/face_detection.launch" >

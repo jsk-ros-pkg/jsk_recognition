@@ -24,11 +24,13 @@ import json
 import requests
 import math
 
-class AutoCheckIn(object):
+from jsk_topic_tools import ConnectionBasedTransport
+
+
+class AutoCheckIn(ConnectionBasedTransport):
 
     def __init__(self):
-        rospy.init_node('aws_auto_checkin_service')
-        rospy.loginfo("ROS node initialized as {}".format(rospy.get_name()))
+        super(AutoCheckIn, self).__init__()
 
         env_path = rospy.get_param('~env_path', 'env.json')
         rospy.loginfo("Loading AutoCheckin env variables from {}".format(env_path))
@@ -74,12 +76,27 @@ class AutoCheckIn(object):
         self.use_window = rospy.get_param('~use_window', False)
         rospy.loginfo("Launch image window : {}".format(self.use_window))
 
-        self.name_pub = rospy.Publisher('face_name', FaceArrayStamped, queue_size=1)
+        self.name_pub = self.advertise('face_name', FaceArrayStamped, queue_size=1)
+
+    def subscribe(self):
         self.image_sub = message_filters.Subscriber('{}/compressed'.format(rospy.resolve_name('image')), CompressedImage)
         self.roi_sub = message_filters.Subscriber('face_roi', FaceArrayStamped)
-        self.ts = message_filters.ApproximateTimeSynchronizer([self.image_sub, self.roi_sub], 10, 1, allow_headerless = True)
-        self.ts.registerCallback(self.callback)
+        self.subs = [self.image_sub, self.roi_sub]
+        queue_size = rospy.get_param('~queue_size', 100)
+        if rospy.get_param('~approximate_sync', True):
+            slop = rospy.get_param('~slop', 1.0)
+            self.ts = message_filters.ApproximateTimeSynchronizer(
+                self.subs,
+                queue_size, slop, allow_headerless=True)
+        else:
+            self.ts = message_filters.TimeSynchronizer(
+                fs=self.subs, queue_size=queue_size)
+            self.ts.registerCallback(self.callback)
         rospy.loginfo("Waiting for {} and {}".format(self.image_sub.name, self.roi_sub.name))
+
+    def unsubscribe(self):
+        for sub in self.subs:
+            sub.unregister()
 
     def findface(self, face_image):
         area = face_image.shape[0] * face_image.shape[1]
@@ -149,6 +166,7 @@ class AutoCheckIn(object):
 
 
 if __name__ == '__main__':
+    rospy.init_node('aws_auto_checkin_service')
     auto = AutoCheckIn()
     rospy.spin()
 

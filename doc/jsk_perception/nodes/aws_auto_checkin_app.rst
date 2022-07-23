@@ -7,8 +7,7 @@ What is this?
 .. image:: https://d1.awsstatic.com/Solutions/Solutions%20Category%20Template%20Draft/Solution%20Architecture%20Diagrams/auto-check-in-app-architecture.8baa84b79c2294d035c7b9cee323d7c9ba53a43a.png
 
 Face recognition using Amazon Rekognition, see
-https://aws.amazon.com/solutions/implementations/auto-check-in-app/
-for more info.
+`SearchFacesByImage <https://docs.aws.amazon.com/rekognition/latest/APIReference/API_SearchFacesByImage.html>`_ and `Auto Check-In App <https://aws.amazon.com/solutions/implementations/auto-check-in-app/>`_ for more info.  
 
 Subscribing Topic
 -----------------
@@ -16,10 +15,10 @@ Subscribing Topic
 
 * ``image/compressed`` (``sensor_msgs/CompressedImage``)
 
-  Input image.
+  Input jpeg image.
   This topic name is resolved from ``image``.
 
-* ``~face_roi`` (``opencv_apps/FaceArrayStamped``)
+* ``face_roi`` (``opencv_apps/FaceArrayStamped``)
 
   Rectangles on the face of input image. Use ROI value.
 
@@ -33,9 +32,17 @@ Subscribing Topic
 Publishing Topic
 ----------------
 
-* ``~face_name`` (``opencv_apps/FaceArrayStamped``)
+* ``face_name`` (``opencv_apps/FaceArrayStamped``)
 
   Publish recognized face name as well as face image. The face.{x,y,width,height} corresponds to input `face_roi`, that means x, y is the center of face rectangle.
+
+* ``~output/rects`` (``jsk_recognition_msgs/RectArray``)
+
+  Rectangles of matched faces
+
+* ``~output/class`` (``jsk_recognition_msgs/ClassificationResult``)
+
+  Detected face class labels and probabilities.
 
 Parameters
 ----------
@@ -44,30 +51,40 @@ Parameters
 
   Show input image on the window, if it is true.
 
+* ``~classifier_name`` (String, default: ``rospy.get_name()``)
+
+  Classifier name written to ``classifier`` field of ``~output/class``.
+
 * ``~env_path`` (String, default: ``env.json``)
 
-  Json file for environment variables to run aws auto-checkin app. You
-  can find how to generate this file on
-  https://aws.amazon.com/jp/builders-flash/202004/auto-checkin-app/.
-  In addition to that, you need to add "UserName" and "UserPassword"
+  Json file for environment variables.
 
 .. code-block:: json
 
   {
     "Region": "%%REGION%%",
-    "ApiEndpoint" : "%%REST_API_ID%%.execute-api.%%REGION%%.amazonaws.com/prod/rekognize_face",
-    "CognitoUserPoolId": "%%COGNITO_USER_POOL_ID%%",
-    "CognitoUserPoolClientId": "%%COGNITO_USER_POOL_CLIENT_ID%%",
+    "DynamodbTable": "%%DYNAMODB_TABLE%%",
+    "CollectionId": "%%COLLECTION_ID%%",
     "FaceAreaThreshold": 1e4,
-    "FaceMarginRatio": 0.2,
     "FaceSimilarityThreshold": 90,
-    "CroppedImageWidth": 540,
-    "CroppedImageHeight": 540,
-    "NameTtlSec": 10,
-    "UseDeepLeaningForDetector": true,
-    "UserName": "%%YOUR_USER_NAME%%",
-    "UserPassword": "%%YOUR_PASSWORD%%"
+    "MaxFaces": 1,
   }
+
+* ``~aws_credentials_path`` (String, Default: ``aws.json``)
+
+  Json file for aws access key and secret key to run AWS Rekognition.
+  see `Set up an AWS account and create an IAM user
+  <https://docs.aws.amazon.com/rekognition/latest/dg/setting-up.html>`_
+  for how to obtain keys.
+
+.. code-block:: json
+
+  {
+      "region" : "xxxxxxxxxxxxxxxxxxxx",
+      "aws_access_key_id" : "####################",
+      "aws_secret_access_key" : "********************"
+  }
+
 
 Sample
 ------
@@ -77,9 +94,9 @@ Sample
   roslaunch jsk_perception sample_aws_auto_checkin_app.launch use_window:=true
 
 
-For JSK user, Download `env.json` file from
-`Gdrive <https://drive.google.com/file/d/1WUrRxPtT0ZuRx-IqjGwDBqeR5vZVTkB1/view?usp=sharing>`_
-and put this under `/tmp` directory to run sample code.
+For JSK user, Download `env.json` file and `aws.json` from
+`Gdrive <https://drive.google.com/drive/folders/1imuZ-1mEZvKkQBBoxtze1jYE_eaXdmJ4?usp=sharing>`_
+and put these under `/tmp` directory to run sample code.
 
 To add new people to face database, add face image file to
 `Amazon S3 <https://console.aws.amazon.com/s3>`_,

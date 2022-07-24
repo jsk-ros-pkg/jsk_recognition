@@ -115,7 +115,7 @@ class AutoCheckIn(ConnectionBasedTransport):
         else:
             self.ts = message_filters.TimeSynchronizer(
                 fs=self.subs, queue_size=queue_size)
-            self.ts.registerCallback(self.callback)
+        self.ts.registerCallback(self.callback)
         rospy.loginfo("Waiting for {} and {}".format(self.image_sub.name, self.roi_sub.name))
 
     def unsubscribe(self):

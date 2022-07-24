@@ -1,6 +1,5 @@
 <launch>
-  <arg name="gui" default="true" />
-  <arg name="use_window" default="true" />
+  <arg name="gui" default="true" doc="set true to show windows displaying face detection and face search"/>
   <arg name="use_usb_cam" default="false" doc="set true to use USB camera image as input"/>
   <arg name="use_aws_face_detection" default="false" doc="set true to use aws face detection API"/>
 
@@ -22,7 +21,7 @@
       <remap from="image" to="$(arg INPUT_IMAGE)" />
       <remap from="~faces" to="/face_detection/faces" />
       <rosparam subst_value="true">
-        use_window: $(arg use_window)
+        use_window: $(arg gui)
         aws_credentials_path: /tmp/aws.json
         attributes: ALL
       </rosparam>
@@ -31,7 +30,7 @@
   <group unless="$(arg use_aws_face_detection)" >
     <!-- face_detection.cpp -->
     <include file="$(find opencv_apps)/launch/face_detection.launch" >
-      <arg name="debug_view" value="$(arg use_window)" />
+      <arg name="debug_view" value="$(arg gui)" />
       <arg name="image" value="$(arg INPUT_IMAGE)" />
     </include>
   </group>
@@ -43,7 +42,7 @@
     <remap from="image" to="$(arg INPUT_IMAGE)" />
     <remap from="face_roi" to="/face_detection/faces" />
     <rosparam subst_value="true">
-      use_window: $(arg use_window)
+      use_window: $(arg gui)
       env_path: /tmp/env.json
       aws_credentials_path: /tmp/aws.json
       approximate_sync: false

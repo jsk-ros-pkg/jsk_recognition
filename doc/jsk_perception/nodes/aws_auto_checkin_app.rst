@@ -107,7 +107,7 @@ Sample
 
 .. code-block:: bash
 
-  roslaunch jsk_perception sample_aws_auto_checkin_app.launch use_window:=true
+  roslaunch jsk_perception sample_aws_auto_checkin_app.launch
 
 
 For JSK user, Download ``env.json`` file and ``aws.json`` from

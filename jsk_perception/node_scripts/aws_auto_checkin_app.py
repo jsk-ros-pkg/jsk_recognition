@@ -27,6 +27,7 @@ import datetime
 import json
 import requests
 import math
+import sys
 
 from jsk_topic_tools import ConnectionBasedTransport
 

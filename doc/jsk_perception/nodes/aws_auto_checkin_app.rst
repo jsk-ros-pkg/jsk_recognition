@@ -51,20 +51,20 @@ Parameters
 
   Show input image on the window, if it is true.
 
-* ``~approximate_sync`` (Bool, default: `True`)
+* ``~approximate_sync`` (Bool, default: ``True``)
 
   Approximately synchronize inputs if it's true.
 
-* ``~queue_size`` (Int, default: `100`)
+* ``~queue_size`` (Int, default: ``100``)
 
   How many messages you allow about the subscriber to keep in the queue.
   This should be big when there is much difference about delay between two topics.
 
-* ``~slop`` (Float, default: `1.0`)
+* ``~slop`` (Float, default: ``1.0``)
 
   Maximum allowed time for approximate synchronization in [sec].
 
-  This parameter is enabled only when `~approximate_sync` is True.
+  This parameter is enabled only when ``~approximate_sync`` is True.
 
 * ``~classifier_name`` (String, default: ``rospy.get_name()``)
 
@@ -110,10 +110,12 @@ Sample
   roslaunch jsk_perception sample_aws_auto_checkin_app.launch use_window:=true
 
 
-For JSK user, Download `env.json` file and `aws.json` from
+For JSK user, Download ``env.json`` file and ``aws.json`` from
 `Gdrive <https://drive.google.com/drive/folders/1imuZ-1mEZvKkQBBoxtze1jYE_eaXdmJ4?usp=sharing>`_
-and put these under `/tmp` directory to run sample code.
+and put these under ``/tmp`` directory to run sample code.
 
 To add new people to face database, add face image file to
 `Amazon S3 <https://console.aws.amazon.com/s3>`_,
 `auto-check-in-gapp-register...` buckets
+
+For more info about managing the face collection, see `Searching faces in a collection <https://docs.aws.amazon.com/rekognition/latest/dg/collections.html>`_.

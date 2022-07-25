@@ -14,9 +14,10 @@ Please refer to `DetectFaces <https://github.com/awsdocs/amazon-rekognition-deve
 Subscribing Topic
 -----------------
 
-* ``~input`` (``sensor_msgs/Image``)
+* ``image/compressed`` (``sensor_msgs/CompressedImage``)
 
   Input image.
+  This topic name is resolved from ``image``.
 
 Publishing Topic
 ----------------

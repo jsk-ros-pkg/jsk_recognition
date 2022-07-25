@@ -116,11 +116,13 @@ Sample
 
 .. code-block:: bash
 
-  roslaunch jsk_perception sample_aws_auto_checkin_app.launch
+  roslaunch jsk_perception sample_aws_auto_checkin_app.launch use_aws_face_detection:=true
 
+If ``use_aws_face_detection`` is true, AWS face detection API is used. Otherwise OpenCV face detection is used.
+AWS face detection is more accurate.
 
 For JSK user, Download ``env.json`` file and ``aws.json`` from
-`Gdrive <https://drive.google.com/drive/folders/1imuZ-1mEZvKkQBBoxtze1jYE_eaXdmJ4?usp=sharing>`_
+`Gdrive <https://drive.google.com/drive/folders/10kVoswI3EgDG4x1tTW0iSQkqUwsJkOqg?usp=sharing>`_
 and put these under ``/tmp`` directory to run sample code.
 
 To add new people to face database, add face image file to

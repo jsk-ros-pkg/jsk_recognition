@@ -47,6 +47,7 @@
       aws_credentials_path: /tmp/aws.json
       approximate_sync: false
       queue_size: 100
+      image_transport: compressed
     </rosparam>
   </node>
 

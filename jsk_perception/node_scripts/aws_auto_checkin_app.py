@@ -14,7 +14,7 @@ from __future__ import division
 import rospy
 
 import message_filters
-from sensor_msgs.msg import CompressedImage
+from sensor_msgs.msg import CompressedImage, Image
 from opencv_apps.msg import FaceArrayStamped, Face, Rect
 from jsk_recognition_msgs.msg import RectArray
 from jsk_recognition_msgs.msg import ClassificationResult
@@ -23,6 +23,7 @@ import numpy as np
 
 import boto3
 import cv2
+from cv_bridge import CvBridge
 import datetime
 import json
 import requests
@@ -89,6 +90,10 @@ class AutoCheckIn(ConnectionBasedTransport):
         self.use_window = rospy.get_param('~use_window', False)
         rospy.loginfo("Launch image window : {}".format(self.use_window))
 
+        self.bridge = CvBridge()
+        self.transport_hint = rospy.get_param('~image_transport', 'compressed')
+        rospy.loginfo("Using transport {}".format(self.transport_hint))
+
         self.classifier_name = rospy.get_param(
             "~classifier_name", rospy.get_name())
         self.target_names = self.get_label_names()
@@ -103,7 +108,10 @@ class AutoCheckIn(ConnectionBasedTransport):
                                         queue_size=1)
 
     def subscribe(self):
-        self.image_sub = message_filters.Subscriber('{}/compressed'.format(rospy.resolve_name('image')), CompressedImage)
+        if self.transport_hint == 'compressed':
+            self.image_sub = message_filters.Subscriber('{}/compressed'.format(rospy.resolve_name('image')), CompressedImage)
+        else:
+            self.image_sub = message_filters.Subscriber('image', Image)
         self.roi_sub = message_filters.Subscriber('face_roi', FaceArrayStamped)
         self.subs = [self.image_sub, self.roi_sub]
         queue_size = rospy.get_param('~queue_size', 100)
@@ -150,11 +158,14 @@ class AutoCheckIn(ConnectionBasedTransport):
         return None
 
     def callback(self, image, roi):
-        # decode compressed image
-        np_arr = np.fromstring(image.data, np.uint8)
-        img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        if image.format.find("compressed rgb") > -1:
-            img = img[:, :, ::-1]
+        if self.transport_hint == 'compressed':
+            # decode compressed image
+            np_arr = np.fromstring(image.data, np.uint8)
+            img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+            if image.format.find("compressed rgb") > -1:
+                img = img[:, :, ::-1]
+        else:
+            img = self.bridge.imgmsg_to_cv2(image, desired_encoding='bgr8')
 
         if self.use_window:
             img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)

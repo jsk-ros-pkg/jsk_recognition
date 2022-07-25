@@ -15,8 +15,13 @@ Subscribing Topic
 
 * ``image/compressed`` (``sensor_msgs/CompressedImage``)
 
-  Input image.
+  Input compressed image. (only when ``~image_transport`` is ``compressed``.)
+  
   This topic name is resolved from ``image``.
+
+* ``image`` (``sensor_msgs/Image``)
+
+  Input raw image. (only when ``~image_transport`` is ``raw``.)
 
 * ``face_roi`` (``opencv_apps/FaceArrayStamped``)
 
@@ -69,6 +74,10 @@ Parameters
 * ``~classifier_name`` (String, default: ``rospy.get_name()``)
 
   Classifier name written to ``classifier`` field of ``~output/class``.
+
+* ``~image_transport`` (String, default: ``compressed``)
+
+  Set ``raw`` to subscribe raw image.
 
 * ``~env_path`` (String, default: ``env.json``)
 

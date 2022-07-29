@@ -72,6 +72,7 @@ namespace jsk_pcl_ros
       sensor_msgs::PointCloud2
       > ReferenceSyncPolicy;
     ICPRegistration(): timer_(10), done_init_(false) { }
+    virtual ~ICPRegistration();
   protected:
     ////////////////////////////////////////////////////////
     // methosd

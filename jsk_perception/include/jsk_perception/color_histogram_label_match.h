@@ -69,6 +69,7 @@ namespace jsk_perception
       > SyncPolicyWithoutMask;
 
     ColorHistogramLabelMatch(): DiagnosticNodelet("ColorHistogramLabelMatch") {}
+    virtual ~ColorHistogramLabelMatch();
   protected:
     virtual void onInit();
     virtual void subscribe();

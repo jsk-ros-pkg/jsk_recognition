@@ -4,6 +4,9 @@
   <arg name="filename" default="$(find jsk_pcl_ros)/sample/data/convenience_store.bag" />
   <arg name="camera_name" default="openni_camera" />
   <arg name="namespace" default="remote"/>
+  <arg name="MANAGER" value="camera_nodelet_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet" args="manager" />
 
   <node name="rosbag_play"
         pkg="rosbag" type="play"
@@ -24,7 +27,7 @@
   </node>
 
   <node pkg="nodelet" type="nodelet" name="points_xyzrgb_hw_registered"
-        args="standalone depth_image_proc/point_cloud_xyzrgb">
+        args="load depth_image_proc/point_cloud_xyzrgb $(arg MANAGER)">
     <remap from="rgb/image_rect_color"        to="/$(arg namespace)/$(arg camera_name)/rgb/image_rect_color"/>
     <remap from="rgb/camera_info"             to="/$(arg camera_name)/rgb/camera_info"/>
     <remap from="depth_registered/image_rect" to="/$(arg namespace)/$(arg camera_name)/depth_registered/image_rect"/>

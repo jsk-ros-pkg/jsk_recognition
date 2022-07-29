@@ -2,6 +2,7 @@
   <arg name="gui" default="true"/>
 
   <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml"/>
+  <arg name="MANAGER" value="/kinect_head/kinect_head_nodelet_manager" />
 
   <node name="sample_point_publisher_from_pointcloud"
         pkg="jsk_pcl_ros" type="sample_point_publisher_from_pointcloud.py">
@@ -15,7 +16,8 @@
 
   <node name="hinted_handle_estimator"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/HintedHandleEstimator">
+        args="load jsk_pcl/HintedHandleEstimator $(arg MANAGER)"
+        respawn="true" >
     <remap from="~cloud" to="/kinect_head/depth_registered/points"/>
     <remap from="~point" to="sample_point_publisher_from_pointcloud/output"/>
   </node>

@@ -1,6 +1,12 @@
 <launch>
   <arg name="gui" default="true"/>
 
+  <arg name="MANAGER" value="add_point_indices_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet"
+        args="manager"
+        output="screen"/>
+
   <node name="pose_with_covariance_stamped_publisher"
         pkg="rostopic" type="rostopic"
         args="pub -r 1 -s /pose_with_covariance_stamped_publisher/output
@@ -16,7 +22,8 @@
 
   <node name="pose_with_covariance_stamped_to_gaussian_pointcloud"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl_utils/PoseWithCovarianceStampedToGaussianPointCloud">
+        args="load jsk_pcl_utils/PoseWithCovarianceStampedToGaussianPointCloud $(arg MANAGER)"
+        respawn="true">
     <remap from="~input" to="pose_with_covariance_stamped_publisher/output"/>
     <rosparam>
       cut_plane: xy

@@ -36,7 +36,8 @@
       </rosparam>
     </node>
     <node pkg="nodelet" type="nodelet" name="rgb_filter"
-          args="load jsk_pcl/RGBColorFilter $(arg manager)" output="screen">
+          args="load jsk_pcl/RGBColorFilter $(arg manager)" output="screen"
+          respawn="true" >
       <remap from="~input" to="zfilter/output" />
       <remap from="~output" to="$(arg OUTPUT)" />
       <rosparam>

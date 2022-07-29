@@ -59,6 +59,7 @@ namespace jsk_pcl_ros
     sensor_msgs::CameraInfo
     > SyncPolicy;
     AddColorFromImage(): DiagnosticNodelet("AddColorFromImage") { }
+    virtual ~AddColorFromImage();
   protected:
     virtual void onInit();
     virtual void subscribe();

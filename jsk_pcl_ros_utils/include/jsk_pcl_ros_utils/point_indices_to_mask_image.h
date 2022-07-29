@@ -58,6 +58,7 @@ namespace jsk_pcl_ros_utils
       sensor_msgs::Image > SyncPolicy;
 
     PointIndicesToMaskImage(): DiagnosticNodelet("PointIndicesToMaskImage") { }
+    virtual ~PointIndicesToMaskImage();
   protected:
     ////////////////////////////////////////////////////////
     // methods

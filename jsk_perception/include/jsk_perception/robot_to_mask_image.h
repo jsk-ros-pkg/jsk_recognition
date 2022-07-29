@@ -59,6 +59,7 @@ namespace jsk_perception
 
     ros::Subscriber sub_;
     ros::Publisher pub_;
+    ros::Publisher pub_camera_info_;
 
     boost::shared_ptr<robot_self_filter::SelfMask<pcl::PointXYZ> > self_mask_;
     tf::TransformListener tf_listener_;

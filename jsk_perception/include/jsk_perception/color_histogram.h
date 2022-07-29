@@ -65,6 +65,7 @@ namespace jsk_perception
       sensor_msgs::Image> MaskSyncPolicy;
     typedef jsk_perception::ColorHistogramConfig Config;
     ColorHistogram(): DiagnosticNodelet("ColorHistogram") {}
+    virtual ~ColorHistogram();
   protected:
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
     boost::shared_ptr<message_filters::Synchronizer<MaskSyncPolicy> > mask_sync_;

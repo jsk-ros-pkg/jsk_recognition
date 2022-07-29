@@ -77,6 +77,7 @@ namespace jsk_pcl_ros
   {
   public:
     IncrementalModelRegistration(): DiagnosticNodelet("IncrementalModelRegistration") {}
+    virtual ~IncrementalModelRegistration();
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
       pcl_msgs::PointIndices,

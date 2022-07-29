@@ -1,24 +1,78 @@
 <launch>
-  <arg name="use_window" default="true" />
+  <arg name="gui" default="true" doc="set true to show windows displaying face detection and face search"/>
+  <arg name="use_usb_cam" default="false" doc="set true to use USB camera image as input"/>
+  <arg name="use_aws_face_detection" default="false" doc="set true to use aws face detection API"/>
 
-  <include file="$(find jsk_perception)/sample/include/play_rosbag_people.xml" />
+  <node name="usb_cam" pkg="usb_cam" type="usb_cam_node"
+        if="$(arg use_usb_cam)" >
+    <remap from="/usb_cam/image_raw" to="/camera/rgb/image_raw" />
+  </node>
 
-  <!-- face_detection.cpp -->
-  <include file="$(find opencv_apps)/launch/face_detection.launch" >
-    <arg name="debug_view" value="$(arg use_window)" />
-    <arg name="image" value="/camera/rgb/image_raw" />
-  </include>
+  <include file="$(find jsk_perception)/sample/include/play_rosbag_people.xml"
+           unless="$(arg use_usb_cam)" />
+
+  <arg name="INPUT_IMAGE" default="/camera/rgb/image_raw" />
+
+  <group if="$(arg use_aws_face_detection)" >
+    <node name="aws_detect_faces"
+          pkg="jsk_perception" type="aws_detect_faces.py"
+          output="screen"
+          clear_params="true" >
+      <remap from="image" to="$(arg INPUT_IMAGE)" />
+      <remap from="~faces" to="/face_detection/faces" />
+      <rosparam subst_value="true">
+        use_window: $(arg gui)
+        aws_credentials_path: /tmp/aws.json
+        attributes: ALL
+      </rosparam>
+    </node>
+  </group>
+  <group unless="$(arg use_aws_face_detection)" >
+    <!-- face_detection.cpp -->
+    <include file="$(find opencv_apps)/launch/face_detection.launch" >
+      <arg name="debug_view" value="$(arg gui)" />
+      <arg name="image" value="$(arg INPUT_IMAGE)" />
+    </include>
+  </group>
 
   <node name="aws_auto_checkin_app"
         pkg="jsk_perception" type="aws_auto_checkin_app.py"
         output="screen"
         clear_params="true" >
-    <remap from="image" to="/camera/rgb/image_raw" />
+    <remap from="image" to="$(arg INPUT_IMAGE)" />
     <remap from="face_roi" to="/face_detection/faces" />
     <rosparam subst_value="true">
-      use_window: $(arg use_window)
+      use_window: $(arg gui)
       env_path: /tmp/env.json
+      aws_credentials_path: /tmp/aws.json
+      approximate_sync: false
+      queue_size: 100
+      image_transport: compressed
     </rosparam>
   </node>
+
+  <group ns="aws_auto_checkin_app" >
+    <node name="draw_rects"
+          pkg="jsk_perception" type="draw_rects.py"
+          output="screen"
+          clear_params="true" >
+      <remap from="~input" to="$(arg INPUT_IMAGE)" />
+      <remap from="~input/rects" to="output/rects" />
+      <remap from="~input/class" to="output/class" />
+      <rosparam subst_value="true">
+        font_path: $(find jsk_recognition_utils)/font_data/NotoSansJP-Regular.otf
+        use_classification_result: true
+        label_size: 16
+        queue_size: 100
+      </rosparam>
+    </node>
+  </group>
+
+  <group if="$(arg gui)" >
+    <node name="image_view00"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="aws_auto_checkin_app/draw_rects/output" />
+    </node>
+  </group>
 
 </launch>

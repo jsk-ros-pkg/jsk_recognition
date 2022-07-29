@@ -513,4 +513,10 @@
   <class name="jsk_pcl/OrganizedStatisticalOutlierRemoval" type="jsk_pcl_ros::OrganizedStatisticalOutlierRemoval"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_pcl/ContainerOccupancyDetector" type="jsk_pcl_ros::ContainerOccupancyDetector"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Calculate container occupancy rate
+    </description>
+  </class>
 </library>

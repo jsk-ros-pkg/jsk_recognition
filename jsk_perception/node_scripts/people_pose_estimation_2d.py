@@ -304,7 +304,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
                     z = float(depth_img[int(joint_pos['y'])][int(joint_pos['x'])])
                 else:
                     continue
-                if np.isnan(z):
+                if np.isnan(z) or z <= 0:
                     continue
                 x = (joint_pos['x'] - cx) * z / fx
                 y = (joint_pos['y'] - cy) * z / fy

@@ -13,6 +13,8 @@
       timeout_0: 30
       topic_1: /polygon_appender/output_coefficients
       timeout_1: 30
+      check_after_kill_node: true
+      node_names: [polygon_appender,]
     </rosparam>
   </test>
 

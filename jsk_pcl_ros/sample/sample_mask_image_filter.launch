@@ -3,22 +3,30 @@
   <arg name="camera" value="/right_hand_camera" />
 
   <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml" />
+  <arg name="MANAGER" value="/right_hand_camera/right_hand_camera_nodelet_manager" />
 
-  <node name="pointcloud_to_mask_image" pkg="jsk_pcl_ros_utils" type="pointcloud_to_mask_image">
+  <node name="pointcloud_to_mask_image"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PointCloudToMaskImage $(arg MANAGER)">
     <param name="~z_near" value="0" />
     <param name="~z_far" value="1" />
     <remap from="~input" to="$(arg camera)/depth_registered/points" />
     <remap from="~input/depth" to="$(arg camera)/depth/image_rect" />
   </node>
 
-  <node name="mask_image_filter" pkg="jsk_pcl_ros" type="mask_image_filter">
+  <node name="mask_image_filter"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/MaskImageFilter $(arg MANAGER)"
+        respawn="true">
     <param name="~negative" value="false" />
     <remap from="~input" to="$(arg camera)/depth_registered/points" />
     <remap from="~input/mask" to="/pointcloud_to_mask_image/output" />
     <remap from="~input/camera_info" to="$(arg camera)/depth_registered/camera_info" />
     </node>
 
-  <node name="extract_indices" pkg="jsk_pcl_ros" type="extract_indices">
+  <node name="extract_indices"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ExtractIndices $(arg MANAGER)" >
     <remap from="~input" to="$(arg camera)/depth_registered/points" />
     <remap from="~indices" to="/mask_image_filter/output" />
   </node>

@@ -1,4 +1,4 @@
-# virtual_camera_mono
+# VirtualCameraMono
 
 ![](images/virtual_camera_mono.png)
 

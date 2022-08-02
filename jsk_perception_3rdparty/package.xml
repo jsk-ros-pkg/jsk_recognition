@@ -1,0 +1,66 @@
+<package format="3">
+  <name>jsk_perception_3rdparty</name>
+  <version>1.2.15</version>
+
+  <description>ROS nodes and nodelets for 2-D image perception using 3rdparty libraries.</description>
+  <author email="yanokura@jsk.imi.i.u-tokyo.ac.jp">Iori Yanokura</author>
+  <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
+  <maintainer email="yanokura@jsk.imi.i.u-tokyo.ac.jp">Iori Yanokura</maintainer>
+
+  <license>BSD</license>
+
+  <url type="repository">http://github.com/jsk-ros-pkg/jsk_recognition</url>
+  <url type="bugtracker">http://github.com/jsk-ros-pkg/jsk_recognition/issues</url>
+  <url type="website">https://jsk-docs.readthedocs.io/projects/jsk_recognition/en/latest/jsk_perception_3rdparty</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- ALPHABETICAL ORDER -->
+  <build_depend>catkin_virtualenv</build_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend condition="$ROS_PYTHON_VERSION == 2">cv_bridge_python3</build_depend> <!-- for melodic -->
+  <build_depend>dynamic_reconfigure</build_depend>
+  <build_depend>jsk_data</build_depend>
+  <build_depend>jsk_perception</build_depend>
+  <build_depend>jsk_recognition_msgs</build_depend>
+  <build_depend>jsk_recognition_utils</build_depend>
+  <build_depend>jsk_tools</build_depend>
+  <build_depend>jsk_topic_tools</build_depend>
+  <build_depend>message_generation</build_depend>
+  <build_depend>nodelet</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <!-- ALPHABETICAL ORDER -->
+
+  <!-- ALPHABETICAL ORDER -->
+  <exec_depend>catkin_virtualenv</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">cv_bridge_python3</exec_depend> <!-- for melodic -->
+  <exec_depend>dynamic_reconfigure</exec_depend>
+  <exec_depend>image_view2</exec_depend>
+  <exec_depend>image_view</exec_depend>
+  <exec_depend>jsk_data</exec_depend>
+  <exec_depend>jsk_perception</exec_depend>
+  <exec_depend>jsk_recognition_msgs</exec_depend>
+  <exec_depend>jsk_recognition_utils</exec_depend>
+  <exec_depend>jsk_tools</exec_depend>
+  <exec_depend>jsk_topic_tools</exec_depend>
+  <exec_depend>message_runtime</exec_depend>
+  <exec_depend>nodelet</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>rviz</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <!-- ALPHABETICAL ORDER -->
+
+  <!-- ALPHABETICAL ORDER -->
+  <test_depend>jsk_tools</test_depend>
+  <test_depend>roslaunch</test_depend>
+  <test_depend>roslint</test_depend>
+  <test_depend>rostest</test_depend>
+  <!-- ALPHABETICAL ORDER -->
+
+  <export>
+    <pip_requirements>requirements.txt</pip_requirements>
+  </export>
+
+</package>

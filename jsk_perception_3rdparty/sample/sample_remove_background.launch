@@ -1,0 +1,74 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py"
+        clear_params="true">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception_3rdparty)/sample/pr2-with-peeler.png
+      rate: 1
+    </rosparam>
+  </node>
+  <arg name="INPUT_IMAGE" default="/image_publisher/output" />
+
+  <node name="remove_background"
+        pkg="jsk_perception_3rdparty" type="remove_background.py"
+        output="screen"
+        clear_params="true" >
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <rosparam subst_value="true" >
+      pretrained_model: $(find jsk_perception_3rdparty)/trained_data/rembg/u2net/u2net.onnx
+    </rosparam>
+  </node>
+
+  <group ns="remove_background" >
+    <node name="apply_mask_image"
+          pkg="nodelet" type="nodelet"
+          args="standalone jsk_perception/ApplyMaskImage">
+      <remap from="~input" to="$(arg INPUT_IMAGE)" />
+      <remap from="~input/mask" to="output" />
+      <rosparam>
+        approximate_sync: false
+        clip: false
+        queue_size: 100
+      </rosparam>
+    </node>
+
+    <node name="apply_raw_mask_image"
+          pkg="nodelet" type="nodelet"
+          args="standalone jsk_perception/ApplyMaskImage">
+      <remap from="~input" to="$(arg INPUT_IMAGE)" />
+      <remap from="~input/mask" to="output/raw" />
+      <rosparam>
+        approximate_sync: false
+        clip: false
+        queue_size: 100
+      </rosparam>
+    </node>
+  </group>
+
+  <group if="$(arg gui)">
+    <node name="image_view00"
+          pkg="image_view" type="image_view"
+          clear_params="true">
+      <remap from="image" to="remove_background/output" />
+    </node>
+    <node name="image_view01"
+          pkg="image_view" type="image_view"
+          clear_params="true">
+      <remap from="image" to="remove_background/output/raw" />
+    </node>
+    <node name="image_view02"
+          pkg="image_view" type="image_view"
+          clear_params="true">
+      <remap from="image" to="remove_background/apply_mask_image/output" />
+    </node>
+    <node name="image_view03"
+          pkg="image_view" type="image_view"
+          clear_params="true">
+      <remap from="image" to="remove_background/apply_raw_mask_image/output" />
+    </node>
+  </group>
+
+</launch>

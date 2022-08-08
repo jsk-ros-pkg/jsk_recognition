@@ -14,6 +14,8 @@
   <url type="website">https://jsk-docs.readthedocs.io/projects/jsk_recognition/en/latest/jsk_perception_3rdparty</url>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>python3-catkin-pkg-modules</buildtool_depend>
+  <buildtool_depend>catkin_virtualenv</buildtool_depend>
 
   <!-- ALPHABETICAL ORDER -->
   <build_depend>catkin_virtualenv</build_depend>
@@ -46,6 +48,10 @@
   <exec_depend>jsk_topic_tools</exec_depend>
   <exec_depend>message_runtime</exec_depend>
   <exec_depend>nodelet</exec_depend>
+  <exec_depend>python3-empy</exec_depend>
+  <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>python3-rospkg-modules</exec_depend>
+  <exec_depend>python3-setuptools</exec_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>rviz</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>

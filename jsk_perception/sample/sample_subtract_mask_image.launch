@@ -1,6 +1,13 @@
 <launch>
 
   <arg name="gui" default="true" />
+  <arg name="launch_manager" default="true" />
+
+  <arg name="MANAGER" default="sample_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet" args="manager"
+        if="$(arg launch_manager)"
+        output="screen" />
 
   <node name="image_publisher"
         pkg="jsk_perception" type="image_publisher.py">
@@ -11,7 +18,9 @@
   <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <node name="mask_image_generator0"
-        pkg="jsk_perception" type="mask_image_generator">
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/MaskImageGenerator $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <rosparam>
       offset_x: 50
@@ -22,7 +31,9 @@
   </node>
 
   <node name="mask_image_generator1"
-        pkg="jsk_perception" type="mask_image_generator">
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/MaskImageGenerator $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <rosparam>
       offset_x: 100
@@ -33,7 +44,9 @@
   </node>
 
   <node name="subtract_mask_image"
-        pkg="jsk_perception" type="subtract_mask_image">
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/SubtractMaskImage $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input/src1" to="mask_image_generator0/output" />
     <remap from="~input/src2" to="mask_image_generator1/output" />
   </node>

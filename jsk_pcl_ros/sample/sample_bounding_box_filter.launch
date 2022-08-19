@@ -7,7 +7,9 @@
   </include>
 
   <node name="bounding_box_filter"
-        pkg="jsk_pcl_ros" type="bounding_box_filter">
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/BoundingBoxFilter nodelet_manager"
+        respawn="true" >
     <remap from="~input_box" to="cluster_point_indices_decomposer_cloud_size/boxes" />
     <remap from="~input_indices" to="cluster_point_indices_decomposer_cloud_size/cluster_indices" />
     <rosparam>
@@ -21,7 +23,9 @@
   </node>
 
   <node name="bounding_box_filter_without_indices"
-        pkg="jsk_pcl_ros" type="bounding_box_filter">
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/BoundingBoxFilter nodelet_manager"
+        respawn="true" >
     <remap from="~input_box" to="cluster_point_indices_decomposer_cloud_size/boxes" />
     <rosparam>
       with_indices: false

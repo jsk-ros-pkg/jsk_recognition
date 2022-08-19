@@ -4,6 +4,7 @@
   <include file="$(find jsk_pcl_ros_utils)/sample/sample_normal_concatenater.launch">
     <arg name="gui" value="false"/>
   </include>
+  <arg name="MANAGER" value="/right_hand_camera/right_hand_camera_nodelet_manager" />
 
   <node name="static_tf_publisher"
         pkg="tf" type="static_transform_publisher"
@@ -11,7 +12,8 @@
 
   <node name="normal_flip_to_frame"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl_utils/NormalFlipToFrame">
+        args="load jsk_pcl_utils/NormalFlipToFrame $(arg MANAGER)"
+        respawn="true">
     <remap from="~input" to="normal_concatenater/output"/>
     <rosparam>
       frame_id: dummy_frame

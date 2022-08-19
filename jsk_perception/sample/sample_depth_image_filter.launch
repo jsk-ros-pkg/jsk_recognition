@@ -5,6 +5,7 @@
   <arg name="INPUT_DEPTH_IMAGE" default="/camera/depth_registered/hw_registered/image_rect_raw" />
 
   <include file="$(find jsk_perception)/sample/include/play_rosbag_people.xml" />
+  <arg name="MANAGER" value="/camera/camera_nodelet_manager" />
 
   <node name="depth_image_filter"
         pkg="jsk_perception" type="depth_image_filter.py"
@@ -19,7 +20,8 @@
   <group ns="depth_image_filter" >
     <node name="apply_mask_image"
           pkg="nodelet" type="nodelet"
-          args="standalone jsk_perception/ApplyMaskImage">
+          args="load jsk_perception/ApplyMaskImage $(arg MANAGER)"
+          respawn="true" >
       <remap from="~input" to="$(arg INPUT_IMAGE)" />
       <remap from="~input/mask" to="output/mask" />
       <rosparam>

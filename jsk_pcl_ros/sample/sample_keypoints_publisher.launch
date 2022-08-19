@@ -2,15 +2,18 @@
   <arg name="gui" default="true"/>
 
   <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_room73b2_table.xml"/>
+  <arg name="MANAGER" value="/camera/camera_nodelet_manager" />
 
   <node name="pointcloud_xyzrgb_to_xyz"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl_utils/PointCloudXYZRGBToXYZ">
+        args="load jsk_pcl_utils/PointCloudXYZRGBToXYZ $(arg MANAGER)">
     <remap from="~input" to="/camera/depth_registered/points"/>
   </node>
 
   <include file="$(find jsk_pcl_ros)/launch/keypoints_publisher.launch">
     <arg name="input_point" value="/pointcloud_xyzrgb_to_xyz/output"/>
+    <arg name="create_manager" value="false" />
+    <arg name="manager" value="$(arg MANAGER)" />
   </include>
 
   <group if="$(arg gui)">

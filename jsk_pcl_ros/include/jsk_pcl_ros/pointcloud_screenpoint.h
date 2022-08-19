@@ -55,6 +55,8 @@ namespace jsk_pcl_ros
 {
   class PointcloudScreenpoint : public jsk_topic_tools::ConnectionBasedNodelet
   {
+   public:
+    virtual ~PointcloudScreenpoint();
    protected:
     typedef PointcloudScreenpointConfig Config;
 

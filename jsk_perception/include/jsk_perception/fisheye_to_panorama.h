@@ -62,6 +62,7 @@ namespace jsk_perception
     typedef jsk_perception::FisheyeConfig Config;
 
     FisheyeToPanorama(): DiagnosticNodelet("FisheyeToPanorama") {}
+    virtual ~FisheyeToPanorama();
   protected:
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     void configCallback(Config &new_config, uint32_t level);

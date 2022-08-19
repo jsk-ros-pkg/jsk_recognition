@@ -49,8 +49,9 @@ ROS package to classify sound stream.
         ```
         ```bash
         # For n_channel, bitdepth and sample_rate,
-        $ pactl list short sinks
-        0       alsa_output.pci-0000_00_1f.3.analog-stereo      module-alsa-card.c      s16le 2ch 44100Hz   SUSPENDED
+        # Note that sources means input (e.g. microphone) and sinks means output (e.g. speaker)
+        $ pactl list short sources
+        1       alsa_input.pci-0000_00_1f.3.analog-stereo       module-alsa-card.c      s16le 2ch 44100Hz       SUSPENDED
         ```
     - If you use `/audio` topic from other computer and do not want to publish `/audio`, set `use_microphone:=false` at each launch flie.
 

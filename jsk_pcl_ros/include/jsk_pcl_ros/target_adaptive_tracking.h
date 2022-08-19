@@ -171,6 +171,7 @@ namespace jsk_pcl_ros
       
    public:
       TargetAdaptiveTracking();
+      virtual ~TargetAdaptiveTracking();
       virtual void callback(
          const sensor_msgs::PointCloud2::ConstPtr &,
          const geometry_msgs::PoseStamped::ConstPtr &);

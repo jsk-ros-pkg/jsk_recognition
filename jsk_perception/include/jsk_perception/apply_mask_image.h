@@ -57,6 +57,7 @@ namespace jsk_perception
     sensor_msgs::Image,
     sensor_msgs::Image > SyncPolicy;
     ApplyMaskImage(): DiagnosticNodelet("ApplyMaskImage") {}
+    virtual ~ApplyMaskImage();
   protected:
 
     virtual void onInit();

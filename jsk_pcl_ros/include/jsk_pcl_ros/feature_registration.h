@@ -66,6 +66,7 @@ namespace jsk_pcl_ros
     sensor_msgs::PointCloud2,
     sensor_msgs::PointCloud2> SyncPolicy;
     FeatureRegistration(): DiagnosticNodelet("FeatureRegistration") {};
+    virtual ~FeatureRegistration();
   protected:
     virtual void onInit();
     virtual void subscribe();

@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /mask_rcnn_instance_segmentation/output/filtered_cluster_indices
       timeout_0: 60
+      check_after_kill_node: true
+      node_names: [cluster_point_indices_label_filter,]
     </rosparam>
   </test>
 

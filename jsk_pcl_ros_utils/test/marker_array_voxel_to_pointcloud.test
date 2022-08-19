@@ -12,6 +12,8 @@
     <rosparam>
       topic_0: /marker_array_voxel_to_pointcloud/output
       timeout_0: 100
+      check_after_kill_node: true
+      node_names: [marker_array_voxel_to_pointcloud,]
     </rosparam>
   </test>
 

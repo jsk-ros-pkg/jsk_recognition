@@ -23,6 +23,11 @@
       timeout_5: 30
       topic_6: /cluster_point_indices_decomposer/centroid_pose_array
       timeout_6: 30
+      check_after_kill_node: true
+      node_names:
+        - cluster_point_indices_decomposer
+        - cluster_point_indices_decomposer_align_boxes_with_plane
+        - cluster_point_indices_decomposer_align_boxes_with_frame
     </rosparam>
   </test>
 

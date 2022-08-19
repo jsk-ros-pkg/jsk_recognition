@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /region_growing_segmentation/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [region_growing_segmentation,]
     </rosparam>
   </test>
 

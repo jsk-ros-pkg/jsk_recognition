@@ -60,6 +60,7 @@ namespace jsk_perception
     
     typedef boost::shared_ptr<GrabCut> Ptr;
     GrabCut() : DiagnosticNodelet("GrabCut") {}
+    virtual ~GrabCut();
 
   protected:
     ////////////////////////////////////////////////////////

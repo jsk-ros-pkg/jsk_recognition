@@ -67,6 +67,7 @@ namespace jsk_pcl_ros_utils
     typedef message_filters::sync_policies::ApproximateTime<
     sensor_msgs::PointCloud2,
     jsk_recognition_msgs::Int32Stamped > SyncPolicy;
+    virtual ~StaticPolygonArrayPublisher();
 
   protected:
     ros::Publisher polygon_pub_, coefficients_pub_;

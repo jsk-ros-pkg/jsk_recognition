@@ -46,7 +46,8 @@
 
   <node name="heightmap_time_accumulation"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/HeightmapTimeAccumulation sample_manager">
+        args="load jsk_pcl/HeightmapTimeAccumulation sample_manager"
+        respawn="true" >
     <remap from="~input" to="heightmap_converter/output"/>
     <remap from="~input/config" to="heightmap_converter/output/config"/>
     <remap from="~input/prev_pointcloud" to="heightmap_to_pointcloud/output"/>

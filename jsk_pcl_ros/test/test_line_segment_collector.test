@@ -13,6 +13,8 @@
       timeout_0: 30
       topic_1: /line_segment_collector/debug/connect_segments/inliers
       timeout_1: 30
+      check_after_kill_node: true
+      node_names: [line_segment_collector,]
     </rosparam>
   </test>
 

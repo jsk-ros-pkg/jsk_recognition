@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <include file="$(find jsk_pcl_ros)/sample/sample_container_occupancy_detector.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_container_occupancy_detector"
+        name="test_container_occupancy_detector"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="30" retry="3">
+    <rosparam>
+      topic_0: /container_occupancy_detector/container/occupancies
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

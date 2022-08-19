@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /polygon_array_to_label_image/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [polygon_array_to_label_image,]
     </rosparam>
   </test>
 

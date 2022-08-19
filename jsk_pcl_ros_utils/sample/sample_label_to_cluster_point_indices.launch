@@ -1,13 +1,18 @@
 <launch>
   <arg name="gui" default="true"/>
+  <arg name="MANAGER" value="nodelet_manager" />
 
   <include file="$(find jsk_perception)/sample/sample_grid_label.launch">
     <arg name="gui" value="false"/>
   </include>
 
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet" args="manager" />
+
   <node name="label_to_cluster_point_indices"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl_utils/LabelToClusterPointIndices">
+        args="load jsk_pcl_utils/LabelToClusterPointIndices $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input" to="grid_label/output"/>
     <rosparam>
       bg_label: 0

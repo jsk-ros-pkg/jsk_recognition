@@ -62,6 +62,7 @@ namespace jsk_pcl_ros_utils
       jsk_recognition_msgs::ModelCoefficientsArray > SyncPolicy;
     
     PolygonPointsSampler(): DiagnosticNodelet("PolygonPointsSampler") {}
+    virtual ~PolygonPointsSampler();
   protected:
     virtual void onInit();
     virtual void subscribe();

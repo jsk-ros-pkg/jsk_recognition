@@ -39,5 +39,46 @@
 
 #include "jsk_perception/remove_blurred_frames.h"
 
+namespace jsk_perception{
+    void RemoveBlurredFrames::onInit(){
+        DiagnosticNodelet::onInit();
+        srv_ = std::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+        dynamic_reconfigure::Server<Config>::CallbackType f =
+            boost::bind(&RemoveBlurredFrames::configCallback, this, _1, _2);
+        srv_->setCallback (f);
+        pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
+        onInitPostProcess();
+    }
+
+    void RemoveBlurredFrames::subscribe(){
+        sub_ = pnh_->subscribe("input", 1, &RemoveBlurredFrames::work, this);
+    }
+
+    void RemoveBlurredFrames::unsubscribe(){
+        sub_.shutdown();
+    }
+
+    void RemoveBlurredFrames::work(const sensor_msgs::Image::ConstPtr& image_msg){
+        cv::Mat image, gray, laplacianImage;
+        cv::Scalar mean, stddev;
+        double var;
+        vital_checker_ -> poke();
+        boost::mutex::scoped_lock lock(mutex_);
+        image = cv_bridge::toCvShare(image_msg, image_msg->encoding) -> image;
+        cv::cvtColor(image, gray, cv::COLOR_RGB2GRAY);
+        cv::Laplacian(gray, laplacianImage, CV_64F);
+        cv::meanStdDev(laplacianImage, mean, stddev, cv::Mat());
+        var = stddev.val[0] * stddev.val[0];
+        if(var > min_laplacian_var_){
+            pub_.publish(image_msg);
+        }
+    }
+
+    void RemoveBlurredFrames::configCallback(Config &config, uint32_t level){
+        boost::mutex::scoped_lock lock(mutex_);
+        min_laplacian_var_ = config.min_laplacian_var;
+    }
+}
+
 #include <pluginlib/class_list_macros.h>
 PLUGINLIB_EXPORT_CLASS (jsk_perception::RemoveBlurredFrames, nodelet::Nodelet);

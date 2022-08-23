@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <arg name="INPUT_IMAGE" />
+  <arg name="OUTPUT_IMAGE" />
+  <arg name="DEFAULT_NAMESPACE" default="remove_blurred_frames" />
+  <arg name="launch_manager" default="true" />
+  <arg name="manager" default="manager" />
+
+  <node pkg="nodelet" type="nodelet" name="$(arg manager)"
+        args="manager" output="screen" if="$(arg launch_manager)" />
+
+  <node pkg="nodelet" type="nodelet" name="$(arg DEFAULT_NAMESPACE)"
+        args="load jsk_perception/RemoveBlurredFrames $(arg manager)"
+        output="screen">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~output" to="$(arg OUTPUT_IMAGE)" />
+  </node>
+  
+</launch>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
   <arg name="INPUT_IMAGE" />
-  <arg name="OUTPUT_IMAGE" />
+  <arg name="OUTPUT_IMAGE" default="$(arg INPUT_IMAGE)/blurred_frames_removed" />
   <arg name="DEFAULT_NAMESPACE" default="remove_blurred_frames" />
   <arg name="launch_manager" default="true" />
   <arg name="manager" default="manager" />

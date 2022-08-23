@@ -9,7 +9,6 @@
 
   <include file="$(find jsk_perception)/launch/remove_blurred_frames.launch" >
     <arg name="INPUT_IMAGE" value="/head_camera/rgb/image_rect_color" />
-    <arg name="OUTPUT_IMAGE" value="/head_camera/rgb/image_rect_color/blurred_frames_removed" />
     <arg name="launch_manager" value="false" />
     <arg name="manager" value="rosbag_play_nodelet_manager" />
   </include>

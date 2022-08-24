@@ -50,6 +50,7 @@ namespace jsk_pcl_ros_utils
     pnh_->param("delay_time", delay_time_, 0.1);
     pnh_->param("queue_size", queue_size_, 1000);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", queue_size_);
+    onInitPostProcess();
   }
 
   void DelayPointCloud::configCallback(Config &config, uint32_t level)

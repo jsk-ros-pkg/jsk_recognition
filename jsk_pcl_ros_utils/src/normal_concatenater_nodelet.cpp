@@ -85,6 +85,7 @@ namespace jsk_pcl_ros_utils
     if (!pnh_->getParam("max_queue_size", maximum_queue_size_)) {
       maximum_queue_size_ = 100;
     }
+    onInitPostProcess();
   }
 
   NormalConcatenater::~NormalConcatenater() {

@@ -51,7 +51,7 @@ namespace jsk_perception
     pub_ = advertise<jsk_recognition_msgs::RectArray>(*pnh_, "output", 1);
     pub_internal_ = pnh_->advertise<jsk_recognition_msgs::BoundingBoxArrayWithCameraInfo>("internal", 1);
     sub_box_with_info_.subscribe(*pnh_, "internal", 1);
-    //onInitPosrPocess();
+    onInitPostProcess();
   }
 
   BoundingBoxToRect::~BoundingBoxToRect() {

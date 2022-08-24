@@ -49,6 +49,7 @@ namespace jsk_pcl_ros_utils
     sync_->connectInput(sub_polygon0_, sub_coefficients0_,
                         sub_polygon1_, sub_coefficients1_);
     sync_->registerCallback(boost::bind(&PolygonAppender::callback2, this, _1, _2, _3, _4));
+    onInitPostProcess();
   }
 
   PolygonAppender::~PolygonAppender() {

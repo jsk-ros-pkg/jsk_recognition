@@ -71,7 +71,7 @@ namespace jsk_perception{
         cv::Laplacian(gray, laplacian_image, CV_64F);
         cv::meanStdDev(laplacian_image, mean, stddev, cv::Mat());
         var = stddev.val[0] * stddev.val[0];
-        ROS_DEBUG("%s : Checking variance of the Laplacian: actual %f, threshold %f\n", __func__, var, min_laplacian_var_);
+        NODELET_DEBUG("%s : Checking variance of the Laplacian: actual %f, threshold %f\n", __func__, var, min_laplacian_var_);
         laplacian_image.convertTo(masked_image, CV_8UC1, 255.0);
         mask_img_msg = cv_bridge::CvImage(image_msg->header, sensor_msgs::image_encodings::MONO8, masked_image).toImageMsg();
         pub_masked_.publish(mask_img_msg);

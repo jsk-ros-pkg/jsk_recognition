@@ -47,6 +47,7 @@
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
+#include <std_msgs/Float64.h>
 
 namespace jsk_perception{
     class RemoveBlurredFrames: public jsk_topic_tools::DiagnosticNodelet{
@@ -62,7 +63,7 @@ namespace jsk_perception{
 
         boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
         ros::Subscriber sub_;
-        ros::Publisher pub_, pub_masked_;
+        ros::Publisher pub_, pub_masked_, pub_var_;
         boost::mutex mutex_;
     private:
         double min_laplacian_var_;

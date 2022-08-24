@@ -3,6 +3,7 @@
   <arg name="INPUT_IMAGE" />
   <arg name="OUTPUT_IMAGE" default="$(arg INPUT_IMAGE)/blurred_frames_removed" />
   <arg name="OUTPUT_MASK" default="$(arg INPUT_IMAGE)/laplacian_mask" />
+  <arg name="OUTPUT_VAR" default="$(arg INPUT_IMAGE)/laplacian_var" />
   <arg name="DEFAULT_NAMESPACE" default="remove_blurred_frames" />
   <arg name="launch_manager" default="true" />
   <arg name="manager" default="manager" />
@@ -16,6 +17,7 @@
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <remap from="~output" to="$(arg OUTPUT_IMAGE)" />
     <remap from="~output/mask" to="$(arg OUTPUT_MASK)" />
+    <remap from="~output/var" to="$(arg OUTPUT_VAR)" />
   </node>
   
 </launch>

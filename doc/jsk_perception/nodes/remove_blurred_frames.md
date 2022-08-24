@@ -18,6 +18,10 @@ Non-blurred image output.
 
 Laplacian filtered image output.
 
+* `~output/var` (`std_msgs/Float64`)
+
+Laplacian filtered image's variance.
+
 ## Parameters
 * `~min_laplacian_var` (Double, default: `400.0`)
 

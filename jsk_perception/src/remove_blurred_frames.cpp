@@ -48,6 +48,7 @@ namespace jsk_perception{
         srv_->setCallback (f);
         pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
         pub_masked_ = advertise<sensor_msgs::Image>(*pnh_, "output/mask", 1);
+        pub_var_ = advertise<std_msgs::Float64>(*pnh_, "output/var", 1);
         onInitPostProcess();
     }
 
@@ -63,6 +64,7 @@ namespace jsk_perception{
         cv::Mat image, gray, laplacian_image, masked_image;
         sensor_msgs::Image::Ptr mask_img_msg;
         cv::Scalar mean, stddev;
+        std_msgs::Float64 var_msg;
         double var;
         vital_checker_ -> poke();
         boost::mutex::scoped_lock lock(mutex_);
@@ -74,7 +76,9 @@ namespace jsk_perception{
         NODELET_DEBUG("%s : Checking variance of the Laplacian: actual %f, threshold %f\n", __func__, var, min_laplacian_var_);
         laplacian_image.convertTo(masked_image, CV_8UC1, 255.0);
         mask_img_msg = cv_bridge::CvImage(image_msg->header, sensor_msgs::image_encodings::MONO8, masked_image).toImageMsg();
+        var_msg.data = var;
         pub_masked_.publish(mask_img_msg);
+        pub_var_.publish(var_msg);
         if(var > min_laplacian_var_){
             pub_.publish(image_msg);
         }

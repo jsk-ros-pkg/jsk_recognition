@@ -13,6 +13,8 @@
       timeout_0: 20
       topic_1: /head_camera/rgb/image_rect_color/laplacian_mask
       timeout_1: 20
+      topic_2: /head_camera/rgb/image_rect_color/laplacian_var
+      timeout_2: 20
     </rosparam>
   </test>
 

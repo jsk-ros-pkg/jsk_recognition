@@ -42,11 +42,12 @@
 namespace jsk_perception{
     void RemoveBlurredFrames::onInit(){
         DiagnosticNodelet::onInit();
-        srv_ = std::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+        srv_ = boost::make_shared<dynamic_reconfigure::Server<Config> > (*pnh_);
         dynamic_reconfigure::Server<Config>::CallbackType f =
             boost::bind(&RemoveBlurredFrames::configCallback, this, _1, _2);
         srv_->setCallback (f);
         pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
+        pub_masked_ = advertise<sensor_msgs::Image>(*pnh_, "output/mask", 1);
         onInitPostProcess();
     }
 
@@ -59,16 +60,21 @@ namespace jsk_perception{
     }
 
     void RemoveBlurredFrames::work(const sensor_msgs::Image::ConstPtr& image_msg){
-        cv::Mat image, gray, laplacianImage;
+        cv::Mat image, gray, laplacian_image, masked_image;
+        sensor_msgs::Image::Ptr mask_img_msg;
         cv::Scalar mean, stddev;
         double var;
         vital_checker_ -> poke();
         boost::mutex::scoped_lock lock(mutex_);
         image = cv_bridge::toCvShare(image_msg, image_msg->encoding) -> image;
         cv::cvtColor(image, gray, cv::COLOR_RGB2GRAY);
-        cv::Laplacian(gray, laplacianImage, CV_64F);
-        cv::meanStdDev(laplacianImage, mean, stddev, cv::Mat());
+        cv::Laplacian(gray, laplacian_image, CV_64F);
+        cv::meanStdDev(laplacian_image, mean, stddev, cv::Mat());
         var = stddev.val[0] * stddev.val[0];
+        ROS_DEBUG("%s : Checking variance of the Laplacian: actual %f, threshold %f\n", __func__, var, min_laplacian_var_);
+        laplacian_image.convertTo(masked_image, CV_8UC1, 255.0);
+        mask_img_msg = cv_bridge::CvImage(image_msg->header, sensor_msgs::image_encodings::MONO8, masked_image).toImageMsg();
+        pub_masked_.publish(mask_img_msg);
         if(var > min_laplacian_var_){
             pub_.publish(image_msg);
         }

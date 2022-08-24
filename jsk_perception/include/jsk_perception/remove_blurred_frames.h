@@ -60,9 +60,9 @@ namespace jsk_perception{
         virtual void work(const sensor_msgs::Image::ConstPtr& image_msg);
         virtual void configCallback(Config &config, uint32_t level);
 
-        std::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
+        boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
         ros::Subscriber sub_;
-        ros::Publisher pub_;
+        ros::Publisher pub_, pub_masked_;
         boost::mutex mutex_;
     private:
         double min_laplacian_var_;

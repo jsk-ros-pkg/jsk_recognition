@@ -14,6 +14,10 @@ Image input.
 
 Non-blurred image output.
 
+* `~output/mask` (`sensor_msgs/Image`)
+
+Laplacian filtered image output.
+
 ## Parameters
 * `~min_laplacian_var` (Double, default: `400.0`)
 

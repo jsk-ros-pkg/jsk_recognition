@@ -67,6 +67,7 @@ namespace jsk_perception{
         boost::mutex mutex_;
     private:
         double min_laplacian_var_;
+        double threshold_;
 
     };
 }

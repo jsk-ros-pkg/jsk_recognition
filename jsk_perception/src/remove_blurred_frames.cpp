@@ -61,7 +61,7 @@ namespace jsk_perception{
     }
 
     void RemoveBlurredFrames::work(const sensor_msgs::Image::ConstPtr& image_msg){
-        cv::Mat image, gray, laplacian_image, masked_image;
+        cv::Mat image, gray, laplacian_image;
         sensor_msgs::Image::Ptr mask_img_msg;
         cv::Scalar mean, stddev;
         std_msgs::Float64 var_msg;
@@ -74,7 +74,9 @@ namespace jsk_perception{
         cv::meanStdDev(laplacian_image, mean, stddev, cv::Mat());
         var = stddev.val[0] * stddev.val[0];
         NODELET_DEBUG("%s : Checking variance of the Laplacian: actual %f, threshold %f\n", __func__, var, min_laplacian_var_);
-        laplacian_image.convertTo(masked_image, CV_8UC1, 255.0);
+        cv::Mat masked_image = cv::Mat::zeros(laplacian_image.rows, laplacian_image.cols, CV_8UC1);
+        laplacian_image.convertTo(laplacian_image, CV_8UC1, 1.0);
+        cv::threshold(cv::abs(laplacian_image), masked_image, threshold_, 255, cv::THRESH_BINARY);
         mask_img_msg = cv_bridge::CvImage(image_msg->header, sensor_msgs::image_encodings::MONO8, masked_image).toImageMsg();
         var_msg.data = var;
         pub_masked_.publish(mask_img_msg);
@@ -87,6 +89,7 @@ namespace jsk_perception{
     void RemoveBlurredFrames::configCallback(Config &config, uint32_t level){
         boost::mutex::scoped_lock lock(mutex_);
         min_laplacian_var_ = config.min_laplacian_var;
+        threshold_ = config.threshold;
     }
 }
 

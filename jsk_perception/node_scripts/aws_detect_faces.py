@@ -284,10 +284,10 @@ class DetectFaces(ConnectionBasedTransport):
             # Confidence level that the bounding box contains a face.
             if 'Confidence' in face:
                 confidence = face['Confidence']
-                face_msg.confidence = confidence
+                face_msg.confidence = confidence / 100.0
                 attributes_msgs.label_names.append('confidence')
-                attributes_msgs.probabilities.append(confidence)
-                self.process_attributes("Confidence : {:.3f}".format(confidence), img_gray, bbox_msg)
+                attributes_msgs.probabilities.append(confidence / 100.0)
+                self.process_attributes("Confidence : {:.3f}".format(confidence / 100.0), img_gray, bbox_msg)
 
             # The estimated age range, in years, for the face. Low represents the lowest estimated age and High represents the highest estimated age.
             if 'AgeRange' in face:
@@ -323,8 +323,8 @@ class DetectFaces(ConnectionBasedTransport):
                     if emotion['Confidence'] > 50:
                         face_msg.label += "; {}".format(emotion['Type'])
                     attributes_msgs.label_names.append(emotion['Type'])
-                    attributes_msgs.probabilities.append(emotion['Confidence'])
-                    self.process_attributes("{}: {:.3f}".format(emotion['Type'], emotion['Confidence']), img_gray, bbox_msg)
+                    attributes_msgs.probabilities.append(emotion['Confidence'] / 100.0)
+                    self.process_attributes("{}: {:.3f}".format(emotion['Type'], emotion['Confidence'] / 100.0), img_gray, bbox_msg)
 
             # Other attributes in https://docs.aws.amazon.com/sdkfornet/v3/apidocs/items/Rekognition/TFaceDetail.html
             for key in face.keys():
@@ -335,14 +335,14 @@ class DetectFaces(ConnectionBasedTransport):
                         face_msg.label += "; {}".format(face[key]['Value'])
                     if face[key]['Value'] is True:
                         attributes_msgs.label_names.append(key)
-                        attributes_msgs.probabilities.append(face[key]['Confidence'])
-                    elif face[key]['Value'] is False:  # If attributes is false, then we use 100-confidnece
+                        attributes_msgs.probabilities.append(face[key]['Confidence'] / 100.0)
+                    elif face[key]['Value'] is False:  # If attributes is false, then we use 1 - confidence
                         attributes_msgs.label_names.append(key)
-                        attributes_msgs.probabilities.append(100 - face[key]['Confidence'])
+                        attributes_msgs.probabilities.append((100 - face[key]['Confidence']) / 100.0)
                     else:
                         attributes_msgs.label_names.append(face[key]['Value'])
                         attributes_msgs.probabilities.append(face[key]['Confidence'])
-                    self.process_attributes("{} : {} ({:.3f})".format(key, face[key]['Value'], face[key]['Confidence']), img_gray, bbox_msg)
+                    self.process_attributes("{} : {} ({:.3f})".format(key, face[key]['Value'], face[key]['Confidence'] / 100.0), img_gray, bbox_msg)
 
             # Construct face message
             face_msg.label = face_msg.label[2:]  # skip first "; "

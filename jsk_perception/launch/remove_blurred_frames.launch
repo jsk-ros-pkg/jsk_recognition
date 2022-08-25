@@ -14,6 +14,7 @@
 
   <node pkg="nodelet" type="nodelet" name="$(arg DEFAULT_NAMESPACE)"
         args="load jsk_perception/RemoveBlurredFrames $(arg manager)"
+        respawn="true"
         output="screen">
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <remap from="~output" to="$(arg OUTPUT_IMAGE)" />

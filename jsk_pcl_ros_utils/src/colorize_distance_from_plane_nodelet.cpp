@@ -55,6 +55,7 @@ namespace jsk_pcl_ros_utils
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&ColorizeDistanceFromPlane::configCallback, this, _1, _2);
     srv_->setCallback (f);
+    onInitPostProcess();
   }
 
   ColorizeDistanceFromPlane::~ColorizeDistanceFromPlane() {

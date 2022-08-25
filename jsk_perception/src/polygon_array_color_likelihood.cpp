@@ -59,6 +59,7 @@ namespace jsk_perception
         &PolygonArrayColorLikelihood::configCallback, this, _1, _2);
     srv_->setCallback (f);
     pub_ = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   PolygonArrayColorLikelihood::~PolygonArrayColorLikelihood() {

@@ -47,6 +47,7 @@ namespace jsk_perception
     pnh_->param("max_robot_dist", max_robot_dist_, 10.0);
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
     pub_camera_info_ = advertise<sensor_msgs::CameraInfo>(*pnh_, "output/info", 1);
+    onInitPostProcess();
   }
 
   void RobotToMaskImage::subscribe()

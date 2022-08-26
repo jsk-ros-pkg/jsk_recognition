@@ -37,7 +37,18 @@
 #ifndef JSK_PCL_ROS_UTILS_MASK_IMAGE_TO_DEPTH_CONSIDERED_MASK_IMAGE_H_
 #define JSK_PCL_ROS_UTILS_MASK_IMAGE_TO_DEPTH_CONSIDERED_MASK_IMAGE_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <sensor_msgs/Image.h>
 #include <dynamic_reconfigure/server.h>
 #include "jsk_recognition_utils/pcl_conversion_util.h"
@@ -49,7 +60,7 @@
 
 namespace jsk_pcl_ros_utils
 {
-  class MaskImageToDepthConsideredMaskImage: public jsk_topic_tools::DiagnosticNodelet
+  class MaskImageToDepthConsideredMaskImage: public jsk_topic_tools::NODELET
   {
   public:
     typedef message_filters::sync_policies::ApproximateTime<
@@ -60,7 +71,7 @@ namespace jsk_pcl_ros_utils
       sensor_msgs::Image > SyncPolicy;
     typedef jsk_pcl_ros_utils::MaskImageToDepthConsideredMaskImageConfig Config;
 
-    MaskImageToDepthConsideredMaskImage(): DiagnosticNodelet("MaskImageToDepthConsideredMaskImage") { }
+    MaskImageToDepthConsideredMaskImage(){ }
     virtual ~MaskImageToDepthConsideredMaskImage();
   protected:
     ////////////////////////////////////////////////////////

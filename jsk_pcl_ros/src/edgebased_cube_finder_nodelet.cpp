@@ -376,7 +376,7 @@ namespace jsk_pcl_ros
   
   void EdgebasedCubeFinder::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
@@ -726,7 +726,9 @@ namespace jsk_pcl_ros
      pose_array.header = input_cloud->header;
      std::vector<jsk_recognition_utils::Cube::Ptr> cubes;
      std::vector<pcl::PointIndices::Ptr> candidate_cluster_indices;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
      vital_checker_->poke();
+#endif
      for (size_t i = 0; i < input_edges->edge_groups.size(); i++) {
        jsk_recognition_msgs::ParallelEdge parallel_edge = input_edges->edge_groups[i];
        std::vector<pcl::PointIndices::Ptr> edges

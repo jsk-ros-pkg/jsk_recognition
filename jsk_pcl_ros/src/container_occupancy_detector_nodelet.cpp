@@ -42,7 +42,7 @@
 namespace jsk_pcl_ros{
 
     void ContainerOccupancyDetector::onInit(){
-        jsk_topic_tools::DiagnosticNodelet::onInit();
+        jsk_topic_tools::NODELET::onInit();
         pnh_->param("approximate_sync", approximate_sync_, false);
         pnh_->param("queue_size", queue_size_, 100);
         boxes_occupancy_pub_
@@ -131,7 +131,9 @@ namespace jsk_pcl_ros{
                     }
                     result_.boxes.at(i_box).value = sum_occupancy_ / float(n_points_);
                 }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
                 vital_checker_->poke();
+#endif
                 boxes_occupancy_pub_.publish(result_);
             }else{
                 NODELET_WARN("Failed to transform point cloud\n");
@@ -162,7 +164,7 @@ namespace jsk_pcl_ros{
             return false;
         }
     }
-
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     void ContainerOccupancyDetector::updateDiagnostic(
         diagnostic_updater::DiagnosticStatusWrapper &stat){
         if(vital_checker_ -> isAlive()){
@@ -171,6 +173,7 @@ namespace jsk_pcl_ros{
         }
         DiagnosticNodelet::updateDiagnostic(stat);
     }
+#endif
 }
 
 #include <pluginlib/class_list_macros.h>

@@ -37,7 +37,18 @@
 #ifndef JSK_PCL_ROS_ADD_COLOR_FROM_IMAGE_H_
 #define JSK_PCL_ROS_ADD_COLOR_FROM_IMAGE_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
@@ -50,7 +61,7 @@
 
 namespace jsk_pcl_ros
 {
-  class AddColorFromImage: public jsk_topic_tools::DiagnosticNodelet
+  class AddColorFromImage: public jsk_topic_tools::NODELET
   {
   public:
     typedef message_filters::sync_policies::ApproximateTime<
@@ -58,7 +69,7 @@ namespace jsk_pcl_ros
     sensor_msgs::Image,
     sensor_msgs::CameraInfo
     > SyncPolicy;
-    AddColorFromImage(): DiagnosticNodelet("AddColorFromImage") { }
+    AddColorFromImage(){ }
     virtual ~AddColorFromImage();
   protected:
     virtual void onInit();

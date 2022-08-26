@@ -42,7 +42,7 @@ namespace jsk_perception
 {
   void PolygonArrayColorLikelihood::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("approximate_sync", approximate_sync_, false);
     pnh_->param("max_queue_size", max_queue_size_, 10);
     pnh_->param("synchronizer_queue_size", sync_queue_size_, 100);
@@ -252,7 +252,9 @@ namespace jsk_perception
         new_msg.likelihood[i] *= d;
       }
     }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_.publish(new_msg);
   }
 }

@@ -6,7 +6,7 @@
 namespace resized_image_transport
 {
   void ImageProcessing::onInit() {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     initReconfigure();
     initParams();
     initPublishersAndSubscribers();
@@ -156,7 +156,8 @@ namespace resized_image_transport
     }
     callback(msg, info_msg_);
   }
-    
+
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
   void ImageProcessing::updateDiagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
     boost::mutex::scoped_lock lock(mutex_);
@@ -165,7 +166,13 @@ namespace resized_image_transport
       // initialization is not finished
       return;
     }
-    
+
+    if (connection_status_ != jsk_topic_tools::SUBSCRIBED) {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
+                   getName() + " is not subscribed");
+      return;
+    }
+
     // common
     stat.add("use_camera_info", use_camera_info_);
     stat.add("use_snapshot", use_snapshot_);
@@ -249,6 +256,7 @@ namespace resized_image_transport
     last_rosinfo_time_ = now;
 
   }
+#endif
   
   void ImageProcessing::image_cb(const sensor_msgs::ImageConstPtr &img){
     image_vital_->poke();
@@ -275,8 +283,10 @@ namespace resized_image_transport
       sensor_msgs::ImagePtr dst_img;
       sensor_msgs::CameraInfo dst_info;
       process(img, info, dst_img, dst_info);
-  
-
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+      image_vital_->poke();
+      info_vital_->poke();
+#endif
       if (use_camera_info_) {
         cp_.publish(dst_img,
                     boost::make_shared<sensor_msgs::CameraInfo> (dst_info));

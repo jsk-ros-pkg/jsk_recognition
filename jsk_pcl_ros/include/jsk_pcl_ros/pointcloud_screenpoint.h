@@ -40,7 +40,18 @@
 #include <geometry_msgs/PolygonStamped.h>
 #include <jsk_pcl_ros/PointcloudScreenpointConfig.h>
 #include <jsk_recognition_msgs/TransformScreenpoint.h>
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <message_filters/subscriber.h>
 #include <message_filters/sync_policies/approximate_time.h>
 #include <message_filters/sync_policies/exact_time.h>
@@ -53,10 +64,10 @@ namespace mf = message_filters;
 
 namespace jsk_pcl_ros
 {
-  class PointcloudScreenpoint : public jsk_topic_tools::DiagnosticNodelet
+  class PointcloudScreenpoint : public jsk_topic_tools::NODELET
   {
    public:
-    PointcloudScreenpoint() : DiagnosticNodelet("PointcloudScreenpoint") {}
+    PointcloudScreenpoint(){}
     virtual ~PointcloudScreenpoint();
    protected:
     typedef PointcloudScreenpointConfig Config;

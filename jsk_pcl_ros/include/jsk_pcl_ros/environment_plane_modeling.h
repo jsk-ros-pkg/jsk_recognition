@@ -64,7 +64,18 @@
 #include "jsk_recognition_utils/pcl_util.h"
 #include <jsk_recognition_msgs/SimpleOccupancyGridArray.h>
 #include <jsk_recognition_msgs/BoundingBoxArray.h>
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include "jsk_recognition_utils/geo_util.h"
 #include "jsk_pcl_ros/tf_listener_singleton.h"
 
@@ -77,7 +88,7 @@ namespace jsk_pcl_ros
    * @brief
    * Nodelet implementation of jsk_pcl/EnvironmentPlaneModeling
    */
-  class EnvironmentPlaneModeling: public jsk_topic_tools::DiagnosticNodelet
+  class EnvironmentPlaneModeling: public jsk_topic_tools::NODELET
   {
   public:
     typedef EnvironmentPlaneModelingConfig Config;
@@ -88,7 +99,7 @@ namespace jsk_pcl_ros
       jsk_recognition_msgs::PolygonArray,
       jsk_recognition_msgs::ModelCoefficientsArray,
       jsk_recognition_msgs::ClusterPointIndices > SyncPolicy;
-    EnvironmentPlaneModeling(): DiagnosticNodelet("EnvironmentPlaneModeling") {}
+    EnvironmentPlaneModeling(){}
     virtual ~EnvironmentPlaneModeling();
   protected:
     virtual void onInit();

@@ -64,7 +64,9 @@ namespace jsk_pcl_ros
   
   void VoxelGridDownsampleDecoder::pointCB(const jsk_recognition_msgs::SlicedPointCloudConstPtr &input)
   {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     NODELET_INFO_STREAM("new pointcloud!" << input->point_cloud.header.frame_id);
     
     int id = getPointcloudID(input);
@@ -153,7 +155,7 @@ namespace jsk_pcl_ros
   
   void VoxelGridDownsampleDecoder::onInit(void)
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     previous_id_ = -1;
     // decoded output
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);

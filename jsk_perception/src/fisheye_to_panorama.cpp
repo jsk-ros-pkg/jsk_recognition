@@ -48,7 +48,7 @@ namespace jsk_perception
 {
   void FisheyeToPanorama::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("use_panorama", use_panorama_, false);
     pnh_->param("simple_panorama", simple_panorama_, false);
     pub_undistorted_image_ = advertise<sensor_msgs::Image>(
@@ -175,7 +175,9 @@ namespace jsk_perception
           }
         }
 
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
         vital_checker_->poke();
+#endif
         pub_undistorted_image_.publish(
                                        cv_bridge::CvImage(
                                                           image_msg->header,
@@ -210,7 +212,9 @@ namespace jsk_perception
             }
           }
         }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
         vital_checker_->poke();
+#endif
         pub_undistorted_image_.publish(
                                        cv_bridge::CvImage(
                                                           image_msg->header,
@@ -250,7 +254,9 @@ namespace jsk_perception
           }
         }
       }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
       vital_checker_->poke();
+#endif
       pub_undistorted_image_.publish(
                                      cv_bridge::CvImage(
                                                         image_msg->header,

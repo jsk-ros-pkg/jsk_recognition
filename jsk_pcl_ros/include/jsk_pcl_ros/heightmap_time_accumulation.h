@@ -37,7 +37,18 @@
 #ifndef JSK_PCL_ROS_HEIGHTMAP_TIME_ACCUMULATION_H_
 #define JSK_PCL_ROS_HEIGHTMAP_TIME_ACCUMULATION_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <jsk_recognition_msgs/HeightmapConfig.h>
 #include <jsk_pcl_ros/HeightmapTimeAccumulationConfig.h>
 #include <dynamic_reconfigure/server.h>
@@ -63,7 +74,7 @@ namespace jsk_pcl_ros
   typedef pcl::PointXYZI PointType;
 
   class HeightmapTimeAccumulation:
-    public jsk_topic_tools::DiagnosticNodelet
+    public jsk_topic_tools::NODELET
   {
   public:
     typedef boost::shared_ptr<HeightmapTimeAccumulation> Ptr;
@@ -74,7 +85,7 @@ namespace jsk_pcl_ros
         boost::accumulators::tag::variance,
         boost::accumulators::tag::count,
         boost::accumulators::tag::mean> >  Accumulator;
-    HeightmapTimeAccumulation(): DiagnosticNodelet("HeightmapTimeAccumulation") {}
+    HeightmapTimeAccumulation(){}
   protected:
     virtual void onInit();
     virtual void subscribe();

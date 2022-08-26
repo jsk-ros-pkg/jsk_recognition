@@ -40,7 +40,7 @@ namespace jsk_pcl_ros_utils
 
   void ClusterPointIndicesLabelFilter::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("approximate_sync", approximate_sync_, false);
     pnh_->param("queue_size", queue_size_, 100);
 
@@ -95,7 +95,9 @@ namespace jsk_pcl_ros_utils
       if(label_msg->labels[i].id == label_value_)
         filtered_msg.cluster_indices.push_back(cluster_msg->cluster_indices[i]);
     }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_.publish(filtered_msg);
   }
 

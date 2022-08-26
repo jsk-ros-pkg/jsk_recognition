@@ -46,7 +46,7 @@ namespace jsk_pcl_ros
 {
   void VoxelGridLargeScale::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind(&VoxelGridLargeScale::configCallback, this, _1, _2);
@@ -68,7 +68,9 @@ namespace jsk_pcl_ros
   void VoxelGridLargeScale::filter(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     if (leaf_size_ == 0.0) {
       pub_.publish(msg);
     }

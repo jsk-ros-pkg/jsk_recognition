@@ -37,7 +37,18 @@
 #ifndef JSK_PCL_ROS_UTILS_SUBTRACT_POINT_INDICES_H_
 #define JSK_PCL_ROS_UTILS_SUBTRACT_POINT_INDICES_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 
 #include "jsk_recognition_utils/pcl_conversion_util.h"
 #include "jsk_recognition_utils/pcl_util.h"
@@ -50,7 +61,7 @@
 
 namespace jsk_pcl_ros_utils
 {
-  class SubtractPointIndices: public jsk_topic_tools::DiagnosticNodelet
+  class SubtractPointIndices: public jsk_topic_tools::NODELET
   {
   public:
     typedef message_filters::sync_policies::ExactTime<
@@ -60,7 +71,7 @@ namespace jsk_pcl_ros_utils
     PCLIndicesMsg,
     PCLIndicesMsg > ASyncPolicy;
 
-    SubtractPointIndices(): DiagnosticNodelet("SubtractPointIndices") {}
+    SubtractPointIndices(){}
     virtual ~SubtractPointIndices();
 
   protected:

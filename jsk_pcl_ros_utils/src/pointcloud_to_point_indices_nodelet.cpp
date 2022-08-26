@@ -42,7 +42,7 @@ namespace jsk_pcl_ros_utils
 {
   void PointCloudToPointIndices::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_ = advertise<PCLIndicesMsg>(*pnh_, "output", 1);
     onInitPostProcess();
   }
@@ -70,7 +70,9 @@ namespace jsk_pcl_ros_utils
       }
     }
     indices_msg.header = cloud_msg->header;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_.publish(indices_msg);
   }
 }

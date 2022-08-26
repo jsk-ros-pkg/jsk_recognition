@@ -49,7 +49,9 @@ namespace jsk_pcl_ros_utils
 {
   void CentroidPublisher::extract(const sensor_msgs::PointCloud2ConstPtr& input)
   {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pcl::PointCloud<pcl::PointXYZ> cloud_xyz;
     pcl::fromROSMsg(*input, cloud_xyz);
     Eigen::Vector4f center;
@@ -111,7 +113,9 @@ namespace jsk_pcl_ros_utils
       pose_array.poses[i].orientation.z = q.z();
       pose_array.poses[i].orientation.w = q.w();
     }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_pose_array_.publish(pose_array);
   }
 
@@ -129,7 +133,7 @@ namespace jsk_pcl_ros_utils
   
   void CentroidPublisher::onInit(void)
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("publish_tf", publish_tf_, false);
     if (publish_tf_) {
       if (!pnh_->getParam("frame", frame_))

@@ -43,7 +43,7 @@ namespace jsk_pcl_ros_utils
 {
   void PoseWithCovarianceStampedToGaussianPointCloud::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&PoseWithCovarianceStampedToGaussianPointCloud::configCallback, this, _1, _2);
@@ -153,7 +153,9 @@ namespace jsk_pcl_ros_utils
     sensor_msgs::PointCloud2 ros_cloud;
     pcl::toROSMsg(*cloud, ros_cloud);
     ros_cloud.header = msg->header;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_.publish(ros_cloud);
   }
   

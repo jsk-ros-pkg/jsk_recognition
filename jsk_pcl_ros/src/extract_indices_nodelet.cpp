@@ -49,7 +49,7 @@ namespace jsk_pcl_ros
 {
   void ExtractIndices::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("keep_organized", keep_organized_, false);
     pnh_->param("negative", negative_, false);
     pnh_->param("max_queue_size", max_queue_size_, 10);
@@ -133,7 +133,9 @@ namespace jsk_pcl_ros
     pcl_conversions::moveFromPCL(output, out_cloud_msg);
 
     out_cloud_msg.header = cloud_msg->header;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_.publish(out_cloud_msg);
   }
 }

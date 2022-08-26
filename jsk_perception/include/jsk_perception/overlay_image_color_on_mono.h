@@ -37,7 +37,18 @@
 #ifndef JSK_PERCEPTION_APPLY_MASK_IMAGE_H_
 #define JSK_PERCEPTION_APPLY_MASK_IMAGE_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <dynamic_reconfigure/server.h>
 #include <jsk_perception/OverlayImageColorOnMonoConfig.h>
 #include <sensor_msgs/Image.h>
@@ -48,14 +59,14 @@
 
 namespace jsk_perception
 {
-  class OverlayImageColorOnMono: public jsk_topic_tools::DiagnosticNodelet
+  class OverlayImageColorOnMono: public jsk_topic_tools::NODELET
   {
   public:
     typedef OverlayImageColorOnMonoConfig Config;
     typedef message_filters::sync_policies::ApproximateTime<
       sensor_msgs::Image, sensor_msgs::Image > ApproximateSyncPolicy;
     typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::Image > SyncPolicy;
-    OverlayImageColorOnMono(): DiagnosticNodelet("OverlayImageColorOnMono") {}
+    OverlayImageColorOnMono(){}
     virtual ~OverlayImageColorOnMono();
   protected:
 

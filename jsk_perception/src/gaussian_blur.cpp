@@ -45,7 +45,7 @@ namespace jsk_perception
 {
   void GaussianBlur::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&GaussianBlur::configCallback, this, _1, _2);
@@ -92,7 +92,9 @@ namespace jsk_perception
     } else {
       cv::GaussianBlur(image, applied_image, cv::Size(kernel_size_+1, kernel_size_+1), sigma_x_, sigma_y_);
     }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_.publish(cv_bridge::CvImage(
                      image_msg->header,
                      image_msg->encoding,

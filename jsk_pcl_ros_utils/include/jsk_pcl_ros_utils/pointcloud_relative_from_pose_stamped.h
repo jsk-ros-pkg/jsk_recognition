@@ -36,7 +36,18 @@
 #ifndef JSK_PCL_ROS_UTILS_POINTCLOUD_RELATIVE_FROM_POSE_STAMPED_H_
 #define JSK_PCL_ROS_UTILS_POINTCLOUD_RELATIVE_FROM_POSE_STAMPED_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
@@ -47,7 +58,7 @@
 
 namespace jsk_pcl_ros_utils
 {
-  class PointCloudRelativeFromPoseStamped: public jsk_topic_tools::DiagnosticNodelet
+  class PointCloudRelativeFromPoseStamped: public jsk_topic_tools::NODELET
   {
   public:
     typedef message_filters::sync_policies::ExactTime<
@@ -56,7 +67,7 @@ namespace jsk_pcl_ros_utils
     typedef message_filters::sync_policies::ApproximateTime<
     sensor_msgs::PointCloud2,
     geometry_msgs::PoseStamped > ApproximateSyncPolicy;
-    PointCloudRelativeFromPoseStamped(): DiagnosticNodelet("PointCloudRelativeFromPoseStamped") {}
+    PointCloudRelativeFromPoseStamped(){}
     virtual ~PointCloudRelativeFromPoseStamped();
   protected:
     virtual void onInit();

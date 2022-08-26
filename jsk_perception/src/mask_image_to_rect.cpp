@@ -44,7 +44,7 @@ namespace jsk_perception
 {
   void MaskImageToRect::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_ = advertise<jsk_recognition_msgs::RectArray>(*pnh_, "output", 1);
     onInitPostProcess();
   }
@@ -86,7 +86,9 @@ namespace jsk_perception
       rect.height = mask_rect.height;
       rects.rects.push_back(rect);
     }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_.publish(rects);
   }
 }

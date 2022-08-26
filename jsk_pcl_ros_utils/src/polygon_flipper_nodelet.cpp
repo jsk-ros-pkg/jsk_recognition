@@ -43,7 +43,7 @@ namespace jsk_pcl_ros_utils
 {
   void PolygonFlipper::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     if (!pnh_->getParam("sensor_frame", sensor_frame_)) {
       NODELET_FATAL("no ~sensor_frame is specified");
       return;
@@ -183,7 +183,9 @@ namespace jsk_pcl_ros_utils
           }
         }
       }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
       vital_checker_->poke();
+#endif
       pub_polygons_.publish(flipped_polygons);
       pub_coefficients_.publish(flipped_coefficients);
       if (use_indices_)

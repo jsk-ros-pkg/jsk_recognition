@@ -45,7 +45,7 @@ namespace jsk_perception
 {
   void RGBDecomposer::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_r_ = advertise<sensor_msgs::Image>(*pnh_, "output/red", 1);
     pub_g_ = advertise<sensor_msgs::Image>(*pnh_, "output/green", 1);
     pub_b_ = advertise<sensor_msgs::Image>(*pnh_, "output/blue", 1);
@@ -82,7 +82,9 @@ namespace jsk_perception
     cv::Mat red = bgr_planes[2];
     cv::Mat blue = bgr_planes[0];
     cv::Mat green = bgr_planes[1];
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_r_.publish(cv_bridge::CvImage(
                      image_msg->header,
                      sensor_msgs::image_encodings::MONO8,

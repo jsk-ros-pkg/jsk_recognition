@@ -37,7 +37,18 @@
 #ifndef IMAGESIFT_SIFT_NODE_H_
 #define IMAGESIFT_SIFT_NODE_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <ros/node_handle.h>
 #include <sensor_msgs/Image.h>
 #include <posedetection_msgs/ImageFeature0D.h>
@@ -57,14 +68,14 @@
 
 namespace imagesift
 {
-  class SiftNode: public jsk_topic_tools::DiagnosticNodelet
+  class SiftNode: public jsk_topic_tools::NODELET
   {
   public:
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::Image,
       sensor_msgs::Image > SyncPolicy;
     ros::WallTime lasttime;
-    SiftNode(): DiagnosticNodelet("SiftNode") {}
+    SiftNode(){}
     virtual ~SiftNode();
   protected:
     bool _bInfoInitialized;

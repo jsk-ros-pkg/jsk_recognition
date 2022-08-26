@@ -43,7 +43,7 @@ namespace jsk_pcl_ros_utils
 {
   void NormalFlipToFrame::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
     tf_listener_ = jsk_recognition_utils::TfListenerSingleton::getInstance();
     if (!pnh_->getParam("frame_id", frame_id_)) {
@@ -124,7 +124,9 @@ namespace jsk_pcl_ros_utils
       sensor_msgs::PointCloud2 ros_cloud;
       pcl::toROSMsg(*flipped_cloud, ros_cloud);
       ros_cloud.header = cloud_msg->header;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
       vital_checker_->poke();
+#endif
       pub_.publish(ros_cloud);
     }
     catch (tf2::ConnectivityException &e)

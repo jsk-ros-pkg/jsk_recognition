@@ -62,12 +62,23 @@
 #include <diagnostic_updater/publisher.h>
 #include <jsk_topic_tools/rosparam_utils.h>
 #include "jsk_recognition_utils/pcl_util.h"
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 
 
 namespace jsk_pcl_ros_utils
 {
-  class PlaneRejector: public jsk_topic_tools::DiagnosticNodelet
+  class PlaneRejector: public jsk_topic_tools::NODELET
   {
   public:
     typedef message_filters::sync_policies::ExactTime< jsk_recognition_msgs::PolygonArray,
@@ -77,7 +88,7 @@ namespace jsk_pcl_ros_utils
                                                        jsk_recognition_msgs::ClusterPointIndices
                                                        > SyncInlierPolicy;
     typedef jsk_pcl_ros_utils::PlaneRejectorConfig Config;
-    PlaneRejector() : DiagnosticNodelet("PlaneRejector") {}
+    PlaneRejector(){}
     virtual ~PlaneRejector();
   protected:
     virtual void onInit();
@@ -88,8 +99,9 @@ namespace jsk_pcl_ros_utils
                         const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& inliers);
     virtual void configCallback (Config &config, uint32_t level);
 
-    
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     virtual void updateDiagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat);
+#endif
     virtual void subscribe();
     virtual void unsubscribe();
     

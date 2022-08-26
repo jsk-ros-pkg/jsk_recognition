@@ -52,14 +52,18 @@ namespace jsk_pcl_ros_utils
         if (pcl_ros::transformPointCloud(target_frame_id_, latest_pointcloud, output,
                                          *tf_listener_)) {
           output.header.stamp = input->header.stamp;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
           vital_checker_->poke();
+#endif
           pub_cloud_.publish(output);
         }
       }
       else {
         if (pcl_ros::transformPointCloud(target_frame_id_, *input, output,
                                          *tf_listener_)) {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
           vital_checker_->poke();
+#endif
           pub_cloud_.publish(output);
         }
       }
@@ -80,7 +84,7 @@ namespace jsk_pcl_ros_utils
 
   void TfTransformCloud::onInit(void)
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     
     if (!pnh_->getParam("target_frame_id", target_frame_id_))
     {

@@ -37,16 +37,27 @@
 #ifndef JSK_PERCEPTION_ROI_TO_RECT_H_
 #define JSK_PERCEPTION_ROI_TO_RECT_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <geometry_msgs/PolygonStamped.h>
 #include <sensor_msgs/CameraInfo.h>
 
 namespace jsk_perception
 {
-  class ROIToRect: public jsk_topic_tools::DiagnosticNodelet
+  class ROIToRect: public jsk_topic_tools::NODELET
   {
   public:
-    ROIToRect(): DiagnosticNodelet("ROIToRect") {}
+    ROIToRect(){}
   protected:
     virtual void onInit();
     virtual void subscribe();

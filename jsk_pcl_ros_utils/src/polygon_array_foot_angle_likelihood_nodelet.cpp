@@ -45,7 +45,7 @@ namespace jsk_pcl_ros_utils
 {
   void PolygonArrayFootAngleLikelihood::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     if (!pnh_->getParam("target_frame_id", target_frame_id_)) {
       ROS_ERROR("You need to specify ~target_frame_id");
       return;
@@ -126,7 +126,9 @@ namespace jsk_pcl_ros_utils
           new_msg.likelihood[i] = new_msg.likelihood[i] * likelihood;
         }
       }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
       vital_checker_->poke();
+#endif
       pub_.publish(new_msg);
     }
     catch (...)

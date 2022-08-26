@@ -43,7 +43,7 @@ namespace jsk_pcl_ros_utils
 {
   void PlaneRejector::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     tf_success_.reset(new jsk_recognition_utils::SeriesedBoolean(30));
     listener_ = jsk_recognition_utils::TfListenerSingleton::getInstance();
 
@@ -122,7 +122,8 @@ namespace jsk_pcl_ros_utils
     sub_polygons_.unsubscribe();
     sub_coefficients_.unsubscribe();
   }
-  
+
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
   void PlaneRejector::updateDiagnostic(
     diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
@@ -150,6 +151,7 @@ namespace jsk_pcl_ros_utils
     }
     DiagnosticNodelet::updateDiagnostic(stat);
   }
+#endif
 
   void PlaneRejector::configCallback (Config &config, uint32_t level)
   {
@@ -223,13 +225,17 @@ namespace jsk_pcl_ros_utils
     }
     rejected_plane_counter_.add(rejected_plane_counter);
     passed_plane_counter_.add(passed_plane_counter);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     polygons_pub_.publish(result_polygons);
     coefficients_pub_.publish(result_coefficients);
     if (use_inliers_) {
       inliers_pub_.publish(result_inliers);
     }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     diagnostic_updater_->update();
+#endif
   }
   
 }

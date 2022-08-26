@@ -45,7 +45,7 @@ namespace jsk_pcl_ros
 {
   void EdgeDepthRefinement::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
 
     ////////////////////////////////////////////////////////
     // publishers
@@ -397,7 +397,9 @@ namespace jsk_pcl_ros
       output_edge_msg.end_point.z = coefficients[i]->values[2] + coefficients[i]->values[5];
       output_ros_edges_msg.segments.push_back(output_edge_msg);
     }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub.publish(output_ros_msg);
     pub_coefficients.publish(output_ros_coefficients_msg);
     pub_edges.publish(output_ros_edges_msg);

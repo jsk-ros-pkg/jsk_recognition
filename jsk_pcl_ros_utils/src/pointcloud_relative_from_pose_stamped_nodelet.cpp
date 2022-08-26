@@ -45,7 +45,7 @@ namespace jsk_pcl_ros_utils
 {
   void PointCloudRelativeFromPoseStamped::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     pnh_->param<bool>("approximate_sync", approximate_sync_, false);
     onInitPostProcess();
@@ -104,7 +104,9 @@ namespace jsk_pcl_ros_utils
     sensor_msgs::PointCloud2 ros_cloud;
     pcl::toROSMsg(*transformed_cloud, ros_cloud);
     ros_cloud.header = cloud_msg->header;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_.publish(ros_cloud);
   }
 }

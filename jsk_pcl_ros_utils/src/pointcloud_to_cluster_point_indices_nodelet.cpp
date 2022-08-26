@@ -43,7 +43,7 @@ namespace jsk_pcl_ros_utils
 {
   void PointCloudToClusterPointIndices::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output", 1);
     pnh_->param<bool>("skip_nan", skip_nan_, false);
     onInitPostProcess();
@@ -79,7 +79,9 @@ namespace jsk_pcl_ros_utils
     indices.header = msg->header;
     cluster_indices.header = msg->header;
     cluster_indices.cluster_indices.push_back(indices);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_.publish(cluster_indices);
   }
 }

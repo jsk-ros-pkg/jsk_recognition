@@ -8,7 +8,7 @@
 namespace jsk_pcl_ros 
 {
    TargetAdaptiveTracking::TargetAdaptiveTracking() :
-      DiagnosticNodelet("target_adaptive_tracking"),
+      
       init_counter_(0),
       update_counter_(0),
       growth_rate_(1.15)
@@ -33,7 +33,7 @@ namespace jsk_pcl_ros
 
    void TargetAdaptiveTracking::onInit()
    {
-      DiagnosticNodelet::onInit();
+      jsk_topic_tools::NODELET::onInit();
 
       pnh_->param("use_tf", use_tf_, false);
       pnh_->param("parent_frame_id", parent_frame_id_, std::string("/track_result"));
@@ -116,7 +116,9 @@ namespace jsk_pcl_ros
       const sensor_msgs::PointCloud2::ConstPtr &bkgd_msg,
       const geometry_msgs::PoseStamped::ConstPtr &pose_msg)
    {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
       vital_checker_->poke();
+#endif
       pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
       pcl::fromROSMsg(*cloud_msg, *cloud);
       pcl::PointCloud<PointT>::Ptr bkgd_cloud (new pcl::PointCloud<PointT>);
@@ -175,7 +177,9 @@ namespace jsk_pcl_ros
    void TargetAdaptiveTracking::callback(
       const sensor_msgs::PointCloud2::ConstPtr &cloud_msg,
       const geometry_msgs::PoseStamped::ConstPtr &pose_msg) {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
       vital_checker_->poke();
+#endif
       if (this->object_reference_->empty())
       {
          ROS_WARN("No Model To Track Selected");

@@ -39,19 +39,30 @@
 
 #include <pcl/pcl_base.h>
 #include <pcl_ros/pcl_nodelet.h>
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <jsk_topic_tools/counter.h>
 #include <dynamic_reconfigure/server.h>
 #include "jsk_pcl_ros/OrganizedStatisticalOutlierRemovalConfig.h"
 
 namespace jsk_pcl_ros
 {
-  class OrganizedStatisticalOutlierRemoval: public jsk_topic_tools::DiagnosticNodelet
+  class OrganizedStatisticalOutlierRemoval: public jsk_topic_tools::NODELET
   {
   public:
     typedef jsk_pcl_ros::OrganizedStatisticalOutlierRemovalConfig Config;
     typedef pcl::PointXYZRGB PointT;
-    OrganizedStatisticalOutlierRemoval() : DiagnosticNodelet("OrganizedStatisticalOutlierRemoval") {};
+    OrganizedStatisticalOutlierRemoval(){};
   protected:
     ////////////////////////////////////////////////////////
     // methods
@@ -66,8 +77,10 @@ namespace jsk_pcl_ros
 
     virtual void filter(const sensor_msgs::PointCloud2::ConstPtr& msg);
 
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
+#endif
 
     ////////////////////////////////////////////////////////
     // ROS variables

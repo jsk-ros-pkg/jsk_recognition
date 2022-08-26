@@ -45,7 +45,7 @@ namespace jsk_pcl_ros
 {
   void TorusFinder::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
     pnh_->param("use_hint", use_hint_, false);
     if (use_hint_) {
@@ -144,7 +144,9 @@ namespace jsk_pcl_ros
       return;
     }
     boost::mutex::scoped_lock lock(mutex_);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pcl::PointCloud<pcl::PointNormal>::Ptr cloud
       (new pcl::PointCloud<pcl::PointNormal>);
     pcl::fromROSMsg(*cloud_msg, *cloud);

@@ -131,7 +131,7 @@ namespace jsk_pcl_ros
   
   void LineSegmentDetector::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
 
     pnh_->param("approximate_sync", approximate_sync_, false);
 
@@ -205,7 +205,9 @@ namespace jsk_pcl_ros
     const pcl::PointCloud<PointT>::Ptr& cloud,
     const std::vector<LineSegment::Ptr>& segments)
   {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     std::vector<pcl::PointIndices::Ptr> indices;
     std::vector<pcl::ModelCoefficients::Ptr> coefficients;
     visualization_msgs::Marker marker;

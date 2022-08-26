@@ -40,7 +40,7 @@ namespace jsk_pcl_ros_utils
 {
   void PolygonAppender::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_polygon_ = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "output", 1);
     pub_coefficients_ = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(*pnh_,
       "output_coefficients", 1);
@@ -119,7 +119,9 @@ namespace jsk_pcl_ros_utils
         new_array.polygons.push_back(polygon);
       }
     }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_polygon_.publish(new_array);
 
     jsk_recognition_msgs::ModelCoefficientsArray coefficients_new_array;

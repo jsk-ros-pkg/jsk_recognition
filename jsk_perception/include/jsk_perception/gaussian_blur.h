@@ -37,18 +37,29 @@
 #ifndef JSK_PERCEPTION_GAUSSIAN_BLUR_H_
 #define JSK_PERCEPTION_GAUSSIAN_BLUR_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <dynamic_reconfigure/server.h>
 #include <jsk_perception/GaussianBlurConfig.h>
 #include <sensor_msgs/Image.h>
 
 namespace jsk_perception
 {
-  class GaussianBlur: public jsk_topic_tools::DiagnosticNodelet
+  class GaussianBlur: public jsk_topic_tools::NODELET
   {
   public:
     typedef jsk_perception::GaussianBlurConfig Config;
-    GaussianBlur(): DiagnosticNodelet("GaussianBlur") {}
+    GaussianBlur(){}
   protected:
     virtual void onInit();
     virtual void subscribe();

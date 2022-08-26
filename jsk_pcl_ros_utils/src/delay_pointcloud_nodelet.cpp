@@ -40,7 +40,7 @@ namespace jsk_pcl_ros_utils
 {
   void DelayPointCloud::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
@@ -65,7 +65,9 @@ namespace jsk_pcl_ros_utils
   {
     sensor_msgs::PointCloud2 out_cloud_msg = *msg;
     out_cloud_msg.header.stamp = ros::Time::now();
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_.publish(out_cloud_msg);
   }
 

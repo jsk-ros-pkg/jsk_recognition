@@ -41,7 +41,7 @@ namespace jsk_perception
 {
   void RectToROI::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_ = advertise<sensor_msgs::CameraInfo>(*pnh_, "output", 1);
     onInitPostProcess();
   }
@@ -87,7 +87,9 @@ namespace jsk_perception
       roi.roi.y_offset = (int)min_y;
       roi.roi.height = height;
       roi.roi.width = width;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
       vital_checker_->poke();
+#endif
       pub_.publish(roi);
     }
     else {

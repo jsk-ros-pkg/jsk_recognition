@@ -43,7 +43,7 @@ namespace jsk_pcl_ros_utils
 {
   void MaskImageToDepthConsideredMaskImage::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
     applypub_ = advertise<sensor_msgs::Image>(*pnh_, "applyoutput", 1);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
@@ -236,7 +236,9 @@ namespace jsk_pcl_ros_utils
           cv_bridge::CvImage mask_bridge(point_cloud2_msg->header,
                                          sensor_msgs::image_encodings::MONO8,
                                          mask_image);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
           vital_checker_->poke();
+#endif
           pub_.publish(mask_bridge.toImageMsg());
           if (use_mask_region_ == false || region_width_ == 0 | region_height_ == 0) {
             applypub_.publish(mask_bridge.toImageMsg());
@@ -295,7 +297,9 @@ namespace jsk_pcl_ros_utils
         cv_bridge::CvImage mask_bridge(point_cloud2_msg->header,
                                        sensor_msgs::image_encodings::MONO8,
                                        tmp_mask);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
         vital_checker_->poke();
+#endif
         pub_.publish(mask_bridge.toImageMsg());
         if (use_mask_region_ == false || region_width_ == 0 | region_height_ == 0) {
           applypub_.publish(mask_bridge.toImageMsg());

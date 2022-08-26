@@ -3,7 +3,18 @@
 #ifndef JSK_PERCEPTION_SLIDING_WINDOW_OBJECT_DETECTOR_H
 #define JSK_PERCEPTION_SLIDING_WINDOW_OBJECT_DETECTOR_H
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <jsk_perception/histogram_of_oriented_gradients.h>
 #include <jsk_recognition_msgs/RectArray.h>
 #include <jsk_recognition_msgs/ClusterPointIndices.h>
@@ -34,12 +45,11 @@
 
 namespace jsk_perception
 {
-   class SlidingWindowObjectDetector: public jsk_topic_tools::DiagnosticNodelet,
+   class SlidingWindowObjectDetector: public jsk_topic_tools::NODELET,
                                       public HOGFeatureDescriptor
    {
     public:
-      SlidingWindowObjectDetector():
-         DiagnosticNodelet("SlidingWindowObjectDetector") {}
+      SlidingWindowObjectDetector(){}
       
       virtual void readTrainingManifestFromDirectory();
       virtual void loadTrainedDetectorModel();

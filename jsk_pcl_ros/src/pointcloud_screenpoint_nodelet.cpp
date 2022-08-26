@@ -46,7 +46,7 @@ namespace jsk_pcl_ros
 
 void PointcloudScreenpoint::onInit()
 {
-  DiagnosticNodelet::onInit();
+  jsk_topic_tools::NODELET::onInit();
 
 
   normals_tree_ = boost::make_shared< pcl::search::KdTree< pcl::PointXYZ > > ();
@@ -306,7 +306,9 @@ void PointcloudScreenpoint::points_cb(const sensor_msgs::PointCloud2::ConstPtr &
 
 void PointcloudScreenpoint::point_cb (const geometry_msgs::PointStampedConstPtr& pt_ptr)
 {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
   vital_checker_->poke();
+#endif
   if (latest_cloud_.empty())
   {
     NODELET_ERROR_THROTTLE(1.0, "no point cloud was received");
@@ -338,7 +340,9 @@ void PointcloudScreenpoint::point_cb (const geometry_msgs::PointStampedConstPtr&
 
 void PointcloudScreenpoint::point_array_cb (const sensor_msgs::PointCloud2ConstPtr& pt_arr_ptr)
 {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
   vital_checker_->poke();
+#endif
   if (latest_cloud_.empty())
   {
     NODELET_ERROR_THROTTLE(1.0, "no point cloud was received");

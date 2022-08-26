@@ -43,7 +43,7 @@ namespace jsk_pcl_ros
 {
   void CaptureStereoSynchronizer::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     counter_ = 0;
     pnh_->param("rotational_bin_size", rotational_bin_size_, pcl::deg2rad(10.0));
     pnh_->param("positional_bin_size", positional_bin_size_, 0.1);
@@ -162,7 +162,9 @@ namespace jsk_pcl_ros
     }
     std_msgs::Int32 count;
     count.data = counter_;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_count_.publish(count);
   }
 }

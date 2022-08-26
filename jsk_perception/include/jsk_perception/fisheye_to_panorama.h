@@ -37,7 +37,18 @@
 #ifndef JSK_PERCEPTION_FISHEYE_TO_PANORAMA_H_
 #define JSK_PERCEPTION_FISHEYE_TO_PANORAMA_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
 
@@ -52,7 +63,7 @@
 
 namespace jsk_perception
 {
-  class FisheyeToPanorama: public jsk_topic_tools::DiagnosticNodelet
+  class FisheyeToPanorama: public jsk_topic_tools::NODELET
   {
   public:
     typedef message_filters::sync_policies::ApproximateTime<
@@ -61,7 +72,7 @@ namespace jsk_perception
       > SyncPolicy;
     typedef jsk_perception::FisheyeConfig Config;
 
-    FisheyeToPanorama(): DiagnosticNodelet("FisheyeToPanorama") {}
+    FisheyeToPanorama(){}
     virtual ~FisheyeToPanorama();
   protected:
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;

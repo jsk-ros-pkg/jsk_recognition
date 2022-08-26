@@ -47,7 +47,7 @@ namespace jsk_perception
 {
   void GridLabel::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
@@ -116,7 +116,9 @@ namespace jsk_perception
         ++counter;
       }
     }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_.publish(cv_bridge::CvImage(header,
                                     sensor_msgs::image_encodings::TYPE_32SC1,
                                     label).toImageMsg());

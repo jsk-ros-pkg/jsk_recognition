@@ -44,7 +44,7 @@ namespace jsk_perception
 {
   void PolygonArrayToLabelImage::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_ = advertise<sensor_msgs::Image>(
       *pnh_, "output", 1);
     onInitPostProcess();
@@ -105,7 +105,9 @@ namespace jsk_perception
           }
         }
       }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
       vital_checker_->poke();
+#endif
       pub_.publish(cv_bridge::CvImage(polygon_msg->header,
                                       sensor_msgs::image_encodings::TYPE_32SC1,
                                       mask_image).toImageMsg());

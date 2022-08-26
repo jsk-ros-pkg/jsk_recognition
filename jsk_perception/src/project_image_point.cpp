@@ -41,7 +41,7 @@ namespace jsk_perception
 {
   void ProjectImagePoint::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&ProjectImagePoint::configCallback, this, _1, _2);
@@ -101,7 +101,9 @@ namespace jsk_perception
     vector.vector.x = ray.x;
     vector.vector.y = ray.y;
     vector.vector.z = ray.z;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_vector_.publish(vector);
     if (ray.z == 0.0) {
       NODELET_ERROR("Z value of projected ray is 0");

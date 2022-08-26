@@ -42,7 +42,7 @@ namespace jsk_pcl_ros_utils
 
   void MarkerArrayVoxelToPointCloud::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
 
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     onInitPostProcess();
@@ -80,7 +80,9 @@ namespace jsk_pcl_ros_utils
     sensor_msgs::PointCloud2 ros_cloud;
     pcl::toROSMsg(*cloud, ros_cloud);
     ros_cloud.header = marker_array_msg->markers[0].header;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_.publish(ros_cloud);
   }
 

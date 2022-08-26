@@ -43,7 +43,7 @@ namespace jsk_pcl_ros
   // Do nothing
   void ExtractCuboidParticlesTopN::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&ExtractCuboidParticlesTopN::configCallback, this, _1, _2);
@@ -93,7 +93,9 @@ namespace jsk_pcl_ros
     ex.setInputCloud(cloud);
     ex.setIndices(indices);
     ex.filter(*cloud_filtered);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     publishPointIndices(pub_, *indices, msg->header);
     publishBoxArray(*cloud_filtered, msg->header);
     publishPoseArray(*cloud_filtered, msg->header);

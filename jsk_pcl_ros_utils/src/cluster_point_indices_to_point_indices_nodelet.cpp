@@ -43,7 +43,7 @@ namespace jsk_pcl_ros_utils
 
   void ClusterPointIndicesToPointIndices::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     // dynamic_reconfigure
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
@@ -93,7 +93,9 @@ namespace jsk_pcl_ros_utils
     } else {
       NODELET_ERROR_THROTTLE(10, "Invalid ~index %d is specified for cluster size %d.", index_, cluster_size);
     }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_.publish(indices_msg);
   }
 

@@ -55,7 +55,7 @@ namespace jsk_perception
 
     public:
       SlidingWindowObjectDetectorTrainer();
-      // :DiagnosticNodelet("SlidingWindowObjectDetectorTrainer");
+      // :;
       
       virtual void trainObjectClassifier(
          std::string, std::string);

@@ -41,7 +41,7 @@ namespace jsk_pcl_ros
 {
   void JointStateStaticFilter::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
 
     if (!jsk_topic_tools::readVectorParameter(*pnh_,
                                               "joint_names",
@@ -76,7 +76,9 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     NODELET_DEBUG("Pointcloud Callback");
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     if (isStatic(msg->header.stamp)) {
       ROS_DEBUG("static");
       pub_.publish(msg);
@@ -138,7 +140,9 @@ namespace jsk_pcl_ros
       NODELET_DEBUG("cannot find the joints from the input message");
       return;
     }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
 
     // check the previous state...
     if (previous_joints_.size() > 0) {

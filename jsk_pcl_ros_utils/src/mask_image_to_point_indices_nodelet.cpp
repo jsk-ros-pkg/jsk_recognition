@@ -42,7 +42,7 @@ namespace jsk_pcl_ros_utils
 {
   void MaskImageToPointIndices::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("use_multi_channels", use_multi_channels_, false);
     pnh_->param("target_channel", target_channel_, -1);
 
@@ -87,7 +87,9 @@ namespace jsk_pcl_ros_utils
             }
           }
         }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
         vital_checker_->poke();
+#endif
         pub_.publish(cluster_msg);
       } else {
         if (target_channel_ > image.channels() - 1) {
@@ -104,7 +106,9 @@ namespace jsk_pcl_ros_utils
             }
           }
         }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
         vital_checker_->poke();
+#endif
         pub_.publish(indices_msg);
       }
     } else {
@@ -120,7 +124,9 @@ namespace jsk_pcl_ros_utils
           }
         }
       }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
       vital_checker_->poke();
+#endif
       pub_.publish(indices_msg);
     }
   }

@@ -44,7 +44,7 @@ namespace jsk_pcl_ros_utils
 {
   void PointCloudToMaskImage::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
 
     srv_ = boost::make_shared<dynamic_reconfigure::Server<Config> >(*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
@@ -109,7 +109,9 @@ namespace jsk_pcl_ros_utils
     cv_bridge::CvImage mask_bridge(cloud_msg->header,
                                    sensor_msgs::image_encodings::MONO8,
                                    mask_image);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_.publish(mask_bridge.toImageMsg());
   }
 
@@ -161,7 +163,9 @@ namespace jsk_pcl_ros_utils
       return;
     }
 
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_.publish(mask_img->toImageMsg());
   }
 }

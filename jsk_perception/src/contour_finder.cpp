@@ -48,7 +48,7 @@ namespace jsk_perception
 {
   void ContourFinder::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_debug_image_ = advertise<sensor_msgs::Image>(*pnh_, "debug", 1);
     pub_convex_image_ = advertise<sensor_msgs::Image>(*pnh_, "output/convex", 1);
     onInitPostProcess();
@@ -97,7 +97,9 @@ namespace jsk_perception
     cv::convexHull(cv::Mat(all_contours), convex_contours[0]);
     cv::Mat convex_image = cv::Mat::zeros(input.size(), CV_8UC1);
     cv::drawContours(convex_image, convex_contours, 0, cv::Scalar(255), CV_FILLED);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_convex_image_.publish(
       cv_bridge::CvImage(
         image_msg->header,

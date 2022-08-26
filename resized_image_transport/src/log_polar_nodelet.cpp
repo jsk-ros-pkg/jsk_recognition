@@ -3,7 +3,7 @@
 namespace resized_image_transport
 {
   void LogPolar::onInit(){
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     initReconfigure();
     initParams();
     initPublishersAndSubscribers();

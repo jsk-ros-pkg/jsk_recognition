@@ -46,7 +46,7 @@ namespace jsk_pcl_ros
 {
   void HeightmapToPointCloud::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_config_ = pnh_->advertise<jsk_recognition_msgs::HeightmapConfig>(
       "output/config", 1);
     sub_config_ = pnh_->subscribe(
@@ -101,7 +101,9 @@ namespace jsk_pcl_ros
     sensor_msgs::PointCloud2 ros_cloud;
     pcl::toROSMsg(cloud, ros_cloud);
     ros_cloud.header = msg->header;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_.publish(ros_cloud);
   }
 }

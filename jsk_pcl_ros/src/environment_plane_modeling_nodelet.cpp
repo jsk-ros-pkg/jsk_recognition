@@ -53,7 +53,7 @@ namespace jsk_pcl_ros
 {
   void EnvironmentPlaneModeling::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
@@ -283,7 +283,9 @@ namespace jsk_pcl_ros
       std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> convexes = convertToConvexPolygons(cloud, indices_msg, coefficients_msg);
       // magnify convexes
       std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> magnified_convexes = magnifyConvexes(convexes);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
       vital_checker_->poke();
+#endif
       publishConvexPolygonsBoundaries(pub_debug_convex_point_cloud_, cloud_msg->header, magnified_convexes);
       // Publish magnified convexes for debug
       publishConvexPolygons(pub_debug_magnified_polygons_, cloud_msg->header, magnified_convexes);

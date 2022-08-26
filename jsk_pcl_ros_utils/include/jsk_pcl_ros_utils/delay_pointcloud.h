@@ -38,7 +38,18 @@
 
 #include <pcl_ros/pcl_nodelet.h>
 #include <sensor_msgs/PointCloud.h>
-#include "jsk_topic_tools/diagnostic_nodelet.h"
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 
 #include "jsk_pcl_ros_utils/DelayPointCloudConfig.h"
 #include <dynamic_reconfigure/server.h>
@@ -49,13 +60,13 @@
 namespace jsk_pcl_ros_utils
 {
 
-  class DelayPointCloud: public jsk_topic_tools::DiagnosticNodelet
+  class DelayPointCloud: public jsk_topic_tools::NODELET
   {
     
   public:
 
     typedef jsk_pcl_ros_utils::DelayPointCloudConfig Config;
-    DelayPointCloud() : DiagnosticNodelet("DelayPointCloud") {}
+    DelayPointCloud(){}
 
   protected:
     virtual void onInit();

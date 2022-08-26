@@ -40,7 +40,18 @@
 #include <ros/ros.h>
 #include <ros/console.h>
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <sensor_msgs/Image.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
@@ -53,10 +64,10 @@
 
 namespace jsk_perception
 {
-   class Skeletonization: public jsk_topic_tools::DiagnosticNodelet
+   class Skeletonization: public jsk_topic_tools::NODELET
    {
     public:
-      Skeletonization(): DiagnosticNodelet("Skeletonization"),
+      Skeletonization(): 
                          num_threads_(1) {}
       virtual void imageCallback(const sensor_msgs::Image::ConstPtr&);
       virtual void skeletonization(cv::Mat &);

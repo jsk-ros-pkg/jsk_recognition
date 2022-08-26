@@ -60,15 +60,26 @@
 #include <diagnostic_updater/publisher.h>
 #include "jsk_recognition_utils/pcl_util.h"
 #include <jsk_topic_tools/vital_checker.h>
-#include "jsk_topic_tools/diagnostic_nodelet.h"
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include "jsk_pcl_ros/ClusterPointIndicesDecomposerConfig.h"
 
 namespace jsk_pcl_ros
 {
-  class ClusterPointIndicesDecomposer: public jsk_topic_tools::DiagnosticNodelet
+  class ClusterPointIndicesDecomposer: public jsk_topic_tools::NODELET
   {
   public:
-    ClusterPointIndicesDecomposer(): DiagnosticNodelet("ClusterPointIndicesDecomposer") { }
+    ClusterPointIndicesDecomposer(){ }
     virtual ~ClusterPointIndicesDecomposer();
     typedef jsk_pcl_ros::ClusterPointIndicesDecomposerConfig Config;
     typedef message_filters::sync_policies::ExactTime<
@@ -139,8 +150,10 @@ namespace jsk_pcl_ros
                                  const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients);
 
     virtual void configCallback (Config &config, uint32_t level);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
+#endif
     virtual void allocatePublishers(size_t num);
     virtual void publishNegativeIndices(
       const sensor_msgs::PointCloud2ConstPtr &input,

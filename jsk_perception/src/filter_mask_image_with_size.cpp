@@ -43,7 +43,7 @@ namespace jsk_perception
 {
   void FilterMaskImageWithSize::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("approximate_sync", approximate_sync_, false);
     pnh_->param("queue_size", queue_size_, 100);
     pnh_->param("use_reference", use_reference_, false);
@@ -158,7 +158,9 @@ namespace jsk_perception
         (min_size_ <= size_input) && (size_input <= max_size_) &&
         (min_relative_size_ <= size_relative) && (size_relative <= max_relative_size_))
     {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
       vital_checker_->poke();
+#endif
       pub_.publish(input_msg);
     }
   }

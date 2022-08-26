@@ -41,7 +41,7 @@ namespace jsk_perception
 {
   void BackgroundSubstraction::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
@@ -116,7 +116,9 @@ namespace jsk_perception
       = cv_bridge::CvImage(image_msg->header,
                            sensor_msgs::image_encodings::MONO8,
                            fg).toImageMsg();
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     image_pub_.publish(diff_image);
   }
 }

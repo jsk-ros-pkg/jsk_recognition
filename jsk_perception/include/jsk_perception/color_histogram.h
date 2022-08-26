@@ -49,11 +49,22 @@
 #include <jsk_perception/ColorHistogramConfig.h>
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 
 namespace jsk_perception
 {
-  class ColorHistogram: public jsk_topic_tools::DiagnosticNodelet
+  class ColorHistogram: public jsk_topic_tools::NODELET
   {
   public:
     typedef message_filters::sync_policies::ApproximateTime<
@@ -64,7 +75,7 @@ namespace jsk_perception
       sensor_msgs::Image,
       sensor_msgs::Image> MaskSyncPolicy;
     typedef jsk_perception::ColorHistogramConfig Config;
-    ColorHistogram(): DiagnosticNodelet("ColorHistogram") {}
+    ColorHistogram(){}
     virtual ~ColorHistogram();
   protected:
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;

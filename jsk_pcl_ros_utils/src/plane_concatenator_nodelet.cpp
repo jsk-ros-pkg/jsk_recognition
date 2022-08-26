@@ -45,7 +45,7 @@ namespace jsk_pcl_ros_utils
 {
   void PlaneConcatenator::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
@@ -196,7 +196,9 @@ namespace jsk_pcl_ros_utils
     // new_ros_coefficients.coefficients
     //   = pcl_conversions::convertToROSModelCoefficients(
     //     new_refined_coefficients, cloud_msg->header);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_indices_.publish(new_ros_indices);
     pub_polygon_.publish(new_ros_polygons);
     pub_coefficients_.publish(new_ros_coefficients);

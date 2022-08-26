@@ -46,7 +46,7 @@ namespace jsk_pcl_ros
 {
   void ROIClipper::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
     pnh_->param("not_sync", not_sync_, false);
     pnh_->param("keep_organized", keep_organized_, false);
@@ -106,7 +106,9 @@ namespace jsk_pcl_ros
   void ROIClipper::clip(const sensor_msgs::Image::ConstPtr& image_msg,
                         const sensor_msgs::CameraInfo::ConstPtr& camera_info_msg)
   {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     try {
       cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(image_msg, sensor_msgs::image_encodings::RGB8);
       cv::Mat image = cv_ptr->image;
@@ -148,7 +150,9 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     if (latest_camera_info_) {
       image_geometry::PinholeCameraModel model;
       PCLIndicesMsg indices;

@@ -49,7 +49,7 @@ namespace jsk_perception
 {
   void DualFisheyeToPanorama::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("light_compen", enb_lc_, false);
     pnh_->param("refine_align", enb_ra_, false);
     pnh_->param("fovd", fovd_, 195.0f);
@@ -123,7 +123,9 @@ namespace jsk_perception
     cv::Mat pano;
     pano = stitcher_->stitch(img_l, img_r);
 
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_panorama_image_.publish(cv_bridge::CvImage(image_msg->header,
                                                    image_msg->encoding,
                                                    pano).toImageMsg());

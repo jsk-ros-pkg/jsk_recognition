@@ -54,7 +54,7 @@ namespace jsk_pcl_ros
   void ICPRegistration::onInit()
   {
     pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     tf_listener_ = TfListenerSingleton::getInstance();
     ////////////////////////////////////////////////////////
     // Dynamic Reconfigure
@@ -311,7 +311,9 @@ namespace jsk_pcl_ros
       result.header = box_msg->header;
       result.pose = box_msg->pose;
       pub_icp_result.publish(result);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
       vital_checker_->poke();
+#endif
       return;
     }
     try
@@ -325,7 +327,9 @@ namespace jsk_pcl_ros
       Eigen::Affine3f inversed_offset = offset.inverse();
       jsk_recognition_msgs::ICPResult result = alignPointcloudWithReferences(output, inversed_offset, msg->header);
       pub_icp_result.publish(result);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
       vital_checker_->poke();
+#endif
     }
     catch (tf2::ConnectivityException &e)
     {
@@ -354,7 +358,9 @@ namespace jsk_pcl_ros
       result.header = offset_msg->header;
       result.pose = offset_msg->pose;
       pub_icp_result.publish(result);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
       vital_checker_->poke();
+#endif
       return;
     }
     try
@@ -376,7 +382,9 @@ namespace jsk_pcl_ros
       pcl::transformPointCloud(*input, *output, inversed_offset);
       jsk_recognition_msgs::ICPResult result = alignPointcloudWithReferences(output, offset, msg->header);
       pub_icp_result.publish(result);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
       vital_checker_->poke();
+#endif
     }
     catch (tf2::ConnectivityException &e)
     {
@@ -414,7 +422,9 @@ namespace jsk_pcl_ros
     }
     jsk_recognition_msgs::ICPResult result = alignPointcloudWithReferences(non_nan_cloud, offset, msg->header);
     pub_icp_result.publish(result);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
   }
   
   void ICPRegistration::align(const sensor_msgs::PointCloud2::ConstPtr& msg,
@@ -460,7 +470,9 @@ namespace jsk_pcl_ros
       sensor_msgs::PointCloud2 empty_cloud;
       empty_cloud.header = header;
       pub_result_cloud_.publish(empty_cloud);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
       vital_checker_->poke();
+#endif
 
       pcl::PointCloud<PointT> empty_pcl_cloud;
       publishDebugCloud(pub_debug_source_cloud_, empty_pcl_cloud, header);
@@ -503,7 +515,9 @@ namespace jsk_pcl_ros
       geometry_msgs::PoseStamped empty_pose;
       empty_pose.header = header;
       pub_result_pose_.publish(empty_pose);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
       vital_checker_->poke();
+#endif
 
       result.header = header;
       result.score = min_score;
@@ -515,7 +529,9 @@ namespace jsk_pcl_ros
       pcl::toROSMsg(*best_transformed_cloud, ros_final);
       ros_final.header = header;
       pub_result_cloud_.publish(ros_final);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
       vital_checker_->poke();
+#endif
     }
     geometry_msgs::PoseStamped ros_result_pose;
     ros_result_pose.header = header;

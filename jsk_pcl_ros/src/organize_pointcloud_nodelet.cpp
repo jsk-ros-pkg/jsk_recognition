@@ -42,7 +42,9 @@ namespace jsk_pcl_ros
 {
   void OrganizePointCloud::extract(const sensor_msgs::PointCloud2ConstPtr &input)
   {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     // skip empty cloud
     ROS_INFO_STREAM("received input clouds, convert range image, resolution: " << angular_resolution << ", width(deg): " << angle_width << ", height(deg):" << angle_height << ", min_points:" << min_points);
 
@@ -76,7 +78,7 @@ namespace jsk_pcl_ros
 
   void OrganizePointCloud::onInit(void)
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     pnh_->param<double>("angular_resolution", angular_resolution, 1.0);

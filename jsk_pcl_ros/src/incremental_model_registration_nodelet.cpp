@@ -92,7 +92,7 @@ namespace jsk_pcl_ros
   
   void IncrementalModelRegistration::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("frame_id", frame_id_,
                 std::string("multisense/left_camera_optical_frame"));
     start_registration_srv_
@@ -179,7 +179,9 @@ namespace jsk_pcl_ros
     sensor_msgs::PointCloud2 ros_all_cloud;
     pcl::toROSMsg(all_cloud_, ros_all_cloud);
     ros_all_cloud.header = cloud_msg->header;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_cloud_non_registered_.publish(ros_all_cloud);
   }
 

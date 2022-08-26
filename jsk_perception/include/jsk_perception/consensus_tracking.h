@@ -42,16 +42,27 @@
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <sensor_msgs/Image.h>
 
 namespace jsk_perception
 {
-  class ConsensusTracking : public jsk_topic_tools::DiagnosticNodelet
+  class ConsensusTracking : public jsk_topic_tools::NODELET
   {
   public:
     ConsensusTracking() :
-      DiagnosticNodelet("ConsensusTracking"),
+      
       window_initialized_(false) {}
     virtual ~ConsensusTracking();
     typedef message_filters::sync_policies::ApproximateTime<

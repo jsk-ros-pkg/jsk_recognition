@@ -37,7 +37,18 @@
 #ifndef JSK_PCL_ROS_UTILS_POLYGON_FLIPPER_H_
 #define JSK_PCL_ROS_UTILS_POLYGON_FLIPPER_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <jsk_recognition_msgs/PolygonArray.h>
 #include <jsk_recognition_msgs/ModelCoefficientsArray.h>
 #include <jsk_recognition_msgs/ClusterPointIndices.h>
@@ -52,7 +63,7 @@
 
 namespace jsk_pcl_ros_utils
 {
-  class PolygonFlipper: public jsk_topic_tools::DiagnosticNodelet
+  class PolygonFlipper: public jsk_topic_tools::NODELET
   {
   public:
     typedef boost::shared_ptr<PolygonFlipper> Ptr;
@@ -60,7 +71,7 @@ namespace jsk_pcl_ros_utils
       jsk_recognition_msgs::PolygonArray,
       jsk_recognition_msgs::ClusterPointIndices,
       jsk_recognition_msgs::ModelCoefficientsArray > SyncPolicy;
-    PolygonFlipper(): DiagnosticNodelet("PolygonFlipper") {}
+    PolygonFlipper(){}
     virtual ~PolygonFlipper();
   protected:
     virtual void onInit();

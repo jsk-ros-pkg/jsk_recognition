@@ -48,7 +48,7 @@ namespace jsk_pcl_ros
   
   void TiltLaserListener::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     skip_counter_ = 0;
     if (pnh_->hasParam("joint_name")) {
       pnh_->getParam("joint_name", joint_name_);
@@ -126,7 +126,9 @@ namespace jsk_pcl_ros
   void TiltLaserListener::timerCallback(const ros::TimerEvent& e)
   {
     boost::mutex::scoped_lock lock(mutex_);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     publishTimeRange(e.current_real, e.last_real, e.current_real);
     start_time_ = e.current_real; // not used??
   }
@@ -141,6 +143,7 @@ namespace jsk_pcl_ros
 
   }
 
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
   void TiltLaserListener::updateDiagnostic(
     diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
@@ -165,6 +168,7 @@ namespace jsk_pcl_ros
     }
     DiagnosticNodelet::updateDiagnostic(stat);
   }
+#endif
 
   void TiltLaserListener::cloudCallback(
     const sensor_msgs::PointCloud2::ConstPtr& msg)
@@ -425,7 +429,9 @@ namespace jsk_pcl_ros
     for (size_t i = 0; i < msg->name.size(); i++) {
       std::string name = msg->name[i];
       if (name == joint_name_) {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
         vital_checker_->poke();
+#endif
         if(msg->position.size() <= i) {
           ROS_WARN("size of position (%zu) is smaller than joint(%s) position(%zu)",
                    msg->position.size(), name.c_str(), i);

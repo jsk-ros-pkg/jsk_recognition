@@ -46,7 +46,7 @@ namespace jsk_pcl_ros_utils
   void PCDReaderWithPose::onInit()
   {
     pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     std::string file_name;
     pnh_->param("pcd_file", file_name, std::string(""));
     if (file_name == std::string("") || pcl::io::loadPCDFile (file_name, template_cloud_) == -1){
@@ -76,7 +76,9 @@ namespace jsk_pcl_ros_utils
     Eigen::Matrix4f transform = pose_eigen.matrix();
     pcl_ros::transformPointCloud(transform ,template_cloud_, ros_out);
     ros_out.header = pose_stamped->header;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_cloud_.publish(ros_out);
   }
 }

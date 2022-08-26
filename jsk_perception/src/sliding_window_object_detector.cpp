@@ -13,7 +13,7 @@ namespace jsk_perception
 {
    void SlidingWindowObjectDetector::onInit()
    {
-      DiagnosticNodelet::onInit();
+      jsk_topic_tools::NODELET::onInit();
 
       this->nms_client_ = pnh_->serviceClient<
          jsk_perception::NonMaximumSuppression>("non_maximum_suppression");
@@ -128,7 +128,9 @@ namespace jsk_perception
          out_msg->header = msg->header;
          out_msg->encoding = sensor_msgs::image_encodings::BGR8;
          out_msg->image = bimg.clone();
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
          vital_checker_->poke();
+#endif
          this->pub_rects_.publish(jsk_rect_array);
          this->pub_image_.publish(out_msg->toImageMsg());
       } else if (this->run_type_.compare("BOOTSTRAPER") == 0) {
@@ -151,7 +153,9 @@ namespace jsk_perception
             }
          }
       } else {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
         vital_checker_->poke();
+#endif
          this->pub_image_.publish(cv_ptr->toImageMsg());
          ROS_ERROR("NODELET RUNTYPE IS NOT SET.");
          std::_Exit(EXIT_FAILURE);

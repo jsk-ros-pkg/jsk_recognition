@@ -46,7 +46,7 @@ namespace jsk_pcl_ros
 {
   void HeightmapConverter::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_config_ = pnh_->advertise<jsk_recognition_msgs::HeightmapConfig>(
       "output/config", 1, true);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
@@ -163,7 +163,9 @@ namespace jsk_pcl_ros
     cv_bridge::CvImage height_map_image(msg_header,
                                         sensor_msgs::image_encodings::TYPE_32FC2,
                                         height_map);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_.publish(height_map_image.toImageMsg());
   }
 

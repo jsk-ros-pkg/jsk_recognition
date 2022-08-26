@@ -42,7 +42,7 @@ namespace jsk_pcl_ros
 {
   void NormalDirectionFilter::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("use_imu", use_imu_, false);
     if (!use_imu_) {
       std::vector<double> direction;
@@ -141,7 +141,9 @@ namespace jsk_pcl_ros
     const sensor_msgs::Imu::ConstPtr& imu_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pcl::PointCloud<pcl::Normal>::Ptr normal(new pcl::PointCloud<pcl::Normal>);
     pcl::fromROSMsg(*msg, *normal);
     geometry_msgs::Vector3Stamped stamped_imu, transformed_imu;
@@ -184,7 +186,9 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pcl::PointCloud<pcl::Normal>::Ptr normal(new pcl::PointCloud<pcl::Normal>);
     pcl::fromROSMsg(*msg, *normal);
 

@@ -47,7 +47,7 @@ namespace jsk_pcl_ros
 {
   void FuseImages::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_out_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
     onInitPostProcess();
   }
@@ -263,7 +263,9 @@ namespace jsk_pcl_ros
     validateInput(in8, height, width, inputs);
 
     cv::Mat out = fuseInputs(inputs);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_out_.publish(cv_bridge::CvImage(in1->header, encoding_, out).toImageMsg());
   }
 

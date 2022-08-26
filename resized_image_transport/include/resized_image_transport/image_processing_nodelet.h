@@ -26,11 +26,22 @@
 #include <dynamic_reconfigure/server.h>
 #include <jsk_topic_tools/timered_diagnostic_updater.h>
 #include <jsk_topic_tools/diagnostic_utils.h>
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 
 namespace resized_image_transport
 {
-  class ImageProcessing : public jsk_topic_tools::DiagnosticNodelet
+  class ImageProcessing : public jsk_topic_tools::NODELET
   {
   public:
   protected:
@@ -72,9 +83,10 @@ namespace resized_image_transport
     jsk_topic_tools::VitalChecker::Ptr image_vital_;
     jsk_topic_tools::VitalChecker::Ptr info_vital_;
     jsk_topic_tools::TimeredDiagnosticUpdater::Ptr diagnostic_updater_;
-
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
+#endif
     void onInit();
     void initReconfigure();
     void initParams();
@@ -86,8 +98,7 @@ namespace resized_image_transport
       in_times(boost::circular_buffer<double>(100)),
       out_times(boost::circular_buffer<double>(100)),
       in_bytes(boost::circular_buffer<double>(100)),
-      out_bytes(boost::circular_buffer<double>(100)),
-      DiagnosticNodelet("ImageProcessing")
+      out_bytes(boost::circular_buffer<double>(100))
       { }
     ~ImageProcessing() { }
     

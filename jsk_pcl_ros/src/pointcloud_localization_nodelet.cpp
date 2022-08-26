@@ -46,7 +46,7 @@ namespace jsk_pcl_ros
   void PointCloudLocalization::onInit()
   {
     pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     tf_listener_ = TfListenerSingleton::getInstance();
     // initialize localize_transform_ as identity
     localize_transform_.setIdentity();
@@ -147,7 +147,9 @@ namespace jsk_pcl_ros
   void PointCloudLocalization::cloudCallback(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     boost::mutex::scoped_lock lock(mutex_);
     //NODELET_INFO("cloudCallback");
     latest_cloud_ = cloud_msg;

@@ -43,7 +43,7 @@ namespace jsk_pcl_ros_utils
 
   void PolygonArrayTransformer::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     if (!pnh_->getParam("frame_id", frame_id_)) {
       NODELET_FATAL("~frame_id is not specified");
       return;
@@ -216,7 +216,9 @@ namespace jsk_pcl_ros_utils
         return;
       }
     }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     polygons_pub_.publish(transformed_polygon_array);
     coefficients_pub_.publish(transformed_model_coefficients_array);
   }

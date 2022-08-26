@@ -45,7 +45,7 @@ namespace jsk_perception
 {
   void LabDecomposer::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_l_ = advertise<sensor_msgs::Image>(*pnh_, "output/l", 1);
     pub_a_ = advertise<sensor_msgs::Image>(*pnh_, "output/a", 1);
     pub_b_ = advertise<sensor_msgs::Image>(*pnh_, "output/b", 1);
@@ -86,7 +86,9 @@ namespace jsk_perception
     cv::Mat l = lab_planes[0];
     cv::Mat a = lab_planes[1];
     cv::Mat b = lab_planes[2];
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_l_.publish(cv_bridge::CvImage(
                      image_msg->header,
                      sensor_msgs::image_encodings::MONO8,

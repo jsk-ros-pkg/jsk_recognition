@@ -37,7 +37,18 @@
 #ifndef JSK_PERCEPTION_RECT_ARRAY_TO_DENSITY_IMAGE_H_
 #define JSK_PERCEPTION_RECT_ARRAY_TO_DENSITY_IMAGE_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <sensor_msgs/Image.h>
 #include <jsk_recognition_msgs/RectArray.h>
 #include <message_filters/subscriber.h>
@@ -47,14 +58,14 @@
 
 namespace jsk_perception
 {
-  class RectArrayToDensityImage: public jsk_topic_tools::DiagnosticNodelet
+  class RectArrayToDensityImage: public jsk_topic_tools::NODELET
   {
   public:
     typedef message_filters::sync_policies::ApproximateTime<
       sensor_msgs::Image, jsk_recognition_msgs::RectArray > ApproximateSyncPolicy;
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::Image, jsk_recognition_msgs::RectArray > SyncPolicy;
-    RectArrayToDensityImage(): DiagnosticNodelet("RectArrayToDensityImage") {}
+    RectArrayToDensityImage(){}
     virtual ~RectArrayToDensityImage();
   protected:
 

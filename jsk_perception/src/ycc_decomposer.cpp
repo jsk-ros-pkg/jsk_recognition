@@ -45,7 +45,7 @@ namespace jsk_perception
 {
   void YCCDecomposer::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_y_ = advertise<sensor_msgs::Image>(*pnh_, "output/y", 1);
     pub_cr_ = advertise<sensor_msgs::Image>(*pnh_, "output/cr", 1);
     pub_cb_ = advertise<sensor_msgs::Image>(*pnh_, "output/cb", 1);
@@ -86,7 +86,9 @@ namespace jsk_perception
     cv::Mat y = ycc_planes[0];
     cv::Mat cr = ycc_planes[1];
     cv::Mat cb = ycc_planes[2];
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_y_.publish(cv_bridge::CvImage(
                      image_msg->header,
                      sensor_msgs::image_encodings::MONO8,

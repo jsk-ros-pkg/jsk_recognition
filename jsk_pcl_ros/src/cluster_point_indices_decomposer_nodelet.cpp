@@ -79,7 +79,7 @@ namespace jsk_pcl_ros
 
   void ClusterPointIndicesDecomposer::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("publish_tf", publish_tf_, false);
     if (publish_tf_) {
       br_.reset(new tf::TransformBroadcaster);
@@ -293,6 +293,7 @@ namespace jsk_pcl_ros
               [&cloud_sizes](size_t i1, size_t i2) {return cloud_sizes[i1] < cloud_sizes[i2];});
   }
 
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
   void ClusterPointIndicesDecomposer::updateDiagnostic(
     diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
@@ -312,6 +313,7 @@ namespace jsk_pcl_ros
     }
     DiagnosticNodelet::updateDiagnostic(stat);
   }
+#endif
   
   int ClusterPointIndicesDecomposer::findNearestPlane(
     const Eigen::Vector4f& center,
@@ -667,7 +669,9 @@ namespace jsk_pcl_ros
     const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
     const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients)
   {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     if (publish_clouds_) {
       allocatePublishers(indices_input->cluster_indices.size());
     }

@@ -41,7 +41,7 @@ namespace jsk_pcl_ros
 {
   void CollisionDetector::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     initSelfMask();
     pnh_->param<std::string>("world_frame_id", world_frame_id_, "map");
     sub_ = pnh_->subscribe("input", 1, &CollisionDetector::pointcloudCallback, this);
@@ -124,7 +124,9 @@ namespace jsk_pcl_ros
   void CollisionDetector::pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     NODELET_DEBUG("update pointcloud.");
 
     pcl::fromROSMsg(*msg, cloud_);

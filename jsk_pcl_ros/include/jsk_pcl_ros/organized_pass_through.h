@@ -38,19 +38,30 @@
 #define JSK_PCL_ROS_ORGANIZED_PASS_THROUGH_H_
 
 #include <pcl_ros/pcl_nodelet.h>
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <jsk_topic_tools/counter.h>
 #include <dynamic_reconfigure/server.h>
 #include "jsk_pcl_ros/OrganizedPassThroughConfig.h"
 
 namespace jsk_pcl_ros
 {
-  class OrganizedPassThrough: public jsk_topic_tools::DiagnosticNodelet
+  class OrganizedPassThrough: public jsk_topic_tools::NODELET
   {
   public:
     typedef jsk_pcl_ros::OrganizedPassThroughConfig Config;
     typedef pcl::PointXYZRGB PointT;
-    OrganizedPassThrough(): DiagnosticNodelet("OrganizedPassThrough") {}
+    OrganizedPassThrough(){}
 
   protected:
     ////////////////////////////////////////////////////////
@@ -68,9 +79,10 @@ namespace jsk_pcl_ros
 
     virtual pcl::PointIndices::Ptr filterIndices(const pcl::PointCloud<PointT>::Ptr& pc);
     
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
-
+#endif
     bool isPointNaN(const PointT& p) {
       return (!pcl_isfinite(p.x) || !pcl_isfinite(p.y) || !pcl_isfinite(p.z));
     }

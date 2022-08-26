@@ -42,7 +42,7 @@ namespace jsk_perception
 {
   void GrabCut::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
@@ -165,7 +165,9 @@ namespace jsk_perception
       image_msg->header, sensor_msgs::image_encodings::MONO8, fgd_mask);
     cv_bridge::CvImage bg_mask_bridge(
       image_msg->header, sensor_msgs::image_encodings::MONO8, bgd_mask);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_foreground_.publish(fg_bridge.toImageMsg());
     pub_background_.publish(bg_bridge.toImageMsg());
     pub_foreground_mask_.publish(fg_mask_bridge.toImageMsg());

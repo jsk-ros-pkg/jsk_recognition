@@ -53,7 +53,9 @@ namespace jsk_pcl_ros
   
   void VoxelGridDownsampleManager::pointCB(const sensor_msgs::PointCloud2ConstPtr &input)
   {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     try {
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr output_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
@@ -219,7 +221,7 @@ namespace jsk_pcl_ros
   
   void VoxelGridDownsampleManager::onInit(void)
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("base_frame", base_frame_, std::string("pelvis"));
     tf_listener = TfListenerSingleton::getInstance();
     initializeGrid();

@@ -8,7 +8,7 @@ namespace jsk_perception
 {
    void SaliencyMapGenerator::onInit()
    {
-      DiagnosticNodelet::onInit();
+      jsk_topic_tools::NODELET::onInit();
       pnh_->getParam("num_threads", this->num_threads_);
       pnh_->getParam("fps", this->print_fps_);
       this->pub_image_ = advertise<sensor_msgs::Image>(*pnh_,
@@ -63,7 +63,9 @@ namespace jsk_perception
       cv_bridge::CvImage pub_img(image_msg->header,
                                  image_msg->encoding,
                                  saliency_map);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
       vital_checker_->poke();
+#endif
       this->pub_image_.publish(pub_img.toImageMsg());
    }
 

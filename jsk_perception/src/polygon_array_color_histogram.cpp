@@ -48,7 +48,7 @@ namespace jsk_perception
 {
   void PolygonArrayColorHistogram::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     tf_listener_ = jsk_recognition_utils::TfListenerSingleton::getInstance();
     pnh_->param("max_queue_size", max_queue_size_, 10);
     pnh_->param("synchronizer_queue_size", sync_queue_size_, 100);
@@ -169,7 +169,9 @@ namespace jsk_perception
             hist, pixel_min_value_, pixel_max_value_);
         histogram_array.histograms.push_back(histogram);
       }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
       vital_checker_->poke();
+#endif
       pub_debug_polygon_.publish(cv_bridge::CvImage(image_msg->header,
                                                     sensor_msgs::image_encodings::RGB8,
                                                     debug_polygon_image).toImageMsg());

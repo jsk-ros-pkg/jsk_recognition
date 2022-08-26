@@ -45,7 +45,9 @@ namespace jsk_pcl_ros
   void MovingLeastSquareSmoothing::smooth(const sensor_msgs::PointCloud2ConstPtr& input)
   {
     boost::mutex::scoped_lock lock(mutex_);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr result_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::fromROSMsg(*input, *cloud);
@@ -95,7 +97,7 @@ namespace jsk_pcl_ros
 
   void MovingLeastSquareSmoothing::onInit(void)
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("gauss_param_set", gauss_param_set_, false);
     pnh_->param("search_radius", search_radius_, 0.03);
     pnh_->param("use_polynomial_fit", use_polynomial_fit_, false);

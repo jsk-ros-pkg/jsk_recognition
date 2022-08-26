@@ -45,7 +45,7 @@ namespace jsk_perception
 {
   void UnapplyMaskImage::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("approximate_sync", approximate_sync_, false);
     pub_image_ = advertise<sensor_msgs::Image>(
       *pnh_, "output", 1);
@@ -125,7 +125,9 @@ namespace jsk_perception
         }
       }
     }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pub_image_.publish(cv_bridge::CvImage(
                          image_msg->header,
                          image_msg->encoding,

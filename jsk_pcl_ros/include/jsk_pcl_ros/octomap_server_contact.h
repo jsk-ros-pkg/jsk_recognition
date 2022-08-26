@@ -37,7 +37,18 @@
 #define OCTOMAP_SERVER_OCTOMAPSERVER_CONTACT_H_
 
 #include <ros/ros.h>
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 
 #define NDEBUG
 #include <octomap_server/OctomapServer.h>
@@ -50,10 +61,10 @@ using octomap_server::OctomapServer;
 namespace jsk_pcl_ros
 {
   class OctomapServerContact : public OctomapServer,
-                               public jsk_topic_tools::DiagnosticNodelet
+                               public jsk_topic_tools::NODELET
   {
    public:
-    OctomapServerContact(): DiagnosticNodelet("OctomapServerContact") {}
+    OctomapServerContact(){}
     OctomapServerContact(const ros::NodeHandle &privateNh);
      virtual ~OctomapServerContact();
 

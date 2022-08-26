@@ -46,7 +46,7 @@ namespace jsk_pcl_ros
 {
   void IntermittentImageAnnotator::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     listener_ = TfListenerSingleton::getInstance();
     last_publish_time_ = ros::Time::now();
     pnh_->param("fixed_frame_id", fixed_frame_id_, std::string("odom"));
@@ -290,7 +290,9 @@ namespace jsk_pcl_ros
       const sensor_msgs::CameraInfo::ConstPtr& info_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     latest_image_msg_ = image_msg;
     latest_camera_info_msg_ = info_msg;
 

@@ -2,10 +2,8 @@
 <launch>
   <arg name="manager" default="rosbag_play_nodelet_manager" />
   <arg name="launch_nodelet_manager" default="true" />
-  <arg name="start_time" default="0" />
-  <arg name="duration_time" default="0" />
-  <arg name="duration" default="--duration $(arg duration_time)" if="$(eval duration_time != 0)" />
-  <arg name="duration" default="" if="$(eval duration_time == 0)" />
+  <arg name="start_time" />
+  <arg name="duration_time" />
 
   <arg name="RGB_CAMERA_INFO" value="/head_camera/rgb/throttled/camera_info" />
   <arg name="RGB_IMAGE" value="/head_camera/rgb/throttled/image_rect_color" />
@@ -77,6 +75,6 @@
 
   <!-- rosbag player -->
   <node pkg="rosbag" type="play" name="rosbag_play"
-        args="$(find jsk_perception)/sample/data/fetch_go_to_kitchen.bag --loop --clock --start $(arg start_time) $(arg duration)" output="screen" />
+        args="$(find jsk_perception)/sample/data/fetch_go_to_kitchen.bag --loop --clock --start $(arg start_time) --duration $(arg duration_time)" output="screen" />
 
 </launch>

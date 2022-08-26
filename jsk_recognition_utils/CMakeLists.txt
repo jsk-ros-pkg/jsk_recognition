@@ -29,6 +29,10 @@ find_package(catkin REQUIRED COMPONENTS
   visualization_msgs
 )
 
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/jsk_recognition_utils/jsk_topic_tools_version.h.in
+  ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_INCLUDE_DESTINATION}/jsk_recognition_utils/jsk_topic_tools_version.h)
+
 
 # ------------------------------------------------------------------------------------
 # Download
@@ -143,6 +147,7 @@ install(TARGETS jsk_recognition_utils
 
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.h" # Ignore *_version.h.in files
 )
 
 install(DIRECTORY node_scripts sample test

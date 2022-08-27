@@ -1,6 +1,7 @@
 <launch>
 
   <arg name="gui" default="true" />
+  <arg name="debug" default="false" />
 
   <node name="static_tf_publisher_map_to_shelf"
         pkg="tf" type="static_transform_publisher"
@@ -20,6 +21,23 @@
   <node name="rearrange_bounding_box"
         pkg="jsk_pcl_ros" type="rearrange_bounding_box">
     <remap from="~input" to="/bounding_box_array_publisher/output" />
+    <rosparam>
+      offset_x: 0.0
+      offset_y: 0.0
+      offset_z: 0.0
+      scale_x: 1.0
+      scale_y: 1.0
+      scale_z: 1.0
+      rotate_x: 1.5707963267948966
+      rotate_y: 1.5707963267948966
+      rotate_z: 1.5707963267948966
+    </rosparam>
+  </node>
+
+  <node name="rearrange_bounding_box_check"
+        pkg="jsk_pcl_ros" type="rearrange_bounding_box"
+        if="$(arg debug)">
+    <remap from="~input" to="/rearrange_bounding_box/output" />
     <rosparam>
       offset_x: 0.0
       offset_y: 0.0

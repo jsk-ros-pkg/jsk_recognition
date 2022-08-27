@@ -7,6 +7,7 @@ namespace resized_image_transport
     initReconfigure();
     initParams();
     initPublishersAndSubscribers();
+    onInitPostProcess();
   }
   
 

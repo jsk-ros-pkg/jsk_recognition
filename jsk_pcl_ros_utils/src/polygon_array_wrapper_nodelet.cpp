@@ -45,6 +45,7 @@ namespace jsk_pcl_ros_utils
     pub_coefficients_array_
       = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(*pnh_,
         "output_coefficients", 1);
+    onInitPostProcess();
   }
 
   PolygonArrayWrapper::~PolygonArrayWrapper() {

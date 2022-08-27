@@ -145,6 +145,12 @@ def main():
         md5='4dab24bd6e6a7fd5b9e86d053352cdfd',
     )
 
+    download_data(
+        path='sample/data/fetch_trashbin_top.bag',
+        url='https://drive.google.com/uc?id=1amwEWa2ZYL4Tbgxu0nkBQ_xfW0gryDLI',
+        md5='90e9f794ac99ac05eb0dfd74eade3d40',
+    )
+
 
 if __name__ == '__main__':
     main()

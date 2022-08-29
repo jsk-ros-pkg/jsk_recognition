@@ -15,7 +15,6 @@
   <arg name="spectrogram_period" default="1" />
 
   <arg name="gui" default="false" />
-  <arg name="threshold" default="0.5" />
 
   <arg name="pause_rosbag" default="true" />
   <arg name="rosbag_args" value="--clock --pause" if="$(arg pause_rosbag)" />

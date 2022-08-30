@@ -234,6 +234,7 @@ jsk_add_nodelet(src/sparse_image_decoder.cpp "jsk_perception/SparseImageDecoder"
 jsk_add_nodelet(src/color_histogram.cpp "jsk_perception/ColorHistogram" "color_histogram")
 jsk_add_nodelet(src/background_substraction_nodelet.cpp "jsk_perception/BackgroundSubstraction" "background_substraction")
 jsk_add_nodelet(src/fisheye_to_panorama.cpp "jsk_perception/FisheyeToPanorama" "fisheye_to_panorama")
+jsk_add_nodelet(src/point_pose_extractor.cpp "jsk_perception/PointPoseExtractor" "point_pose_extractor")
 # See https://github.com/drNoob13/fisheyeStitcher#pre-requisite
 if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_GREATER "7.0" AND # >= 7.1
    "${OpenCV_VERSION}" VERSION_GREATER "2.9.9" AND # >= 3.0.0
@@ -347,7 +348,6 @@ target_link_libraries(oriented_gradient ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 jsk_add_node(src/camshiftdemo.cpp camshiftdemo)
 jsk_add_node(src/linemod.cpp linemod)
-jsk_add_node(src/point_pose_extractor.cpp point_pose_extractor)
 jsk_add_node(src/white_balance_converter.cpp white_balance_converter)
 jsk_add_node(src/rectangle_detector.cpp rectangle_detector)
 jsk_add_node(src/calc_flow.cpp calc_flow)

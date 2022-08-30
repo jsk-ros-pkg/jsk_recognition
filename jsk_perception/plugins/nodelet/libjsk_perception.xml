@@ -290,4 +290,8 @@
          type="jsk_perception::VirtualCameraMono"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_perception/PointPoseExtractor"
+         type="jsk_perception::PointPoseExtractor"
+         base_class_type="nodelet::Nodelet">
+  </class>
 </library>

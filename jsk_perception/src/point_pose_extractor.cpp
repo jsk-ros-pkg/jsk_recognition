@@ -184,17 +184,15 @@ namespace jsk_perception
         cv::Mat M;
         cv::Size size;
         M = make_homography(src, rvec, tvec, template_width, template_height, size);
-        Mvec.push_back(M);
-        sizevec.push_back(size);
+        //Whenever an H matrix cannot be estimated, cv::findHomography returns an empty one.
+        if(!M.empty()){
+          Mvec.push_back(M);
+          sizevec.push_back(size);
+        }
       }
     }
     for (int i = 0; i < (int)Mvec.size(); i++){
       cv::Mat dst;
-      for (int j = 0; j < Mvec.at(i).cols; ++j ) {
-        for (int k = 0; k < Mvec.at(i).rows; ++k ) {
-        }
-      }
-
       cv::warpPerspective(src, dst, Mvec.at(i), sizevec.at(i),
                           CV_INTER_LINEAR, IPL_BORDER_CONSTANT, 0);
       imgs.push_back(dst);
@@ -239,6 +237,10 @@ namespace jsk_perception
 
   bool PointPoseExtractor::settemplate_cb (jsk_perception::SetTemplate::Request &req,
                                            jsk_perception::SetTemplate::Response &res){
+    if ( !_initialized ) {
+      ROS_WARN("SetTemplate service is available only after receiving input ImageFeature0D");
+      return false;
+    }
     cv_bridge::CvImagePtr cv_ptr;
     cv_ptr = cv_bridge::toCvCopy(req.image, enc::BGR8);
     cv::Mat img(cv_ptr->image);
@@ -362,7 +364,7 @@ namespace jsk_perception
     _client = pnh_->serviceClient<posedetection_msgs::Feature0DDetect>("/Feature0DDetect");
     _pub = advertise<posedetection_msgs::ObjectDetection>(*pnh_, "/ObjectDetection", 10);
     _pub_agg = advertise<posedetection_msgs::ObjectDetection>(*pnh_, "/ObjectDetection_agg", 10);
-    _pub_pose = advertise<geometry_msgs::PoseStamped>(*pnh_, "object_pose", 10);
+    _pub_pose = advertise<geometry_msgs::PoseStamped>(*pnh_, "/object_pose", 10);
     _debug_pub = it->advertise("debug_image", 1);
     _server = pnh_->advertiseService("/SetTemplate", &PointPoseExtractor::settemplate_cb, this);
     _initialized = false;

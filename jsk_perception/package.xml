@@ -55,6 +55,7 @@
   <exec_depend>cv_bridge</exec_depend>
   <exec_depend>dynamic_reconfigure</exec_depend>
   <exec_depend>eigen</exec_depend>
+  <exec_depend>fetch_description</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>image_geometry</exec_depend>
   <exec_depend>image_transport</exec_depend>

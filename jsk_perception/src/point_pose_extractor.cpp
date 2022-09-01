@@ -50,12 +50,11 @@ namespace jsk_perception
     double template_height;
     std::string template_filename;
     std::string window_name;
-    ros::NodeHandle local_nh("~");
 
-    local_nh.param("child_frame_id", _child_frame_id, std::string("matching"));
-    local_nh.param("object_width",  template_width,  0.06);
-    local_nh.param("object_height", template_height, 0.0739);
-    local_nh.param("relative_pose", _pose_str, std::string("0 0 0 0 0 0 1"));
+    pnh_->param("child_frame_id", _child_frame_id, std::string("matching"));
+    pnh_->param("object_width",  template_width,  0.06);
+    pnh_->param("object_height", template_height, 0.0739);
+    pnh_->param("relative_pose", _pose_str, std::string("0 0 0 0 0 0 1"));
     std::string default_template_file_name;
     try {
 #ifdef ROSPACK_EXPORT
@@ -72,17 +71,17 @@ namespace jsk_perception
 #endif
     } catch (std::runtime_error &e) {
     }
-    local_nh.param("template_filename", template_filename, default_template_file_name);
-    local_nh.param("reprojection_threshold", _reprojection_threshold, 3.0);
-    local_nh.param("distanceratio_threshold", _distanceratio_threshold, 0.49);
-    local_nh.param("error_threshold", _err_thr, 50.0);
-    local_nh.param("theta_step", _th_step, 5.0);
-    local_nh.param("phi_step", _phi_step, 5.0);
-    local_nh.param("viewer_window", _viewer, true);
-    local_nh.param("window_name", window_name, std::string("sample1"));
-    local_nh.param("autosize", _autosize, false);
-    local_nh.param("publish_null_object_detection", pnod, false);
-    local_nh.param("publish_tf", _publish_tf, false);
+    pnh_->param("template_filename", template_filename, default_template_file_name);
+    pnh_->param("reprojection_threshold", _reprojection_threshold, 3.0);
+    pnh_->param("distanceratio_threshold", _distanceratio_threshold, 0.49);
+    pnh_->param("error_threshold", _err_thr, 50.0);
+    pnh_->param("theta_step", _th_step, 5.0);
+    pnh_->param("phi_step", _phi_step, 5.0);
+    pnh_->param("viewer_window", _viewer, true);
+    pnh_->param("window_name", window_name, std::string("sample1"));
+    pnh_->param("autosize", _autosize, false);
+    pnh_->param("publish_null_object_detection", pnod, false);
+    pnh_->param("publish_tf", _publish_tf, false);
 
     // make one template
     cv::Mat template_img;

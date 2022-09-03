@@ -11,6 +11,11 @@ class SplitImage(ConnectionBasedTransport):
 
     def __init__(self):
         super(SplitImage, self).__init__()
+
+        # issue deprecation warning
+        # like https://github.com/ros/xacro/blob/kinetic-devel/xacro.py
+        rospy.logwarn('split_image.py is deprecated; please use split_image instead')
+
         self.vertical_parts = rospy.get_param('~vertical_parts', 1)
         self.horizontal_parts = rospy.get_param('~horizontal_parts', 1)
         self.pubs = []

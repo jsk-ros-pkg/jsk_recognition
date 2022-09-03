@@ -244,13 +244,8 @@ namespace jsk_perception
     cv_ptr = cv_bridge::toCvCopy(req.image, enc::BGR8);
     cv::Mat img(cv_ptr->image);
 
-    tf::Transform transform(tf::Quaternion(req.relativepose.orientation.x,
-                                           req.relativepose.orientation.y,
-                                           req.relativepose.orientation.z,
-                                           req.relativepose.orientation.w),
-                            tf::Vector3(req.relativepose.position.x,
-                                        req.relativepose.position.y,
-                                        req.relativepose.position.z));
+    tf::Transform transform;
+    tf::poseMsgToTF(req.relativepose, transform);
 
     // add the image to template list
     add_new_template(img, req.type, transform,
@@ -321,19 +316,8 @@ namespace jsk_perception
         }
         // broadcast tf
         if ( this->_publish_tf ) {
-          tf::Transform transform(
-                                  tf::Quaternion(
-                                                 pose_msg.pose.orientation.x,
-                                                 pose_msg.pose.orientation.y,
-                                                 pose_msg.pose.orientation.z,
-                                                 pose_msg.pose.orientation.w
-                                                 ),
-                                  tf::Vector3(
-                                              pose_msg.pose.position.x,
-                                              pose_msg.pose.position.y,
-                                              pose_msg.pose.position.z
-                                              )
-                                  );
+          tf::Transform transform;
+          tf::poseMsgToTF(pose_msg.pose, transform);
           _br.sendTransform(
                             tf::StampedTransform(
                                                  transform,

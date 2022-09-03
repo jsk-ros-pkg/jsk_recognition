@@ -604,7 +604,7 @@ namespace jsk_perception
     static void cvmousecb (int event, int x, int y, int flags, void* param){
       PointPoseExtractor* ppe = static_cast<PointPoseExtractor*>(param);
       Matching_Template *mt = ppe->_templates.back();
-      std::cerr << "mousecb_ -> " << mt << std::endl;
+      // std::cerr << "mousecb_ -> " << mt << std::endl;
       switch (event){
       case CV_EVENT_LBUTTONUP: {
         cv::Point2d pt(x,y - (int)mt->_template_img.size().height);
@@ -660,7 +660,7 @@ namespace jsk_perception
       cv::imwrite(filename,tmp_template);
       boost::filesystem::path fname(filename);
       std::stringstream ss;
-      ss << fname.stem() << "_wrap" << fname.extension();
+      ss << (fname.parent_path() / fname.stem()).c_str() << "_wrap" << fname.extension().c_str();
       cv::imwrite(ss.str(),tmp_warp_template);
     }catch (cv::Exception e) {
       std::cerr << e.what()  << std::endl;

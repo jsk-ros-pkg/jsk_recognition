@@ -20,6 +20,17 @@
   <arg name="save_unwarped" default="false" />
   <arg name="mls_map_path" default="$(find jsk_perception)/config/fisheye_stitcher_grid_xd_yd_3840x1920.yml.gz" />
   <arg name="gui" default="true" />
+  <arg name="launch_manager" default="true" />
+  <arg name="manager" default="insta360_nodelet_manager" />
+  <arg name="nodelet_command" value="load" if="$(arg launch_manager)" />
+  <arg name="nodelet_command" value="standalone" unless="$(arg launch_manager)" />
+
+  <group ns="insta360" >
+    <node name="$(arg manager)"
+          pkg="nodelet" type="nodelet"
+          args="manager" output="screen"
+          if="$(arg launch_manager)" />
+  </group>
 
   <!-- Publish camera image -->
   <group if="$(arg publish_image)">
@@ -34,6 +45,8 @@
       <arg name="frame_rate" value="$(arg frame_rate)" />
       <arg name="brightness" value="$(arg brightness)" /> <!-- -32768 ~ 32767 -->
       <arg name="gui" value="$(arg gui)" />
+      <arg name="manager" default="$(arg manager)" />
+      <arg name="nodelet_command" default="$(arg nodelet_command)" />
     </include>
     <!-- For kinetic or older -->
     <include if="$(arg use_usb_cam)" file="$(find jsk_perception)/launch/usb_cam.launch">
@@ -49,7 +62,9 @@
   </group>
 
   <!-- Split insta360 air image into 2 fisheye image -->
-  <node pkg="jsk_perception" name="split_image" type="split_image.py" output="screen">
+  <node name="split_image"
+        pkg="nodelet" type="nodelet"
+        args="$(arg nodelet_command) jsk_perception/SplitImage /insta360/$(arg manager)" >
     <remap from="~input" to="/insta360/image_raw" />
     <rosparam>
       vertical_parts: 1
@@ -60,7 +75,7 @@
   <group ns="insta360" if="$(arg throttle)">
     <node name="throttle_camera_info"
           pkg="nodelet" type="nodelet"
-          args="standalone jsk_topic_tools/LightweightThrottle"
+          args="$(arg nodelet_command) jsk_topic_tools/LightweightThrottle $(arg manager)"
           respawn="true">
       <remap from="~input" to="camera_info"/>
       <remap from="~output" to="throttled/camera_info" />
@@ -68,7 +83,7 @@
     </node>
     <node name="throttle_rgb"
           pkg="nodelet" type="nodelet"
-          args="standalone jsk_topic_tools/LightweightThrottle"
+          args="$(arg nodelet_command) jsk_topic_tools/LightweightThrottle $(arg manager)"
           respawn="true">
       <remap from="~input" to="image_raw" />
       <remap from="~output" to="throttled/image_raw" />
@@ -76,7 +91,7 @@
     </node>
     <node name="throttle_rgb_compressed"
           pkg="nodelet" type="nodelet"
-          args="standalone jsk_topic_tools/LightweightThrottle"
+          args="$(arg nodelet_command) jsk_topic_tools/LightweightThrottle $(arg manager)"
           respawn="true">
       <remap from="~input" to="image_raw/compressed" />
       <remap from="~output" to="throttled/image_raw/compressed" />
@@ -92,6 +107,8 @@
     <arg name="refine_align" value="$(arg refine_align)" />
     <arg name="save_unwarped" value="$(arg save_unwarped)" />
     <arg name="mls_map_path" value="$(arg mls_map_path)" />
+    <arg name="manager" default="/insta360/$(arg manager)" />
+    <arg name="nodelet_command" default="$(arg nodelet_command)" />
   </include>
 
   <group if="$(arg gui)">

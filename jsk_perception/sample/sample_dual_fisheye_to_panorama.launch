@@ -6,10 +6,12 @@
   <arg name="fovd" default="185.0" doc="Camera's Field of View [degree]" />
   <arg name="save_unwarped" default="false" doc="Save unwarped fisheye images. This is useful to create MLS grids." />
   <arg name="mls_map_path" default="$(find jsk_perception)/config/fisheye_stitcher_grid_xd_yd_3840x1920.yml.gz" doc="Yaml file for MLS grids." />
+  <arg name="manager" default="insta360_nodelet_manager" />
+  <arg name="nodelet_command" default="standalone" />
 
   <node name="dual_fisheye_to_panorama"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_perception/DualFisheyeToPanorama">
+        args="$(arg nodelet_command) jsk_perception/DualFisheyeToPanorama $(arg manager)">
     <remap from="~input" to="$(arg INPUT_IMAGE)"/>
     <param name="light_compen" value="false" />
     <param name="refine_align" value="$(arg refine_align)" />

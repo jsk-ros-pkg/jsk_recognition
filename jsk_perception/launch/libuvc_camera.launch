@@ -9,9 +9,13 @@
   <arg name="brightness" />
   <arg name="gui" default="false" />
   <arg name="frame_id" default="$(arg camera_name)_link" />
+  <arg name="manager" default="insta360_nodelet_manager" />
+  <arg name="nodelet_command" default="standalone" />
 
   <group ns="$(arg camera_name)">
-    <node name="insta_camera_node" pkg="libuvc_camera" type="camera_node">
+    <node name="insta_camera_node"
+          pkg="nodelet" type="nodelet"
+          args="$(arg nodelet_command) libuvc_camera/driver $(arg manager)" >
       <param name="frame_id" value="$(arg frame_id)" />
       <param name="vendor" value="$(arg vendor)" />
       <param name="product" value="$(arg product)" />

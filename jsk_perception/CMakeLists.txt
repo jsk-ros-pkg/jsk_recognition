@@ -16,6 +16,7 @@ endif()
 
 find_package(catkin REQUIRED COMPONENTS
   angles
+  camera_info_manager
   cmake_modules
   cv_bridge
   dynamic_reconfigure
@@ -170,6 +171,7 @@ generate_messages(
 
 catkin_package(
   CATKIN_DEPENDS
+  camera_info_manager
   geometry_msgs
   jsk_recognition_msgs
   jsk_recognition_utils
@@ -231,6 +233,7 @@ jsk_add_nodelet(src/polygon_array_color_likelihood.cpp "jsk_perception/PolygonAr
 jsk_add_nodelet(src/polygon_array_color_histogram.cpp "jsk_perception/PolygonArrayColorHistogram" "polygon_array_color_histogram")
 jsk_add_nodelet(src/sparse_image_encoder.cpp "jsk_perception/SparseImageEncoder" "sparse_image_encoder")
 jsk_add_nodelet(src/sparse_image_decoder.cpp "jsk_perception/SparseImageDecoder" "sparse_image_decoder")
+jsk_add_nodelet(src/split_image.cpp "jsk_perception/SplitImage" "split_image")
 jsk_add_nodelet(src/color_histogram.cpp "jsk_perception/ColorHistogram" "color_histogram")
 jsk_add_nodelet(src/background_substraction_nodelet.cpp "jsk_perception/BackgroundSubstraction" "background_substraction")
 jsk_add_nodelet(src/fisheye_to_panorama.cpp "jsk_perception/FisheyeToPanorama" "fisheye_to_panorama")

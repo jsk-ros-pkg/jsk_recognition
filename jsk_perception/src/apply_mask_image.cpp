@@ -194,14 +194,17 @@ namespace jsk_perception
             output_image).toImageMsg());
     }
     else {
-      if (jsk_recognition_utils::isBGRA(image_msg->encoding)) {
-        cv::cvtColor(masked_image, output_image, cv::COLOR_BGR2BGRA);
-      }
-      else if (jsk_recognition_utils::isRGBA(image_msg->encoding)) {
-        cv::cvtColor(masked_image, output_image, cv::COLOR_BGR2RGBA);
-      }
-      else {  // BGR, RGB or GRAY
-        masked_image.copyTo(output_image);
+      // Error in cvtColor when masked_image is empty.
+      if (!masked_image.empty()) {
+        if (jsk_recognition_utils::isBGRA(image_msg->encoding)) {
+          cv::cvtColor(masked_image, output_image, cv::COLOR_BGR2BGRA);
+        }
+        else if (jsk_recognition_utils::isRGBA(image_msg->encoding)) {
+          cv::cvtColor(masked_image, output_image, cv::COLOR_BGR2RGBA);
+        }
+        else {  // BGR, RGB or GRAY
+          masked_image.copyTo(output_image);
+        }
       }
       pub_image_.publish(cv_bridge::CvImage(
             image_msg->header,

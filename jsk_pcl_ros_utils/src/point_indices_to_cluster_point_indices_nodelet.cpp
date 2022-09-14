@@ -40,7 +40,7 @@ namespace jsk_pcl_ros_utils
 {
   void PointIndicesToClusterPointIndices::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output", 1);
     onInitPostProcess();
   }
@@ -59,10 +59,12 @@ namespace jsk_pcl_ros_utils
   void PointIndicesToClusterPointIndices::convert(
     const PCLIndicesMsg::ConstPtr& indices_msg)
   {
-    vital_checker_->poke();
     jsk_recognition_msgs::ClusterPointIndices cluster_indices_msg;
     cluster_indices_msg.header = indices_msg->header;
     cluster_indices_msg.cluster_indices.push_back(*indices_msg);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(cluster_indices_msg);
   }
 }

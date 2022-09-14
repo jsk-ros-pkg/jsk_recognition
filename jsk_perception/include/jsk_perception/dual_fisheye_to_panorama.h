@@ -37,7 +37,18 @@
 #ifndef JSK_PERCEPTION_DUAL_FISHEYE_TO_PANORAMA_H_
 #define JSK_PERCEPTION_DUAL_FISHEYE_TO_PANORAMA_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <jsk_recognition_msgs/PanoramaInfo.h>
@@ -56,7 +67,7 @@
 
 namespace jsk_perception
 {
-  class DualFisheyeToPanorama: public jsk_topic_tools::DiagnosticNodelet
+  class DualFisheyeToPanorama: public jsk_topic_tools::NODELET
   {
   public:
     typedef message_filters::sync_policies::ApproximateTime<
@@ -65,7 +76,7 @@ namespace jsk_perception
       > SyncPolicy;
     typedef jsk_perception::DualFisheyeConfig Config;
 
-    DualFisheyeToPanorama(): DiagnosticNodelet("DualFisheyeToPanorama") {}
+    DualFisheyeToPanorama(){}
   protected:
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     void configCallback(Config &new_config, uint32_t level);

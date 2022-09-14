@@ -41,15 +41,10 @@
 
 namespace jsk_pcl_ros
 {
-  OrganizedStatisticalOutlierRemoval::OrganizedStatisticalOutlierRemoval():
-    DiagnosticNodelet("OrganizedStatisticalOutlierRemoval")
-  {
-
-  }
 
   void OrganizedStatisticalOutlierRemoval::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
@@ -82,7 +77,9 @@ namespace jsk_pcl_ros
   void OrganizedStatisticalOutlierRemoval::filter(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     sensor_msgs::PointCloud2 output;
 
     if (keep_organized_&& msg->is_dense) {
@@ -215,9 +212,12 @@ namespace jsk_pcl_ros
     output.is_dense = !keep_organized;
     pub_.publish(output);
 #endif
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     diagnostic_updater_->update();
+#endif
   }
 
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
   void OrganizedStatisticalOutlierRemoval::updateDiagnostic(
     diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
@@ -235,6 +235,7 @@ namespace jsk_pcl_ros
     }
     DiagnosticNodelet::updateDiagnostic(stat);
   }
+#endif
 }
 
 #include <pluginlib/class_list_macros.h>

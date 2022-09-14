@@ -42,7 +42,7 @@ namespace jsk_pcl_ros_utils
 {
   void DepthImageError::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("approximate_sync", approximate_sync_, false);
     depth_error_publisher_ = advertise<jsk_recognition_msgs::DepthErrorResult>(*pnh_, "output", 1);
     onInitPostProcess();
@@ -107,6 +107,9 @@ namespace jsk_pcl_ros_utils
       result.center_v = camera_info->P[6];
       result.true_depth = uv_point->point.z;
       result.observed_depth = depth_from_depth_sensor;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+      vital_checker_->poke();
+#endif
       depth_error_publisher_.publish(result);
     }
   }

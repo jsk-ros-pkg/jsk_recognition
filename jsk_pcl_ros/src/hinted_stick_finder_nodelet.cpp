@@ -48,7 +48,7 @@ namespace jsk_pcl_ros
 {
   void HintedStickFinder::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&HintedStickFinder::configCallback, this, _1, _2);
@@ -253,6 +253,9 @@ namespace jsk_pcl_ros
     seg.setProbability(min_probability_);
     seg.setInputCloud(filtered_cloud);
     seg.setInputNormals(cloud_normals);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     for (size_t i = 0; i < cylinder_fitting_trial_; i++) {
       seg.segment(*inliers, *coefficients);
       if (inliers->indices.size() > min_inliers_) {
@@ -331,6 +334,9 @@ namespace jsk_pcl_ros
     output_indices.header = cloud->header;
     PCLIndicesMsg ros_indices;
     pcl_conversions::fromPCL(output_indices, ros_indices);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_line_filtered_indices_.publish(ros_indices);
   }
 

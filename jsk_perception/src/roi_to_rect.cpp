@@ -41,7 +41,7 @@ namespace jsk_perception
 {
   void ROIToRect::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_ = advertise<geometry_msgs::PolygonStamped>(
       *pnh_, "output", 1);
     onInitPostProcess();
@@ -62,7 +62,6 @@ namespace jsk_perception
   void ROIToRect::convert(
     const sensor_msgs::CameraInfo::ConstPtr& roi_msg)
   {
-    vital_checker_->poke();
     geometry_msgs::PolygonStamped rect;
     rect.header = roi_msg->header;
     geometry_msgs::Point32 top_left_pt, top_right_pt, bottom_left_pt, bottom_right_pt;
@@ -78,6 +77,9 @@ namespace jsk_perception
     rect.polygon.points.push_back(bottom_left_pt);
     rect.polygon.points.push_back(bottom_right_pt);
     rect.polygon.points.push_back(top_right_pt);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(rect);
   }
 }

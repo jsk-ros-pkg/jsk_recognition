@@ -45,7 +45,7 @@ namespace jsk_pcl_ros
 {
   void ColorHistogramClassifier::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     classifier_name_ = "color_histogram";
 
     if (!loadReference()) return;
@@ -166,12 +166,18 @@ namespace jsk_pcl_ros
       result.label_proba.push_back(0.0);
     }
 
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_class_.publish(result);
   }
 
   void ColorHistogramClassifier::features(const jsk_recognition_msgs::ColorHistogramArray::ConstPtr& histograms)
   {
     boost::mutex::scoped_lock lock(mutex_);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
 
     jsk_recognition_msgs::ClassificationResult result;
     result.header = histograms->header;
@@ -204,6 +210,9 @@ namespace jsk_pcl_ros
       }
     }
 
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_class_.publish(result);
   }
 }

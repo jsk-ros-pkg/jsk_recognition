@@ -41,7 +41,7 @@ namespace jsk_pcl_ros_utils
 
   void StaticPolygonArrayPublisher::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("use_periodic", use_periodic_, false);
     pnh_->param("use_message", use_message_, false);
     pnh_->param("use_trigger", use_trigger_, false);
@@ -259,7 +259,9 @@ namespace jsk_pcl_ros_utils
     for (size_t i = 0; i < coefficients_.coefficients.size(); i++) {
       coefficients_.coefficients[i].header.stamp = stamp;
     }
-    
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     polygon_pub_.publish(polygons_);
     coefficients_pub_.publish(coefficients_);
   }

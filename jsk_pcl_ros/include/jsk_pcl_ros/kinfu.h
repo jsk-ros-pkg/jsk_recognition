@@ -49,7 +49,18 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <jsk_recognition_utils/pcl_conversion_util.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <std_srvs/Empty.h>
@@ -75,7 +86,7 @@ namespace pcl
 
 namespace jsk_pcl_ros
 {
-  class Kinfu: public jsk_topic_tools::ConnectionBasedNodelet
+  class Kinfu: public jsk_topic_tools::NODELET
   {
   public:
     typedef message_filters::sync_policies::ExactTime<
@@ -84,7 +95,7 @@ namespace jsk_pcl_ros
       sensor_msgs::CameraInfo, sensor_msgs::Image, sensor_msgs::Image> SyncPolicyWithColor;
     typedef jsk_pcl_ros::KinfuConfig Config;
 
-    Kinfu(): ConnectionBasedNodelet(), frame_idx_(0) {}
+    Kinfu(): DiagnosticNodelet(), frame_idx_(0) {}
     virtual ~Kinfu();
   protected:
     virtual void onInit();

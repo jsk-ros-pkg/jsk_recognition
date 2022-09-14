@@ -37,17 +37,28 @@
 #ifndef JSK_PCL_ROS_UTILS_MASK_IMAGE_TO_POINT_INDICES_H_
 #define JSK_PCL_ROS_UTILS_MASK_IMAGE_TO_POINT_INDICES_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <sensor_msgs/Image.h>
 #include <jsk_recognition_msgs/ClusterPointIndices.h>
 #include "jsk_recognition_utils/pcl_conversion_util.h"
 
 namespace jsk_pcl_ros_utils
 {
-  class MaskImageToPointIndices: public jsk_topic_tools::DiagnosticNodelet
+  class MaskImageToPointIndices: public jsk_topic_tools::NODELET
   {
   public:
-    MaskImageToPointIndices(): DiagnosticNodelet("MaskImageToPointIndices") { }
+    MaskImageToPointIndices(){ }
   protected:
     ////////////////////////////////////////////////////////
     // methods

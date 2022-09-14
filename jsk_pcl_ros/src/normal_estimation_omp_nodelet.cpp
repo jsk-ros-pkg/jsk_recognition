@@ -43,7 +43,7 @@ namespace jsk_pcl_ros
   void NormalEstimationOMP::onInit()
   {
     pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("number_of_threads", num_of_threads_, 0);
     NODELET_DEBUG_STREAM("num_of_threads: " << num_of_threads_);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
@@ -81,7 +81,9 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     {
       jsk_recognition_utils::ScopedWallDurationReporter r
         = timer_.reporter(pub_latest_time_, pub_average_time_);

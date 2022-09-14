@@ -44,11 +44,11 @@ namespace jsk_pcl_ros
 {
   void MaskImageFilter::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("negative", negative_, false);
     pub_ = advertise<PCLIndicesMsg>(
       *pnh_, "output", 1);
-    DiagnosticNodelet::onInitPostProcess();
+    jsk_topic_tools::NODELET::onInitPostProcess();
   }
 
   void MaskImageFilter::subscribe()
@@ -110,6 +110,9 @@ namespace jsk_pcl_ros
           }
         }
       }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+      vital_checker_->poke();
+#endif
       pub_.publish(indices);
     }
   }

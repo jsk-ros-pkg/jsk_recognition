@@ -37,7 +37,18 @@
 #ifndef JSK_PERCEPTION_BACKGROUND_SUBSTRACTION_H_
 #define JSK_PERCEPTION_BACKGROUND_SUBSTRACTION_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <opencv2/opencv.hpp>
 #if ( CV_MAJOR_VERSION >= 4)
 #else
@@ -54,10 +65,10 @@
 
 namespace jsk_perception
 {
-  class BackgroundSubstraction: public jsk_topic_tools::DiagnosticNodelet
+  class BackgroundSubstraction: public jsk_topic_tools::NODELET
   {
   public:
-    BackgroundSubstraction(): DiagnosticNodelet("BackgroundSubstraction") {}
+    BackgroundSubstraction(){}
     typedef jsk_perception::BackgroundSubstractionConfig Config;
   protected:
     ////////////////////////////////////////////////////////

@@ -43,7 +43,7 @@ namespace jsk_perception
 {
   void BoundingBoxToRect::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     tf_listener_ = jsk_recognition_utils::TfListenerSingleton::getInstance();
     pnh_->param("queue_size", queue_size_, 100);
     pnh_->param("approximate_sync", approximate_sync_, false);
@@ -131,6 +131,9 @@ namespace jsk_perception
     internal_msg.header = boxes_msg->header;
     internal_msg.boxes = *boxes_msg;
     internal_msg.camera_info = *info_msg;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_internal_.publish(internal_msg);
   }
 

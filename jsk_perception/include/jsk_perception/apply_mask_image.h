@@ -37,7 +37,18 @@
 #ifndef JSK_PERCEPTION_APPLY_MASK_IMAGE_H_
 #define JSK_PERCEPTION_APPLY_MASK_IMAGE_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <message_filters/subscriber.h>
@@ -47,7 +58,7 @@
 
 namespace jsk_perception
 {
-  class ApplyMaskImage: public jsk_topic_tools::DiagnosticNodelet
+  class ApplyMaskImage: public jsk_topic_tools::NODELET
   {
   public:
     typedef message_filters::sync_policies::ApproximateTime<
@@ -56,7 +67,7 @@ namespace jsk_perception
     typedef message_filters::sync_policies::ExactTime<
     sensor_msgs::Image,
     sensor_msgs::Image > SyncPolicy;
-    ApplyMaskImage(): DiagnosticNodelet("ApplyMaskImage") {}
+    ApplyMaskImage(){}
     virtual ~ApplyMaskImage();
   protected:
 

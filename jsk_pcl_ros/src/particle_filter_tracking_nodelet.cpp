@@ -54,7 +54,7 @@ namespace jsk_pcl_ros
     // Suppress huge amount of error message.
     pcl::console::setVerbosityLevel(pcl::console::VERBOSITY_LEVEL::L_ALWAYS);
     // not implemented yet
-    ConnectionBasedNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     
     track_target_set_ = false;
     new_cloud_ = false;
@@ -284,6 +284,9 @@ namespace jsk_pcl_ros
   //Publish the current particles
   void ParticleFilterTracking::publish_particles()
   {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     PointCloudStatePtr particles = tracker_get_particles();
     if (particles && new_cloud_ && particle_publisher_.getNumSubscribers()) {
       //Set pointCloud with particle's points
@@ -308,6 +311,9 @@ namespace jsk_pcl_ros
   //Publish model reference point cloud
   void ParticleFilterTracking::publish_result()
   {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     ParticleXYZRPY result = tracker_get_result();
     Eigen::Affine3f transformation = tracker_to_eigen_matrix(result);
 

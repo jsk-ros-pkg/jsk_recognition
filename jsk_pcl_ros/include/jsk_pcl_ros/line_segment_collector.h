@@ -42,7 +42,18 @@
 #ifndef JSK_PCL_ROS_LINE_SEGMENT_COLLECTOR_H_
 #define JSK_PCL_ROS_LINE_SEGMENT_COLLECTOR_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <jsk_recognition_msgs/ClusterPointIndices.h>
 #include <jsk_recognition_msgs/ModelCoefficientsArray.h>
 #include <sensor_msgs/JointState.h>
@@ -103,10 +114,10 @@ namespace jsk_pcl_ros
   private:
   };
   
-  class LineSegmentCollector: public jsk_topic_tools::DiagnosticNodelet
+  class LineSegmentCollector: public jsk_topic_tools::NODELET
   {
   public:
-    LineSegmentCollector(): DiagnosticNodelet("LineSegmentCollector") { }
+    LineSegmentCollector(){ }
     virtual ~LineSegmentCollector();
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,

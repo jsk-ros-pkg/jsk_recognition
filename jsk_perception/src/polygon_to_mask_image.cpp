@@ -44,7 +44,7 @@ namespace jsk_perception
 {
   void PolygonToMaskImage::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_ = advertise<sensor_msgs::Image>(
       *pnh_, "output", 1);
     onInitPostProcess();
@@ -77,7 +77,6 @@ namespace jsk_perception
     const geometry_msgs::PolygonStamped::ConstPtr& polygon_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    vital_checker_->poke();
     if (camera_info_) {
       if (polygon_msg->header.frame_id != camera_info_->header.frame_id) {
         NODELET_ERROR("frame_id of polygon (%s) and camera (%s) are not same.",
@@ -99,6 +98,9 @@ namespace jsk_perception
         }
         cv::fillConvexPoly(mask_image, &(points[0]), points.size(), cv::Scalar(255));
       }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+      vital_checker_->poke();
+#endif
       pub_.publish(cv_bridge::CvImage(polygon_msg->header,
                                       sensor_msgs::image_encodings::MONO8,
                                       mask_image).toImageMsg());

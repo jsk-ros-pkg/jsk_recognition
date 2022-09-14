@@ -37,7 +37,18 @@
 #ifndef JSK_PCL_ROS_GEOMETRIC_CONSISTENCY_GROUPING_H_
 #define JSK_PCL_ROS_GEOMETRIC_CONSISTENCY_GROUPING_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
@@ -58,15 +69,14 @@ namespace jsk_pcl_ros
    * @brief
    * Nodelet implementation of jsk_pcl/GeometricConsistencyGrouping 
    */
-  class GeometricConsistencyGrouping: public jsk_topic_tools::DiagnosticNodelet
+  class GeometricConsistencyGrouping: public jsk_topic_tools::NODELET
   {
   public:
     typedef GeometricConsistencyGroupingConfig Config;
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
       sensor_msgs::PointCloud2> SyncPolicy;
-    GeometricConsistencyGrouping():
-      DiagnosticNodelet("GeometricConsistencyGrouping") {}
+    GeometricConsistencyGrouping(){}
     virtual ~GeometricConsistencyGrouping();
   protected:
     virtual void onInit();

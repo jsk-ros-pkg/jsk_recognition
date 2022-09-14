@@ -38,7 +38,18 @@
 #define JSK_PCL_ROS_BILATERAL_FILTER_H_
 
 #include <pcl_ros/publisher.h>
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <jsk_pcl_ros/BilateralFilterConfig.h>
 #include <dynamic_reconfigure/server.h>
@@ -74,12 +85,13 @@ namespace jsk_pcl_ros
   }
 
   
-  class BilateralFilter: public jsk_topic_tools::ConnectionBasedNodelet
+  class BilateralFilter: public jsk_topic_tools::NODELET
   {
   public:
     typedef boost::shared_ptr<BilateralFilter> Ptr;
     typedef pcl::PointXYZRGB PointT;
     typedef BilateralFilterConfig Config;
+    BilateralFilter(){}
   protected:
     ////////////////////////////////////////////////////////
     // methods

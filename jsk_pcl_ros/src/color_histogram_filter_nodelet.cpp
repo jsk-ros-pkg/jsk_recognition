@@ -44,7 +44,7 @@ namespace jsk_pcl_ros
 {
   void ColorHistogramFilter::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
 
     pnh_->param("reference_histogram", reference_histogram_, std::vector<float>());
     if (reference_histogram_.empty()) {
@@ -143,6 +143,9 @@ namespace jsk_pcl_ros
       }
     }
 
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_histogram_.publish(out_hist);
     pub_indices_.publish(out_indices);
   }

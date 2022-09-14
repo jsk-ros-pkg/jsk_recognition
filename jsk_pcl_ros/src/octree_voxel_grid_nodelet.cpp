@@ -122,6 +122,9 @@ namespace jsk_pcl_ros
   void OctreeVoxelGrid::generateVoxelCloud(const sensor_msgs::PointCloud2ConstPtr& input_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     if (resolution_ == 0.0) {
       pub_cloud_.publish(input_msg);
       
@@ -171,7 +174,7 @@ namespace jsk_pcl_ros
 
   void OctreeVoxelGrid::onInit(void)
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&OctreeVoxelGrid::configCallback, this, _1, _2);

@@ -42,7 +42,7 @@ namespace jsk_pcl_ros_utils
 {
   void CloudOnPlane::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS);
     pnh_->param("approximate_sync", approximate_sync_, false);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
@@ -101,7 +101,6 @@ namespace jsk_pcl_ros_utils
                                const jsk_recognition_msgs::PolygonArray::ConstPtr& polygon_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    vital_checker_->poke();
     // check header
     if (!jsk_recognition_utils::isSameFrameId(*cloud_msg, *polygon_msg)) {
       NODELET_ERROR("frame_id does not match: cloud: %s, polygon: %s",
@@ -137,6 +136,9 @@ namespace jsk_pcl_ros_utils
     jsk_recognition_msgs::BoolStamped bool_stamped;
     bool_stamped.header = header;
     bool_stamped.data = v;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(bool_stamped);
   }
 }

@@ -45,7 +45,7 @@ namespace jsk_pcl_ros
 {
   void AddColorFromImage::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_ = advertise<sensor_msgs::PointCloud2>(
       *pnh_, "output", 1);
     onInitPostProcess();
@@ -93,7 +93,6 @@ namespace jsk_pcl_ros
                     info_msg->header.frame_id.c_str());
       return;
     }
-    vital_checker_->poke();
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud
       (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*cloud_msg, *cloud);
@@ -130,6 +129,9 @@ namespace jsk_pcl_ros
     sensor_msgs::PointCloud2 ros_cloud;
     pcl::toROSMsg(*rgb_cloud, ros_cloud);
     ros_cloud.header = cloud_msg->header;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(ros_cloud);
   }
 }

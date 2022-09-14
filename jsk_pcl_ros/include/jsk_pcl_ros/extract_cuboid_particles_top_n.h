@@ -37,7 +37,18 @@
 #ifndef JSK_PCL_ROS_EXTRACT_CUBOID_PARTICLES_TOP_N_BASE_H_
 #define JSK_PCL_ROS_EXTRACT_CUBOID_PARTICLES_TOP_N_BASE_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include "jsk_pcl_ros/plane_supported_cuboid_estimator.h"
 #include <dynamic_reconfigure/server.h>
 #include <jsk_pcl_ros/ExtractParticlesTopNBaseConfig.h>
@@ -57,12 +68,12 @@ namespace jsk_pcl_ros
   }
 
   
-  class ExtractCuboidParticlesTopN: public jsk_topic_tools::DiagnosticNodelet
+  class ExtractCuboidParticlesTopN: public jsk_topic_tools::NODELET
   {
   public:
     typedef boost::shared_ptr<ExtractCuboidParticlesTopN> Ptr;
     typedef ExtractParticlesTopNBaseConfig Config;
-    ExtractCuboidParticlesTopN(): DiagnosticNodelet("ExtractCuboidParticlesTopN") {}
+    ExtractCuboidParticlesTopN(){}
   protected:
     virtual void onInit();
     virtual void subscribe();

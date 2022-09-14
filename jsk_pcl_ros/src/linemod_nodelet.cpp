@@ -563,7 +563,7 @@ namespace jsk_pcl_ros
 
   void LINEMODDetector::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("template_file", template_file_, std::string("template"));
     // load original point and poses
     template_cloud_.reset(new pcl::PointCloud<pcl::PointXYZRGBA>);
@@ -679,7 +679,9 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
     NODELET_INFO("detect");
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     boost::mutex::scoped_lock lock(mutex_);
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr
       cloud (new pcl::PointCloud<pcl::PointXYZRGBA>);

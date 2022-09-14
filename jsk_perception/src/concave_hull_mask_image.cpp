@@ -44,7 +44,7 @@ namespace jsk_perception
 {
   void ConcaveHullMaskImage::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
@@ -76,7 +76,6 @@ namespace jsk_perception
 
   void ConcaveHullMaskImage::concave(const sensor_msgs::Image::ConstPtr& mask_msg)
   {
-    vital_checker_->poke();
     cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(mask_msg, sensor_msgs::image_encodings::MONO8);
     cv::Mat mask = cv_ptr->image;
 
@@ -133,6 +132,9 @@ namespace jsk_perception
       cv::drawContours(concave_hull_mask, smoothed_contours, i, cv::Scalar(255), CV_FILLED);
     }
 
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(cv_bridge::CvImage(mask_msg->header,
                                     sensor_msgs::image_encodings::MONO8,
                                     concave_hull_mask).toImageMsg());

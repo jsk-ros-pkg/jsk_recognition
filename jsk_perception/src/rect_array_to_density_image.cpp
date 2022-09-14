@@ -44,7 +44,7 @@ namespace jsk_perception
 {
   void RectArrayToDensityImage::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("approximate_sync", approximate_sync_, false);
     pnh_->param("queue_size", queue_size_, 100);
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
@@ -91,7 +91,6 @@ namespace jsk_perception
     const sensor_msgs::Image::ConstPtr& image_msg,
     const jsk_recognition_msgs::RectArray::ConstPtr& rects_msg)
   {
-    vital_checker_->poke();
     cv::Mat density_image = cv::Mat::zeros(image_msg->height, image_msg->width, CV_32FC1);
 
     // Compute density
@@ -111,6 +110,9 @@ namespace jsk_perception
     cv::Mat(density_image - min_image_value).convertTo(
         density_image, CV_32FC1, 1. / (max_image_value - min_image_value));
 
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(cv_bridge::CvImage(
                     image_msg->header,
                     "32FC1",

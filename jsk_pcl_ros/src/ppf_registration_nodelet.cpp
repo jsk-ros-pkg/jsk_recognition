@@ -44,7 +44,7 @@ namespace jsk_pcl_ros
 {
   void PPFRegistration::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&PPFRegistration::configCallback, this, _1, _2);
@@ -147,6 +147,9 @@ namespace jsk_pcl_ros
   (const sensor_msgs::PointCloud2::ConstPtr& input_cloud,
    const sensor_msgs::PointCloud2::ConstPtr& input_reference_cloud)
   {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ> ());
     pcl::fromROSMsg(*input_cloud, *cloud);
 
@@ -212,6 +215,9 @@ namespace jsk_pcl_ros
   (const sensor_msgs::PointCloud2::ConstPtr& input_cloud,
    const jsk_recognition_msgs::PointsArray::ConstPtr& input_reference_points_array)
   {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ> ());
     pcl::fromROSMsg(*input_cloud, *cloud);
 

@@ -46,7 +46,7 @@ namespace jsk_pcl_ros
 
   void RegionGrowingMultiplePlaneSegmentation::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
@@ -143,7 +143,9 @@ namespace jsk_pcl_ros
     if (!done_initialization_) {
       return;
     }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     {
       jsk_recognition_utils::ScopedWallDurationReporter r
         = timer_.reporter(pub_latest_time_, pub_average_time_);

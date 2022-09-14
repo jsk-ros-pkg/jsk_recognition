@@ -48,7 +48,7 @@ namespace jsk_perception
 {
   void MaskImageGenerator::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&MaskImageGenerator::configCallback, this, _1, _2);
@@ -91,6 +91,9 @@ namespace jsk_perception
                   cv::Point(min_x, min_y),
                   cv::Point(max_x, max_y),
                   cv::Scalar(255), CV_FILLED);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(cv_bridge::CvImage(msg->header,
                                     sensor_msgs::image_encodings::MONO8,
                                     mask_image).toImageMsg());

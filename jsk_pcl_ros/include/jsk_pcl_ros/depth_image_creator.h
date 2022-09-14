@@ -60,12 +60,23 @@
 #include <std_srvs/Empty.h>
 #include <boost/thread/mutex.hpp>
 
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include "jsk_pcl_ros/tf_listener_singleton.h"
 
 namespace jsk_pcl_ros
 {
-  class DepthImageCreator : public jsk_topic_tools::ConnectionBasedNodelet
+  class DepthImageCreator : public jsk_topic_tools::NODELET
   {
   protected:
     message_filters::Subscriber<sensor_msgs::CameraInfo> sub_info_;
@@ -119,6 +130,7 @@ namespace jsk_pcl_ros
     void subscribe();
     void unsubscribe();
   public:
+    DepthImageCreator(){}
     virtual ~DepthImageCreator();
   };
 }

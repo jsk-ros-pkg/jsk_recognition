@@ -39,7 +39,7 @@ namespace jsk_pcl_ros
 {   
     void ConvexConnectedVoxels::onInit()
     {
-       DiagnosticNodelet::onInit();
+       jsk_topic_tools::NODELET::onInit();
        pub_indices_ = advertise<
           jsk_recognition_msgs::ClusterPointIndices>(
              *pnh_, "output/indices", 1);
@@ -68,7 +68,6 @@ namespace jsk_pcl_ros
        // ROS_INFO("PROCESSING CLOUD CALLBACK");
        
        // boost::mutex::scoped_lock lock(this->mutex_);
-       // vital_checker_->poke();
        pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
        pcl::fromROSMsg(*cloud_msg, *cloud);
        std::vector<pcl::PointCloud<PointT>::Ptr> cloud_clusters;
@@ -105,6 +104,9 @@ namespace jsk_pcl_ros
        ros_indices.cluster_indices = pcl_conversions::convertToROSPointIndices(
           all_indices, cloud_msg->header);
        ros_indices.header = cloud_msg->header;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+       vital_checker_->poke();
+#endif
        pub_indices_.publish(ros_indices);
     }
 
@@ -112,7 +114,6 @@ namespace jsk_pcl_ros
        const jsk_recognition_msgs::ClusterPointIndices &indices_msg)
     {
        // boost::mutex::scoped_lock lock(this->mutex_);
-       vital_checker_->poke();
        this->indices_.clear();
        std::vector<pcl_msgs::PointIndices> indices =
           indices_msg.cluster_indices;

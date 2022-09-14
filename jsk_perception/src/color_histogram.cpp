@@ -64,7 +64,7 @@ namespace jsk_perception
 
   void ColorHistogram::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     nh_ = ros::NodeHandle(getNodeHandle(), "image");
     pnh_->param("use_mask", use_mask_, false);
     b_hist_size_ = r_hist_size_ = g_hist_size_ =
@@ -233,7 +233,6 @@ namespace jsk_perception
     const sensor_msgs::Image::ConstPtr& image,
     const geometry_msgs::PolygonStamped::ConstPtr& rectangle)
   {
-    vital_checker_->poke();
     boost::mutex::scoped_lock lock(mutex_);
     try
     {
@@ -254,6 +253,9 @@ namespace jsk_perception
       else {
         roi_image.copyTo(bgr_image);
       }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+      vital_checker_->poke();
+#endif
       image_pub_.publish(cv_bridge::CvImage(
                            image->header,
                            sensor_msgs::image_encodings::BGR8,
@@ -285,6 +287,9 @@ namespace jsk_perception
         = cv_bridge::CvImage(image->header,
                              sensor_msgs::image_encodings::BGR8,
                              masked_image).toImageMsg();
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+      vital_checker_->poke();
+#endif
       image_pub_.publish(ros_masked_image);
       
       processBGR(bgr_image, mask_image, image->header);

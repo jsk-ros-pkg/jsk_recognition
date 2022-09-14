@@ -45,7 +45,7 @@ namespace jsk_perception
 {
   void BlobDetector::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
@@ -72,7 +72,6 @@ namespace jsk_perception
   void BlobDetector::detect(
     const sensor_msgs::Image::ConstPtr& image_msg)
   {
-    vital_checker_->poke();
     boost::mutex::scoped_lock lock(mutex_);
     cv::Mat image = cv_bridge::toCvShare(image_msg, image_msg->encoding)->image;
     cv::Mat label(image.size(), CV_16SC1);
@@ -86,6 +85,9 @@ namespace jsk_perception
         label_int.at<int>(j, i) = label.at<short>(j, i);
       }
     }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(
       cv_bridge::CvImage(image_msg->header,
                          sensor_msgs::image_encodings::TYPE_32SC1,

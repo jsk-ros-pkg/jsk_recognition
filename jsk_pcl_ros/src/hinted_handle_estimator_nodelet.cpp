@@ -53,7 +53,7 @@ namespace jsk_pcl_ros
 {
   void HintedHandleEstimator::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_pose_ = advertise<geometry_msgs::PoseStamped>(
                                                       *pnh_, "handle_pose", 1);
     pub_length_ = advertise<std_msgs::Float64>(
@@ -277,6 +277,9 @@ namespace jsk_pcl_ros
     handle_pose_stamped.pose.orientation.w = min_qua.getW();
     std_msgs::Float64 min_width_msg;
     min_width_msg.data = min_width;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_pose_.publish(handle_pose_stamped);
     pub_debug_marker_.publish(debug_hand_marker);
     pub_debug_marker_array_.publish(make_handle_array(handle_pose_stamped, handle));

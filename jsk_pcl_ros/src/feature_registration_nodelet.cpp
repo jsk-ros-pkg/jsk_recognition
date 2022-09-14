@@ -45,7 +45,7 @@ namespace jsk_pcl_ros
 {
   void FeatureRegistration::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
@@ -157,7 +157,9 @@ namespace jsk_pcl_ros
     // Maximum allowable difference between two consecutive transformations
     align.setTransformationEpsilon(transformation_epsilon_);
     align.align (*object_aligned);
-  
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     if (align.hasConverged ())
     {
       // Print results

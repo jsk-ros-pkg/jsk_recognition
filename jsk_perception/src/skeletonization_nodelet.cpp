@@ -40,7 +40,7 @@ namespace jsk_perception
 {
     void Skeletonization::onInit()
     {
-       DiagnosticNodelet::onInit();
+       jsk_topic_tools::NODELET::onInit();
        pnh_->getParam("num_threads", this->num_threads_);
        this->pub_image_ = advertise<sensor_msgs::Image>(
           *pnh_, "image_output", 1);
@@ -78,6 +78,9 @@ namespace jsk_perception
        out_msg->header = cv_ptr->header;
        out_msg->encoding = sensor_msgs::image_encodings::TYPE_32FC1;
        out_msg->image = image.clone();
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+       vital_checker_->poke();
+#endif
        this->pub_image_.publish(out_msg->toImageMsg());
     }
 

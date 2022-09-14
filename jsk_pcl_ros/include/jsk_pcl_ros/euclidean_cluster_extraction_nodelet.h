@@ -64,11 +64,22 @@
 #include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <jsk_topic_tools/time_accumulator.h>
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 
 namespace jsk_pcl_ros
 {
-  class EuclideanClustering : public jsk_topic_tools::DiagnosticNodelet
+  class EuclideanClustering : public jsk_topic_tools::NODELET
   {
   public:
     typedef message_filters::sync_policies::ExactTime<
@@ -83,7 +94,7 @@ namespace jsk_pcl_ros
     typedef std::vector<Eigen::Vector4f,
                         Eigen::aligned_allocator<Eigen::Vector4f> >
     Vector4fVector;
-    EuclideanClustering() : DiagnosticNodelet("EuclideanClustering") {}
+    EuclideanClustering(){}
     virtual ~EuclideanClustering();
   protected:
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
@@ -132,7 +143,9 @@ namespace jsk_pcl_ros
                                           std::vector<pcl::PointIndices> &clustered_indices);
     bool serviceCallback(jsk_recognition_msgs::EuclideanSegment::Request &req,
                          jsk_recognition_msgs::EuclideanSegment::Response &res);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     virtual void updateDiagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat);
+#endif
     virtual std::vector<pcl::PointIndices> pivotClusterIndices(
       std::vector<int>& pivot_table,
       std::vector<pcl::PointIndices>& cluster_indices);

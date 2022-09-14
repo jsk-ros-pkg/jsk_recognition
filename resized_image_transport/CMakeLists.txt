@@ -12,6 +12,7 @@ endif(CCACHE_FOUND)
 find_package(catkin REQUIRED COMPONENTS cv_bridge sensor_msgs image_transport
   std_srvs message_generation dynamic_reconfigure
   nodelet
+  jsk_recognition_utils
   jsk_topic_tools)
 find_package(OpenCV REQUIRED)
 

@@ -216,7 +216,6 @@ namespace jsk_pcl_ros
   void EuclideanClustering::extract(
     const sensor_msgs::PointCloud2ConstPtr &input)
   {
-    vital_checker_->poke();
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud
       (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*input, *cloud);
@@ -268,6 +267,9 @@ namespace jsk_pcl_ros
       result.cluster_indices[i].indices = clustered_indices[i].indices;
     }
 
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     result_pub_.publish(result);
     
     jsk_recognition_msgs::Int32Stamped::Ptr cluster_num_msg (new jsk_recognition_msgs::Int32Stamped);
@@ -275,13 +277,17 @@ namespace jsk_pcl_ros
     cluster_num_msg->data = clustered_indices.size();
     cluster_num_pub_.publish(cluster_num_msg);
 
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     diagnostic_updater_->update();
+#endif
   }
 
   void EuclideanClustering::multi_extract(
     const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_cluster_indices,
     const sensor_msgs::PointCloud2::ConstPtr& input) {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud
       (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*input, *cloud);
@@ -311,6 +317,9 @@ namespace jsk_pcl_ros
       result.cluster_indices[i].indices = clustered_indices[i].indices;
     }
 
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     result_pub_.publish(result);
 
     jsk_recognition_msgs::Int32Stamped::Ptr cluster_num_msg (new jsk_recognition_msgs::Int32Stamped);
@@ -318,7 +327,9 @@ namespace jsk_pcl_ros
     cluster_num_msg->data = clustered_indices.size();
     cluster_num_pub_.publish(cluster_num_msg);
 
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     diagnostic_updater_->update();
+#endif
   }
 
   bool EuclideanClustering::serviceCallback(
@@ -377,7 +388,7 @@ namespace jsk_pcl_ros
 
   void EuclideanClustering::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
 
     pnh_->param("multi", multi_, false);
     pnh_->param("approximate_sync", approximate_sync_, false);
@@ -445,7 +456,8 @@ namespace jsk_pcl_ros
       sub_input_.shutdown();
     }
   }
-  
+
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
   void EuclideanClustering::updateDiagnostic(
     diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
@@ -471,6 +483,7 @@ namespace jsk_pcl_ros
     }
     DiagnosticNodelet::updateDiagnostic(stat);
   }
+#endif
   
   void EuclideanClustering::configCallback (Config &config, uint32_t level)
   {

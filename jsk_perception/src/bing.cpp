@@ -51,7 +51,7 @@ namespace jsk_perception
 {
   void Bing::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_rects_ = advertise<jsk_recognition_msgs::RectArray>(*pnh_, "output", 1);
     pub_objectness_ = advertise<sensor_msgs::Image>(*pnh_, "output/objectness", 1);
     pnh_->param("score_threshold", score_threshold_, 0.0);
@@ -155,6 +155,9 @@ namespace jsk_perception
     }
     // publish proposals
     rects_msg.header = img_msg->header;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_rects_.publish(rects_msg);
     // publish objectness
     pub_objectness_.publish(

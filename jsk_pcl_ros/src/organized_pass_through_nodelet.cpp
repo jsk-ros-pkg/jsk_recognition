@@ -40,15 +40,9 @@
 
 namespace jsk_pcl_ros
 {
-  OrganizedPassThrough::OrganizedPassThrough():
-    DiagnosticNodelet("OrganizedPassThrough")
-  {
-    
-  }
-  
   void OrganizedPassThrough::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     ////////////////////////////////////////////////////////
     // Publisher
     ////////////////////////////////////////////////////////
@@ -122,7 +116,9 @@ namespace jsk_pcl_ros
   void OrganizedPassThrough::filter(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
     pcl::fromROSMsg(*msg, *cloud);
     pcl::PointIndices::Ptr indices = filterIndices(cloud);
@@ -138,9 +134,12 @@ namespace jsk_pcl_ros
     pcl::toROSMsg(output, ros_output);
     ros_output.header = msg->header;
     pub_.publish(ros_output);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     diagnostic_updater_->update();
+#endif
   }
 
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
   void OrganizedPassThrough::updateDiagnostic(
     diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
@@ -168,6 +167,7 @@ namespace jsk_pcl_ros
     }
     DiagnosticNodelet::updateDiagnostic(stat);
   }
+#endif
 }
 
 #include <pluginlib/class_list_macros.h>

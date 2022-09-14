@@ -43,7 +43,7 @@ namespace jsk_perception
 {
   void SingleChannelHistogram::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("use_mask", use_mask_, false);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
@@ -122,6 +122,9 @@ namespace jsk_perception
     for (int i = 0; i < hist_size_; i++) {
       histogram.histogram.push_back(hist.at<float>(0, i));
     }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(histogram);
   }
   

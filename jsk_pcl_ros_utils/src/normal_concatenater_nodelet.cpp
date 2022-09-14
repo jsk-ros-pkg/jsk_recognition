@@ -73,12 +73,15 @@ namespace jsk_pcl_ros_utils
     sensor_msgs::PointCloud2 output_cloud;
     pcl::toROSMsg(concatenated_cloud, output_cloud);
     output_cloud.header = xyz->header;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(output_cloud);
   }
   
   void NormalConcatenater::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
     pnh_->param("use_async", use_async_, false);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);

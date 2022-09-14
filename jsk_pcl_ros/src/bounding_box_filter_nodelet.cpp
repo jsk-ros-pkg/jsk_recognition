@@ -39,7 +39,7 @@ namespace jsk_pcl_ros
 {
   void BoundingBoxFilter::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
 
     ////////////////////////////////////////////////////////
     // dynamic reconfigure
@@ -162,6 +162,9 @@ namespace jsk_pcl_ros
     }
 
     // publish
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     filtered_box_pub_.publish(filtered_box_array);
 
     // for diagnostic
@@ -182,7 +185,6 @@ namespace jsk_pcl_ros
         "the size of message ~input_box and ~input_indices are different");
       return;
     }
-    vital_checker_->poke();
 
     jsk_recognition_msgs::BoundingBoxArray filtered_box_array;
     jsk_recognition_msgs::ClusterPointIndices filtered_indices;
@@ -199,6 +201,9 @@ namespace jsk_pcl_ros
     }
 
     // publish
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     filtered_box_pub_.publish(filtered_box_array);
     filtered_indices_pub_.publish(filtered_indices);
 
@@ -224,6 +229,7 @@ namespace jsk_pcl_ros
     z_dimension_max_ = config.z_dimension_max;
   }
   
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
   void BoundingBoxFilter::updateDiagnostic(
     diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
@@ -246,6 +252,7 @@ namespace jsk_pcl_ros
     }
     DiagnosticNodelet::updateDiagnostic(stat);
   }
+#endif
   
 }
 

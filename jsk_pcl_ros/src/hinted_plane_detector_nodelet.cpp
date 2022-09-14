@@ -51,7 +51,7 @@ namespace jsk_pcl_ros {
   
   void HintedPlaneDetector::onInit() {
     pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&HintedPlaneDetector::configCallback, this, _1, _2);
@@ -137,7 +137,9 @@ namespace jsk_pcl_ros {
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
     const sensor_msgs::PointCloud2::ConstPtr& hint_cloud_msg)
   {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     boost::mutex::scoped_lock lock(mutex_);
     pcl::PointCloud<pcl::PointNormal>::Ptr
       input_cloud (new pcl::PointCloud<pcl::PointNormal>);
@@ -345,6 +347,9 @@ namespace jsk_pcl_ros {
       = jsk_recognition_utils::convexFromCoefficientsAndInliers<pcl::PointNormal>(
         input_cloud, density_filtered_indices, plane_coefficients);
     // publish to ROS
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     publishPolygon(convex, pub_polygon_, pub_polygon_array_,
                    input_cloud->header);
     PCLIndicesMsg ros_inliers;
@@ -387,6 +392,9 @@ namespace jsk_pcl_ros {
     seg.setMaxIterations (hint_max_iteration_);
     seg.setInputCloud(hint_cloud);
     seg.segment(*hint_inliers, *hint_coefficients);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     if (hint_inliers->indices.size() > hint_min_size_) { // good!
       convex = jsk_recognition_utils::convexFromCoefficientsAndInliers<pcl::PointXYZ>(
         hint_cloud, hint_inliers, hint_coefficients);

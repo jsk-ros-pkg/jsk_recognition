@@ -42,7 +42,7 @@ namespace jsk_pcl_ros
 {
   void DepthCalibration::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     if (pnh_->hasParam("coefficients2")) {
       jsk_topic_tools::readVectorParameter(
         *pnh_, "coefficients2", coefficients2_);
@@ -163,6 +163,9 @@ namespace jsk_pcl_ros
       }
     }
     sensor_msgs::Image::Ptr ros_image = cv_bridge::CvImage(msg->header, "32FC1", output_image).toImageMsg();
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(ros_image);
   }
 

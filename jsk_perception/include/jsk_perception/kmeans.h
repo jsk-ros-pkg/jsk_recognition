@@ -37,7 +37,18 @@
 #ifndef JSK_PERCEPTION_KMEANS_H_
 #define JSK_PERCEPTION_KMEANS_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <sensor_msgs/Image.h>
 #include <dynamic_reconfigure/server.h>
 #include <jsk_perception/KMeansConfig.h>
@@ -45,11 +56,11 @@
 
 namespace jsk_perception
 {
-  class KMeans: public jsk_topic_tools::DiagnosticNodelet
+  class KMeans: public jsk_topic_tools::NODELET
   {
   public:
     typedef jsk_perception::KMeansConfig Config;
-    KMeans(): DiagnosticNodelet("KMeans") {}
+    KMeans(){}
   protected:
     virtual void onInit();
     virtual void subscribe();

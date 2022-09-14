@@ -42,7 +42,7 @@ namespace jsk_pcl_ros
 {
   void InteractiveCuboidLikelihood::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     tf_ = TfListenerSingleton::getInstance();
     pub_ = pnh_->advertise<std_msgs::Float32>("output", 1);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
@@ -144,6 +144,9 @@ namespace jsk_pcl_ros
     NODELET_INFO("likelihood: %f", l);
     std_msgs::Float32 float_msg;
     float_msg.data = l;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(float_msg);
   }
 

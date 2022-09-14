@@ -43,7 +43,7 @@ namespace jsk_pcl_ros
 {
   void GeometricConsistencyGrouping::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&GeometricConsistencyGrouping::configCallback, this, _1, _2);
@@ -162,6 +162,9 @@ namespace jsk_pcl_ros
     std::vector<Eigen::Matrix4f,
                 Eigen::aligned_allocator<Eigen::Matrix4f> > rototranslations;
     gc_clusterer.recognize(rototranslations, clustered_corrs);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     if (rototranslations.size() > 0) {
       NODELET_INFO("detected %lu objects", rototranslations.size());
       Eigen::Matrix4f result_mat = rototranslations[0];

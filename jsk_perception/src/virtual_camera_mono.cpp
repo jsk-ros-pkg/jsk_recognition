@@ -9,7 +9,7 @@ namespace jsk_perception
 {
   void VirtualCameraMono::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_ = advertiseCamera(*pnh_, "image", 1);
 
     dynamic_reconfigure::Server<jsk_perception::VirtualCameraMonoConfig>::CallbackType f =
@@ -94,7 +94,9 @@ namespace jsk_perception
   void VirtualCameraMono::imageCb(const sensor_msgs::ImageConstPtr& image_msg,
                const sensor_msgs::CameraInfoConstPtr& info_msg)
   {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     cv_bridge::CvImagePtr cv_ptr;
     cv::Mat image;
     try {

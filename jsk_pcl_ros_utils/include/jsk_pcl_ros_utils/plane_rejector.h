@@ -58,18 +58,27 @@
 
 #include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <jsk_topic_tools/time_accumulator.h>
-#include <jsk_topic_tools/vital_checker.h>
 
-#include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
 #include <jsk_topic_tools/rosparam_utils.h>
 #include "jsk_recognition_utils/pcl_util.h"
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 
 
 namespace jsk_pcl_ros_utils
 {
-  class PlaneRejector: public jsk_topic_tools::ConnectionBasedNodelet
+  class PlaneRejector: public jsk_topic_tools::NODELET
   {
   public:
     typedef message_filters::sync_policies::ExactTime< jsk_recognition_msgs::PolygonArray,
@@ -79,6 +88,7 @@ namespace jsk_pcl_ros_utils
                                                        jsk_recognition_msgs::ClusterPointIndices
                                                        > SyncInlierPolicy;
     typedef jsk_pcl_ros_utils::PlaneRejectorConfig Config;
+    PlaneRejector(){}
     virtual ~PlaneRejector();
   protected:
     virtual void onInit();
@@ -89,10 +99,9 @@ namespace jsk_pcl_ros_utils
                         const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& inliers);
     virtual void configCallback (Config &config, uint32_t level);
 
-    
-    virtual void updateDiagnostics(const ros::TimerEvent& event);
-    virtual void updateDiagnosticsPlaneRejector(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    virtual void updateDiagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat);
+#endif
     virtual void subscribe();
     virtual void unsubscribe();
     
@@ -113,9 +122,6 @@ namespace jsk_pcl_ros_utils
     boost::mutex mutex_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     ros::Publisher polygons_pub_, coefficients_pub_, inliers_pub_;
-    ros::Timer diagnostics_timer_;
-    boost::shared_ptr<diagnostic_updater::Updater> diagnostic_updater_;
-    jsk_topic_tools::VitalChecker::Ptr vital_checker_;
     jsk_recognition_utils::SeriesedBoolean::Ptr tf_success_;
     
     jsk_recognition_utils::Counter rejected_plane_counter_;

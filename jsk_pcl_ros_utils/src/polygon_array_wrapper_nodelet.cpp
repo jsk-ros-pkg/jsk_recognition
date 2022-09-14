@@ -39,7 +39,7 @@ namespace jsk_pcl_ros_utils
 {
   void PolygonArrayWrapper::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_polygon_array_ = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_,
       "output_polygons", 1);
     pub_coefficients_array_
@@ -84,6 +84,9 @@ namespace jsk_pcl_ros_utils
     array_msg.header = polygon->header;
     geometry_msgs::PolygonStamped new_polygon(*polygon);
     array_msg.polygons.push_back(new_polygon);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_polygon_array_.publish(array_msg);
 
     jsk_recognition_msgs::ModelCoefficientsArray coefficients_array;

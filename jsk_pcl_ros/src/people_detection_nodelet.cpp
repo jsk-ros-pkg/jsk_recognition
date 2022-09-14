@@ -42,7 +42,7 @@
 
 namespace jsk_pcl_ros {
   void PeopleDetection::onInit() {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
 
     pnh_->param("people_height_threshold", people_height_threshold_, 0.5);
     pnh_->param("min_confidence", min_confidence_, -1.5);
@@ -119,6 +119,9 @@ namespace jsk_pcl_ros {
   void PeopleDetection::detect(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg) {
     boost::mutex::scoped_lock lock(mutex_);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr input_cloud(
       new pcl::PointCloud<pcl::PointXYZRGBA>);
     pcl::fromROSMsg(*cloud_msg, *input_cloud);

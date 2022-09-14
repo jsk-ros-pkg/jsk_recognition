@@ -45,7 +45,7 @@ namespace jsk_perception
 {
   void HSVDecomposer::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_h_ = advertise<sensor_msgs::Image>(*pnh_, "output/hue", 1);
     pub_s_ = advertise<sensor_msgs::Image>(*pnh_, "output/saturation", 1);
     pub_v_ = advertise<sensor_msgs::Image>(*pnh_, "output/value", 1);
@@ -98,6 +98,9 @@ namespace jsk_perception
     cv::Mat hue = hsv_planes[0];
     cv::Mat saturation = hsv_planes[1];
     cv::Mat value = hsv_planes[2];
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_h_.publish(cv_bridge::CvImage(
                      image_msg->header,
                      sensor_msgs::image_encodings::MONO8,

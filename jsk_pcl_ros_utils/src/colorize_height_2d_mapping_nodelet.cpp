@@ -43,7 +43,7 @@ namespace jsk_pcl_ros_utils
 {
   void ColorizeHeight2DMapping::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     onInitPostProcess();
   }
@@ -61,7 +61,6 @@ namespace jsk_pcl_ros_utils
   void ColorizeHeight2DMapping::colorize(
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
-    vital_checker_->poke();
     pcl::PointCloud<pcl::PointXYZ> cloud;
     pcl::fromROSMsg(*msg, cloud);
 
@@ -81,6 +80,9 @@ namespace jsk_pcl_ros_utils
     sensor_msgs::PointCloud2 ros_cloud;
     pcl::toROSMsg(colorized_cloud, ros_cloud);
     ros_cloud.header = msg->header;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(ros_cloud);
   }
 }

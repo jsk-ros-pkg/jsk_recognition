@@ -5,7 +5,7 @@ namespace resized_image_transport
   void ImageResizer::onInit() {
     raw_width_ = 0;
     raw_height_ = 0;
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     initParams();
     initReconfigure();
     initPublishersAndSubscribers();

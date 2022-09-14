@@ -45,7 +45,7 @@ namespace jsk_pcl_ros
 {
   void BorderEstimator::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     // planar or spherical
     pnh_->param("model_type", model_type_, std::string("planar"));
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
@@ -155,6 +155,9 @@ namespace jsk_pcl_ros
         }
       }
     }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     publishCloud(pub_border_, border_indices, header);
     publishCloud(pub_veil_, veil_indices, header);
     publishCloud(pub_shadow_, shadow_indices, header);

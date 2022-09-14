@@ -42,7 +42,7 @@ namespace jsk_pcl_ros_utils
 
   void TfTransformBoundingBoxArray::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     if (!pnh_->getParam("target_frame_id", target_frame_id_)) {
       ROS_FATAL("~target_frame_id is not specified");
       return;
@@ -85,7 +85,6 @@ namespace jsk_pcl_ros_utils
   void TfTransformBoundingBoxArray::transform(
     const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& msg)
   {
-    vital_checker_->poke();
     try
     {
       jsk_recognition_msgs::BoundingBoxArray transformed_box;
@@ -112,6 +111,9 @@ namespace jsk_pcl_ros_utils
         box.header.frame_id = target_frame_id_;
         transformed_box.boxes.push_back(box);
       }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+      vital_checker_->poke();
+#endif
       pub_.publish(transformed_box);
     }
     catch (tf2::ConnectivityException &e)

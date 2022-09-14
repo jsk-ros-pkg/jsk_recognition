@@ -48,7 +48,18 @@
 #include <message_filters/synchronizer.h>
 
 #include <jsk_pcl_ros/MultiPlaneSACSegmentationConfig.h>
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include "jsk_pcl_ros/tf_listener_singleton.h"
 
 
@@ -63,7 +74,7 @@
 
 namespace jsk_pcl_ros
 {
-  class MultiPlaneSACSegmentation: public jsk_topic_tools::ConnectionBasedNodelet
+  class MultiPlaneSACSegmentation: public jsk_topic_tools::NODELET
   {
   public:
     typedef pcl::PointXYZRGB PointT;
@@ -85,6 +96,7 @@ namespace jsk_pcl_ros
       > SyncNormalImuPolicy;
     typedef message_filters::Synchronizer<SyncNormalImuPolicy>
     NormalImuSynchronizer;
+    MultiPlaneSACSegmentation(){}
     virtual ~MultiPlaneSACSegmentation();
   protected:
     ////////////////////////////////////////////////////////

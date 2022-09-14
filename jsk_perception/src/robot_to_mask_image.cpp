@@ -42,7 +42,7 @@ namespace jsk_perception
 {
   void RobotToMaskImage::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     initSelfMask(*pnh_);
     pnh_->param("max_robot_dist", max_robot_dist_, 10.0);
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
@@ -63,7 +63,6 @@ namespace jsk_perception
 
   void RobotToMaskImage::infoCallback(const sensor_msgs::CameraInfo::ConstPtr& info_msg)
   {
-    vital_checker_->poke();
     if (info_msg) {
       image_geometry::PinholeCameraModel model;
       model.fromCameraInfo(info_msg);
@@ -111,6 +110,9 @@ namespace jsk_perception
       cv::Mat_<double> D = model.distortionCoeffs();
       camera_info_msg.D.resize(D.rows * D.cols);
       for (size_t i = 0; i < D.rows; ++i) for (size_t j = 0; j < D.cols; ++j) camera_info_msg.D[i * D.cols + j] = D(i, j);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+      vital_checker_->poke();
+#endif
       pub_.publish(cv_bridge::CvImage(info_msg->header,
                                       sensor_msgs::image_encodings::MONO8,
                                       mask_image).toImageMsg());

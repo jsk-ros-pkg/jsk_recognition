@@ -37,22 +37,32 @@
 #ifndef JSK_PCL_ROS_JOINT_STATE_STATIC_FILTER_H_
 #define JSK_PCL_ROS_JOINT_STATE_STATIC_FILTER_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <boost/tuple/tuple.hpp>
 #include <float.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/JointState.h>
 #include <boost/circular_buffer.hpp>
-#include <jsk_topic_tools/vital_checker.h>
 
 namespace jsk_pcl_ros
 {
 
-  class JointStateStaticFilter: public jsk_topic_tools::DiagnosticNodelet
+  class JointStateStaticFilter: public jsk_topic_tools::NODELET
   {
   public:
     typedef boost::tuple<ros::Time, bool> StampedBool;
-    JointStateStaticFilter(): DiagnosticNodelet("JointStateStaticFilter"),
+    JointStateStaticFilter(): 
                               buf_(100),
                               eps_(0.00001) { }
   protected:
@@ -63,8 +73,6 @@ namespace jsk_pcl_ros
     virtual void filter(const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual void jointStateCallback(const sensor_msgs::JointState::ConstPtr& msg);
     virtual bool isStatic(const ros::Time& stamp);
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual std::vector<double> filterJointState(
       const sensor_msgs::JointState::ConstPtr& msg);
     virtual void subscribe();
@@ -77,7 +85,6 @@ namespace jsk_pcl_ros
     ros::Publisher pub_;
     boost::circular_buffer<StampedBool> buf_;
     std::vector<double> previous_joints_;
-    jsk_topic_tools::VitalChecker::Ptr joint_vital_;
     boost::mutex mutex_;
     ////////////////////////////////////////////////////////
     // parameters

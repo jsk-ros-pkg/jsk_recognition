@@ -44,7 +44,7 @@ namespace jsk_perception
 {
   void ColorHistogramLabelMatch::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
@@ -292,6 +292,9 @@ namespace jsk_perception
                                             CV_8UC1);
     threshold_image.convertTo(threshold_uchar_image, 8, 255.0);
     // convert image from float to uchar
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_result_.publish(
       cv_bridge::CvImage(image_msg->header,
                          sensor_msgs::image_encodings::MONO8,

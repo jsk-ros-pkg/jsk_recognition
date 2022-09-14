@@ -46,7 +46,7 @@ namespace jsk_perception
 {
   void OverlayImageColorOnMono::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("approximate_sync", approximate_sync_, false);
     pnh_->param("queue_size", queue_size_, 100);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
@@ -130,6 +130,9 @@ namespace jsk_perception
                                                         color[2] * color_alpha_ + mono * (1 - color_alpha_));
       }
     }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(cv_bridge::CvImage(color_imgmsg->header,
                                     color_imgmsg->encoding,
                                     overlayed_image).toImageMsg());

@@ -40,7 +40,7 @@ namespace jsk_pcl_ros_utils
 {
   void ColorizeDistanceFromPlane::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
 
     ////////////////////////////////////////////////////////
     // publisher
@@ -182,6 +182,9 @@ namespace jsk_pcl_ros_utils
     sensor_msgs::PointCloud2 ros_output;
     pcl::toROSMsg(*output_cloud, ros_output);
     ros_output.header = cloud_msg->header;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(ros_output);
   }
   

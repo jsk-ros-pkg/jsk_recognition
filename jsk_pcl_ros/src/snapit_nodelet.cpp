@@ -58,7 +58,7 @@ namespace jsk_pcl_ros
 {
   void SnapIt::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     tf_listener_ = TfListenerSingleton::getInstance();
     pnh_->param("use_service", use_service_, false);
     polygon_aligned_pub_ = advertise<geometry_msgs::PoseStamped>(
@@ -120,7 +120,9 @@ namespace jsk_pcl_ros
     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     polygons_ = polygon_msg;
   }
 

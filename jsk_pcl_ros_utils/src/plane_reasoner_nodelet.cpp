@@ -44,7 +44,7 @@ namespace jsk_pcl_ros_utils
     ////////////////////////////////////////////////////////
     // Diagnostics
     ////////////////////////////////////////////////////////
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     tf_listener_ = jsk_recognition_utils::TfListenerSingleton::getInstance();
     
     ////////////////////////////////////////////////////////
@@ -134,7 +134,6 @@ namespace jsk_pcl_ros_utils
       NODELET_FATAL("the size of inliers, coefficients and polygons are not same");
       return;
     }
-    vital_checker_->poke();
     pcl::PointCloud<PointT>::Ptr input_cloud (new pcl::PointCloud<PointT>);
     pcl::fromROSMsg(*cloud_msg, *input_cloud);
     
@@ -194,6 +193,9 @@ namespace jsk_pcl_ros_utils
       = pcl_conversions::convertToROSModelCoefficients(
         coefficients, header);
     ros_polygons.polygons = polygons;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_inlier.publish(ros_indices);
     pub_coefficients.publish(ros_coefficients);
     pub_polygons.publish(ros_polygons);

@@ -51,11 +51,22 @@
 #include <boost/circular_buffer.hpp>
 #include <boost/tuple/tuple.hpp>
 
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 
 namespace jsk_pcl_ros
 {
-  class HandleEstimator: public jsk_topic_tools::ConnectionBasedNodelet
+  class HandleEstimator: public jsk_topic_tools::NODELET
   {
   public:
     typedef message_filters::sync_policies::ExactTime< sensor_msgs::PointCloud2,
@@ -67,6 +78,7 @@ namespace jsk_pcl_ros
       HANDLE_SMALL_ENOUGH_LIE_ON_PLANE_Y_LONGEST,
       HANDLE_SMALL_ENOUGH_LIE_ON_PLANE_X_LONGEST
     };
+    HandleEstimator(){}
     virtual ~HandleEstimator();
 
   protected:

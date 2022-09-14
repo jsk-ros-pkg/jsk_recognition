@@ -46,7 +46,7 @@ namespace jsk_perception
 
   void MorphologicalImageOperatorNodelet::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
@@ -101,6 +101,9 @@ namespace jsk_perception
       cv::Size(2 * size_ + 1, 2 * size_+1),
       cv::Point(size_, size_));
     apply(image, output_image, element);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(
       cv_bridge::CvImage(image_msg->header,
                          sensor_msgs::image_encodings::MONO8,

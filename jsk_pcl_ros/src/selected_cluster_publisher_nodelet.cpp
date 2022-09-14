@@ -42,7 +42,7 @@ namespace jsk_pcl_ros
 {
   void SelectedClusterPublisher::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("keep_organized", keep_organized_, false);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     onInitPostProcess();
@@ -80,6 +80,9 @@ namespace jsk_pcl_ros
                                          const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices,
                                          const jsk_recognition_msgs::Int32Stamped::ConstPtr& index)
   {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     if (indices->cluster_indices.size() <= index->data) {
       NODELET_ERROR("the selected index %d is out of clusters array %lu",
                     index->data,

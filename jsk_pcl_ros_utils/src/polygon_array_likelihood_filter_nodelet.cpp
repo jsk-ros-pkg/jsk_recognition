@@ -40,7 +40,7 @@ namespace jsk_pcl_ros_utils
 {
   void PolygonArrayLikelihoodFilter::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
 
     srv_ = boost::make_shared<dynamic_reconfigure::Server<Config> >(*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
@@ -134,7 +134,6 @@ namespace jsk_pcl_ros_utils
                                 << coefficients->coefficients.size());
       return;
     }
-    vital_checker_->poke();
 
     bool use_labels = polygons->polygons.size() == polygons->labels.size();
 
@@ -165,6 +164,9 @@ namespace jsk_pcl_ros_utils
     }
 
     ret_polygons.header = polygons->header;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_polygons_.publish(ret_polygons);
     if (use_coefficients_) {
       ret_coefficients.header = coefficients->header;

@@ -44,7 +44,7 @@ namespace jsk_pcl_ros
 {
   void AddColorFromImageToOrganized::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_ = advertise<sensor_msgs::PointCloud2>(
       *pnh_, "output", 1);
     onInitPostProcess();
@@ -80,7 +80,6 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
     const sensor_msgs::Image::ConstPtr& image_msg)
   {
-    vital_checker_->poke();
     if (cloud_msg->header.frame_id != image_msg->header.frame_id)
     {
       NODELET_FATAL("frame_id does not match: [%s, %s]",
@@ -126,6 +125,9 @@ namespace jsk_pcl_ros
     sensor_msgs::PointCloud2 ros_cloud;
     pcl::toROSMsg(*rgb_cloud, ros_cloud);
     ros_cloud.header = cloud_msg->header;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(ros_cloud);
   }
 }

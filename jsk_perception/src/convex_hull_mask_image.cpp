@@ -49,7 +49,7 @@ namespace jsk_perception
 {
   void ConvexHullMaskImage::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
     onInitPostProcess();
   }
@@ -69,7 +69,6 @@ namespace jsk_perception
   void ConvexHullMaskImage::rectify(
     const sensor_msgs::Image::ConstPtr& mask_msg)
   {
-    vital_checker_->poke();
     cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(
       mask_msg, sensor_msgs::image_encodings::MONO8);
     cv::Mat mask = cv_ptr->image;
@@ -92,6 +91,9 @@ namespace jsk_perception
     cv::Mat convex_hull_mask = cv::Mat::zeros(mask_msg->height, mask_msg->width, CV_8UC1);
     cv::drawContours(convex_hull_mask, hull, max_area.get<0>(), cv::Scalar(255), CV_FILLED);
 
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(cv_bridge::CvImage(
                     mask_msg->header,
                     sensor_msgs::image_encodings::MONO8,

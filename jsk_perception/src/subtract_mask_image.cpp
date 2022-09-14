@@ -49,7 +49,7 @@ namespace jsk_perception
 {
   void SubtractMaskImage::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("approximate_sync", approximate_sync_, false);
     pnh_->param("queue_size", queue_size_, 100);
     pub_ = advertise<sensor_msgs::Image>(
@@ -95,7 +95,6 @@ namespace jsk_perception
     const sensor_msgs::Image::ConstPtr& src1_msg,
     const sensor_msgs::Image::ConstPtr& src2_msg)
   {
-    vital_checker_->poke();
 
     if (src1_msg->width != src2_msg->width || src1_msg->height != src2_msg->height)
     {
@@ -113,6 +112,9 @@ namespace jsk_perception
 
     cv::Mat result = cv::Mat::zeros(mask1.size(), mask1.type());
     mask1.copyTo(result, mask2_not);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(
       cv_bridge::CvImage(src1_msg->header, enc::MONO8, result).toImageMsg());
   }

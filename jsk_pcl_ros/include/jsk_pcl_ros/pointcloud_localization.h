@@ -39,7 +39,18 @@
 #include <tf_conversions/tf_eigen.h>
 #include "jsk_pcl_ros/tf_listener_singleton.h"
 #include <tf/transform_broadcaster.h>
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <std_srvs/Empty.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -49,12 +60,12 @@
 
 namespace jsk_pcl_ros
 {
-  class PointCloudLocalization: public jsk_topic_tools::DiagnosticNodelet
+  class PointCloudLocalization: public jsk_topic_tools::NODELET
   {
   public:
     PointCloudLocalization():
-      first_time_(true), localize_requested_(false),
-      DiagnosticNodelet("PointCloudLocalization") {}
+      first_time_(true), localize_requested_(false)
+      {}
   protected:
     virtual void onInit();
     virtual void subscribe();

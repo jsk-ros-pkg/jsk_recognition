@@ -44,7 +44,7 @@ namespace jsk_pcl_ros
 {
   OctomapServerContact::OctomapServerContact(const ros::NodeHandle &privateNh)
   : OctomapServer(privateNh),
-    DiagnosticNodelet("OctomapServerContact"),
+    
     m_octreeContact(NULL),
     m_publishUnknownSpace(false),
     m_publishFrontierSpace(false),
@@ -464,6 +464,9 @@ namespace jsk_pcl_ros
   }
 
   void OctomapServerContact::publishAll(const ros::Time& rostime) {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     ros::WallTime startTime = ros::WallTime::now();
     size_t octomapSize = m_octreeContact->size();
     // TODO: estimate num occ. voxels for size of arrays (reserve)
@@ -851,7 +854,7 @@ namespace jsk_pcl_ros
 
   void OctomapServerContact::onInit(void)
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     onInitPostProcess();
   }
 }

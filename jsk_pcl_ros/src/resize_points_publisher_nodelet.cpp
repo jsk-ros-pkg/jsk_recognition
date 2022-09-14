@@ -14,7 +14,18 @@
 #include <message_filters/synchronizer.h>
 
 #include "jsk_recognition_utils/pcl_conversion_util.h"
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 
 #include <dynamic_reconfigure/server.h>
 #include <jsk_pcl_ros/ResizePointsPublisherConfig.h>
@@ -24,11 +35,13 @@
 
 namespace jsk_pcl_ros
 {
-  class ResizePointsPublisher : public jsk_topic_tools::ConnectionBasedNodelet
+  class ResizePointsPublisher : public jsk_topic_tools::NODELET
   {
+  public:
     typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2,
                                                       PCLIndicesMsg> SyncPolicy;
     typedef jsk_pcl_ros::ResizePointsPublisherConfig Config;
+    ResizePointsPublisher(){}
 
   private:
     int step_x_, step_y_;
@@ -43,7 +56,7 @@ namespace jsk_pcl_ros
     boost::mutex mutex_;
     bool use_indices_;
     void onInit () {
-      ConnectionBasedNodelet::onInit();
+      jsk_topic_tools::NODELET::onInit();
       pnh_->param("use_indices", use_indices_, false);
       pnh_->param("not_use_rgb", not_use_rgb_, false);
       srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
@@ -138,6 +151,9 @@ namespace jsk_pcl_ros
     
     template<class T> void filter (const sensor_msgs::PointCloud2::ConstPtr &input,
                                    const PCLIndicesMsg::ConstPtr &indices) {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+      vital_checker_->poke();
+#endif
       pcl::PointCloud<T> pcl_input_cloud, output;
       fromROSMsg(*input, pcl_input_cloud);
       boost::mutex::scoped_lock lock (mutex_);

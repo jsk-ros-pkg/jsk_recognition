@@ -52,7 +52,7 @@ namespace jsk_perception
 {
   void TabletopColorDifferenceLikelihood::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("tf_queue_size", tf_queue_size_, 10);
     pnh_->param("cyclic_value", cyclic_value_, true);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
@@ -217,6 +217,9 @@ namespace jsk_perception
           }
         }
       }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+      vital_checker_->poke();
+#endif
       pub_.publish(cv_bridge::CvImage(msg->header,
                                       sensor_msgs::image_encodings::MONO8,
                                       image).toImageMsg());

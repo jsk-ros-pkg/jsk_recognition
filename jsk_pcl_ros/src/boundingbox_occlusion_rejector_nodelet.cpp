@@ -43,7 +43,7 @@ namespace jsk_pcl_ros
 {
   void BoundingBoxOcclusionRejector::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     tf_listener_ = TfListenerSingleton::getInstance();
     pub_ = advertise<jsk_recognition_msgs::BoundingBoxArray>(*pnh_, "output", 1);
     pub_target_image_ = advertise<sensor_msgs::Image>(*pnh_, "output/target_image", 1);
@@ -156,6 +156,9 @@ namespace jsk_pcl_ros
     for (size_t i = 0; i < candidate_indices.size(); i++) {
       rejected_boxes.boxes.push_back(candidate_boxes_msg->boxes[candidate_indices[i]]);
     }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(rejected_boxes);
   }
 

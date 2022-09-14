@@ -43,7 +43,7 @@ namespace jsk_pcl_ros_utils
 
   void BoundingBoxArrayToBoundingBox::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
 
     // dynamic_reconfigure
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
@@ -75,8 +75,6 @@ namespace jsk_pcl_ros_utils
   void BoundingBoxArrayToBoundingBox::convert(
     const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& bbox_array_msg)
   {
-    vital_checker_->poke();
-
     jsk_recognition_msgs::BoundingBox bbox_msg;
     bbox_msg.header = bbox_array_msg->header;
 
@@ -89,6 +87,9 @@ namespace jsk_pcl_ros_utils
       NODELET_ERROR_THROTTLE(10, "Invalid ~index %d is specified for array size %d.", index_, array_size);
     }
 
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(bbox_msg);
   }
 

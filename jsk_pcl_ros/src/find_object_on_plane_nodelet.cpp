@@ -42,7 +42,7 @@ namespace jsk_pcl_ros
 {
   void FindObjectOnPlane::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_min_area_rect_image_ = advertise<sensor_msgs::Image>(
       *pnh_, "debug/min_area_rect_image", 1);
     onInitPostProcess();
@@ -151,6 +151,9 @@ namespace jsk_pcl_ros
     drawAngle(min_area_rect_image, min_search_point, min_angle,
               min_x, min_y, model, plane, cv::Scalar(0, 255, 255));
     // convert the points into 3-D
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_min_area_rect_image_.publish(
       cv_bridge::CvImage(image_msg->header,
                          sensor_msgs::image_encodings::BGR8,

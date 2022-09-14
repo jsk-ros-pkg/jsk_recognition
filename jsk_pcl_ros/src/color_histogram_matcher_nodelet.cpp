@@ -50,7 +50,7 @@ namespace jsk_pcl_ros
 {
   void ColorHistogramMatcher::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&ColorHistogramMatcher::configCallback, this, _1, _2);
@@ -187,6 +187,9 @@ namespace jsk_pcl_ros
       ros_histogram.histogram = histogram;
       histogram_array.histograms.push_back(ros_histogram);
     }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     all_histogram_pub_.publish(histogram_array);
 
     // compare histograms
@@ -387,6 +390,9 @@ namespace jsk_pcl_ros
     jsk_recognition_msgs::ColorHistogram ros_histogram;
     ros_histogram.header = input_cloud->header;
     ros_histogram.histogram = reference_histogram_;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     reference_histogram_pub_.publish(ros_histogram);
   }
   
@@ -396,6 +402,9 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     NODELET_INFO("update reference");
     reference_histogram_ = input_histogram->histogram;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     reference_histogram_pub_.publish(input_histogram);
     reference_set_ = true;
   }

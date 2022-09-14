@@ -44,7 +44,7 @@ namespace jsk_pcl_ros_utils
 
 void PointCloudXYZToXYZRGB::onInit()
 {
-  DiagnosticNodelet::onInit();
+  jsk_topic_tools::NODELET::onInit();
   pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
   onInitPostProcess();
 }
@@ -61,7 +61,6 @@ void PointCloudXYZToXYZRGB::unsubscribe()
 
 void PointCloudXYZToXYZRGB::convert(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
 {
-  vital_checker_->poke();
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz(new pcl::PointCloud<pcl::PointXYZ>);
   pcl::fromROSMsg(*cloud_msg, *cloud_xyz);
 
@@ -83,6 +82,9 @@ void PointCloudXYZToXYZRGB::convert(const sensor_msgs::PointCloud2::ConstPtr& cl
   sensor_msgs::PointCloud2 out_cloud_msg;
   pcl::toROSMsg(*cloud_xyzrgb, out_cloud_msg);
   out_cloud_msg.header = cloud_msg->header;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  vital_checker_->poke();
+#endif
   pub_.publish(out_cloud_msg);
 }
 

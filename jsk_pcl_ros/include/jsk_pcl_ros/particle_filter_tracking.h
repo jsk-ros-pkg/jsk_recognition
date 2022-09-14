@@ -44,7 +44,18 @@
 #include <tf/transform_broadcaster.h>
 #include <tf_conversions/tf_eigen.h>
 #include <jsk_recognition_utils/pcl_conversion_util.h>
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <jsk_recognition_utils/tf_listener_singleton.h>
 #include <boost/circular_buffer.hpp>
 // pcl
@@ -535,7 +546,7 @@ namespace pcl
 using namespace pcl::tracking;
 namespace jsk_pcl_ros
 {
-  class ParticleFilterTracking: public jsk_topic_tools::ConnectionBasedNodelet
+  class ParticleFilterTracking: public jsk_topic_tools::NODELET
   {
   public:
     typedef pcl::PointXYZRGB PointT;

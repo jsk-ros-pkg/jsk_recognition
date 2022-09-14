@@ -82,7 +82,7 @@ namespace jsk_pcl_ros
   void
   Kinfu::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     always_subscribe_ = true;  // for mapping
 
     pnh_->param("device", device_, 0);
@@ -210,6 +210,9 @@ namespace jsk_pcl_ros
                 const sensor_msgs::Image::ConstPtr& color_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
 
     if ((depth_msg->height != caminfo_msg->height) || (depth_msg->width != caminfo_msg->width))
     {

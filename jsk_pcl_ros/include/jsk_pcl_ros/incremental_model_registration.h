@@ -40,7 +40,18 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <sensor_msgs/PointCloud.h>
 #include <pcl_conversions/pcl_conversions.h>
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
@@ -73,10 +84,10 @@ namespace jsk_pcl_ros
     
   };
   
-  class IncrementalModelRegistration: public jsk_topic_tools::DiagnosticNodelet
+  class IncrementalModelRegistration: public jsk_topic_tools::NODELET
   {
   public:
-    IncrementalModelRegistration(): DiagnosticNodelet("IncrementalModelRegistration") {}
+    IncrementalModelRegistration(){}
     virtual ~IncrementalModelRegistration();
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
@@ -89,8 +100,10 @@ namespace jsk_pcl_ros
     virtual void onInit();
     virtual void subscribe() {}
     virtual void unsubscribe() {}
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat) {}
+#endif
     virtual void newsampleCallback(
       const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
       const pcl_msgs::PointIndices::ConstPtr& indices_msg,

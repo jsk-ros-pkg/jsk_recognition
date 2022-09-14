@@ -39,7 +39,7 @@ namespace jsk_pcl_ros_utils
 {
   void SphericalPointCloudSimulator::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->getParam("frame_id", frame_id_);
     rotate_velocity_ = 0.5;
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
@@ -97,7 +97,6 @@ namespace jsk_pcl_ros_utils
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    vital_checker_->poke();
     pcl::PointCloud<pcl::PointXYZ>::Ptr
       cloud (new pcl::PointCloud<pcl::PointXYZ>);
     // 40fps 
@@ -124,6 +123,9 @@ namespace jsk_pcl_ros_utils
     else {
       ros_cloud.header.frame_id = cloud->header.frame_id;
     }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(ros_cloud);
   }
 

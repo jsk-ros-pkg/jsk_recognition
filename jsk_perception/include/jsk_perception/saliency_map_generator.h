@@ -11,7 +11,18 @@
 #include <cv_bridge/cv_bridge.h>
 #include <boost/thread/mutex.hpp>
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 
 #include <omp.h>
 #include <time.h>
@@ -19,7 +30,7 @@
 
 namespace jsk_perception
 {
-   class SaliencyMapGenerator: public jsk_topic_tools::DiagnosticNodelet
+   class SaliencyMapGenerator: public jsk_topic_tools::NODELET
    {
     private:
       void calcIntensityChannel(cv::Mat, cv::Mat);
@@ -45,7 +56,7 @@ namespace jsk_perception
       void unsubscribe();
 
     public:
-      SaliencyMapGenerator(): DiagnosticNodelet("SaliencyMapGenerator"),
+      SaliencyMapGenerator(): 
                               counter_(0), num_threads_(2) {}
       bool computeSaliencyImpl(cv::Mat, cv::Mat &);
       void setNumThreads(int);

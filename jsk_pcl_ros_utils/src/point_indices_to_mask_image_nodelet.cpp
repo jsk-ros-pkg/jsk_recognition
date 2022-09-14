@@ -42,7 +42,7 @@ namespace jsk_pcl_ros_utils
 {
   void PointIndicesToMaskImage::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("approximate_sync", approximate_sync_, false);
     pnh_->param("queue_size", queue_size_, 100);
     pnh_->param("static_image_size", static_image_size_, false);
@@ -113,13 +113,15 @@ namespace jsk_pcl_ros_utils
     cv_bridge::CvImage mask_bridge(indices_msg->header,
                                    sensor_msgs::image_encodings::MONO8,
                                    mask_image);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(mask_bridge.toImageMsg());
   }
 
   void PointIndicesToMaskImage::mask(
     const PCLIndicesMsg::ConstPtr& indices_msg)
   {
-    vital_checker_->poke();
     convertAndPublish(indices_msg, width_, height_);
   }
 
@@ -127,7 +129,6 @@ namespace jsk_pcl_ros_utils
     const PCLIndicesMsg::ConstPtr& indices_msg,
     const sensor_msgs::Image::ConstPtr& image_msg)
   {
-    vital_checker_->poke();
     convertAndPublish(indices_msg, image_msg->width, image_msg->height);
   }
 }

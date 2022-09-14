@@ -42,7 +42,7 @@ namespace jsk_pcl_ros_utils
 
   void TfTransformBoundingBox::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     if (!pnh_->getParam("target_frame_id", target_frame_id_)) {
       ROS_FATAL("~target_frame_id is not specified");
       return;
@@ -84,7 +84,6 @@ namespace jsk_pcl_ros_utils
   void TfTransformBoundingBox::transform(
     const jsk_recognition_msgs::BoundingBox::ConstPtr& msg)
   {
-    vital_checker_->poke();
     try
     {
       jsk_recognition_msgs::BoundingBox transformed_box;
@@ -106,6 +105,9 @@ namespace jsk_pcl_ros_utils
       tf::transformTFToEigen(tf_transform, transform);
       Eigen::Affine3f new_pose = transform * pose;
       tf::poseEigenToMsg(new_pose, transformed_box.pose);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+      vital_checker_->poke();
+#endif
       pub_.publish(transformed_box);
     }
     catch (tf2::ConnectivityException &e)

@@ -46,13 +46,13 @@
 
 namespace jsk_pcl_ros
 {
-  class InteractiveCuboidLikelihood: public jsk_topic_tools::DiagnosticNodelet
+  class InteractiveCuboidLikelihood: public jsk_topic_tools::NODELET
   {
   public:
     typedef boost::shared_ptr<InteractiveCuboidLikelihood> Ptr;
     typedef InteractiveCuboidLikelihoodConfig Config;
     typedef pcl::tracking::ParticleCuboid Particle;
-    InteractiveCuboidLikelihood(): DiagnosticNodelet("InteractiveCuboidLikelihood") {}
+    InteractiveCuboidLikelihood(){}
     
   protected:
     virtual void onInit();

@@ -49,7 +49,7 @@ namespace jsk_perception
 {
   void ConsensusTracking::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
 
     pnh_->param("approximate_sync", approximate_sync_, false);
     pnh_->param("queue_size", queue_size_, 100);
@@ -163,6 +163,9 @@ namespace jsk_perception
     cv::fillConvexPoly(mask, vertices, 4, cv::Scalar(255));
 
     // Publish all.
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_mask_image_.publish(cv_bridge::CvImage(image_msg->header,
                                                sensor_msgs::image_encodings::MONO8,
                                                mask).toImageMsg());

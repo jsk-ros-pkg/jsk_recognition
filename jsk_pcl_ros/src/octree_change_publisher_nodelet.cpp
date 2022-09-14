@@ -40,7 +40,7 @@ namespace jsk_pcl_ros
 {
   void OctreeChangePublisher::onInit(void)
   {
-    ConnectionBasedNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     counter_ = 0;
 
     pnh_->param("resolution", resolution_, 0.02);
@@ -84,6 +84,9 @@ namespace jsk_pcl_ros
 
   void OctreeChangePublisher::cloud_cb(const sensor_msgs::PointCloud2 &pc)
   {
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     if(pc.fields.size() <= 0){
       return;
     }

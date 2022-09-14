@@ -41,7 +41,7 @@ namespace jsk_pcl_ros_utils
 {
   void SubtractPointIndices::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("approximate_sync", approximate_sync_, false);
     pub_ = advertise<PCLIndicesMsg>(*pnh_, "output", 1);
     onInitPostProcess();
@@ -89,7 +89,6 @@ namespace jsk_pcl_ros_utils
     const PCLIndicesMsg::ConstPtr& src1,
     const PCLIndicesMsg::ConstPtr& src2)
   {
-    vital_checker_->poke();
     pcl::PointIndices a, b;
     pcl_conversions::toPCL(*src1, a);
     pcl_conversions::toPCL(*src2, b);
@@ -98,6 +97,9 @@ namespace jsk_pcl_ros_utils
     PCLIndicesMsg ros_indices;
     pcl_conversions::fromPCL(*c, ros_indices);
     ros_indices.header = src1->header;
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(ros_indices);
   }
 }

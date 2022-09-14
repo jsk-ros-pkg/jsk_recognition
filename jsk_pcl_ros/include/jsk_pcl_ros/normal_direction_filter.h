@@ -39,7 +39,18 @@
 
 #include <pcl_ros/point_cloud.h>
 #include <sensor_msgs/PointCloud2.h>
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include "jsk_pcl_ros/NormalDirectionFilterConfig.h"
 #include <dynamic_reconfigure/server.h>
 #include <message_filters/subscriber.h>
@@ -52,14 +63,14 @@
 
 namespace jsk_pcl_ros
 {
-  class NormalDirectionFilter: public jsk_topic_tools::DiagnosticNodelet
+  class NormalDirectionFilter: public jsk_topic_tools::NODELET
   {
   public:
     typedef NormalDirectionFilterConfig Config;
     typedef message_filters::sync_policies::ApproximateTime<
       sensor_msgs::PointCloud2,
       sensor_msgs::Imu> SyncPolicy;
-    NormalDirectionFilter(): DiagnosticNodelet("NormalDirectionFilter") {}
+    NormalDirectionFilter(){}
     virtual ~NormalDirectionFilter();
   protected:
     ////////////////////////////////////////////////////////

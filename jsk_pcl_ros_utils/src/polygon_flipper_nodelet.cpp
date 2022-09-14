@@ -43,7 +43,7 @@ namespace jsk_pcl_ros_utils
 {
   void PolygonFlipper::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     if (!pnh_->getParam("sensor_frame", sensor_frame_)) {
       NODELET_FATAL("no ~sensor_frame is specified");
       return;
@@ -113,7 +113,6 @@ namespace jsk_pcl_ros_utils
     const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg,
     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg)
   {
-    vital_checker_->poke();
     if (polygons_msg->polygons.size() != coefficients_msg->coefficients.size()) {
       NODELET_ERROR("The size of polygons and coefficients are not same");
       return;
@@ -184,6 +183,9 @@ namespace jsk_pcl_ros_utils
           }
         }
       }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+      vital_checker_->poke();
+#endif
       pub_polygons_.publish(flipped_polygons);
       pub_coefficients_.publish(flipped_coefficients);
       if (use_indices_)

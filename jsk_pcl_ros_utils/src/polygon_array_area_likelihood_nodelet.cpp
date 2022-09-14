@@ -44,7 +44,7 @@ namespace jsk_pcl_ros_utils
 {
   void PolygonArrayAreaLikelihood::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&PolygonArrayAreaLikelihood::configCallback, this, _1, _2);
@@ -68,7 +68,6 @@ namespace jsk_pcl_ros_utils
     const jsk_recognition_msgs::PolygonArray::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    vital_checker_->poke();
     jsk_recognition_msgs::PolygonArray new_msg(*msg);
 
     double min_area = DBL_MAX;
@@ -94,6 +93,9 @@ namespace jsk_pcl_ros_utils
         new_msg.likelihood[i] = new_msg.likelihood[i] * likelihood;
       }
     }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(new_msg);
   }
 

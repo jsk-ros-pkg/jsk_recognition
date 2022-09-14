@@ -37,7 +37,18 @@
 
 #include <vector>
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <message_filters/pass_through.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
@@ -48,11 +59,11 @@
 
 namespace jsk_pcl_ros
 {
-  class FuseImages: public jsk_topic_tools::DiagnosticNodelet
+  class FuseImages: public jsk_topic_tools::NODELET
   {
   public:
     FuseImages(const std::string& name, const std::string& encoding):
-      DiagnosticNodelet(name), encoding_(encoding) {}
+      encoding_(encoding) {}
     virtual ~FuseImages();
   protected:
     virtual void onInit();

@@ -291,11 +291,17 @@ namespace jsk_pcl_ros
         unsigned char rgb_packed_[4] = {r_, g_, b_, 0};
         memcpy((void *)(&(color_space_msg_.data[j*16+12])), (const void *)rgb_packed_, 4*sizeof(unsigned char));
       }
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+      vital_checker_->poke();
+#endif
       color_space_pub_.publish(color_space_msg_);
     }
 
     if (tmp_out.points.size() > 0) {
       toROSMsg(tmp_out, out);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+      vital_checker_->poke();
+#endif
       pub_.publish(out);
     }
   }
@@ -309,7 +315,7 @@ namespace jsk_pcl_ros
   template <class PackedComparison, typename Config>
   void ColorFilter<PackedComparison, Config>::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
 
     color_space_pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("color_space", 1);
     color_space_msg_.header.frame_id = "/map";

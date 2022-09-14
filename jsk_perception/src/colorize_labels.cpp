@@ -45,7 +45,7 @@ namespace jsk_perception
 {
   void ColorizeLabels::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pub_ = advertise<sensor_msgs::Image>(
       *pnh_, "output", 1);
     onInitPostProcess();
@@ -72,6 +72,9 @@ namespace jsk_perception
     cv::Mat output_image;
     jsk_recognition_utils::labelToRGB(label_image, output_image);
     cv::cvtColor(output_image, output_image, CV_RGB2BGR);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(
       cv_bridge::CvImage(
         label_image_msg->header,

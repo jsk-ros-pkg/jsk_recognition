@@ -43,18 +43,29 @@
 
 #include <image_geometry/pinhole_camera_model.h>
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include <dynamic_reconfigure/server.h>
 #include <jsk_perception/ProjectImagePointConfig.h>
 
 namespace jsk_perception
 {
-  class ProjectImagePoint: public jsk_topic_tools::DiagnosticNodelet
+  class ProjectImagePoint: public jsk_topic_tools::NODELET
   {
   public:
     typedef boost::shared_ptr<ProjectImagePoint> Ptr;
     typedef ProjectImagePointConfig Config;
-    ProjectImagePoint(): DiagnosticNodelet("ProjectImagePoint") {}
+    ProjectImagePoint(){}
     
   protected:
     virtual void onInit();

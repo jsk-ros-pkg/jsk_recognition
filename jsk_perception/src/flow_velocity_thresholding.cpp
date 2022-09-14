@@ -46,7 +46,7 @@ namespace jsk_perception
 {
   void FlowVelocityThresholding::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&FlowVelocityThresholding::configCallback, this, _1, _2);
@@ -137,8 +137,6 @@ namespace jsk_perception
     const int image_height,
     const int image_width)
   {
-    vital_checker_->poke();
-
     cv::Mat mask = cv::Mat::zeros(image_height, image_width, CV_8UC1);
 
     for (size_t i=0; i<flow_msg->flow.size(); i++)
@@ -157,6 +155,9 @@ namespace jsk_perception
       }
     }
 
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_.publish(cv_bridge::CvImage(
                     flow_msg->header,
                     sensor_msgs::image_encodings::MONO8,

@@ -47,7 +47,7 @@ namespace jsk_perception
 {
   void SnakeSegmentation::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
@@ -94,7 +94,6 @@ namespace jsk_perception
 #if CV_MAJOR_VERSION >= 3
     ROS_ERROR("cvSnakeImage is not supported in OpenCV3");
 #else
-    vital_checker_->poke();
     boost::mutex::scoped_lock lock(mutex_);
     cv::Mat input = cv_bridge::toCvCopy(
       image_msg, sensor_msgs::image_encodings::MONO8)->image;
@@ -138,6 +137,9 @@ namespace jsk_perception
       cv::circle(debug_image, points[i], 2, cv::Scalar(100, 0, 0), 1);
     }
 
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_debug_.publish(cv_bridge::CvImage(
                          image_msg->header,
                          sensor_msgs::image_encodings::BGR8,

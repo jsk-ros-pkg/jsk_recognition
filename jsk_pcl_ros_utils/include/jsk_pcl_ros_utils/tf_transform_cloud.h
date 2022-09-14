@@ -47,7 +47,18 @@
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl/point_types.h>
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_utils/jsk_topic_tools_version.h>
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+  #include <jsk_topic_tools/diagnostic_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET DiagnosticNodelet
+  }
+#else
+  #include <jsk_topic_tools/connection_based_nodelet.h>
+  namespace jsk_topic_tools {
+    #define NODELET ConnectionBasedNodelet
+  }
+#endif
 #include "jsk_recognition_utils/tf_listener_singleton.h"
 
 #include <tf/message_filter.h>
@@ -55,10 +66,10 @@
 
 namespace jsk_pcl_ros_utils
 {
-  class TfTransformCloud: public jsk_topic_tools::DiagnosticNodelet
+  class TfTransformCloud: public jsk_topic_tools::NODELET
   {
   public:
-    TfTransformCloud(): DiagnosticNodelet("TfTransformCloud") {}
+    TfTransformCloud(){}
   protected:
     ros::Subscriber sub_cloud_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_cloud_message_filters_;

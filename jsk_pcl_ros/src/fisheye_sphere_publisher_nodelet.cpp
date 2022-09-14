@@ -80,6 +80,9 @@ namespace jsk_pcl_ros
     pcl::toROSMsg(pointcloud, pc2);
     pc2.header.frame_id = "fisheye";
     pc2.header.stamp = ros::Time::now();
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
+    vital_checker_->poke();
+#endif
     pub_sphere_.publish(pc2);
   }
 
@@ -102,7 +105,7 @@ namespace jsk_pcl_ros
 
   void FisheyeSpherePublisher::onInit(void)
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     downsample_rate_ = 0.5;
     sphere_radius_ = 1.0;
     pub_sphere_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);

@@ -40,7 +40,7 @@ namespace jsk_pcl_ros
 {
   void SupervoxelSegmentation::onInit()
   {
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
@@ -67,7 +67,9 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     if (cloud_msg->data.size() > 0) {
       pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
       pcl::fromROSMsg(*cloud_msg, *cloud);

@@ -49,7 +49,7 @@ namespace jsk_pcl_ros
   void MultiPlaneExtraction::onInit()
   {
     pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
-    DiagnosticNodelet::onInit();
+    jsk_topic_tools::NODELET::onInit();
     pnh_->param("use_indices", use_indices_, true);
     pnh_->param("use_async", use_async_, false);
     ////////////////////////////////////////////////////////
@@ -188,6 +188,7 @@ namespace jsk_pcl_ros
     }
   }
 
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
   void MultiPlaneExtraction::updateDiagnostic(
     diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
@@ -200,6 +201,7 @@ namespace jsk_pcl_ros
     }
     DiagnosticNodelet::updateDiagnostic(stat);
   }
+#endif
 
   void MultiPlaneExtraction::fillEmptyIndices(
     const jsk_recognition_msgs::PolygonArray::ConstPtr &polygons)
@@ -227,7 +229,9 @@ namespace jsk_pcl_ros
                                      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons)
   {
     boost::mutex::scoped_lock lock(mutex_);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     vital_checker_->poke();
+#endif
     // check header
     if(!jsk_recognition_utils::isSameFrameId(input->header.frame_id,
                                              indices->header.frame_id) ||
@@ -383,7 +387,9 @@ namespace jsk_pcl_ros
     pcl_conversions::fromPCL(*all_result_indices, ros_indices);
     ros_indices.header = input->header;
     pub_indices_.publish(ros_indices);
+#if JSK_TOPIC_TOOLS_VERSION_MINIMUM(2,2,13)
     diagnostic_updater_->update();
+#endif
   }
 }
 

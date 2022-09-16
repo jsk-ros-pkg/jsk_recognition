@@ -1,0 +1,81 @@
+<launch>
+
+  <arg name="gui" default="true" />
+  <arg name="launch_manager" default="true" />
+
+  <arg name="MANAGER" default="sample_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet" args="manager"
+        if="$(arg launch_manager)"
+        output="screen" />
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/kiva_pod_image_color.jpg
+      encoding: bgr8
+      publish_info: false
+    </rosparam>
+  </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
+
+  <node name="mask_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/kiva_pod_mask.jpg
+      encoding: mono8
+      publish_info: false
+    </rosparam>
+  </node>
+  <arg name="MASK_IMAGE" default="mask_publisher/output" />
+
+  <node name="invert_mask_image"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/InvertMaskImage $(arg MANAGER)"
+        respawn="true" >
+    <remap from="~input" to="mask_publisher/output" />
+  </node>
+  <arg name="INVERTED_MASK_IMAGE" default="invert_mask_image/output" />
+
+  <node name="apply_mask_image"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/ApplyMaskImage $(arg MANAGER)"
+        respawn="true" >
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~input/mask" to="$(arg MASK_IMAGE)" />
+    <rosparam>
+      approximate_sync: true
+    </rosparam>
+  </node>
+
+  <node name="apply_mask_image_with_invert_mask_image"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/ApplyMaskImage $(arg MANAGER)"
+        respawn="true" >
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~input/mask" to="$(arg INVERTED_MASK_IMAGE)" />
+    <rosparam>
+      approximate_sync: true
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="$(arg INPUT_IMAGE)" />
+    </node>
+    <node name="image_view1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="$(arg MASK_IMAGE)" />
+    </node>
+    <node name="image_view2"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="apply_mask_image/output" />
+    </node>
+    <node name="image_view3"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="apply_mask_image_with_invert_mask_image/output" />
+    </node>
+  </group>
+
+</launch>

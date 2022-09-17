@@ -161,6 +161,28 @@ namespace jsk_recognition_utils
     }
   }
 
+  cv::Rect boundingRectFromContours(const std::vector<cv::Point>& contours) {
+    double minx = contours.at(0).x;
+    double miny = contours.at(0).y;
+    double maxx = contours.at(0).x;
+    double maxy = contours.at(0).y;
+    for (int i = 1; i < contours.size(); ++i) {
+      if (maxx < contours.at(i).x) {
+        maxx = contours.at(i).x;
+      }
+      if (maxy < contours.at(i).y) {
+        maxy = contours.at(i).y;
+      }
+      if (minx > contours.at(i).x) {
+        minx = contours.at(i).x;
+      }
+      if (miny > contours.at(i).y) {
+        miny = contours.at(i).y;
+      }
+    }
+    return cv::Rect(minx, miny, maxx - minx, maxy - miny);
+  }
+
   cv::Rect boundingRectOfMaskImage(const cv::Mat& image)
   {
     int min_x = image.cols;

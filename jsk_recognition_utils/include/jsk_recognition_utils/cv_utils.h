@@ -111,6 +111,11 @@ namespace jsk_recognition_utils
    */
   void labelToRGB(const cv::Mat src, cv::Mat& dst);
 
+  /**
+   * @brief
+   * Return Bounding Box from contours.
+   */
+  cv::Rect boundingRectFromContours(const std::vector<cv::Point>& contours);
 
   /**
    * @brief

@@ -18,6 +18,7 @@
 
   <!-- ALPHABETICAL ORDER -->
   <build_depend>angles</build_depend>
+  <build_depend>catkin_virtualenv</build_depend>
   <build_depend>cmake_modules</build_depend>
   <build_depend>cv_bridge</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
@@ -131,5 +132,6 @@
   <export>
     <nodelet plugin="${prefix}/plugins/nodelet/libjsk_perception.xml"/>
     <nodelet plugin="${prefix}/plugins/nodelet/libopencv_apps.xml"/>
+    <pip_requirements>requirements.txt</pip_requirements>
   </export>
 </package>

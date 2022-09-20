@@ -169,14 +169,17 @@ namespace jsk_perception
 
     cv::Mat output_image;
     if (mask_black_to_transparent_) {
-      if (sensor_msgs::image_encodings::isMono(image_msg->encoding)) {
-        cv::cvtColor(masked_image, output_image, CV_GRAY2BGRA);
-      }
-      else if (jsk_recognition_utils::isRGB(image_msg->encoding)) {
-        cv::cvtColor(masked_image, output_image, CV_RGB2BGRA);
-      }
-      else {  // BGR, BGRA or RGBA
-        cv::cvtColor(masked_image, output_image, CV_BGR2BGRA);
+      // Error in cvtColor when masked_image is empty.
+      if (!masked_image.empty()) {
+        if (sensor_msgs::image_encodings::isMono(image_msg->encoding)) {
+          cv::cvtColor(masked_image, output_image, CV_GRAY2BGRA);
+        }
+        else if (jsk_recognition_utils::isRGB(image_msg->encoding)) {
+          cv::cvtColor(masked_image, output_image, CV_RGB2BGRA);
+        }
+        else {  // BGR, BGRA or RGBA
+          cv::cvtColor(masked_image, output_image, CV_BGR2BGRA);
+        }
       }
       for (size_t j=0; j < mask.rows; j++) {
         for (int i=0; i < mask.cols; i++) {

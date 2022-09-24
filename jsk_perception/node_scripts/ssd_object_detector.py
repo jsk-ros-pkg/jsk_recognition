@@ -8,7 +8,6 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from cv_bridge import CvBridge
 from jsk_topic_tools import ConnectionBasedTransport
 import numpy as np
 import rospy
@@ -49,6 +48,9 @@ import chainer
 from chainercv.links import SSD300
 from chainercv.links import SSD512
 from chainercv.visualizations import vis_bbox
+
+from jsk_recognition_utils import cv_bridge
+from jsk_recognition_utils import CvBridge
 
 
 chainer.config.cv_resize_backend = 'cv2'
@@ -186,6 +188,7 @@ class SSDObjectDetector(ConnectionBasedTransport):
 
         rect_msg = RectArray(header=msg.header)
         for bbox in bboxes:
+            bbox = list(map(int, bbox))
             rect = Rect(x=bbox[1], y=bbox[0],
                         width= bbox[3] - bbox[1],
                         height=bbox[2] - bbox[0])

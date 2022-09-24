@@ -1,0 +1,3 @@
+chainer==6.7.0
+chainercv
+dlib

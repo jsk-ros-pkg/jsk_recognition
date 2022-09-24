@@ -8,8 +8,8 @@ import PyKDL
 
 import numpy as np
 
-import tf2_ros
-import tf2_geometry_msgs
+from jsk_recognition_utils import tf2_ros
+from jsk_recognition_utils import tf2_geometry_msgs
 
 import math
 import sys

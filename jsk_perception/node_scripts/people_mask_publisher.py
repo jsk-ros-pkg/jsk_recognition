@@ -4,7 +4,7 @@
 import cv2
 import numpy as np
 
-import cv_bridge
+from jsk_recognition_utils import cv_bridge
 import message_filters
 import rospy
 from jsk_topic_tools import ConnectionBasedTransport

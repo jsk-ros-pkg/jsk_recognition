@@ -9,6 +9,12 @@ from jsk_recognition_utils import mask
 from jsk_recognition_utils import put_text
 from jsk_recognition_utils import visualize
 from jsk_recognition_utils import geometry
+from jsk_recognition_utils.cv_compat import cv2
+from jsk_recognition_utils.cv_bridge_compat import cv_bridge
+from jsk_recognition_utils.cv_bridge_compat import CvBridge
+from jsk_recognition_utils.tf_compat import tf
+from jsk_recognition_utils.tf_compat import tf2_ros
+from jsk_recognition_utils.tf_compat import tf2_geometry_msgs
 
 
 try:

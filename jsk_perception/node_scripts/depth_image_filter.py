@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
-import cv_bridge
 from dynamic_reconfigure.server import Server
 from jsk_perception.cfg import DepthImageFilterConfig as Config
 from jsk_topic_tools import ConnectionBasedTransport
 import numpy as np
 import rospy
 from sensor_msgs.msg import Image
+
+from jsk_recognition_utils import cv_bridge
 
 
 class DepthImageFilter(ConnectionBasedTransport):

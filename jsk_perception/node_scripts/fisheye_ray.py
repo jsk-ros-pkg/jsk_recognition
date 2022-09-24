@@ -2,11 +2,11 @@
 import cv2
 
 import rospy
-import cv_bridge
+from jsk_recognition_utils import cv_bridge
 from sensor_msgs.msg import Image, CameraInfo
 from geometry_msgs.msg import Vector3, PoseStamped, PointStamped
 import math
-import tf
+from jsk_recognition_utils import tf
 import numpy as np
 
 

@@ -1,7 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import cv_bridge
+import os
+import sys
+
+# cv_bridge_python3 import
+if os.environ['ROS_PYTHON_VERSION'] == '2':
+    sys.path.insert(0, '/opt/ros/'
+                    + os.environ['ROS_DISTRO']
+                    + '/lib/python3/dist-packages/')
+from jsk_recognition_utils import cv_bridge
 from jsk_recognition_msgs.msg import ClusterPointIndices
 from jsk_topic_tools import ConnectionBasedTransport
 import message_filters

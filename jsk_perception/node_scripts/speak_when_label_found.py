@@ -6,7 +6,7 @@ import os
 import shutil
 import tempfile
 
-import cv_bridge
+from jsk_recognition_utils import cv_bridge
 from jsk_gui_msgs.msg import SlackMessage
 import message_filters
 import rospy

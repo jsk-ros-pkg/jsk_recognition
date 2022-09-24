@@ -36,7 +36,7 @@ import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 import pylab as plt  # NOQA
 
-import cv_bridge
+from jsk_recognition_utils import cv_bridge
 import message_filters
 import rospy
 from jsk_topic_tools import ConnectionBasedTransport
@@ -706,7 +706,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
                         cv2.fillConvexPoly(roi2, polygon - np.array([left, top]), color)
                         cv2.addWeighted(roi, 0.4, roi2, 0.6, 0.0, dst=roi)
                     #
-                    offset += len(self.index2handname) / 2
+                    offset += len(self.index2handname) // 2
 
         return img
 

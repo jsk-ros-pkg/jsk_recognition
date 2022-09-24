@@ -3,7 +3,7 @@
 import os.path as osp
 
 import cv2
-import cv_bridge
+from jsk_recognition_utils import cv_bridge
 import dynamic_reconfigure.server
 from jsk_recognition_msgs.msg import ClassificationResult
 from jsk_recognition_msgs.msg import RectArray

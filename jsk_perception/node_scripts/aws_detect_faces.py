@@ -28,7 +28,7 @@ import math
 import boto3
 
 import cv2
-import cv_bridge
+from jsk_recognition_utils import cv_bridge
 
 import json
 

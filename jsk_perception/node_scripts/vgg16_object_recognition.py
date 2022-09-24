@@ -6,6 +6,7 @@ from __future__ import print_function
 
 
 import itertools, pkg_resources, sys
+import os
 from distutils.version import LooseVersion
 if LooseVersion(pkg_resources.get_distribution("chainer").version) >= LooseVersion('7.0.0') and \
         sys.version_info.major == 2:
@@ -33,7 +34,14 @@ from distutils.version import LooseVersion
 import numpy as np
 import skimage.transform
 
-import cv_bridge
+# cv_bridge_python3 import
+if os.environ['ROS_PYTHON_VERSION'] == '3':
+    from jsk_recognition_utils import cv_bridge
+else:
+    sys.path.insert(0, '/opt/ros/'
+                    + os.environ['ROS_DISTRO']
+                    + '/lib/python3/dist-packages/')
+    from jsk_recognition_utils import cv_bridge
 from jsk_recognition_msgs.msg import ClassificationResult
 from jsk_recognition_utils.chainermodels import VGG16
 from jsk_recognition_utils.chainermodels import VGG16BatchNormalization

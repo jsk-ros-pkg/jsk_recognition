@@ -28,6 +28,13 @@ RectArray from object detection with the panorama image topic
 * `~bbox_array` (`jsk_recognition_msgs/BoundingBoxArray`)
 
 BoundingBoxArray of each object of output of object detection.
+Descriptions of each fields of BoundingBoxArray below.
+
+* `boxes` : List of BoundingBox
+  * `pose` : Object Pose. orientation is aligned to the parent frame.
+  * `dimensions` : Object Dimensions
+  * `value` : Classification probability from classification result
+  * `label` : Object class ID from classification result
 
 ## Parameters
 

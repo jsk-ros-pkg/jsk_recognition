@@ -53,6 +53,7 @@ namespace jsk_perception
     tf::StampedTransform trans_; // transform to virtual camera
     geometry_msgs::PolygonStamped poly_; // target polygon to transform image
     int interpolation_method_;
+    int queue_size_;
     
   private:
     

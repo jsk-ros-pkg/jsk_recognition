@@ -20,7 +20,7 @@ namespace jsk_perception
     pnh_->param("frame_id", trans_.frame_id_, std::string("/elevator_inside_panel"));
     pnh_->param("child_frame_id", trans_.child_frame_id_, std::string("/virtual_camera_frame"));
     ROS_INFO("VirutalCmaeraMono(%s) frame_id: %s, chid_frame_id: %s", ros::this_node::getName().c_str(), trans_.frame_id_.c_str(), trans_.child_frame_id_.c_str());
-
+    pnh_->param("queue_size", queue_size_, 1);
     std::vector<double> initial_pos, initial_rot;
     if (jsk_topic_tools::readVectorParameter(*pnh_, "initial_pos", initial_pos)) {
       trans_.setOrigin(tf::Vector3(initial_pos[0], initial_pos[1], initial_pos[2]));
@@ -80,7 +80,7 @@ namespace jsk_perception
   {
     ROS_INFO("Subscribing to image topic");
     it_.reset(new image_transport::ImageTransport(*nh_));
-    sub_ = it_->subscribeCamera("image", 1, &VirtualCameraMono::imageCb, this);
+    sub_ = it_->subscribeCamera("image", queue_size_, &VirtualCameraMono::imageCb, this);
     ros::V_string names = boost::assign::list_of("image");
     jsk_topic_tools::warnNoRemap(names);
   }

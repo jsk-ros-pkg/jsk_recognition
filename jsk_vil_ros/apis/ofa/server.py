@@ -16,7 +16,6 @@ from tasks.mm_tasks.vqa_gen import VqaGenTask
 from models.ofa import OFAModel
 from torchvision import transforms
 from PIL import Image
-
 # web server
 from flask import Flask, request, Response
 import json
@@ -223,49 +222,57 @@ if __name__ == "__main__":
     ofa_task = os.environ["OFA_TASK"]
     ofa_model_scale = os.environ["OFA_MODEL_SCALE"]
     # TODO add refcoco
-    # if ofa_task == "all":
-    caption_infer = Inference("caption", ofa_model_scale)
-    vqa_infer = Inference("vqa_gen", ofa_model_scale)
+    if ofa_task == "all":
+        caption_infer = Inference("caption", ofa_model_scale)
+        vqa_infer = Inference("vqa_gen", ofa_model_scale)
 
-    # elif ofa_task == "caption":
-    #     caption_infer = Inference("caption", ofa_model_scale)
+    elif ofa_task == "caption":
+        caption_infer = Inference("caption", ofa_model_scale)
 
-    # elif ofa_task == "vqa_gen":
-    #     vqa_infer = Inference("vqa_gen", ofa_model_scale)
+    elif ofa_task == "vqa_gen":
+        vqa_infer = Inference("vqa_gen", ofa_model_scale)
 
+    else:
+        raise RuntimeError("No application is available")
 
-    @app.route("/caption", methods=['POST'])
-    def caption_request():
-        data = request.data.decode("utf-8")
-        data_json = json.loads(data)
-        # process image
-        image_b = data_json['image']
-        image_dec = base64.b64decode(image_b)
-        data_np = np.fromstring(image_dec, dtype='uint8')
-        img = cv2.imdecode(data_np, 1)
-        # get text
-        texts = data_json['queries']
-        results = []
-        for text in texts:
-            answer = caption_infer.infer(img, text)
-            results.append({"question": text, "answer": answer})
-        return Response(response=json.dumps({"results": results}), status=200)
+    try:
+        @app.route("/caption", methods=['POST'])
+        def caption_request():
+            data = request.data.decode("utf-8")
+            data_json = json.loads(data)
+            # process image
+            image_b = data_json['image']
+            image_dec = base64.b64decode(image_b)
+            data_np = np.fromstring(image_dec, dtype='uint8')
+            img = cv2.imdecode(data_np, 1)
+            # get text
+            texts = data_json['queries']
+            results = []
+            for text in texts:
+                answer = caption_infer.infer(img, text)
+                results.append({"question": text, "answer": answer})
+            return Response(response=json.dumps({"results": results}), status=200)
+    except NameError:
+        print("Skipping create caption app")
 
-    @app.route("/vqa_gen", methods=['POST'])
-    def vqa_request():
-        data = request.data.decode("utf-8")
-        data_json = json.loads(data)
-        # process image
-        image_b = data_json['image']
-        image_dec = base64.b64decode(image_b)
-        data_np = np.fromstring(image_dec, dtype='uint8')
-        img = cv2.imdecode(data_np, 1)
-        # get text
-        texts = data_json['queries']
-        results = []
-        for text in texts:
-            answer = vqa_infer.infer(img, text)
-            results.append({"question": text, "answer": answer})
-        return Response(response=json.dumps({"results": results}), status=200)
+    try:
+        @app.route("/vqa_gen", methods=['POST'])
+        def vqa_request():
+            data = request.data.decode("utf-8")
+            data_json = json.loads(data)
+            # process image
+            image_b = data_json['image']
+            image_dec = base64.b64decode(image_b)
+            data_np = np.fromstring(image_dec, dtype='uint8')
+            img = cv2.imdecode(data_np, 1)
+            # get text
+            texts = data_json['queries']
+            results = []
+            for text in texts:
+                answer = vqa_infer.infer(img, text)
+                results.append({"question": text, "answer": answer})
+            return Response(response=json.dumps({"results": results}), status=200)
+    except NameError:
+        print("Skipping create vqa_gen app")
     
     app.run("0.0.0.0", 8080, threaded=True)

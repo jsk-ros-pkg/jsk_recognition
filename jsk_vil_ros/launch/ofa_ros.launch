@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <arg name="host" default="localhost" />
+  <arg name="port" default="8888" />
+  <arg name="gui" default="false" />
+  <arg name="run_api" default="false" />
+  <arg name="CAPTION_INPUT_IMAGE" default="caption_image" />
+  <arg name="VQA_INPUT_IMAGE" default="vqa_image" />
+
+  <node name="ofa_api" pkg="jsk_vil_ros" type="run_jsk_vil_api" output="log"
+        args="ofa -p $(arg port)" if="$(arg gui)" />
+
+  <node name="ofa_ros_client" pkg="jsk_vil_ros" type="ofa.py" output="screen">
+    <remap from="~caption_image" to="$(arg CAPTION_INPUT_IMAGE)" />
+    <remap from="~vqa_image" to="$(arg VQA_INPUT_IMAGE)" />
+    <rosparam subst_value="true">
+      host: $(arg host)
+      port: $(arg port)
+    </rosparam>
+  </node>
+
+  <include file="$(find jsk_vil_ros)/launch/ofa_gui.launch" if="$(arg gui)" />
+
+</launch>

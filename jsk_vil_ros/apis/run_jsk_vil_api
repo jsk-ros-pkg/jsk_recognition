@@ -17,7 +17,7 @@ parser.add_argument("--ofa_task", default="all",
 parser.add_argument("--ofa_model_scale", default="huge", choices=OFA_MODEL_SCALES,
                     help="Scale of parameters to be read in OFA. Use huge by default")
 
-args = parser.parse_args()
+args, unknown = parser.parse_known_args()
 
 if __name__ == "__main__":
     port_option = "{}:8080".format(str(args.port))
@@ -36,6 +36,7 @@ if __name__ == "__main__":
         cmd += ofa_option
 
     # Execute
+    print("Unrecognized arguments {}".format(unknown))
     print("Run {} container on port {}".format(docker_image, args.port))
     cmd.append(docker_image)
     subprocess.run(cmd)

@@ -23,7 +23,6 @@ OFAPARAMS = caption_huge_best.pt caption_large_best_clean.pt refcocog_large_best
 OFAPARAMFILES = $(foreach param, $(OFAPARAMS), $(PARAMDIR)/$(param))
 
 # TODO check command wget exists, nvidia-driver version
-# check:
 
 # TODO add clip, glip
 download: $(OFAPARAMFILES)

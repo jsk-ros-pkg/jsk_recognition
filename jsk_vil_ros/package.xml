@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>jsk_vil_ros</name>
+  <version>0.0.0</version>
+  <description>JSK Vision and Language model package</description>
+
+  <maintainer email="obinata@jsk.imi.i.u-tokyo.ac.jp">Yoshiki Obinata</maintainer>
+  <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
+
+  <author email="kawaharazuka@jsk.imi.i.u-tokyo.ac.jp">Kento Kawaharazuka</author>
+  <author email="obinata@jsk.imi.i.u-tokyo.ac.jp">Yoshiki Obinata</author>
+  <author email="kanazawa@jsk.imi.i.u-tokyo.ac.jp">Naoaki Kanazawa</author>
+
+  <license>BSD</license>
+
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>jsk_vil_msgs</depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-requests</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-requests</exec_depend>
+  <depend>jsk_rviz_plugins</depend>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+  </export>
+</package>

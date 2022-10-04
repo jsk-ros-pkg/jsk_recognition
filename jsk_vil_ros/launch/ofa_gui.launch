@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+    <node pkg="rviz" type="rviz" name="$(anon ofa_ros_client_rviz)"
+          args="-d $(find jsk_vil_ros)/config/ofa_config.rviz" />
+    <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="$(anon ofa_ros_client_rqt)" />
+</launch>

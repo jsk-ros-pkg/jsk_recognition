@@ -19,13 +19,12 @@ PARAMDIR = $(CONFIGDIR)/params
 # Download files
 PARAMURLS = parameter_urls.txt
 # OFA parameters
-OFAPARAMS = caption_huge_best.pt caption_large_best_clean.pt refcocog_large_best.pt vqa_large_best.pt
 OFAPARAMFILES = $(foreach param, $(OFAPARAMS), $(PARAMDIR)/$(param))
 
 # TODO check command wget exists, nvidia-driver version
 
 # TODO add clip, glip
-download: $(OFAPARAMFILES)
+download:
 	@if [ ! -d $(PARAMDIR) ]; then\
 		mkdir -p $(PARAMDIR); \
 	fi

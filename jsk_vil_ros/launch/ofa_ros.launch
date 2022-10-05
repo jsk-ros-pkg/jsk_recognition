@@ -8,7 +8,7 @@
   <arg name="VQA_INPUT_IMAGE" default="vqa_image" />
 
   <node name="ofa_api" pkg="jsk_vil_ros" type="run_jsk_vil_api" output="log"
-        args="ofa -p $(arg port)" if="$(arg gui)" />
+        args="ofa -p $(arg port)" if="$(arg run_api)" />
 
   <node name="ofa_ros_client" pkg="jsk_vil_ros" type="ofa.py" output="screen">
     <remap from="~caption_image" to="$(arg CAPTION_INPUT_IMAGE)" />

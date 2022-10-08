@@ -34,6 +34,8 @@ The code is open source, and `available on github`_.
    :maxdepth: 1
    :caption: ROS Packages
 
+
+   sound_classification/index
    checkerboard_detector/index
    imagesift/index
    jsk_perception/index

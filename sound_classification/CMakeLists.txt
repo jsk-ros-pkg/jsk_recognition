@@ -3,9 +3,10 @@ project(sound_classification)
 
 find_package(catkin REQUIRED
   catkin_virtualenv
+  dynamic_reconfigure
   message_generation
-  std_msgs
   roslaunch
+  std_msgs
   )
 if (${catkin_virtualenv_VERSION} VERSION_LESS "0.3.0")
   message(STATUS "sound_classification requires catkin_virtualenv >= 0.3.0")
@@ -18,6 +19,14 @@ add_message_files(
   FILES
   InSound.msg
   )
+
+# download and install sample data
+add_custom_target(${PROJECT_NAME}_install_sample_data ALL COMMAND python$ENV{ROS_PYTHON_VERSION} ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
+
+# Dynamic reconfigure support
+generate_dynamic_reconfigure_options(
+  cfg/AudioTagging.cfg
+)
 
 generate_messages(
   DEPENDENCIES
@@ -32,15 +41,17 @@ catkin_package(
 catkin_generate_virtualenv(
   PYTHON_INTERPRETER python2
   INPUT_REQUIREMENTS requirements.in
-  )
+  USE_SYSTEM_PACKAGES FALSE
+)
 
 file(GLOB SCRIPTS_FILES scripts/*.py)
+file(GLOB NODE_SCRIPTS_FILES node_scripts/*.py)
 catkin_install_python(
-  PROGRAMS ${SCRIPTS_FILES}
+  PROGRAMS ${SCRIPTS_FILES} ${NODE_SCRIPTS_FILES}
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(DIRECTORY launch scripts sample_rosbag
+install(DIRECTORY launch scripts node_scripts sample_rosbag
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   USE_SOURCE_PERMISSIONS
   )

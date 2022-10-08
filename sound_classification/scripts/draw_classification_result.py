@@ -54,8 +54,15 @@ class DrawClassificationResult(ConnectionBasedTransport):
     def subscribe(self):
         self.sub = message_filters.Subscriber('~input', ClassificationResult)
         self.sub_img = message_filters.Subscriber('~input/image', Image)
-        sync = message_filters.TimeSynchronizer(
-            [self.sub, self.sub_img], queue_size=10)
+        subs = [self.sub, self.sub_img]
+        queue_size = rospy.get_param('~queue_size', 10)
+        if rospy.get_param('~approximate_sync', False):
+            slop = rospy.get_param('~slop', 0.1)
+            sync = message_filters.ApproximateTimeSynchronizer(
+                fs=subs, queue_size=queue_size, slop=slop)
+        else:
+            sync = message_filters.TimeSynchronizer(
+                fs=self.subs, queue_size=queue_size)
         sync.registerCallback(self._draw)
 
     def unsubscribe(self):
@@ -67,11 +74,12 @@ class DrawClassificationResult(ConnectionBasedTransport):
         rgb = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='rgb8')
 
         n_results = len(cls_msg.labels)
-        for i in range(n_results):
+        legend_size_ratio = 0.05
+        cur_h = 0
+        for i in range(n_results - 1, -1, -1):
             label = cls_msg.labels[i]
             color = self.cmap[label % len(self.cmap)] * 255
-            legend_size = int(rgb.shape[0] * 0.1)
-            rgb[:legend_size, :] = (np.array(color) * 255).astype(np.uint8)
+            legend_size = int(rgb.shape[0] * legend_size_ratio)
 
             label_name = cls_msg.label_names[i]
             if len(label_name) > 16:
@@ -84,15 +92,23 @@ class DrawClassificationResult(ConnectionBasedTransport):
             scale_w = rgb.shape[1] / text_w
             scale = min(scale_h, scale_w)
             (text_w, text_h), baseline = cv2.getTextSize(
-                label_name, cv2.FONT_HERSHEY_SIMPLEX, scale, 1)
+                title, cv2.FONT_HERSHEY_SIMPLEX, scale, 1)
+
+            # draw text background color
+            (text_w, _), _ = cv2.getTextSize(
+                title, cv2.FONT_HERSHEY_PLAIN + cv2.FONT_ITALIC, scale, 1)
+            rgb[cur_h:cur_h + legend_size, :text_w] = (np.array(color) * 255).astype(np.uint8)
+
+            # put text
             if LooseVersion(cv2.__version__).version[0] < 3:
                 line_type = cv2.CV_AA
             else:  # for opencv version > 3
                 line_type = cv2.LINE_AA
-            cv2.putText(rgb, title, (0, text_h - baseline),
+            cv2.putText(rgb, title, (0, cur_h + text_h - baseline),
                         cv2.FONT_HERSHEY_PLAIN + cv2.FONT_ITALIC,
                         scale, (255, 255, 255), 1,
                         line_type)
+            cur_h += text_h
 
         out_msg = bridge.cv2_to_imgmsg(rgb, encoding='rgb8')
         out_msg.header = imgmsg.header

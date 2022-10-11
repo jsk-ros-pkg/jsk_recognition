@@ -68,7 +68,7 @@ namespace jsk_perception{
         double var;
         vital_checker_ -> poke();
         boost::mutex::scoped_lock lock(mutex_);
-        image = cv_bridge::toCvShare(image_msg, image_msg->encoding) -> image;
+        image = cv_bridge::toCvShare(image_msg, sensor_msgs::image_encodings::RGB8) -> image;
         cv::cvtColor(image, gray, cv::COLOR_RGB2GRAY);
         cv::Laplacian(gray, laplacian_image, CV_64F);
         cv::meanStdDev(laplacian_image, mean, stddev, cv::Mat());

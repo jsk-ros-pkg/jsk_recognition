@@ -18,7 +18,7 @@ ROS package to classify sound stream.
     ```bash
     mkdir ~/sound_classification_ws/src -p
     cd ~/sound_classification_ws/src
-    git clone https://github.com/708yamaguchi/sound_classification.git
+    git clone https://github.com/jsk-ros-pkg/jsk_recognition.git
     rosdep install --from-paths . --ignore-src -y -r
     cd ..
     catkin build sound_classification
@@ -26,12 +26,7 @@ ROS package to classify sound stream.
     ```
 
 1. Install other packages.
-    - Some pip packages which are not managed in rosdep are needed.
-        ```bash
-        cd ~/sound_classification_ws/src/sound_classification
-        pip install -r requirements.txt
-        ```
-    - cuda and cupy are needed for chainer. See https://docs-cupy.chainer.org/en/stable/compatibility.html
+    - cuda and cupy are needed for chainer. See [installation guide of JSK](../doc/install_chainer_gpu.rst)
     - Using GPU is highly recommended.
 
 ## Usage

@@ -1,5 +1,12 @@
 <launch>
+  <!-- rosbag_record arguments -->
   <arg name="filename" />
+
+  <!-- audio_to_spectrogram arguments -->
+  <arg name="device" default="hw:0,0" />
+  <arg name="n_channel" default="2" />
+  <arg name="bitdepth" default="16" />
+  <arg name="mic_sampling_rate" default="44100" />
   <arg name="use_microphone" default="true" />
 
   <node name="rosbag_record"
@@ -12,6 +19,10 @@
   </node>
 
   <include file="$(find sound_classification)/launch/audio_to_spectrogram.launch" >
+    <arg name="device" value="$(arg device)" />
+    <arg name="n_channel" value="$(arg n_channel)" />
+    <arg name="bitdepth" value="$(arg bitdepth)" />
+    <arg name="mic_sampling_rate" value="$(arg mic_sampling_rate)" />
     <arg name="use_microphone" value="$(arg use_microphone)" />
     <arg name="gui" value="true" />
   </include>

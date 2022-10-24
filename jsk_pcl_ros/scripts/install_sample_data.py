@@ -129,7 +129,7 @@ def main():
 
     download_data(
         path='sample/data/torus.pcd',
-        url='https://blog.innovotion.co.jp/wp-content/uploads/2018/08/torus.pcd',  # NOQA
+        url='https://drive.google.com/uc?id=18VRHlcbHNFw6Hi5ejLPMDI2iqaEdlpTU',
         md5='17ae9636f42403a20bf1b936c03bb35c',
         extract=False,
     )

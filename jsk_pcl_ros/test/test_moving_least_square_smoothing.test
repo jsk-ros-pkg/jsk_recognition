@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /moving_least_square_smoothing/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [moving_least_square_smoothing,]
     </rosparam>
   </test>
 

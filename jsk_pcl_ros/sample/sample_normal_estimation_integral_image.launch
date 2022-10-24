@@ -2,10 +2,12 @@
   <arg name="gui" default="true"/>
 
   <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml"/>
+  <arg name="MANAGER" value="/right_hand_camera/right_hand_camera_nodelet_manager" />
 
   <node name="normal_estimation_integral_image"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/NormalEstimationIntegralImage">
+        args="load jsk_pcl/NormalEstimationIntegralImage $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input" to="/right_hand_camera/depth_registered/points"/>
     <rosparam>
       max_depth_change_factor: 0.001

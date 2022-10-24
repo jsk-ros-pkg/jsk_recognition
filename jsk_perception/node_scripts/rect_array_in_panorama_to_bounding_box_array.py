@@ -80,7 +80,14 @@ class RectArrayInPanoramaToBoundingBoxArray(object):
                 rospy.wait_for_message( '~input_rects', RectArray, 3)
                 break
             except (rospy.ROSException, rospy.ROSInterruptException) as e:
-                rospy.logwarn('subscribing topic seems not to be pulished. waiting... Error: {}'.format(e))
+                # For melodic or newer
+                # https://wiki.ros.org/rospy/Overview/Logging#Logging_Periodically
+                try:
+                    rospy.logwarn_throttle_identical(
+                        600, 'subscribing topic seems not to be pulished. waiting... Error: {}'.format(e))
+                # For kinetic or older (logwarn_throttle_identical is not defined)
+                except AttributeError:
+                    rospy.logwarn('subscribing topic seems not to be pulished. waiting... Error: {}'.format(e))
             rate.sleep()
 
         # Subscriber
@@ -124,7 +131,14 @@ class RectArrayInPanoramaToBoundingBoxArray(object):
                         msg_rects.rects):
 
             if label_name not in self._dimensions_labels:
-                rospy.logwarn('height for label "{}" (id:{}) is not specified'.format(label_name,label_id))
+                # For melodic or newer
+                # https://wiki.ros.org/rospy/Overview/Logging#Logging_Periodically
+                try:
+                    rospy.logwarn_throttle_identical(
+                        600, 'height for label "{}" (id:{}) is not specified'.format(label_name,label_id))
+                # For kinetic or older (logwarn_throttle_identical is not defined)
+                except AttributeError:
+                    rospy.logwarn('height for label "{}" (id:{}) is not specified'.format(label_name,label_id))
                 continue
 
             (theta_a, phi_a) = transformPanoramaPoint(

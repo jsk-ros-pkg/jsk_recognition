@@ -41,7 +41,8 @@
 
   <node name="grabcut"
         pkg="nodelet" type="nodelet"
-        args="load jsk_perception/GrabCut /sample_manager">
+        args="load jsk_perception/GrabCut /sample_manager"
+        respawn="true">
     <remap from="~input" to="$(arg INPUT_IMAGE)"/>
     <remap from="~input/foreground" to="mask_image_generator_foreground/output"/>
     <remap from="~input/background" to="mask_image_generator_background/output"/>

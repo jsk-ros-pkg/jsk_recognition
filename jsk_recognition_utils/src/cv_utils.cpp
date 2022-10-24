@@ -13,7 +13,7 @@
  *     notice, this list of conditions and the following disclaimer.
  *   * Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/o2r other materials provided
+ *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
  *   * Neither the name of the JSK Lab nor the names of its
  *     contributors may be used to endorse or promote products derived
@@ -159,6 +159,28 @@ namespace jsk_recognition_utils
         }
       }
     }
+  }
+
+  cv::Rect boundingRectFromContours(const std::vector<cv::Point>& contours) {
+    double minx = contours.at(0).x;
+    double miny = contours.at(0).y;
+    double maxx = contours.at(0).x;
+    double maxy = contours.at(0).y;
+    for (int i = 1; i < contours.size(); ++i) {
+      if (maxx < contours.at(i).x) {
+        maxx = contours.at(i).x;
+      }
+      if (maxy < contours.at(i).y) {
+        maxy = contours.at(i).y;
+      }
+      if (minx > contours.at(i).x) {
+        minx = contours.at(i).x;
+      }
+      if (miny > contours.at(i).y) {
+        miny = contours.at(i).y;
+      }
+    }
+    return cv::Rect(minx, miny, maxx - minx, maxy - miny);
   }
 
   cv::Rect boundingRectOfMaskImage(const cv::Mat& image)

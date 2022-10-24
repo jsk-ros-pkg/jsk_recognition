@@ -15,7 +15,6 @@
   <arg name="spectrogram_period" default="1" />
 
   <arg name="gui" default="false" />
-  <arg name="threshold" default="0.5" />
 
   <arg name="pause_rosbag" default="true" />
   <arg name="rosbag_args" value="--clock --pause" if="$(arg pause_rosbag)" />
@@ -50,6 +49,7 @@
     <arg name="launch_audio_capture" value="false" />
     <arg name="bitdepth" value="$(arg bitdepth)" />
     <arg name="mic_sampling_rate" value="$(arg mic_sampling_rate)" />
+    <arg name="n_channel" value="$(arg n_channel)" />
     <arg name="high_cut_freq" value="$(arg high_cut_freq)" />
     <arg name="low_cut_freq" value="$(arg low_cut_freq)" />
     <arg name="spectrogram_period" value="$(arg spectrogram_period)" />

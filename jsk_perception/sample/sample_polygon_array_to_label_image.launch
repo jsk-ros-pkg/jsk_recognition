@@ -1,5 +1,12 @@
 <launch>
   <arg name="gui" default="true"/>
+  <arg name="launch_manager" default="true" />
+
+  <arg name="MANAGER" default="sample_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet" args="manager"
+        if="$(arg launch_manager)"
+        output="screen" />
 
   <node name="static_tf_publisher_map_to_camera"
         pkg="tf" type="static_transform_publisher"
@@ -45,7 +52,8 @@
 
   <node name="polygon_array_to_label_image"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_perception/PolygonArrayToLabelImage">
+        args="load jsk_perception/PolygonArrayToLabelImage $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input" to="polygon_array_publisher/output"/>
     <remap from="~input/camera_info" to="camera/rgb/camera_info"/>
   </node>

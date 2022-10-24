@@ -15,7 +15,8 @@
   </node>
   <node name="edge_depth_refinement"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/EdgeDepthRefinement edge_depth_refinement_manager">
+        args="load jsk_pcl/EdgeDepthRefinement edge_depth_refinement_manager"
+        respawn="true" >
     <remap from="~input" to="$(arg INPUT_CLOUD)" />
     <remap from="~input_indices" to="/edge_detector/output_straight_edges_indices" />
   </node>

@@ -68,7 +68,8 @@
 
   <node name="plane_concatenator"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl_utils/PlaneConcatenator sample_manager">
+        args="load jsk_pcl_utils/PlaneConcatenator sample_manager"
+        respawn="true">
     <remap from="~input" to="pointcloud_xyz_to_xyzrgb/output"/>
     <remap from="~input/indices" to="label_to_cluster_point_indices/output"/>
     <remap from="~input/polygons" to="static_polygon_array_publisher/output_polygons"/>

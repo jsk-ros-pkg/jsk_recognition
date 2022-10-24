@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /find_object_on_plane/debug/min_area_rect_image
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [find_object_on_plane,]
     </rosparam>
   </test>
 

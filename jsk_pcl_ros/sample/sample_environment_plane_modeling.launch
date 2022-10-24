@@ -27,7 +27,8 @@
 
   <node name="environment_plane_modeling"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/EnvironmentPlaneModeling /sample_manager">
+        args="load jsk_pcl/EnvironmentPlaneModeling /sample_manager"
+        respawn="true" >
     <remap from="~input" to="normal_concatenater/output"/>
     <remap from="~input/full_cloud" to="normal_concatenater/output"/>
     <remap from="~input/indices" to="multi_plane_segmentation/output_refined"/>

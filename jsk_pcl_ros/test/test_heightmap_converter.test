@@ -13,6 +13,8 @@
       timeout_0: 30
       topic_1: /heightmap_converter/output/config
       timeout_1: 30
+      check_after_kill_node: true
+      node_names: [heightmap_converter,]
     </rosparam>
   </test>
 

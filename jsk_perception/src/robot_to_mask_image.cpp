@@ -13,7 +13,7 @@
  *     notice, this list of conditions and the following disclaimer.
  *   * Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/o2r other materials provided
+ *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
  *   * Neither the name of the JSK Lab nor the names of its
  *     contributors may be used to endorse or promote products derived
@@ -46,6 +46,8 @@ namespace jsk_perception
     initSelfMask(*pnh_);
     pnh_->param("max_robot_dist", max_robot_dist_, 10.0);
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
+    pub_camera_info_ = advertise<sensor_msgs::CameraInfo>(*pnh_, "output/info", 1);
+    onInitPostProcess();
   }
 
   void RobotToMaskImage::subscribe()
@@ -66,10 +68,20 @@ namespace jsk_perception
       image_geometry::PinholeCameraModel model;
       model.fromCameraInfo(info_msg);
 
-      cv::Mat mask_image = cv::Mat::zeros(info_msg->height, info_msg->width, CV_8UC1);
+      sensor_msgs::RegionOfInterest roi = info_msg->roi;
+      int height = roi.height ? roi.height : info_msg->height;
+      int width = roi.width ? roi.width : info_msg->width;
+      if (info_msg->binning_y > 0) {
+        height /= info_msg->binning_y;
+      }
+      if (info_msg->binning_x > 0) {
+        width /= info_msg->binning_x;
+      }
+
+      cv::Mat mask_image = cv::Mat::zeros(height, width, CV_8UC1);
       self_mask_->assumeFrame(info_msg->header);
-      for (int u = 0; u < info_msg->width; u++) {
-        for (int v = 0; v < info_msg->height; v++) {
+      for (int u = 0; u < width; u++) {
+        for (int v = 0; v < height; v++) {
           // project to 3d
           cv::Point uv(u, v);
           cv::Point3d p = model.projectPixelTo3dRay(uv);
@@ -80,9 +92,29 @@ namespace jsk_perception
           }
         }
       }
+      sensor_msgs::CameraInfo camera_info_msg;
+      camera_info_msg.header = info_msg->header;
+      camera_info_msg.width = width;
+      camera_info_msg.height = height;
+      camera_info_msg.distortion_model = info_msg->distortion_model;
+      camera_info_msg.roi.x_offset = 0;
+      camera_info_msg.roi.y_offset = 0;
+      camera_info_msg.roi.width = width;
+      camera_info_msg.roi.height = height;
+      camera_info_msg.roi.do_rectify = info_msg->roi.do_rectify;
+      cv::Matx33d K = model.intrinsicMatrix();
+      for (size_t i = 0; i < 3; ++i) for (size_t j = 0; j < 3; ++j) camera_info_msg.K[i * 3 + j] = K(i, j);
+      cv::Matx33d R = model.rotationMatrix();
+      for (size_t i = 0; i < 3; ++i) for (size_t j = 0; j < 3; ++j) camera_info_msg.R[i * 3 + j] = R(i, j);
+      cv::Matx34d P = model.projectionMatrix();
+      for (size_t i = 0; i < 3; ++i) for (size_t j = 0; j < 4; ++j) camera_info_msg.P[i * 4 + j] = P(i, j);
+      cv::Mat_<double> D = model.distortionCoeffs();
+      camera_info_msg.D.resize(D.rows * D.cols);
+      for (size_t i = 0; i < D.rows; ++i) for (size_t j = 0; j < D.cols; ++j) camera_info_msg.D[i * D.cols + j] = D(i, j);
       pub_.publish(cv_bridge::CvImage(info_msg->header,
                                       sensor_msgs::image_encodings::MONO8,
                                       mask_image).toImageMsg());
+      pub_camera_info_.publish(camera_info_msg);
     }
   }
 

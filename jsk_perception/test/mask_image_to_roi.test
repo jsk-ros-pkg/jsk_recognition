@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /mask_image_to_roi/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [mask_image_to_roi,]
     </rosparam>
   </test>
 

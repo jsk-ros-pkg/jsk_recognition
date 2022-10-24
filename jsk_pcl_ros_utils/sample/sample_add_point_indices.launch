@@ -50,7 +50,8 @@
 
   <node name="add_point_indices"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl_utils/AddPointIndices $(arg MANAGER)">
+        args="load jsk_pcl_utils/AddPointIndices $(arg MANAGER)"
+        respawn="true">
     <remap from="~input/src1" to="/pointcloud_to_point_indices_right/output" />
     <remap from="~input/src2" to="/pointcloud_to_point_indices_left/output" />
     <rosparam>

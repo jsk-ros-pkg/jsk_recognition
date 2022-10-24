@@ -9,7 +9,8 @@
 
   <node name="pointcloud_to_cluster_point_indices"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl_utils/PointCloudToClusterPointIndices sample_manager">
+        args="load jsk_pcl_utils/PointCloudToClusterPointIndices sample_manager"
+        respawn="true">
     <remap from="~input" to="/right_hand_camera/depth_registered/points"/>
     <rosparam>
       skip_nan: true

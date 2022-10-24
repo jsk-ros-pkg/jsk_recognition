@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <arg name="manager" default="rosbag_play_nodelet_manager" />
+  <arg name="launch_nodelet_manager" default="true" />
+  <arg name="start_time" />
+  <arg name="duration_time" />
+
+  <arg name="RGB_CAMERA_INFO" value="/head_camera/rgb/throttled/camera_info" />
+  <arg name="RGB_IMAGE" value="/head_camera/rgb/throttled/image_rect_color" />
+  <arg name="QUAT_RGB_CAMERA_INFO" value="/head_camera/rgb/quater/throttled/camera_info" />
+  <arg name="QUAT_RGB_IMAGE" value="/head_camera/rgb/quater/throttled/image_rect_color" />
+  <arg name="DEPTH_CAMERA_INFO" value="/head_camera/depth_registered/throttled/camera_info" />
+  <arg name="DEPTH_IMAGE" value="/head_camera/depth_registered/throttled/image_rect" />
+  <arg name="POINTS" value="/head_camera/depth_registered/throttled/points" />
+  <arg name="QUAT_POINTS" value="/head_camera/depth_registered/quater/throttled/points" />
+
+  <param name="use_sim_time" value="true" />
+  <param name="robot_description" textfile="$(find fetch_description)/robots/fetch.urdf" />
+
+  <node pkg="nodelet" type="nodelet" name="$(arg manager)" args="manager" output="screen" />
+
+  <!-- decompress -->
+  <node name="rgb_decompress" pkg="image_transport" type="republish"
+        args="compressed in:=$(arg RGB_IMAGE) raw out:=$(arg RGB_IMAGE)" />
+  <node name="depth_decompress" pkg="image_transport" type="republish"
+        args="compressedDepth in:=$(arg DEPTH_IMAGE) raw out:=$(arg DEPTH_IMAGE)" />
+  <node pkg="nodelet" type="nodelet" name="point_cloud_xyzrgb"
+        args="load depth_image_proc/point_cloud_xyzrgb $(arg manager)" output="screen" >
+    <remap from="rgb/camera_info" to="$(arg RGB_CAMERA_INFO)" />
+    <remap from="rgb/image_rect_color" to="$(arg RGB_IMAGE)" />
+    <remap from="depth_registered/image_rect" to="$(arg DEPTH_IMAGE)" />
+    <remap from="depth_registered/points" to="$(arg POINTS)" />
+    <rosparam>
+      queue_size: 100
+    </rosparam>
+  </node>
+  <node name="resize_rgb" pkg="nodelet" type="nodelet"
+        args="load image_proc/resize $(arg manager)" output="screen">
+    <remap from="image" to="$(arg RGB_IMAGE)" />
+    <remap from="camera_info" to="$(arg RGB_CAMERA_INFO)" />
+    <remap from="~image" to="$(arg QUAT_RGB_IMAGE)" />
+    <remap from="~camera_info" to="$(arg QUAT_RGB_CAMERA_INFO)" />
+    <rosparam>
+      scale_width: 0.25
+      scale_height: 0.25
+    </rosparam>
+  </node>
+  <node name="resize_cloud" pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ResizePointsPublisher $(arg manager)" output="screen">
+    <remap from="~input" to="$(arg POINTS)" />
+    <remap from="~output" to="$(arg QUAT_POINTS)" />
+    <rosparam>
+      step_x: 4
+      step_y: 4
+    </rosparam>
+  </node>
+
+  <!-- relay -->
+  <node name="rgb_image_relay" pkg="topic_tools" type="relay"
+        args="$(arg RGB_IMAGE) /head_camera/rgb/image_rect_color" />
+  <node name="rgb_info_relay" pkg="topic_tools" type="relay"
+        args="$(arg RGB_CAMERA_INFO) /head_camera/rgb/camera_info" />
+  <node name="quat_rgb_image_relay" pkg="topic_tools" type="relay"
+        args="$(arg QUAT_RGB_IMAGE) /head_camera/rgb/quater/image_rect_color" />
+  <node name="quat_rgb_info_relay" pkg="topic_tools" type="relay"
+        args="$(arg QUAT_RGB_CAMERA_INFO) /head_camera/rgb/quater/camera_info" />
+  <node name="depth_image_relay" pkg="topic_tools" type="relay"
+        args="$(arg DEPTH_IMAGE) /head_camera/depth_registered/image_rect" />
+  <node name="depth_info_relay" pkg="topic_tools" type="relay"
+        args="$(arg DEPTH_CAMERA_INFO) /head_camera/depth_registered/camera_info" />
+  <node name="points_relay" pkg="topic_tools" type="relay"
+        args="$(arg POINTS) /head_camera/depth_registered/points" />
+  <node name="quat_points_relay" pkg="topic_tools" type="relay"
+        args="$(arg QUAT_POINTS) /head_camera/depth_registered/quater/points" />
+
+  <!-- rosbag player -->
+  <node pkg="rosbag" type="play" name="rosbag_play"
+        args="$(find jsk_perception)/sample/data/fetch_go_to_kitchen.bag --loop --clock --start $(arg start_time) --duration $(arg duration_time)" output="screen" />
+
+</launch>

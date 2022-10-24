@@ -61,6 +61,7 @@ namespace jsk_pcl_ros_utils
     PCLIndicesMsg > ASyncPolicy;
 
     SubtractPointIndices(): DiagnosticNodelet("SubtractPointIndices") {}
+    virtual ~SubtractPointIndices();
 
   protected:
     virtual void onInit();

@@ -3,10 +3,12 @@
   <arg name="gui" default="true" />
 
   <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_stereo.xml" />
+  <arg name="MANAGER" value="/right_hand_left_camera/right_hand_left_camera_nodelet_manager" />
 
   <node name="depth_image_creator"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/DepthImageCreator">
+        args="load jsk_pcl/DepthImageCreator $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input" to="/right_hand_right_camera/depth_registered/points" />
     <remap from="~info" to="/right_hand_left_camera/rgb/camera_info" />
     <rosparam>
@@ -20,12 +22,13 @@
   <group ns="/right_hand_right_camera">
     <node name="pointcloud_xyzrgb_to_xyz"
           pkg="nodelet" type="nodelet"
-          args="standalone jsk_pcl_utils/PointCloudXYZRGBToXYZ">
+          args="load jsk_pcl_utils/PointCloudXYZRGBToXYZ $(arg MANAGER)">
       <remap from="~input" to="depth_registered/points" />
     </node>
     <node name="depth_image_creator"
           pkg="nodelet" type="nodelet"
-          args="standalone jsk_pcl/DepthImageCreator">
+          args="load jsk_pcl/DepthImageCreator $(arg MANAGER)"
+          respawn="true" >
       <remap from="~input" to="pointcloud_xyzrgb_to_xyz/output" />
       <remap from="~info" to="/right_hand_left_camera/rgb/camera_info" />
       <rosparam>

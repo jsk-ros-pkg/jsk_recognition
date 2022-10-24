@@ -117,7 +117,7 @@ def main():
 
     download_data(
         path='sample/data/pr2_look_around_in_room_73b2.bag',
-        url='https://drive.google.com/uc?id=1X6S6CU6rC_c_KGlVZfvoTwsAhGS5jG27',
+        url='https://drive.google.com/uc?id=1gmEUanixU-3Fvsff-3e8LkXmZECJCcE2',
         md5='6e3dfda0ac4f23b7849f135ec9041e92',
     )
 

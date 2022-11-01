@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <arg name="gui" default="true" />
+  <arg name="min_percent" default="8" />
+  <arg name="max_percent" default="20" />
+
+  <param name="/use_sim_time" value="true"/>
+  <node name="rosbag_play" pkg="rosbag" type="play"
+        args="$(find jsk_perception)/sample/data/2019-07-18-15-37-50_pr2_self_see.bag --clock --loop --topics /kinect_head/rgb/image_rect_color/compressed"/>
+
+  <include file="$(find jsk_perception)/launch/video_to_scene.launch" >
+    <arg name="INPUT_IMAGE" value="/kinect_head/rgb/image_rect_color" />
+    <arg name="IMAGE_TRANSPORT" default="compressed" />
+    <arg name="launch_manager" value="true" />
+    <arg name="manager" value="rosbag_play_nodelet_manager" />
+    <arg name="min_percent" value="$(arg min_percent)" />
+    <arg name="max_percent" value="$(arg max_percent)" />
+  </include>
+  <node pkg="rosservice" type="rosservice" name="set_logger_level"
+        args="call /rosbag_play_nodelet_manager/set_logger_level ros.jsk_perception./video_to_scene debug" />
+
+  <group if="$(arg gui)">
+    <node name="image_view_rgb"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="/kinect_head/rgb/image_rect_color"/>
+      <param name="image_transport" value="compressed" />
+    </node>
+    <node name="image_view_fg"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="/kinect_head/rgb/image_rect_color/output"/>
+      <param name="image_transport" value="compressed" />
+    </node>
+  </group>
+
+</launch>

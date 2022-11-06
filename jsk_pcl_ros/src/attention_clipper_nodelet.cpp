@@ -434,7 +434,9 @@ namespace jsk_pcl_ros
         }
         PCLIndicesMsg indices_msg;
         pcl_conversions::fromPCL(non_nan_indices, indices_msg);
-        cluster_indices_msg.cluster_indices.push_back(indices_msg);
+        if (!indices_msg.indices.empty()) {
+          cluster_indices_msg.cluster_indices.push_back(indices_msg);
+        }
         if(prefixes_.size()){
           indices_msg.header = msg->header;
           multiple_pub_indices_[i].publish(indices_msg);

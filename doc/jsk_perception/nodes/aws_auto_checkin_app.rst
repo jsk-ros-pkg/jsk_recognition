@@ -49,6 +49,11 @@ Publishing Topic
 
   Detected face class labels and probabilities.
 
+* ``~image`` (``sensor_msgs/Image``)
+
+  Passthourgh input image. This message contains face detected image
+  when ``~always_publish`` is false.
+
 Parameters
 ----------
 

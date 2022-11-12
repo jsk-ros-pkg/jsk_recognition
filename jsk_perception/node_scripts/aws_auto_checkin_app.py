@@ -109,6 +109,10 @@ class AutoCheckIn(ConnectionBasedTransport):
                                         queue_size=1)
         self.pub_class = self.advertise("~output/class", ClassificationResult,
                                         queue_size=1)
+        if self.transport_hint == 'compressed':
+            self.orig_image_pub = self.advertise('~image/compressed', CompressedImage, queue_size=1)
+        else:
+            self.orig_image_pub = self.advertise('~image', Image, queue_size=1)
 
     def subscribe(self):
         if self.transport_hint == 'compressed':
@@ -225,6 +229,9 @@ class AutoCheckIn(ConnectionBasedTransport):
             rects_msg.rects.append(face.face)
         self.pub_rects.publish(rects_msg)
         self.pub_class.publish(cls_msg)
+
+        if self.orig_image_pub.get_num_connections() > 0:
+            self.orig_image_pub.publish(image)
 
         if self.use_window:
             cv2.imshow(image._connection_header['topic'], img_gray)

@@ -416,7 +416,7 @@ install(TARGETS
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(DIRECTORY config euslisp launch node_scripts plugins sample test
+install(DIRECTORY config euslisp launch plugins sample test
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   USE_SOURCE_PERMISSIONS
 )
@@ -425,19 +425,27 @@ install(DIRECTORY include/${PROJECT_NAME}/
 )
 
 if($ENV{ROS_DISTRO} STREQUAL "indigo") # on noetic it needs catkin_install_python to support Python3 and it does not work on indigo for some reason...
-install(DIRECTORY scripts
+install(DIRECTORY scripts node_scripts
    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
    USE_SOURCE_PERMISSIONS
- )
+   )
 else()
-install(PROGRAMS scripts/setup_opencv_learning_data.sh
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/scripts/
+install(DIRECTORY scripts node_scripts
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  USE_SOURCE_PERMISSIONS
+  PATTERN "*"
+  PATTERN "*/*.py" EXCLUDE
 )
 
 file(GLOB SCRIPT_PROGRAMS scripts/*.py)
 catkin_install_python(
   PROGRAMS ${SCRIPT_PROGRAMS}
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/scripts/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/scripts
+)
+file(GLOB NODE_SCRIPT_PROGRAMS node_scripts/*.py)
+catkin_install_python(
+  PROGRAMS ${NODE_SCRIPT_PROGRAMS}
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/node_scripts
 )
 endif()
 

@@ -110,6 +110,9 @@ Parameters
       "aws_secret_access_key" : "********************"
   }
 
+* ``~always_publish`` (Bool, Default: ``True``)
+
+  Set false to publish only when face is detected.
 
 Sample
 ------

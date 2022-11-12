@@ -87,6 +87,9 @@ class AutoCheckIn(ConnectionBasedTransport):
             region_name=region_name)
         self.dynamodb_table = self.dynamodb.Table(self.DYNAMODB_TABLE)
 
+        self.always_publish = rospy.get_param('~always_publish', True)
+        rospy.loginfo("Publish even if face is not found : {}".format(self.always_publish))
+
         self.use_window = rospy.get_param('~use_window', False)
         rospy.loginfo("Launch image window : {}".format(self.use_window))
 
@@ -200,6 +203,10 @@ class AutoCheckIn(ConnectionBasedTransport):
 
             if self.use_window: # copy colored face rectangle to img_gray
                 img_gray[image_roi_slice] = img[image_roi_slice]
+
+        # is always_publish is False, publish results only when the face is not detected
+        if not self.always_publish and len(faces.faces) <= 0:
+            return
 
         self.name_pub.publish(faces)
 

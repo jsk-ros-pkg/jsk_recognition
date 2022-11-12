@@ -90,16 +90,21 @@ namespace jsk_pcl_ros
     bba.header = box_array->header;
     bba.boxes = box_array->boxes;
     for(size_t i = 0; i < box_array->boxes.size(); ++i) {
+      geometry_msgs::Quaternion q_base_ = bba.boxes[i].pose.orientation;
       bba.boxes[i].pose.position.x += offset_x_;
       bba.boxes[i].pose.position.y += offset_y_;
       bba.boxes[i].pose.position.z += offset_z_;
       bba.boxes[i].dimensions.x *= scale_x_;
       bba.boxes[i].dimensions.y *= scale_y_;
       bba.boxes[i].dimensions.z *= scale_z_;
-      bba.boxes[i].pose.orientation.x += q_.x();
-      bba.boxes[i].pose.orientation.y += q_.y();
-      bba.boxes[i].pose.orientation.z += q_.z();
-      bba.boxes[i].pose.orientation.w += q_.w();
+      bba.boxes[i].pose.orientation.x =
+        q_base_.x * q_.w() + q_base_.y * q_.z() - q_base_.z * q_.y() + q_base_.w * q_.x();
+      bba.boxes[i].pose.orientation.y =
+        - q_base_.x * q_.z() + q_base_.y * q_.w() + q_base_.z * q_.x() + q_base_.w * q_.y();
+      bba.boxes[i].pose.orientation.z =
+        q_base_.x * q_.y() - q_base_.y * q_.x() + q_base_.z * q_.w() + q_base_.w * q_.z();
+      bba.boxes[i].pose.orientation.w =
+        - q_base_.x * q_.x() - q_base_.y * q_.y() - q_base_.z * q_.z() + q_base_.w * q_.w();
     }
     pub_bouding_box_array_.publish(bba);
   }

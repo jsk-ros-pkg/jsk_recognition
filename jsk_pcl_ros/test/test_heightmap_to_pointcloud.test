@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /heightmap_to_pointcloud/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [heightmap_to_pointcloud,]
     </rosparam>
   </test>
 

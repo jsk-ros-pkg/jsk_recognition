@@ -53,7 +53,8 @@
 
   <node name="colorize_distance_from_plane"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl_utils/ColorizeDistanceFromPlane sample_manager">
+        args="load jsk_pcl_utils/ColorizeDistanceFromPlane sample_manager"
+        respawn="true">
     <remap from="~input" to="pointcloud_xyz_to_xyzrgb/output"/>
     <remap from="~input_polygons" to="static_polygon_array_publisher/output_polygons"/>
     <remap from="~input_coefficients" to="static_polygon_array_publisher/output_coefficients"/>

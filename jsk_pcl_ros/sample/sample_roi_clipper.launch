@@ -28,7 +28,8 @@
 
   <node name="roi_clipper"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/ROIClipper sample_manager">
+        args="load jsk_pcl/ROIClipper sample_manager"
+        respawn="true">
     <remap from="~input/image" to="/kinect_head/rgb/image_rect_color"/>
     <remap from="~input/camera_info" to="mask_image_to_roi/output"/>
     <remap from="~input/cloud" to="/kinect_head/depth_registered/points"/>

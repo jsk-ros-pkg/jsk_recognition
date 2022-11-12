@@ -21,9 +21,33 @@
     </rosparam>
   </node>
 
+  <node name="mask_image_generator1"
+        pkg="jsk_perception" type="mask_image_generator">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <rosparam>
+      offset_x: 200
+      offset_y: 200
+      width: 100
+      height: 100
+    </rosparam>
+  </node>
+
+  <node name="add_mask_image"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_perception/AddMaskImage"
+        respawn="true" >
+    <remap from="~input/src1" to="mask_image_generator/output" />
+    <remap from="~input/src2" to="mask_image_generator1/output" />
+  </node>
+
   <node name="mask_image_to_rect"
-        pkg="jsk_perception" type="mask_image_to_rect">
-    <remap from="~input" to="mask_image_generator/output" />
+        pkg="jsk_perception" type="mask_image_to_rect"
+        output="screen"
+        clear_params="true" >
+    <remap from="~input" to="add_mask_image/output" />
+    <rosparam subst_value="true">
+      rect_type: 1
+    </rosparam>
   </node>
 
   <node name="draw_rects"
@@ -35,7 +59,7 @@
   <group if="$(arg gui)">
     <node name="image_view0"
           pkg="image_view" type="image_view">
-      <remap from="image" to="mask_image_generator/output" />
+      <remap from="image" to="add_mask_image/output" />
     </node>
     <node name="image_view1"
           pkg="image_view" type="image_view">

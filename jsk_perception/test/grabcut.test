@@ -17,6 +17,8 @@
       timeout_2: 30
       topic_3: /grabcut/output/background_mask
       timeout_3: 30
+      check_after_kill_node: true
+      node_names: [grabcut,]
     </rosparam>
   </test>
 

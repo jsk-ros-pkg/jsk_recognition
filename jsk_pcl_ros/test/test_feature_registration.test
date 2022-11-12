@@ -13,6 +13,8 @@
       timeout_0: 60
       topic_1: /feature_registration/output/cloud
       timeout_1: 60
+      check_after_kill_node: true
+      node_names: [feature_registration,]
     </rosparam>
   </test>
 

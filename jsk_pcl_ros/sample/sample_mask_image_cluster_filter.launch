@@ -19,7 +19,8 @@
 
   <node name="mask_image_cluster_filter"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/MaskImageClusterFilter sample_manager">
+        args="load jsk_pcl/MaskImageClusterFilter sample_manager"
+        respawn="true" >
     <remap from="~input" to="/kinect_head/depth_registered/points"/>
     <remap from="~target" to="grid_sampler/output"/>
     <remap from="~input/camera_info" to="/kinect_head/rgb/camera_info"/>

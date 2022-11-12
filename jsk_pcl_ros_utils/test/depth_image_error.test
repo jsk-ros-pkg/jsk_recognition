@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /depth_image_error/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [depth_image_error,]
     </rosparam>
   </test>
 

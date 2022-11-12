@@ -28,8 +28,10 @@
     </rosparam>
   </node>
 
+    <!-- respawn="true" -->
   <node name="ppf_registration" pkg="nodelet" type="nodelet"
-    args="load jsk_pcl/PPFRegistration $(arg manager)" output="screen">
+    args="load jsk_pcl/PPFRegistration $(arg manager)"
+    output="screen">
     <remap from="~input/cloud" to="subsample_input/output" />
     <remap from="~input/reference_cloud" to="subsample_reference/output" />
     <rosparam>
@@ -52,6 +54,8 @@
       timeout_0: 30
       topic_1: /ppf_registration/output/pose_stamped
       timeout_1: 30
+      check_after_kill_node: true
+      node_names: [ppf_registration,]
     </rosparam>
   </test>
 

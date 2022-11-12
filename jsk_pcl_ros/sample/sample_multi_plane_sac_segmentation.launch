@@ -10,7 +10,8 @@
 
   <node name="multi_plane_sac_segmentation"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/MultiPlaneSACSegmentation /sample_manager">
+        args="load jsk_pcl/MultiPlaneSACSegmentation /sample_manager"
+        respawn="true">
     <remap from="~input" to="/kinect_head/depth_registered/points"/>
     <rosparam>
       use_normal: false

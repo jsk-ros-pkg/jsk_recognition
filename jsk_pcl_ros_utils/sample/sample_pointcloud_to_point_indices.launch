@@ -3,17 +3,22 @@
   <arg name="gui" default="true" />
 
   <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml" />
+  <arg name="MANAGER" value="/right_hand_camera/right_hand_camera_nodelet_manager" />
 
   <arg name="INPUT_CLOUD" value="/right_hand_camera/depth_registered/points" />
   <arg name="INPUT_IMAGE" value="/right_hand_camera/rgb/image_rect_color" />
 
   <node name="pointcloud_to_point_indices"
-        pkg="jsk_pcl_ros_utils" type="pointcloud_to_point_indices">
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PointCloudToPointIndices $(arg MANAGER)"
+        respawn="true">
     <remap from="~input" to="$(arg INPUT_CLOUD)" />
   </node>
 
   <node name="point_indices_to_mask_image"
-        pkg="jsk_pcl_ros_utils" type="point_indices_to_mask_image">
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PointIndicesToMaskImage $(arg MANAGER)"
+        respawn="true">
     <remap from="~input" to="/pointcloud_to_point_indices/output" />
     <rosparam>
       static_image_size: true

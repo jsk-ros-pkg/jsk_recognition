@@ -113,6 +113,7 @@ generate_dynamic_reconfigure_options(
   cfg/TabletopColorDifferenceLikelihood.cfg
   cfg/ProjectImagePoint.cfg
   cfg/MaskImageGenerator.cfg
+  cfg/MaskImageToRect.cfg
   cfg/MorphologicalMaskImageOperator.cfg
   cfg/BlobDetector.cfg
   cfg/SingleChannelHistogram.cfg
@@ -151,6 +152,7 @@ generate_dynamic_reconfigure_options(
   cfg/MaskRCNNInstanceSegmentation.cfg
   cfg/VirtualCameraMono.cfg
   cfg/AWSDetectFaces.cfg
+  cfg/RemoveBlurredFrames.cfg
 )
 
 message(WARNING "DEPRECATION WARNING: srv files in jsk_pcl_ros are deprecated."
@@ -289,6 +291,7 @@ jsk_add_nodelet(src/sliding_window_object_detector.cpp "jsk_perception/SlidingWi
 jsk_add_nodelet(src/gaussian_blur.cpp "jsk_perception/GaussianBlur" "gaussian_blur")
 jsk_add_nodelet(src/kmeans.cpp "jsk_perception/KMeans" "kmeans")
 jsk_add_nodelet(src/draw_rects.cpp "jsk_perception/DrawRects" "draw_rects")
+jsk_add_nodelet(src/remove_blurred_frames.cpp "jsk_perception/RemoveBlurredFrames" "remove_blurred_frames")
 if("${OpenCV_VERSION}" VERSION_GREATER "2.9.9")  # >= 3.0.0
   jsk_add_nodelet(src/bing.cpp "jsk_perception/Bing" "bing")
 endif()
@@ -304,6 +307,8 @@ endif()
 if(robot_self_filter_FOUND)
   jsk_add_nodelet(src/robot_to_mask_image.cpp "jsk_perception/RobotToMaskImage" "robot_to_mask_image")
 endif()
+
+jsk_add_nodelet(src/virtual_camera_mono.cpp "jsk_perception/VirtualCameraMono" "virtual_camera_mono")
 
 # compiling jsk_perception library for nodelet
 if(TARGET JSK_NODELET_${PROJECT_NAME}_dual_fisheye_to_panorama)
@@ -345,7 +350,6 @@ target_link_libraries(oriented_gradient ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 jsk_add_node(src/camshiftdemo.cpp camshiftdemo)
 jsk_add_node(src/linemod.cpp linemod)
-jsk_add_node(src/virtual_camera_mono.cpp virtual_camera_mono)
 jsk_add_node(src/point_pose_extractor.cpp point_pose_extractor)
 jsk_add_node(src/white_balance_converter.cpp white_balance_converter)
 jsk_add_node(src/rectangle_detector.cpp rectangle_detector)
@@ -412,7 +416,7 @@ install(TARGETS
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(DIRECTORY config euslisp launch node_scripts plugins sample test
+install(DIRECTORY config euslisp launch plugins sample test
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   USE_SOURCE_PERMISSIONS
 )
@@ -421,19 +425,27 @@ install(DIRECTORY include/${PROJECT_NAME}/
 )
 
 if($ENV{ROS_DISTRO} STREQUAL "indigo") # on noetic it needs catkin_install_python to support Python3 and it does not work on indigo for some reason...
-install(DIRECTORY scripts
+install(DIRECTORY scripts node_scripts
    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
    USE_SOURCE_PERMISSIONS
- )
+   )
 else()
-install(PROGRAMS scripts/setup_opencv_learning_data.sh
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/scripts/
+install(DIRECTORY scripts node_scripts
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  USE_SOURCE_PERMISSIONS
+  PATTERN "*"
+  PATTERN "*/*.py" EXCLUDE
 )
 
 file(GLOB SCRIPT_PROGRAMS scripts/*.py)
 catkin_install_python(
   PROGRAMS ${SCRIPT_PROGRAMS}
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/scripts/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/scripts
+)
+file(GLOB NODE_SCRIPT_PROGRAMS node_scripts/*.py)
+catkin_install_python(
+  PROGRAMS ${NODE_SCRIPT_PROGRAMS}
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/node_scripts
 )
 endif()
 
@@ -571,6 +583,7 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/ssd_object_detector.test)
     jsk_add_rostest(test/ycc_decomposer.test)
     jsk_add_rostest(test/depth_image_filter.test)
+    jsk_add_rostest(test/remove_blurred_frames.test)
     if(TARGET JSK_NODELET_${PROJECT_NAME}_bing)
       jsk_add_rostest(test/bing.test)
     endif()

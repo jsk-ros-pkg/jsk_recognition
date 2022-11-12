@@ -4,10 +4,12 @@
   <include file="$(find jsk_pcl_ros)/sample/sample_normal_estimation_omp.launch">
     <arg name="gui" value="false"/>
   </include>
+  <arg name="MANAGER" value="/right_hand_camera/right_hand_camera_nodelet_manager" />
 
   <node name="normal_direction_filter"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/NormalDirectionFilter">
+        args="load jsk_pcl/NormalDirectionFilter $(arg MANAGER)"
+        respawn="true">
     <remap from="~input" to="normal_estimation_omp/output"/>
     <rosparam>
       use_imu: false
@@ -19,7 +21,7 @@
   <group if="$(arg gui)">
     <node name="extract_indices_normal_filtered"
           pkg="nodelet" type="nodelet"
-          args="standalone jsk_pcl/ExtractIndices">
+          args="load jsk_pcl/ExtractIndices $(arg MANAGER)">
       <remap from="~input" to="normal_estimation_omp/output_with_xyz"/>
       <remap from="~indices" to="normal_direction_filter/output"/>
       <rosparam>

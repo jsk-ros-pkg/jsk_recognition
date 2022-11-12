@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /colorize_distance_from_plane/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [colorize_distance_from_plane,]
     </rosparam>
   </test>
 

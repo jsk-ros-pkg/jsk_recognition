@@ -13,6 +13,8 @@
       timeout_0: 30
       topic_1: /multi_euclidean_clustering/output
       timeout_1: 30
+      check_after_kill_node: true
+      node_names: [multi_euclidean_clustering,]
     </rosparam>
   </test>
 

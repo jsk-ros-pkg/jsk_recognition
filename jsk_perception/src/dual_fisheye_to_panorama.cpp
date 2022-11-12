@@ -116,6 +116,7 @@ namespace jsk_perception
 
   void DualFisheyeToPanorama::rectify(const sensor_msgs::Image::ConstPtr& image_msg)
   {
+    vital_checker_->poke();
     cv::Mat img;
     cv::resize(cv_bridge::toCvCopy(image_msg, image_msg->encoding)->image, img, cv::Size(blend_image_width_,blend_image_height_));
 

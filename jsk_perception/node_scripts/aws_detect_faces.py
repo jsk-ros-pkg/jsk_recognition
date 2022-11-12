@@ -106,6 +106,7 @@ class DetectFaces(ConnectionBasedTransport):
         self.attributes_pub = self.advertise('~attributes', ClassificationResult, queue_size=1)
         self.landmarks_pub = self.advertise('~landmarks', PeoplePoseArray, queue_size=1)
         self.image_pub = self.advertise('~output', Image, queue_size=1)
+        self.orig_image_pub = self.advertise('~image/compressed', CompressedImage, queue_size=1)
         #
         # To process latest message, we need to set buff_size must be large enough.
         # we need to set buff_size larger than message size to use latest message for callback
@@ -367,6 +368,9 @@ class DetectFaces(ConnectionBasedTransport):
         if self.image_pub.get_num_connections() > 0:
             self.image_pub.publish(self.bridge.cv2_to_imgmsg(
                 img_gray, encoding='bgr8'))
+
+        if self.orig_image_pub.get_num_connections() > 0:
+            self.orig_image_pub.publish(image)
 
         self.faces_pub.publish(face_msgs)
         self.poses_pub.publish(pose_msgs)

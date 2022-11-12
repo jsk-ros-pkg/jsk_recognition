@@ -192,14 +192,16 @@ namespace jsk_pcl_ros
           case jsk_pcl_ros::EuclideanClustering_MaxSize: {
             // take maximum size of cluster
             int size = 0;
-            int index = 0;
+            int index = -1;
             for(size_t i=0; i < output_indices.size(); i++){
               if(output_indices[i].indices.size() > size){
                 size = output_indices[i].indices.size();
                 index = i;
               }
             }
-            examine_indices.push_back(index);
+            if (index >=0) {
+              examine_indices.push_back(index);
+            }
             break;
           }
         }

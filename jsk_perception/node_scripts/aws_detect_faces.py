@@ -89,6 +89,9 @@ class DetectFaces(ConnectionBasedTransport):
 
         self.bridge = cv_bridge.CvBridge()
 
+        self.always_publish = rospy.get_param('~always_publish', True)
+        rospy.loginfo("Publish even if face is not found : {}".format(self.always_publish))
+
         self.use_window = rospy.get_param('~use_window', False)
         rospy.loginfo("Launch image window : {}".format(self.use_window))
 
@@ -354,6 +357,12 @@ class DetectFaces(ConnectionBasedTransport):
         if self.use_window:
             cv2.imshow(image._connection_header['topic'], img_gray)
             cv2.waitKey(1)
+
+        # is always_publish is False, and face is not detected , do not publish any results
+        if not self.always_publish and len(faces['FaceDetails']) <= 0:
+            # debug info
+            rospy.loginfo("processing time {}".format((rospy.Time.now() - start_time).to_sec()))
+            return
 
         if self.image_pub.get_num_connections() > 0:
             self.image_pub.publish(self.bridge.cv2_to_imgmsg(

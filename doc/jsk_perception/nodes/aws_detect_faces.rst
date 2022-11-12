@@ -102,6 +102,10 @@ Parameters
 
   Set true to process even if not one subscribing.
 
+* ``~always_publish`` (Bool, Default: ``True``)
+
+  Set false to publish only when face is detected.
+
 Example
 -------
 

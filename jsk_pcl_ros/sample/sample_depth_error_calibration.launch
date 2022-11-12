@@ -1,13 +1,16 @@
 <launch>
   <arg name="gui" default="true"/>
 
+  <arg name="MANAGER" default="nodelet_manager" />
   <include file="$(find jsk_pcl_ros_utils)/sample/sample_depth_image_error.launch">
     <arg name="gui" value="false"/>
+    <arg name="launch_manager" value="true" />
+    <arg name="MANAGER" value="$(arg MANAGER)" />
   </include>
 
   <node name="depth_calibration"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/DepthCalibration">
+        args="load jsk_pcl/DepthCalibration $(arg MANAGER)">
     <remap from="~input" to="camera/depth_registered/sw_registered/image_rect"/>
     <remap from="~camera_info" to="camera/depth_registered/sw_registered/camera_info"/>
   </node>

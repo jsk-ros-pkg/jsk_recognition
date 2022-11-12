@@ -11,9 +11,12 @@
     <arg name="load_driver" value="false" />
     <arg name="depth_registration" value="true" />
   </include>
+  <arg name="MANAGER" value="/camera/camera_nodelet_manager" />
 
   <node name="background_subtraction"
-        pkg="jsk_perception" type="background_substraction">
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/BackgroundSubstraction $(arg MANAGER)"
+        respawn="true">
     <remap from="~image" to="/camera/rgb/image_rect_color" />
   </node>
 

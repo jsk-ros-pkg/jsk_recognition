@@ -12,6 +12,8 @@
       timeout_0: 10
       topic_1: /ImageFeature0D
       timeout_1: 10
+      check_after_kill_node: true
+      node_names: [imagesift,]
     </rosparam>
   </test>
 

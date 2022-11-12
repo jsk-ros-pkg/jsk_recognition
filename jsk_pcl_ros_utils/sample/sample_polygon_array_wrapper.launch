@@ -4,10 +4,12 @@
   <include file="$(find jsk_pcl_ros_utils)/sample/sample_polygon_array_unwrapper.launch">
     <arg name="gui" value="false"/>
   </include>
+  <arg name="MANAGER" value="sample_manager" />
 
   <node name="polygon_array_wrapper"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl_utils/PolygonArrayWrapper">
+        args="load jsk_pcl_utils/PolygonArrayWrapper $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input_polygon" to="polygon_array_unwrapper/output_polygon"/>
     <remap from="~input_coefficients" to="polygon_array_unwrapper/output_coefficients"/>
   </node>

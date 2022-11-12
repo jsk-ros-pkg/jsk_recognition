@@ -31,7 +31,8 @@
 
   <node name="add_color_from_image"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/AddColorFromImageToOrganized $(arg MANAGER)">
+        args="load jsk_pcl/AddColorFromImageToOrganized $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input" to="camera/depth_registered/points" />
     <remap from="~input/image" to="colorize_label/output" />
   </node>

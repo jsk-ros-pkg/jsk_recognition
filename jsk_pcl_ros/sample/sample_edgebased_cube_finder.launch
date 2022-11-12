@@ -56,7 +56,8 @@
 
   <node name="edgebased_cube_finder"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/EdgebasedCubeFinder /sample_manager">
+        args="load jsk_pcl/EdgebasedCubeFinder /sample_manager"
+        respawn="true" >
     <remap from="~input" to="voxel_grid/output"/>
     <remap from="~input_edges" to="parallel_edge_finder/output_edges_groups"/>
   </node>

@@ -70,7 +70,8 @@
 
   <node name="incremental_model_registration"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/IncrementalModelRegistration sample_manager">
+        args="load jsk_pcl/IncrementalModelRegistration sample_manager"
+        respawn="true">
     <remap from="~input" to="voxel_grid/output"/>
     <remap from="~input/pose" to="icp_registration/output_pose"/>
     <remap from="~input/indices" to="attention_clipper/output/point_indices"/>

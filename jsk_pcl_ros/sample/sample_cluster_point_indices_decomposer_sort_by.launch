@@ -3,10 +3,7 @@
   <arg name="gui" default="true" />
 
   <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_arc2017_4objects.xml" />
-
-  <arg name="MANAGER" value="nodelet_manager" />
-  <node name="$(arg MANAGER)"
-        pkg="nodelet" type="nodelet" args="manager" />
+  <arg name="MANAGER" value="/camera/camera_nodelet_manager" />
 
   <node name="resize_points_publisher"
         pkg="nodelet" type="nodelet"
@@ -47,7 +44,8 @@
   </node>
   <node name="extract_indices"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/ExtractIndices $(arg MANAGER)">
+        args="load jsk_pcl/ExtractIndices $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input" to="$(arg INPUT_CLOUD)" />
     <remap from="~indices" to="attention_clipper/output/point_indices" />
     <rosparam>
@@ -64,7 +62,8 @@
   <!-- Indices -->
   <node name="cluster_point_indices_decomposer"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)">
+        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)"
+        respawn="true">
     <remap from="~input" to="extract_indices/output" />
     <remap from="~target" to="label_to_cluster_indices/output" />
     <rosparam>
@@ -84,7 +83,8 @@
   <!-- Z Axis -->
   <node name="cluster_point_indices_decomposer_z_axis"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)">
+        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)"
+        respawn="true">
     <remap from="~input" to="extract_indices/output" />
     <remap from="~target" to="label_to_cluster_indices/output" />
     <rosparam>
@@ -105,7 +105,8 @@
   <!-- Cloud Size -->
   <node name="cluster_point_indices_decomposer_cloud_size"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)">
+        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input" to="extract_indices/output" />
     <remap from="~target" to="label_to_cluster_indices/output" />
     <rosparam>

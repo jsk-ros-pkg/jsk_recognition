@@ -26,7 +26,8 @@
 
   <node name="polygon_points_sampler"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl_utils/PolygonPointsSampler sample_manager">
+        args="load jsk_pcl_utils/PolygonPointsSampler sample_manager"
+        respawn="true" >
     <remap from="~input/polygons" to="static_polygon_array_publisher/output_polygons"/>
     <remap from="~input/coefficients" to="static_polygon_array_publisher/output_coefficients"/>
     <rosparam>

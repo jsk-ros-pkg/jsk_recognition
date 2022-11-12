@@ -39,7 +39,8 @@
 
   <node name="subtract_point_indices"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl_utils/SubtractPointIndices $(arg MANAGER)">
+        args="load jsk_pcl_utils/SubtractPointIndices $(arg MANAGER)"
+        respawn="true">
     <remap from="~input/src1" to="/pointcloud_to_point_indices/output" />
     <remap from="~input/src2" to="/pointcloud_to_point_indices_left/output" />
     <rosparam>

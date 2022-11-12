@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /depth_considered/output
       timeout_0: 10
+      check_after_kill_node: true
+      node_names: [depth_considered,]
     </rosparam>
   </test>
 

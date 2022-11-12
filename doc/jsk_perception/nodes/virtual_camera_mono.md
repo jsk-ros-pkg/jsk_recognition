@@ -1,4 +1,4 @@
-# virtual_camera_mono
+# VirtualCameraMono
 
 ![](images/virtual_camera_mono.png)
 
@@ -50,6 +50,11 @@ Calculate perspective transformation from TF frame and apply it to the input ima
 * `~child_frame_id` (String, default: `/virtual_camera_frame`)
 
   Frame ID of virtual camera used in published topics.
+
+* `~queue_size` (Int, default: `1`)
+
+  How many messages you allow about the subscriber to keep in the queue.
+  This should be big when there is much difference about delay between two topics.
 
 * `~initial_pos` (List of Float, default: `[0.7, 0.0, 0.0]`)
 

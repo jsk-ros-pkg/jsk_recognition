@@ -35,6 +35,8 @@
       timeout_11: 30
       topic_12: /plane_supported_cuboid_estimator/output/histogram/dz
       timeout_12: 30
+      check_after_kill_node: true
+      node_names: [plane_supported_cuboid_estimator,]
     </rosparam>
   </test>
 

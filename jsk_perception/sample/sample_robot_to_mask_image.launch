@@ -1,12 +1,46 @@
 <launch>
   <arg name="gui" default="true"/>
+  <arg name="decimate" default="false" doc="Use decimate input depth image or not." />
+  <arg name="decimation_x" default="4" doc="decimate with respect to x direction. Only valid when decimate is true."/>
+  <arg name="decimation_y" default="4" doc="decimate with respect to y direction. Only valid when decimate is true."/>
+  <arg name="roi_x_offset" default="200" doc="Region of interest's x_offset. Only valid when decimate is true." />
+  <arg name="roi_y_offset" default="100" doc="Region of interest's y_offset. Only valid when decimate is true." />
+  <arg name="roi_width" default="200" doc="Region of interest's width. Only valid when decimate is true." />
+  <arg name="roi_height" default="320" doc="Region of interest's height. Only valid when decimate is true." />
 
-  <include file="$(find jsk_perception)/sample/include/play_rosbag_pr2_self_see.xml"/>
+  <arg name="INPUT_CAMERA_INFO" default="/kinect_head/rgb/camera_info" unless="$(arg decimate)" />
+  <arg name="INPUT_CAMERA_INFO" default="/kinect_head/depth_downsample/camera_info" if="$(arg decimate)" />
+  <arg name="rosbag_play_args" default="--clock --loop" />
+
+  <include file="$(find jsk_perception)/sample/include/play_rosbag_pr2_self_see.xml">
+    <arg name="rosbag_play_args" value="$(arg rosbag_play_args)" />
+  </include>
+
+  <group ns="kinect_head">
+    <node if="$(arg decimate)"
+          name="crop_decimate"
+          pkg="nodelet" type="nodelet"
+          args="standalone image_proc/crop_decimate"
+          output="screen"
+          clear_params="true" >
+      <remap from="camera/image_raw" to="depth_registered/hw_registered/image_rect" />
+      <remap from="depth_registered/hw_registered/camera_info" to="depth_registered/camera_info" />
+      <remap from="camera_out" to="depth_downsample" />
+      <param name="decimation_x" value="$(arg decimation_x)" />
+      <param name="decimation_y" value="$(arg decimation_y)" />
+      <param name="queue_size" value="1" />
+      <param name="x_offset" type="int" value="$(arg roi_x_offset)" />
+      <param name="y_offset" type="int" value="$(arg roi_y_offset)" />
+      <param name="width" type="int" value="$(arg roi_width)" />
+      <param name="height" type="int" value="$(arg roi_height)" />
+    </node>
+  </group>
 
   <node name="robot_to_mask_image"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_perception/RobotToMaskImage">
-    <remap from="~input/camera_info" to="/kinect_head/rgb/camera_info"/>
+        args="standalone jsk_perception/RobotToMaskImage"
+        output="screen">
+    <remap from="~input/camera_info" to="$(arg INPUT_CAMERA_INFO)"/>
     <rosparam>
       self_see_links:
         - name: base_link

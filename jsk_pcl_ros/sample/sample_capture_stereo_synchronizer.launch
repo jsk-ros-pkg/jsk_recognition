@@ -48,7 +48,8 @@
 
   <node name="capture_stereo_synchronizer"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/CaptureStereoSynchronizer sample_manager">
+        args="load jsk_pcl/CaptureStereoSynchronizer sample_manager"
+        respawn="true" >
     <remap from="~input/pose" to="topic_ensync/output/pose"/>
     <remap from="~input/mask" to="topic_ensync/output/mask"/>
     <remap from="~input/mask_indices" to="topic_ensync/output/mask_indices"/>

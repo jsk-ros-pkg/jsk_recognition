@@ -13,6 +13,8 @@
       timeout_0: 30
       topic_1: /label_to_cluster_point_indices/output/bg_indices
       timeout_1: 30
+      check_after_kill_node: true
+      node_names: [label_to_cluster_point_indices,]
     </rosparam>
   </test>
 

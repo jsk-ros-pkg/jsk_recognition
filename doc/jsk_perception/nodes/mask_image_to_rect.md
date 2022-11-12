@@ -11,8 +11,21 @@ Convert a mask image into jsk_recognition_msgs/RectArray.
 ## Publishing Topic
 * `~output` (`jsk_recognition_msgs/RectArray`)
 
-  Array of rectangle which contains only one rectangle.
-  It is bounding rectangle of input mask.
+  An array of rectangles contains rectangles. They are bounding rectangles of the input mask.
+
+## Parameters
+
+* `~rect_type` (Int, default: `0`)
+
+   Specify output rect types.
+
+   0: Outputs a rect that encloses the entire mask.
+
+   ![](images/mask_image_to_rect.png)
+
+   1: Outputs bounding rectangles containing each contour that is output by applying opencv's `findContours` with `CV_RETR_EXTERNAL` to the mask image.
+
+   ![](images/mask_image_to_rect_rect_type1.jpg)
 
 ## Sample
 

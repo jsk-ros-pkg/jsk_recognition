@@ -1,16 +1,35 @@
 <launch>
   <arg name="gui" default="true"/>
+  <arg name="rosbag_play_args" default="--clock --loop" />
 
   <param name="/use_sim_time" value="true"/>
 
+  <arg name="MANAGER" default="nodelet_manager" />
+  <arg name="launch_manager" default="true" />
+
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet"
+        args="manager"
+        if="$(arg launch_manager)"
+        output="screen" />
+
   <node name="rosbag_play"
         pkg="rosbag" type="play"
-        args="$(find jsk_pcl_ros_utils)/sample/data/bunny_marker_array.bag --clock --loop"/>
+        args="$(find jsk_pcl_ros_utils)/sample/data/bunny_marker_array.bag $(arg rosbag_play_args)"/>
+
+  <!-- copy from
+     https://raw.githubusercontent.com/jsk-ros-pkg/jsk_robot/master/jsk_robot_common/jsk_robot_utils/scripts/marker_msg_from_indigo_to_kinetic.py
+  -->
+  <node name="marker_msg_from_indigo_to_kinetic"
+        pkg="jsk_pcl_ros_utils" type="marker_msg_from_indigo_to_kinetic.py">
+    <param name="~suffix" value="fixed" />
+  </node>
 
   <node name="marker_array_voxel_to_pointcloud"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl_utils/MarkerArrayVoxelToPointCloud">
-    <remap from="~input" to="/octree_voxel_grid/output_marker_array"/>
+        args="load jsk_pcl_utils/MarkerArrayVoxelToPointCloud $(arg MANAGER)"
+        respawn="true">
+    <remap from="~input" to="/octree_voxel_grid/fixed/output_marker_array"/>
   </node>
 
   <group if="$(arg gui)">

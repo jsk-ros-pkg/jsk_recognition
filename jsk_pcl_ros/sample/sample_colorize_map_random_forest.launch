@@ -2,6 +2,7 @@
   <arg name="gui" default="true"/>
 
   <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml" />
+  <arg name="MANAGER" value="/kinect_head/kinect_head_nodelet_manager" />
 
   <node name="random_forest_server"
         pkg="jsk_perception" type="random_forest_server.py">
@@ -12,8 +13,9 @@
 
   <node name="colorize_map_random_forest"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/ColorizeMapRandomForest"
-        clear_params="true">
+        args="load jsk_pcl/ColorizeMapRandomForest $(arg MANAGER)"
+        clear_params="true"
+        respawn="true" >
     <remap from="~input" to="/kinect_head/depth_registered/points" />
     <remap from="~classify_server" to="random_forest_classify_server"/>
     <rosparam>

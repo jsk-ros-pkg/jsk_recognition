@@ -2,9 +2,13 @@
 
   <arg name="gui" default="true" />
 
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
   <node name="static_polygon_array_publisher"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl_utils/StaticPolygonArrayPublisher">
+        args="load jsk_pcl_utils/StaticPolygonArrayPublisher sample_manager">
     <rosparam>
       use_periodic: true
       periodic_rate: 30.0
@@ -25,7 +29,8 @@
 
   <node name="plane_rejector"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl_utils/PlaneRejector">
+        args="load jsk_pcl_utils/PlaneRejector sample_manager"
+        respawn="true">
     <remap from="~input_polygons" to="static_polygon_array_publisher/output_polygons"/>
     <remap from="~input_coefficients" to="static_polygon_array_publisher/output_coefficients"/>
     <rosparam>

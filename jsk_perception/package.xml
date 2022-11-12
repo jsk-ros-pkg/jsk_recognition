@@ -55,6 +55,7 @@
   <exec_depend>cv_bridge</exec_depend>
   <exec_depend>dynamic_reconfigure</exec_depend>
   <exec_depend>eigen</exec_depend>
+  <exec_depend>fetch_description</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>image_geometry</exec_depend>
   <exec_depend>image_transport</exec_depend>
@@ -92,6 +93,7 @@
   <exec_depend>leveldb</exec_depend>
   <exec_depend>python-fcn-pip</exec_depend>  <!-- pip -->
   <!-- }} install fcn -->
+  <exec_depend version_lt="0.3.7">python-pytesseract-pip</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-sklearn</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-sklearn</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-yaml</exec_depend>
@@ -107,6 +109,8 @@
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>sound_play</exec_depend>
   <exec_depend>std_msgs</exec_depend>
+  <exec_depend>tesseract-ocr</exec_depend>
+  <exec_depend>tesseract-ocr-jpn</exec_depend>
   <exec_depend>tf</exec_depend>
   <exec_depend>tf2_geometry_msgs</exec_depend>
   <exec_depend>topic_tools</exec_depend>

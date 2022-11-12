@@ -1,0 +1,67 @@
+<launch>
+
+  <arg name="gui" default="true" />
+  <arg name="gpu" default="0" />
+  <arg name="INPUT_IMAGE" default="/image_publisher/output" />
+  <arg name="language" default="eng" />
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/data/the_zen_of_python.jpg
+      encoding: bgr8
+    </rosparam>
+  </node>
+
+  <node name="craft_node"
+        pkg="jsk_perception" type="craft_node.py"
+        output="screen"
+        clear_params="true" >
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <rosparam subst_value="true" >
+      model_path: $(find jsk_perception)/trained_data/craft_mlt_25k.pth
+      refine_model_path: $(find jsk_perception)/trained_data/craft_refiner_CTW1500.pth
+      text_threshold: 0.7
+      link_threshold: 0.2
+      low_text: 0.2
+      gpu: $(arg gpu)
+    </rosparam>
+  </node>
+
+  <node name="ocr_node"
+        pkg="jsk_perception" type="ocr_node.py"
+        output="screen"
+        clear_params="true" >
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~input/polygons" to="craft_node/output/polygons" />
+    <remap from="~input/rects" to="craft_node/output/rects" />
+    <rosparam subst_value="true" >
+      font_path: $(find jsk_recognition_utils)/font_data/NotoSansJP-Regular.otf
+      language: $(arg language)
+      subscribe_polygon: true
+    </rosparam>
+  </node>
+
+  <node name="draw_rects"
+        pkg="jsk_perception" type="draw_rects.py"
+        output="screen"
+        clear_params="true" >
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~input/rects" to="craft_node/output/rects" />
+    <rosparam subst_value="true">
+      use_classification_result: false
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)" >
+    <node name="image_view00"
+          pkg="image_view" type="image_view" >
+      <remap from="image" to="draw_rects/output"/>
+    </node>
+    <node name="image_view01"
+          pkg="image_view" type="image_view" >
+      <remap from="image" to="ocr_node/output/viz"/>
+    </node>
+  </group>
+
+</launch>

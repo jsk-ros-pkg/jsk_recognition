@@ -14,9 +14,10 @@ Please refer to `DetectFaces <https://github.com/awsdocs/amazon-rekognition-deve
 Subscribing Topic
 -----------------
 
-* ``~input`` (``sensor_msgs/Image``)
+* ``image/compressed`` (``sensor_msgs/CompressedImage``)
 
   Input image.
+  This topic name is resolved from ``image``.
 
 Publishing Topic
 ----------------
@@ -114,5 +115,5 @@ Example
      use_window (default "true"): set false if you do not want to display window
 
 For JSK user, Download `aws.json` file from
-[Gdrive](https://drive.google.com/file/d/1g9DopJACY0rphGUiU9YGVMdzAPLRsuIk/view?usp=sharing)
+`Gdrive <https://drive.google.com/file/d/1g9DopJACY0rphGUiU9YGVMdzAPLRsuIk/view?usp=sharing>`_
 and put this under `/tmp` directory to run sample code.

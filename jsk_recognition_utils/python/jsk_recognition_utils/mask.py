@@ -13,7 +13,7 @@ def bounding_rect_of_mask(img, mask):
 
 def descent_closing(mask, init_selem, n_times):
     S = init_selem.shape
-    for i in xrange(n_times):
+    for i in range(n_times):
         selem = np.ones((S[0] * (n_times - i), S[1] * (n_times - i)))
         mask = binary_closing(mask, selem=selem)
     return mask

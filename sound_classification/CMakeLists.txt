@@ -30,16 +30,23 @@ catkin_package(
   )
 
 catkin_generate_virtualenv(
+  PYTHON_INTERPRETER python2
   INPUT_REQUIREMENTS requirements.in
   )
 
 file(GLOB SCRIPTS_FILES scripts/*.py)
 catkin_install_python(
   PROGRAMS ${SCRIPTS_FILES}
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/scripts
+)
+install(DIRECTORY scripts
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  USE_SOURCE_PERMISSIONS
+  PATTERN "*"
+  PATTERN "*/*.py" EXCLUDE
 )
 
-install(DIRECTORY launch scripts sample_rosbag
+install(DIRECTORY launch sample_rosbag
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   USE_SOURCE_PERMISSIONS
   )

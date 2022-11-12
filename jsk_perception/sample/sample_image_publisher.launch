@@ -16,6 +16,19 @@
     </rosparam>
   </node>
 
+  <node name="raw_image_bgr_16bit"
+        pkg="jsk_perception" type="image_publisher.py">
+    <remap from="~output" to="~image_color" />
+    <remap from="~output/camera_info" to="~camera_info" />
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/kiva_pod_image_color.jpg
+      encoding: bgr16
+      publish_info: true
+      fovx: 84.1
+      fovy: 53.8
+    </rosparam>
+  </node>
+
   <node name="raw_image_rgb"
         pkg="jsk_perception" type="image_publisher.py">
     <remap from="~output" to="~image_color" />
@@ -23,6 +36,19 @@
     <rosparam subst_value="true">
       file_name: $(find jsk_perception)/sample/kiva_pod_image_color.jpg
       encoding: rgb8
+      publish_info: true
+      fovx: 84.1
+      fovy: 53.8
+    </rosparam>
+  </node>
+
+  <node name="raw_image_rgb_16bit"
+        pkg="jsk_perception" type="image_publisher.py">
+    <remap from="~output" to="~image_color" />
+    <remap from="~output/camera_info" to="~camera_info" />
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/kiva_pod_image_color.jpg
+      encoding: rgb16
       publish_info: true
       fovx: 84.1
       fovy: 53.8
@@ -38,7 +64,20 @@
       encoding: bgra8
       publish_info: true
       fovx: 84.1
-      fovy: 53.8
+      fovy: 84.1  <!-- shape of sample_alpha.png is (256, 256). Keep the focal lengths equal. -->
+    </rosparam>
+  </node>
+
+  <node name="raw_image_bgra_16bit"
+        pkg="jsk_perception" type="image_publisher.py">
+    <remap from="~output" to="~image_color" />
+    <remap from="~output/camera_info" to="~camera_info" />
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/image/sample_alpha.png
+      encoding: bgra16
+      publish_info: true
+      fovx: 84.1
+      fovy: 84.1  <!-- shape of sample_alpha.png is (256, 256). Keep the focal lengths equal. -->
     </rosparam>
   </node>
 
@@ -51,7 +90,20 @@
       encoding: rgba8
       publish_info: true
       fovx: 84.1
-      fovy: 53.8
+      fovy: 84.1  <!-- shape of sample_alpha.png is (256, 256). Keep the focal lengths equal. -->
+    </rosparam>
+  </node>
+
+  <node name="raw_image_rgba_16bit"
+        pkg="jsk_perception" type="image_publisher.py">
+    <remap from="~output" to="~image_color" />
+    <remap from="~output/camera_info" to="~camera_info" />
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/image/sample_alpha.png
+      encoding: rgba16
+      publish_info: true
+      fovx: 84.1
+      fovy: 84.1  <!-- shape of sample_alpha.png is (256, 256). Keep the focal lengths equal. -->
     </rosparam>
   </node>
 
@@ -62,6 +114,19 @@
     <rosparam subst_value="true">
       file_name: $(find jsk_perception)/sample/kiva_pod_mask.jpg
       encoding: mono8
+      publish_info: true
+      fovx: 84.1
+      fovy: 53.8
+    </rosparam>
+  </node>
+
+  <node name="mask_image_16bit"
+        pkg="jsk_perception" type="image_publisher.py">
+    <remap from="~output" to="~mask" />
+    <remap from="~output/camera_info" to="~camera_info" />
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/kiva_pod_mask.jpg
+      encoding: mono16
       publish_info: true
       fovx: 84.1
       fovy: 53.8
@@ -112,13 +177,25 @@
           pkg="image_view" type="image_view">
       <remap from="image" to="raw_image_bgr/image_color" />
     </node>
+    <node name="image_view0_16bit"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="raw_image_bgr_16bit/image_color" />
+    </node>
     <node name="image_view1"
           pkg="image_view" type="image_view">
       <remap from="image" to="raw_image_rgb/image_color" />
     </node>
+    <node name="image_view1_16bit"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="raw_image_rgb_16bit/image_color" />
+    </node>
     <node name="image_view2"
           pkg="image_view" type="image_view">
       <remap from="image" to="mask_image/mask" />
+    </node>
+    <node name="image_view2_16bit"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="mask_image_16bit/mask" />
     </node>
     <node name="image_view3"
           pkg="image_view" type="image_view">
@@ -142,9 +219,17 @@
           pkg="image_view" type="image_view">
       <remap from="image" to="raw_image_bgra/image_color" />
     </node>
+    <node name="image_view6_16bit"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="raw_image_bgra_16bit/image_color" />
+    </node>
     <node name="image_view7"
           pkg="image_view" type="image_view">
       <remap from="image" to="raw_image_rgba/image_color" />
+    </node>
+    <node name="image_view7_16bit"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="raw_image_rgba_16bit/image_color" />
     </node>
   </group>
 

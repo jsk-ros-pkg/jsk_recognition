@@ -2,6 +2,7 @@
 
   <include file="$(find jsk_pcl_ros)/sample/sample_incremental_model_registration.launch">
     <arg name="gui" value="false"/>
+    <arg name="rosbag_play_args" value="-r 0.25 --clock --loop" />
   </include>
 
   <test test-name="test_incremental_model_registration"
@@ -13,6 +14,8 @@
       timeout_0: 30
       topic_1: /incremental_model_registration/output/registered
       timeout_1: 30
+      check_after_kill_node: true
+      node_names: [incremental_model_registration,]
     </rosparam>
   </test>
 

@@ -1,11 +1,12 @@
 <launch>
 
   <arg name="gui" default="true" />
+  <arg name="rosbag_play_args" default="--clock --loop" />
 
   <param name="/use_sim_time" value="true" />
   <node name="play"
         pkg="rosbag" type="play"
-        args="$(find jsk_pcl_ros_utils)/sample/data/bunny_marker_array.bag --clock --loop">
+        args="$(find jsk_pcl_ros_utils)/sample/data/bunny_marker_array.bag $(arg rosbag_play_args)">
   </node>
 
   <node name="bounding_box_array_publisher"
@@ -35,10 +36,19 @@
     </rosparam>
   </node>
 
+  <!-- copy from
+     https://raw.githubusercontent.com/jsk-ros-pkg/jsk_robot/master/jsk_robot_common/jsk_robot_utils/scripts/marker_msg_from_indigo_to_kinetic.py
+  -->
+  <node name="marker_msg_from_indigo_to_kinetic"
+        pkg="jsk_pcl_ros_utils" type="marker_msg_from_indigo_to_kinetic.py">
+    <param name="~suffix" value="fixed" />
+  </node>
+
   <node name="evaluate_voxel_segmentation_by_gt_box"
-        pkg="jsk_pcl_ros_utils" type="evaluate_voxel_segmentation_by_gt_box.py">
+        pkg="jsk_pcl_ros_utils" type="evaluate_voxel_segmentation_by_gt_box.py"
+        respawn="true">
     <remap from="~input/box_gt" to="boxes_to_gt_box/output" />
-    <remap from="~input/markers" to="/octree_voxel_grid/output_marker_array" />
+    <remap from="~input/markers" to="/octree_voxel_grid/fixed/output_marker_array" />
   </node>
 
 </launch>

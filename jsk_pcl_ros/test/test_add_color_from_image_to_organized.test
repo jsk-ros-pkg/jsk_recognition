@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /add_color_from_image/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [add_color_from_image,]
     </rosparam>
   </test>
 

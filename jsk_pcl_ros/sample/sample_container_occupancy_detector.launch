@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <arg name="gui" default="true" />
+  <arg name="topic_tools_start_delay" default="2.0" />
+  <arg name="approximate_sync" default="false" />
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_fetch_trashbin.xml" />
+
+  <node name="bounding_box_array_publisher" pkg="jsk_recognition_utils" type="bounding_box_array_publisher.py">
+    <remap from="~output" to="trashbin_boxes" />
+    <rosparam>
+      frame_id: base_link
+      boxes:
+        - position: [0.559, -0.193, 0.267]
+          dimension: [0.3, 0.2, 0.49]
+          label: 0
+        - position: [0.584, 0.09, 0.264]
+          dimension: [0.3, 0.2, 0.49]
+          label: 1
+      rate: 10
+    </rosparam>
+  </node>
+
+  <include file="$(find jsk_pcl_ros)/launch/container_occupancy_detector.launch">
+    <arg name="POINTCLOUD_INPUT" value="/head_camera/depth_registered/quater/throttled/points" />
+    <arg name="CONTAINER_BOXES_INPUT" value="trashbin_boxes" />
+    <arg name="manager" value="container_occupancy_nodelet_manager"/>
+    <arg name="approximate_sync" value="$(arg approximate_sync)" />
+  </include>
+
+  <!-- for visualizing occupancy rate in rviz -->
+  <node name="occupancy0" pkg="topic_tools" type="transform"
+        args="/container_occupancy_detector/container/occupancies /container0/occupancy std_msgs/Float32 --wait-for-start '0.0 if len(m.boxes) == 0 else m.boxes[0].value'" if="$(arg gui)">
+  </node>
+  <node name="occupancy1" pkg="topic_tools" type="transform"
+        args="/container_occupancy_detector/container/occupancies /container1/occupancy std_msgs/Float32 --wait-for-start '0.0 if len(m.boxes) != 2 else m.boxes[1].value'" if="$(arg gui)">
+  </node>
+
+  <node name="rviz" pkg="rviz" type="rviz"
+        args="-d $(find jsk_pcl_ros)/sample/rviz/container_occupancy_detector.rviz"
+        if="$(arg gui)" />
+
+</launch>

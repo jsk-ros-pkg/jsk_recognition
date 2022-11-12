@@ -1,0 +1,130 @@
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  ros:
+    runs-on: ubuntu-latest
+    container: ubuntu:18.04
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - ROS_DISTRO: indigo
+            USE_DEB: true
+            NOT_TEST_INSTALL : true
+            USE_JENKINS: true
+            DOCKER_IMAGE_JENKINS: ros-ubuntu:14.04-pcl
+            BEFORE_SCRIPT : "sudo pip install numpy==1.16.6; sudo pip install scikit-learn==0.19.1 scipy==1.2.3; sudo pip install fcn chainercv chainer-mask-rcnn==0.3.0 decorator==4.4.2 chainer==6.7.0 protobuf==3.18.0 cupy-cuda91; sudo pip install requests[socks]==2.25.1"
+            experimental : false
+          - ROS_DISTRO: kinetic
+            USE_DEB: true
+            NOT_TEST_INSTALL : true
+            USE_JENKINS: true
+            DOCKER_IMAGE_JENKINS: ros-ubuntu:16.04-pcl
+            BEFORE_SCRIPT : "sudo pip install numpy==1.16.6; sudo pip install fcn chainercv chainer-mask-rcnn==0.3.0 decorator==4.4.2 chainer==6.7.0 protobuf==3.18.0 cupy-cuda91 pytesseract==0.3.6 python-dateutil==2.5.0; wget https://download.pytorch.org/whl/cu90/torch-1.1.0-cp27-cp27mu-linux_x86_64.whl -O torch-1.1.0-cp27-cp27mu-linux_x86_64.whl; wget https://download.pytorch.org/whl/cu90/torchvision-0.3.0-cp27-cp27mu-manylinux1_x86_64.whl -O torchvision-0.3.0-cp27-cp27mu-manylinux1_x86_64.whl; sudo pip install torch-1.1.0-cp27-cp27mu-linux_x86_64.whl torchvision-0.3.0-cp27-cp27mu-manylinux1_x86_64.whl;"
+            BUILD_PKGS: 'checkerboard_detector imagesift jsk_perception jsk_recognition_utils resized_image_transport'
+            experimental : false
+          - ROS_DISTRO: kinetic
+            USE_DEB: true
+            NOT_TEST_INSTALL : true
+            USE_JENKINS: true
+            DOCKER_IMAGE_JENKINS: ros-ubuntu:16.04-pcl
+            BEFORE_SCRIPT : "sudo pip install numpy==1.16.6; sudo pip install fcn chainercv chainer-mask-rcnn==0.3.0 decorator==4.4.2 chainer==6.7.0 protobuf==3.18.0 cupy-cuda91 pytesseract==0.3.6 python-dateutil==2.5.0; wget https://download.pytorch.org/whl/cu90/torch-1.1.0-cp27-cp27mu-linux_x86_64.whl -O torch-1.1.0-cp27-cp27mu-linux_x86_64.whl; wget https://download.pytorch.org/whl/cu90/torchvision-0.3.0-cp27-cp27mu-manylinux1_x86_64.whl -O torchvision-0.3.0-cp27-cp27mu-manylinux1_x86_64.whl; sudo pip install torch-1.1.0-cp27-cp27mu-linux_x86_64.whl torchvision-0.3.0-cp27-cp27mu-manylinux1_x86_64.whl;"
+            BUILD_PKGS: 'jsk_pcl_ros_utils jsk_pcl_ros'
+            experimental : false
+          - ROS_DISTRO: melodic
+            USE_DEB: true
+            NOT_TEST_INSTALL : true
+            USE_JENKINS: true
+            DOCKER_IMAGE_JENKINS: ros-ubuntu:18.04-pcl
+            BEFORE_SCRIPT : "sudo pip install numpy==1.16.6; sudo pip install fcn chainercv chainer-mask-rcnn==0.3.0 decorator==4.4.2 chainer==6.7.0 protobuf==3.18.0 cupy-cuda91 pytesseract==0.3.6; wget https://download.pytorch.org/whl/cu90/torch-1.1.0-cp27-cp27mu-linux_x86_64.whl -O torch-1.1.0-cp27-cp27mu-linux_x86_64.whl; wget https://download.pytorch.org/whl/cu90/torchvision-0.3.0-cp27-cp27mu-manylinux1_x86_64.whl -O torchvision-0.3.0-cp27-cp27mu-manylinux1_x86_64.whl; sudo pip install torch-1.1.0-cp27-cp27mu-linux_x86_64.whl torchvision-0.3.0-cp27-cp27mu-manylinux1_x86_64.whl;"
+            BUILD_PKGS: 'checkerboard_detector imagesift jsk_perception jsk_recognition_utils resized_image_transport'
+            experimental : false
+          - ROS_DISTRO: melodic
+            USE_DEB: true
+            NOT_TEST_INSTALL : true
+            USE_JENKINS: true
+            DOCKER_IMAGE_JENKINS: ros-ubuntu:18.04-pcl
+            BEFORE_SCRIPT : "sudo pip install numpy==1.16.6; sudo pip install fcn chainercv chainer-mask-rcnn==0.3.0 decorator==4.4.2 chainer==6.7.0 protobuf==3.18.0 cupy-cuda91 pytesseract==0.3.6; wget https://download.pytorch.org/whl/cu90/torch-1.1.0-cp27-cp27mu-linux_x86_64.whl -O torch-1.1.0-cp27-cp27mu-linux_x86_64.whl; wget https://download.pytorch.org/whl/cu90/torchvision-0.3.0-cp27-cp27mu-manylinux1_x86_64.whl -O torchvision-0.3.0-cp27-cp27mu-manylinux1_x86_64.whl; sudo pip install torch-1.1.0-cp27-cp27mu-linux_x86_64.whl torchvision-0.3.0-cp27-cp27mu-manylinux1_x86_64.whl;"
+            BUILD_PKGS: 'jsk_pcl_ros_utils jsk_pcl_ros'
+            experimental : false
+          - ROS_DISTRO: melodic
+            USE_DEB: true
+            NOT_TEST_INSTALL : true
+            USE_JENKINS: true
+            DOCKER_IMAGE_JENKINS: ros-ubuntu:18.04-pcl
+            # check https://github.com/jsk-ros-pkg/jsk_recognition/pull/2533
+            BEFORE_SCRIPT : "sudo pip uninstall -y fcn chainer chainercv decorator cupy-cuda91 pytesseract==0.3.6; sudo ln -sf /bin/echo /usr/local/bin/pip; sudo ln -sf /bin/echo /usr/local/bin/pip2"
+            TEST_PKGS : "jsk_recognition_msgs"
+            experimental : false
+          - ROS_DISTRO: noetic
+            USE_DEB: false
+            NOT_TEST_INSTALL : true
+            USE_JENKINS: true
+            DOCKER_IMAGE_JENKINS: ros-ubuntu:20.04-pcl
+            TEST_PKGS : 'jsk_recognition_msgs' # to skip test
+            BEFORE_SCRIPT : "sudo pip install numpy==1.16.6; sudo pip install fcn chainercv chainer-mask-rcnn==0.3.0 decorator==4.4.2 chainer==6.7.0 protobuf==3.18.0 cupy-cuda91 pytesseract==0.3.6 torch==1.4.0;"
+            experimental : false
+          - ROS_DISTRO: noetic
+            USE_DEB: false
+            NOT_TEST_INSTALL : true
+            USE_JENKINS: true
+            DOCKER_IMAGE_JENKINS: ros-ubuntu:20.04-pcl
+            BEFORE_SCRIPT : "sudo pip install numpy==1.16.6; sudo pip install fcn chainercv chainer-mask-rcnn==0.3.0 decorator==4.4.2 chainer==6.7.0 protobuf==3.18.0 cupy-cuda91 pytesseract==0.3.6 torch==1.4.0;"
+            experimental : true
+
+
+    steps:
+      - name: Install latest git ( use sudo for ros-ubuntu )
+        run: |
+          [ -e /etc/apt/sources.list.d/ubuntu-esm-infra-$(lsb_release -cs).list ] && sudo rm /etc/apt/sources.list.d/ubuntu-esm-infra-$(lsb_release -cs).list ## fix Err https://esm.ubuntu.com trusty-infra-security/main amd64 Packages, gnutls_handshake() failed: Handshake failed
+          (apt-get update && apt-get install -y sudo) || echo "OK"
+          (apt-get update && apt-get install -y sudo) || echo "OK"
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo apt-get update
+          sudo -E add-apt-repository -y ppa:git-core/ppa
+          sudo apt-get update
+          sudo apt-get install -y git
+
+      - name: work around permission issue  # https://github.com/actions/checkout/issues/760#issuecomment-1097501613
+        run: |
+          set -x
+          export USER=$(whoami)
+          if [ "${{ matrix.CONTAINER }}" = "jskrobotics/ros-ubuntu:*" ]; then
+             git config --global --add safe.directory $GITHUB_WORKSPACE || echo "OK" # Show 'could not lock config file /github/home/.gitconfig: Permission denied', but it is ok
+             sudo mkdir -p /__w/
+             sudo chmod 777 -R /__w/
+             sudo chown -R $USER $HOME
+             # sudo mkdir -p /home/runner/work/_temp/_github_workflow/
+             # sudo chown -R $USER $HOME /home/runner/work/_temp/_github_workflow/
+             # ls -al /home/runner/work/_temp/_github_workflow/
+          else
+             git config --global --add safe.directory $GITHUB_WORKSPACE
+          fi
+
+      - name: Chcekout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
+      - name: Run jsk_travis
+        uses: jsk-ros-pkg/jsk_travis@master
+        with:
+          ROS_PARALLEL_JOBS : "-j8"
+          ROS_PARALLEL_TEST_JOBS : "-j1"
+          CATKIN_PARALLEL_TEST_JOBS : "-p1"
+          ROS_DISTRO : ${{ matrix.ROS_DISTRO }}
+          USE_DEB :  ${{ matrix.USE_DEB }}
+          NOT_TEST_INSTALL : ${{ matrix.NOT_TEST_INSTALL }}
+          TEST_PKGS : ${{ matrix.TEST_PKGS }}
+          BUILD_PKGS : ${{ matrix.BUILD_PKGS }}
+          BEFORE_SCRIPT : ${{ matrix.BEFORE_SCRIPT }}
+          EXTRA_DEB : ${{ matrix.EXTRA_DEB }}
+          USE_JENKINS : ${{ matrix.USE_JENKINS }}
+          DOCKER_IMAGE_JENKINS : ${{ matrix.DOCKER_IMAGE_JENKINS }}
+          TIMEOUT_JENKINS : 180

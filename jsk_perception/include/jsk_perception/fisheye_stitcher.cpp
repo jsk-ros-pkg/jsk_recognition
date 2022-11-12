@@ -792,7 +792,12 @@ FisheyeStitcher::blend( const cv::Mat &left_img,
 //! @param  return    stitched image
 //!
 cv::Mat
-FisheyeStitcher::stitch(const cv::Mat& in_img_L, const cv::Mat& in_img_R)
+FisheyeStitcher::stitch(const cv::Mat& in_img_L, const cv::Mat& in_img_R,
+                        uint16_t p_wid,
+                        uint16_t p_x1,
+                        uint16_t p_x2,
+                        uint16_t row_start,
+                        uint16_t row_end)
 {
     // int W_in = 1920;
     int W_in = m_ws; // default: video 3840 x 1920
@@ -895,15 +900,9 @@ FisheyeStitcher::stitch(const cv::Mat& in_img_L, const cv::Mat& in_img_R)
     uint16_t crop = static_cast<uint16_t>(0.5f * m_ws * (MAX_FOVD - 180.0) / MAX_FOVD); // half overlap region
 
     //------------------------------------------------------------------------//
-    // PARAMETERS (hard-coded) for C200 videos                                //
+    // PARAMETERS                                //
     //------------------------------------------------------------------------//
-    // (empirical experiment for dual-fisheye image of size 3840 x 1920)
-    uint16_t p_wid     = 55;
-    uint16_t p_x1      = 90 - 15;
-    uint16_t p_x2      = 1780 - 5;
     uint16_t p_x1_ref  = 2 * crop;
-    uint16_t row_start = 590;
-    uint16_t row_end   = 1320;
     uint16_t p_x2_ref  = m_ws - 2 * crop + 1;
     //
     cv::Mat Ref_1, Ref_2, Tmpl_1, Tmpl_2;

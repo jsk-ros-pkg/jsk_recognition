@@ -9,7 +9,8 @@
 
   <node name="supervoxel_segmentation"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/SupervoxelSegmentation sample_manager">
+        args="load jsk_pcl/SupervoxelSegmentation sample_manager"
+        respawn="true">
     <remap from="~input" to="/kinect_head/depth_registered/points"/>
     <rosparam>
       seed_resolution: 0.5
@@ -18,7 +19,8 @@
 
   <node name="cluster_point_indices_decomposer"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/ClusterPointIndicesDecomposer sample_manager">
+        args="load jsk_pcl/ClusterPointIndicesDecomposer sample_manager"
+        respawn="true">
     <remap from="~input" to="supervoxel_segmentation/output/cloud"/>
     <remap from="~target" to="supervoxel_segmentation/output/indices"/>
   </node>

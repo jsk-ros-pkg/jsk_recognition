@@ -1,5 +1,12 @@
 <launch>
   <arg name="gui" default="true"/>
+  <arg name="launch_manager" default="true" />
+
+  <arg name="MANAGER" default="sample_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet" args="manager"
+        if="$(arg launch_manager)"
+        output="screen" />
 
   <include file="$(find jsk_perception)/sample/sample_image_publisher.launch">
     <arg name="gui" value="false"/>
@@ -13,7 +20,8 @@
 
   <node name="project_image_point"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_perception/ProjectImagePoint">
+        args="load jsk_perception/ProjectImagePoint $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input" to="point_stamped_publisher/output"/>
     <remap from="~input/camera_info" to="raw_image_rgb/camera_info"/>
     <rosparam>

@@ -1,14 +1,16 @@
 <launch>
   <arg name="gui" default="true"/>
+  <arg name="rosbag_play_args" default="--clock --loop" />
 
   <arg name="input" default="/camera/depth/points"/>
   <arg name="sensor_frame" default="/camera_depth_optical_frame"/>
+  <arg name="reference_update_duration" default="0.05"/>
 
   <param name="/use_sim_time" value="true"/>
 
   <node name="rosbag_play"
         pkg="rosbag" type="play"
-        args="$(find jsk_pcl_ros)/sample/data/2017-06-19-19-34-18_tabletop_coffeecup.bag --clock --loop"/>
+        args="$(find jsk_pcl_ros)/sample/data/2017-06-19-19-34-18_tabletop_coffeecup.bag $(arg rosbag_play_args)"/>
 
   <node name="optical_frame_tf_publisher"
       pkg="tf" type="static_transform_publisher"
@@ -75,7 +77,7 @@
       models: [
         "$(find jsk_pcl_ros)/sample/data/2016-10-26-02-09-51_coffee_cup.pcd",
       ]
-      duration: 0.05
+      duration: $(arg reference_update_duration)
       use_array: false
     </rosparam>
   </node>
@@ -91,7 +93,8 @@
 
   <node name="particle_filter_tracking"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/ParticleFilterTracking $(arg manager)">
+        args="load jsk_pcl/ParticleFilterTracking $(arg manager)"
+        respawn="true" >
     <remap from="~input" to="voxel_grid_target/output"/>
     <remap from="~renew_model" to="voxel_grid_reference/output"/>
     <rosparam>

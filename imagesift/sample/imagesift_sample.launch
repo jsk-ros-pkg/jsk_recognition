@@ -11,7 +11,8 @@
         args="manager" />
   <node name="imagesift"
         pkg="nodelet" type="nodelet"
-        args="load imagesift/ImageSift nodelet_manager">
+        args="load imagesift/ImageSift nodelet_manager"
+        respawn="true" >
     <remap from="image" to="static_virtual_camera/image_color" />
     <remap from="camera_info" to="static_virtual_camera/camera_info" />
     <param name="image_transport" value="$(arg image_transport)" />

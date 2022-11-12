@@ -2,6 +2,7 @@
 
   <include file="$(find jsk_pcl_ros)/sample/sample_particle_filter_tracking.launch">
     <arg name="gui" value="false"/>
+    <arg name="rosbag_play_args" value="-r 0.25 --clock --loop" />
   </include>
 
   <test test-name="test_particle_filter_tracking"
@@ -37,6 +38,8 @@
       timeout_12: 30
       topic_13: /tracker_status_info/text
       timeout_13: 30
+      check_after_kill_node: true
+      node_names: [particle_filter_tracking,]
     </rosparam>
   </test>
 

@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /normal_concatenater/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [normal_concatenater,]
     </rosparam>
   </test>
 

@@ -25,6 +25,9 @@
       timeout_6: 30
       topic_7: /environment_plane_modeling/debug/magnified_plane_poses
       timeout_7: 30
+      check_after_kill_node: true
+      node_names:
+        - environment_plane_modeling
     </rosparam>
   </test>
 

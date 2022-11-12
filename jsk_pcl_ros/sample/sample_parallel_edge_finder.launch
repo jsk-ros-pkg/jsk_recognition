@@ -7,7 +7,8 @@
 
   <node name="parallel_edge_finder"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/ParallelEdgeFinder line_segment_manager">
+        args="load jsk_pcl/ParallelEdgeFinder line_segment_manager"
+        respawn="true">
     <remap from="~input_indices" to="line_segment_detector/output/inliers"/>
     <remap from="~input_coefficients" to="line_segment_detector/output/coefficients"/>
     <rosparam>

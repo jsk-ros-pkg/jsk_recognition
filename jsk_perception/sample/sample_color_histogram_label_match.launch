@@ -35,7 +35,8 @@
 
   <node name="single_channel_histogram"
         pkg="nodelet" type="nodelet"
-        args="load jsk_perception/SingleChannelHistogram /sample_manager">
+        args="load jsk_perception/SingleChannelHistogram /sample_manager"
+        respawn="true" >
     <remap from="~input" to="hsv_decomposer/output/saturation"/>
     <remap from="~input/mask" to="mask_image_generator/output"/>
     <rosparam>
@@ -46,7 +47,8 @@
 
   <node name="color_histogram_label_match"
         pkg="nodelet" type="nodelet"
-        args="load jsk_perception/ColorHistogramLabelMatch /sample_manager">
+        args="load jsk_perception/ColorHistogramLabelMatch /sample_manager"
+        respawn="true" >
     <remap from="~input" to="hsv_decomposer/output/saturation"/>
     <remap from="~input/label" to="slic_super_pixels/output"/>
     <remap from="~input/histogram" to="single_channel_histogram/output"/>

@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 import argparse
 import os
+try:
+    import rospy
+    import_rospy = True
+except ImportError:
+    import_rospy = False
 import subprocess
+import sys
 
 CONTAINERS = {"ofa": "jsk-ofa-server",
               "clip": "jsk-clip-server"}
@@ -19,6 +25,8 @@ parser.add_argument("--ofa_model_scale", default="huge", choices=OFA_MODEL_SCALE
 args, unknown = parser.parse_known_args()
 
 if __name__ == "__main__":
+    if import_rospy and len(sys.argv) != len(rospy.myargv()): # roslaunch
+        rospy.init_node("jsk_vil_docker_manager")
     port_option = "{}:8080".format(str(args.port))
     _home = os.environ["HOME"]
     mount_option = "{}:/var/mount".format(os.path.join(_home, ".jsk_vil_apis"))

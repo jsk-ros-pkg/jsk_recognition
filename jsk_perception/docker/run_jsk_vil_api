@@ -3,12 +3,11 @@ import argparse
 import os
 import subprocess
 
-CONTAINERS = {"ofa": "jsk-ofa-ros-server",
-              "clip": "jsk-ofa-clip-server",
-              "glip": "jsk-ofa-glip-server"}
+CONTAINERS = {"ofa": "jsk-ofa-server",
+              "clip": "jsk-clip-server"}
 OFA_MODEL_SCALES = ["base", "large", "huge"]
 
-parser = argparse.ArgumentParser(description="JSK VIL API runner")
+parser = argparse.ArgumentParser(description="JSK Vision and Language API runner")
 parser.add_argument("model", choices=CONTAINERS.keys(),
                     help="Vision and Language model you want to run", type=str)
 parser.add_argument("-p", "--port", default=8888, help="Port of the API server", type=int)
@@ -36,7 +35,6 @@ if __name__ == "__main__":
         cmd += ofa_option
 
     # Execute
-    print("Unrecognized arguments {}".format(unknown))
     print("Run {} container on port {}".format(docker_image, args.port))
     cmd.append(docker_image)
     subprocess.run(cmd)

@@ -1,7 +1,7 @@
 sensor_msgs/Image image
 string[] queries
 ---
-jsk_vil_msgs/ClipResult result
+jsk_recognition_msgs/ClipResult result
 bool done
 ---
 string status

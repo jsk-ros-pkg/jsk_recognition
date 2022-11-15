@@ -1,7 +1,7 @@
 sensor_msgs/Image image
 string[] questions
 ---
-jsk_vil_msgs/VQAResult result
+jsk_recognition_msgs/VQAResult result
 bool done
 ---
 string status

@@ -4,12 +4,12 @@ import base64
 import cv2
 from cv_bridge import CvBridge
 from dynamic_reconfigure.server import Server
-from jsk_vil_msgs.cfg import OFAQueryConfig
-from jsk_vil_msgs.msg import QuestionAndAnswerText
-from jsk_vil_msgs.msg import VQATaskAction
-from jsk_vil_msgs.msg import VQATaskFeedback
-from jsk_vil_msgs.msg import VQATaskResult
-from jsk_vil_msgs.msg import VQAResult
+from jsk_perception.cfg import VQAQueryConfig
+from jsk_recognition_msgs.msg import QuestionAndAnswerText
+from jsk_recognition_msgs.msg import VQATaskAction
+from jsk_recognition_msgs.msg import VQATaskFeedback
+from jsk_recognition_msgs.msg import VQATaskResult
+from jsk_recognition_msgs.msg import VQAResult
 import json
 import requests
 from requests.exceptions import ConnectionError
@@ -17,9 +17,7 @@ import rospy
 from sensor_msgs.msg import Image
 from std_msgs.msg import String
 
-bridge = CvBridge()
-
-def ros_img_to_base(ros_img):
+def ros_img_to_base(ros_img, bridge):
     cv_img = bridge.imgmsg_to_cv2(ros_img, desired_encoding="bgr8")
     # convert to base64
     encimg = cv2.imencode(".png", cv_img)[1]
@@ -27,8 +25,9 @@ def ros_img_to_base(ros_img):
     img_byte = base64.b64encode(img_str).decode("utf-8")
     return img_byte
 
-class OfaJSKROSClient:
+class OFAClientNode(object):
     def __init__(self):
+        self._bridge = CvBridge()
         # inference server configuration
         self.host = rospy.get_param("~host", default="localhost")
         self.port = rospy.get_param("~port", default=8888)
@@ -58,7 +57,7 @@ class OfaJSKROSClient:
         self.vqa_as.start()
         # TODO Add visual grounding
         # dynamic reconfigure
-        self._reconfigure_server = Server(OFAQueryConfig, self.config_cb)
+        self._reconfigure_server = Server(VQAQueryConfig, self.config_cb)
 
     def config_cb(self, config, level):
         self.caption_queries = config.caption_queries
@@ -70,7 +69,7 @@ class OfaJSKROSClient:
         if not self.caption_queries:
             return
         self.default_caption_img = data
-        img_byte = ros_img_to_base(data)
+        img_byte = ros_img_to_base(data, self._bridge)
         queries = self.caption_queries.split(";")
         req = json.dumps({"image": img_byte,
                           "queries": queries}).encode("utf-8")
@@ -136,7 +135,7 @@ class OfaJSKROSClient:
         self.default_vqa_img = data
         if not self.vqa_queries:
             return
-        img_byte = ros_img_to_base(data)
+        img_byte = ros_img_to_base(data, self._bridge)
         queries = self.vqa_queries.split(";")
         req = json.dumps({"image": img_byte,
                           "queries": queries}).encode("utf-8")
@@ -172,7 +171,7 @@ class OfaJSKROSClient:
         else:
             rospy.loginfo("No images in goal message, so using subscribed image topic instead")
             result.image = self.default_vqa_img
-        img_byte = ros_img_to_base(result.image)
+        img_byte = ros_img_to_base(result.image, self._bridge)
         # creqte request
         req = json.dumps({"image": img_byte,
                           "queries": goal.queries}).encode("utf-8")
@@ -204,7 +203,7 @@ class OfaJSKROSClient:
 
 def main():
     rospy.init_node("ofa_ros_client")
-    node = OfaJSKROSClient()
+    node = OFAClientNode()
     rospy.spin()
 
 if __name__ == "__main__":

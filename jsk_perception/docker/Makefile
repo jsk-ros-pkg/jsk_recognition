@@ -5,11 +5,9 @@
 # api directories
 OFAPROJECT = ofa
 CLIPPROJECT = clip
-GLIPROJECT = glip
 # image names
-OFAIMAGE = jsk-ofa-ros-server
-CLIPIMAGE = jsk-clip-ros-server
-GLIPIMAGE = jsk-glip-ros-server
+OFAIMAGE = jsk-ofa-server
+CLIPIMAGE = jsk-clip-server
 # commands
 BUILDIMAGE = docker build
 REMOVEIMAGE = docker rmi
@@ -23,7 +21,7 @@ OFAPARAMFILES = $(foreach param, $(OFAPARAMS), $(PARAMDIR)/$(param))
 
 # TODO check command wget exists, nvidia-driver version
 
-# TODO add clip, glip
+# TODO add clip
 download:
 	@if [ ! -d $(PARAMDIR) ]; then\
 		mkdir -p $(PARAMDIR); \

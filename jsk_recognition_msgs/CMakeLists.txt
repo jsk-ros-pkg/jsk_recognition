@@ -15,6 +15,7 @@ add_message_files(
   Circle2DArray.msg
   Circle2D.msg
   ClassificationResult.msg
+  ClipResult.msg
   ClusterPointIndices.msg
   ColorHistogramArray.msg
   ColorHistogram.msg
@@ -46,6 +47,8 @@ add_message_files(
   PointsArray.msg
   PolygonArray.msg
   PosedCameraInfo.msg
+  QueryAndProbability.msg
+  QuestionAndAnswerText.msg
   RectArray.msg
   Rect.msg
   RotatedRect.msg
@@ -68,6 +71,7 @@ add_message_files(
   TrackingStatus.msg
   BoolStamped.msg
   VectorArray.msg
+  VQAResult.msg
   WeightedPoseArray.msg
   ContactSensor.msg
   ContactSensorArray.msg
@@ -110,9 +114,14 @@ add_service_files(FILES
   WhiteBalance.srv
   )
 
+add_action_files(FILES
+  VQATask.action
+  ClipTask.action
+  )
+
 generate_messages(
   DEPENDENCIES
-  std_msgs sensor_msgs geometry_msgs pcl_msgs jsk_footstep_msgs
+  std_msgs sensor_msgs geometry_msgs pcl_msgs jsk_footstep_msgs actionlib_msgs
 )
 catkin_package(
   CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs pcl_msgs jsk_footstep_msgs

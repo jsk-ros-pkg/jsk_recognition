@@ -52,8 +52,8 @@ Visualization Manager:
       Value: false
     - Class: jsk_rviz_plugin/OverlayImage
       Enabled: true
-      Name: OFA/Caption/Image
-      Topic: /ofa_ros_client/caption_result/image
+      Name: VQA/Caption/Image
+      Topic: /vqa/caption_result/image
       Value: true
       alpha: 0.800000011920929
       height: 128
@@ -70,10 +70,10 @@ Visualization Manager:
       Enabled: true
       Foreground Alpha: 0.800000011920929
       Foreground Color: 255; 255; 255
-      Name: OFA/Caption/Visualize
+      Name: VQA/Caption/Visualize
       Overtake Color Properties: true
       Overtake Position Properties: true
-      Topic: /ofa_ros_client/caption_result/visualize
+      Topic: /vqa/caption_result/visualize
       Value: true
       font: DejaVu Sans Mono
       height: 500
@@ -84,8 +84,8 @@ Visualization Manager:
       width: 512
     - Class: jsk_rviz_plugin/OverlayImage
       Enabled: true
-      Name: OFA/VQA/Image
-      Topic: /ofa_ros_client/vqa_result/image
+      Name: VQA/VQA/Image
+      Topic: /vqa/vqa_result/image
       Value: true
       alpha: 0.800000011920929
       height: 128
@@ -102,10 +102,10 @@ Visualization Manager:
       Enabled: true
       Foreground Alpha: 0.800000011920929
       Foreground Color: 255; 255; 255
-      Name: OFA/VQA/Visualize
+      Name: VQA/VQA/Visualize
       Overtake Color Properties: true
       Overtake Position Properties: true
-      Topic: /ofa_ros_client/vqa_result/visualize
+      Topic: /vqa/vqa_result/visualize
       Value: true
       font: DejaVu Sans Mono
       height: 500

@@ -59,6 +59,14 @@ Organized version of statistical outlier removal.
 
 ## Sample
 
+### Normal version
+
 ```
-roslaunch jsk_pcl_ros organized_statistical_outlier_removal.launch
+roslaunch jsk_pcl_ros sample_organized_statistical_outlier_removal.launch
+```
+
+### ClusterPointIndices version
+
+```
+roslaunch jsk_pcl_ros sample_realsense_tabletop_object_detector.launch
 ```

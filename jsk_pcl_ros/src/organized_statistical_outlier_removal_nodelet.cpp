@@ -94,7 +94,15 @@ namespace jsk_pcl_ros
 
   void OrganizedStatisticalOutlierRemoval::unsubscribe()
   {
-    sub_.shutdown();
+    if (use_cpi_)
+    {
+      sub_cloud_.unsubscribe();
+      sub_cpi_.unsubscribe();
+    }
+    else
+    {
+      sub_.shutdown();
+    }
   }
 
   void OrganizedStatisticalOutlierRemoval::configCallback(Config &config, uint32_t level)

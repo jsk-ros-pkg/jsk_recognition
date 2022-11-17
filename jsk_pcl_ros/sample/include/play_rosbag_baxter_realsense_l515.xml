@@ -23,11 +23,28 @@
     </group>
 
     <group ns="aligned_depth_to_color">
+      <node name="info_relay" pkg="topic_tools" type="relay"
+            args="compressed/camera_info camera_info" />
+      <node name="image_relay" pkg="topic_tools" type="relay"
+            args="compressed/image_raw/compressedDepth image_raw/compressedDepth" />
       <node name="republish"
             pkg="image_transport" type="republish"
             args="compressedDepth raw">
         <remap from="in" to="image_raw"/>
         <remap from="out" to="image_raw"/>
+      </node>
+    </group>
+
+    <group ns="depth">
+      <node name="info_relay" pkg="topic_tools" type="relay"
+            args="compressed/camera_info camera_info" />
+      <node name="image_relay" pkg="topic_tools" type="relay"
+            args="compressed/image_rect_raw/compressedDepth image_rect_raw/compressedDepth" />
+      <node name="republish"
+            pkg="image_transport" type="republish"
+            args="compressedDepth raw">
+        <remap from="in" to="image_rect_raw"/>
+        <remap from="out" to="image_rect_raw"/>
       </node>
     </group>
   </group>

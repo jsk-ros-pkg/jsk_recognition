@@ -1,5 +1,6 @@
-# FisheyeStitcher
-![](images/fisheye_stitcher.jpg)
+# DualFisheyeToPanorama
+
+![](images/dual_fisheye_to_panorama.jpg)
 
 Generate panorama image by stitching dual-fisheye camera images.
 This is ROS wrapper of [drNoob13/fisheyeStitcher](https://github.com/drNoob13/fisheyeStitcher)

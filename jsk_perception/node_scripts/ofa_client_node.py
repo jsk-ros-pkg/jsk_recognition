@@ -39,7 +39,7 @@ class OFAClientNode(object):
         self.caption_multi_vis_pub = rospy.Publisher("~caption_result/visualize", String, queue_size=1)
         self.caption_as = actionlib.SimpleActionServer("~caption_server",
                                                        VQATaskAction,
-                                                       execute_cb=self.vqa_action_cb,
+                                                       execute_cb=self.caption_action_cb,
                                                        auto_start=False)
         self.caption_as.start()
         self.default_caption_img = None
@@ -102,14 +102,14 @@ class OFAClientNode(object):
         result = VQATaskResult()
         success = True
         if goal.image.data:
-            result.image = goal.image
+            result.result.image = goal.image
         else:
             rospy.loginfo("No images in goal message, so using subscribed image topic instead")
-            result.image = self.default_caption_img
-        img_byte = ros_img_to_base(result.image)
+            result.result.image = self.default_caption_img
+        img_byte = ros_img_to_base(result.result.image, self._bridge)
         # creqte request
         req = json.dumps({"image": img_byte,
-                          "queries": goal.queries}).encode("utf-8")
+                          "queries": goal.questions}).encode("utf-8")
         try:
             response = self.send_request("caption", req)
             if response.status_code == 200:
@@ -118,7 +118,7 @@ class OFAClientNode(object):
                     msg = QuestionAndAnswerText()
                     msg.question = res["question"]
                     msg.answer = res["answer"]
-                    result.result.append(msg)
+                    result.result.result.append(msg)
             else:
                 rospy.logerr("Invalid http status code: {}".format(str(response.status_code)))
                 return
@@ -167,11 +167,11 @@ class OFAClientNode(object):
         feedback = VQATaskFeedback()
         result = VQATaskResult()
         if goal.image.data:
-            result.image = goal.image
+            result.result.image = goal.image
         else:
             rospy.loginfo("No images in goal message, so using subscribed image topic instead")
-            result.image = self.default_vqa_img
-        img_byte = ros_img_to_base(result.image, self._bridge)
+            result.result.image = self.default_vqa_img
+        img_byte = ros_img_to_base(result.result.image, self._bridge)
         # creqte request
         req = json.dumps({"image": img_byte,
                           "queries": goal.queries}).encode("utf-8")
@@ -183,7 +183,7 @@ class OFAClientNode(object):
                     msg = QuestionAndAnswerText()
                     msg.question = res["question"]
                     msg.answer = res["answer"]
-                    result.results.append(msg)
+                    result.result.append(msg)
             else:
                 rospy.logerr("Invalid http status code: {}".format(str(response.status_code)))
                 return

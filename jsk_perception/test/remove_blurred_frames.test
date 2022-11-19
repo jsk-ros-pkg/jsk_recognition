@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <include file="$(find jsk_perception)/sample/sample_remove_blurred_frames.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_remove_blurred_frames"
+        name="test_remove_blurred_frames"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="20" retry="3">
+    <rosparam>
+      topic_0: /head_camera/rgb/image_rect_color/blurred_frames_removed
+      timeout_0: 20
+      topic_1: /head_camera/rgb/image_rect_color/laplacian_mask
+      timeout_1: 20
+      topic_2: /head_camera/rgb/image_rect_color/laplacian_var
+      timeout_2: 20
+      check_after_kill_node: true
+      node_names: [remove_blurred_frames,]
+    </rosparam>
+  </test>
+
+</launch>

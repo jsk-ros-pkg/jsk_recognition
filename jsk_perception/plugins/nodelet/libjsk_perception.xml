@@ -290,4 +290,8 @@
          type="jsk_perception::VirtualCameraMono"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_perception/RemoveBlurredFrames"
+         type="jsk_perception::RemoveBlurredFrames"
+         base_class_type="nodelet::Nodelet">
+  </class>
 </library>

@@ -175,7 +175,7 @@ class DetectFaces(ConnectionBasedTransport):
         np_arr = np.fromstring(image.data, np.uint8)
         img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
-        if image.format != "rgb8; jpeg compressed bgr8":
+        if image.format.find("compressed rgb") > -1:
             img = img[:, :, ::-1]
 
         img_gray = None

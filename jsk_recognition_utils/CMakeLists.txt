@@ -29,6 +29,10 @@ find_package(catkin REQUIRED COMPONENTS
   visualization_msgs
 )
 
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/jsk_recognition_utils/jsk_topic_tools_version.h.in
+  ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_INCLUDE_DESTINATION}/jsk_recognition_utils/jsk_topic_tools_version.h)
+
 
 # ------------------------------------------------------------------------------------
 # Download
@@ -143,9 +147,29 @@ install(TARGETS jsk_recognition_utils
 
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.h" # Ignore *_version.h.in files
 )
 
-install(DIRECTORY node_scripts sample test
+install(DIRECTORY sample test
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   USE_SOURCE_PERMISSIONS
 )
+if($ENV{ROS_DISTRO} STREQUAL "indigo") # on noetic it needs catkin_install_python to support Python3 and it does not work on indigo for some reason...
+install(DIRECTORY node_scripts
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  USE_SOURCE_PERMISSIONS
+  )
+else()
+install(DIRECTORY node_scripts
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  USE_SOURCE_PERMISSIONS
+  FILES_MATCHING
+  PATTERN "*"
+  PATTERN "*/*.py" EXCLUDE
+  )
+file(GLOB NODE_SCRIPT_PROGRAMS node_scripts/*.py)
+catkin_install_python(
+  PROGRAMS ${NODE_SCRIPT_PROGRAMS}
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/node_scripts
+)
+endif()

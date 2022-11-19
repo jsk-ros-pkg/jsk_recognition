@@ -13,7 +13,7 @@
  *     notice, this list of conditions and the following disclaimer.
  *   * Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/o2r other materials provided
+ *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
  *   * Neither the name of the JSK Lab nor the names of its
  *     contributors may be used to endorse or promote products derived
@@ -51,7 +51,7 @@ namespace jsk_perception
     pub_ = advertise<jsk_recognition_msgs::RectArray>(*pnh_, "output", 1);
     pub_internal_ = pnh_->advertise<jsk_recognition_msgs::BoundingBoxArrayWithCameraInfo>("internal", 1);
     sub_box_with_info_.subscribe(*pnh_, "internal", 1);
-    //onInitPosrPocess();
+    onInitPostProcess();
   }
 
   BoundingBoxToRect::~BoundingBoxToRect() {

@@ -12,7 +12,7 @@
  *     notice, this list of conditions and the following disclaimer.
  *   * Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/o2r other materials provided
+ *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
  *   * Neither the name of the JSK Lab nor the names of its
  *     contributors may be used to endorse or promote products derived
@@ -192,14 +192,16 @@ namespace jsk_pcl_ros
           case jsk_pcl_ros::EuclideanClustering_MaxSize: {
             // take maximum size of cluster
             int size = 0;
-            int index = 0;
+            int index = -1;
             for(size_t i=0; i < output_indices.size(); i++){
               if(output_indices[i].indices.size() > size){
                 size = output_indices[i].indices.size();
                 index = i;
               }
             }
-            examine_indices.push_back(index);
+            if (index >=0) {
+              examine_indices.push_back(index);
+            }
             break;
           }
         }

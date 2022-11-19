@@ -13,7 +13,7 @@
  *     notice, this list of conditions and the following disclaimer.
  *   * Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/o2r other materials provided
+ *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
  *   * Neither the name of the JSK Lab nor the names of its
  *     contributors may be used to endorse or promote products derived
@@ -37,25 +37,31 @@
 #ifndef JSK_PERCEPTION_MASK_IMAGE_TO_RECT_H_
 #define JSK_PERCEPTION_MASK_IMAGE_TO_RECT_H_
 
+#include <dynamic_reconfigure/server.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/Image.h>
 #include <jsk_recognition_msgs/RectArray.h>
+#include <jsk_perception/MaskImageToRectConfig.h>
 
 namespace jsk_perception
 {
   class MaskImageToRect: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
+    typedef MaskImageToRectConfig Config;
     MaskImageToRect(): DiagnosticNodelet("MaskImageToRect") {}
   protected:
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
+    virtual void configCallback(Config& config, uint32_t level);
     virtual void convert(const sensor_msgs::Image::ConstPtr& mask_msg);
+
+    int rect_type_;
     ros::Subscriber sub_mask_;
     ros::Publisher pub_;
-    
+    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
   private:
     
   };

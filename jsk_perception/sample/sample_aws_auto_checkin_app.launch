@@ -48,8 +48,8 @@
       env_path: /tmp/env.json
       aws_credentials_path: /tmp/aws.json
       always_publish: $(arg always_publish)
-      approximate_sync: false
-      queue_size: 100
+      approximate_sync: true
+      queue_size: 1
       image_transport: compressed
     </rosparam>
   </node>
@@ -66,7 +66,9 @@
         font_path: $(find jsk_recognition_utils)/font_data/NotoSansJP-Regular.otf
         use_classification_result: true
         label_size: 16
-        queue_size: 100
+        approximate_sync: true
+        queue_size: 30
+        image_transport: compressed
       </rosparam>
     </node>
   </group>
@@ -74,6 +76,7 @@
   <group if="$(arg gui)" >
     <node name="image_view00"
           pkg="image_view" type="image_view">
+      <param name="image_transport" value="compressed" />
       <remap from="image" to="aws_auto_checkin_app/draw_rects/output" />
     </node>
   </group>

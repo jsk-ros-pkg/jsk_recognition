@@ -115,7 +115,7 @@ class DetectFaces(ConnectionBasedTransport):
         #
         # c.f. https://answers.ros.org/question/220502/image-subscriber-lag-despite-queue-1/
         #
-        self.buff_size = rospy.get_param('~buff_size', 640 * 480 // 5 * 10)
+        self.buff_size = rospy.get_param('~buff_size', 640 * 480 * 3 // 5 * 10)
         rospy.loginfo("rospy.Subscriber buffer size : {}".format(self.buff_size))
 
     def subscribe(self):
@@ -378,7 +378,9 @@ class DetectFaces(ConnectionBasedTransport):
         self.landmarks_pub.publish(landmarks_msgs)
 
         # debug info
-        rospy.loginfo("processing time {}".format((rospy.Time.now() - start_time).to_sec()))
+        rospy.loginfo("processing time {} on message taken at {} sec ago".format(
+            (rospy.Time.now() - start_time).to_sec(),
+            (rospy.Time.now() - image.header.stamp).to_sec()))
 
 
 if __name__ == '__main__':

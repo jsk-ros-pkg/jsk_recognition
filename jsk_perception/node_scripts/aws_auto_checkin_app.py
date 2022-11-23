@@ -113,16 +113,27 @@ class AutoCheckIn(ConnectionBasedTransport):
             self.orig_image_pub = self.advertise('~image/compressed', CompressedImage, queue_size=1)
         else:
             self.orig_image_pub = self.advertise('~image', Image, queue_size=1)
+        #
+        # To process latest message, we need to set buff_size must be large enough.
+        # we need to set buff_size larger than message size to use latest message for callback
+        # 640*480(image size) / 5 (expected compressed rate) *
+        #            70 (number of message need to be drop 70 x 30msec = 2100msec processing time)
+        #
+        # c.f. https://answers.ros.org/question/220502/image-subscriber-lag-despite-queue-1/
+        #
+        self.buff_size = rospy.get_param('~buff_size', 640 * 480 * 3 // 5 * 70)
+        rospy.loginfo("rospy.Subscriber buffer size : {}".format(self.buff_size))
 
     def subscribe(self):
         if self.transport_hint == 'compressed':
-            self.image_sub = message_filters.Subscriber('{}/compressed'.format(rospy.resolve_name('image')), CompressedImage)
+            self.image_sub = message_filters.Subscriber('{}/compressed'.format(rospy.resolve_name('image')), CompressedImage, buff_size=self.buff_size)
         else:
-            self.image_sub = message_filters.Subscriber('image', Image)
+            self.image_sub = message_filters.Subscriber('image', Image, buff_size=self.buff_size)
         self.roi_sub = message_filters.Subscriber('face_roi', FaceArrayStamped)
         self.subs = [self.image_sub, self.roi_sub]
-        queue_size = rospy.get_param('~queue_size', 100)
-        if rospy.get_param('~approximate_sync', True):
+        queue_size = rospy.get_param('~queue_size', 1)
+        approximate_sync = rospy.get_param('~approximate_sync', True)
+        if approximate_sync:
             slop = rospy.get_param('~slop', 1.0)
             self.ts = message_filters.ApproximateTimeSynchronizer(
                 self.subs,
@@ -131,6 +142,9 @@ class AutoCheckIn(ConnectionBasedTransport):
             self.ts = message_filters.TimeSynchronizer(
                 fs=self.subs, queue_size=queue_size)
         self.ts.registerCallback(self.callback)
+        rospy.loginfo("To process latest incomming message, use approximate_sync with queue_size == 1 is recommended")
+        rospy.loginfo("  approximate_sync : {}".format(approximate_sync))
+        rospy.loginfo("  queue_size : {}".format(queue_size))
         rospy.loginfo("Waiting for {} and {}".format(self.image_sub.name, self.roi_sub.name))
 
     def unsubscribe(self):
@@ -165,6 +179,7 @@ class AutoCheckIn(ConnectionBasedTransport):
         return None
 
     def callback(self, image, roi):
+        start_time = rospy.Time.now()
         if self.transport_hint == 'compressed':
             # decode compressed image
             np_arr = np.fromstring(image.data, np.uint8)
@@ -195,6 +210,7 @@ class AutoCheckIn(ConnectionBasedTransport):
                                            cx - w // 2:cx + w // 2]
             ret = self.findface(img[image_roi_slice])
             if ret != None:
+                print(ret)
                 if ret['FaceMatches'] != []:
                     face_id = self.dynamodb_table.get_item(
                         Key={'RekognitionId':
@@ -236,6 +252,10 @@ class AutoCheckIn(ConnectionBasedTransport):
         if self.use_window:
             cv2.imshow(image._connection_header['topic'], img_gray)
             cv2.waitKey(1)
+
+        rospy.loginfo("processing time {} on message taken at {} sec ago".format(
+            (rospy.Time.now() - start_time).to_sec(),
+            (rospy.Time.now() - image.header.stamp).to_sec()))
 
 
 if __name__ == '__main__':

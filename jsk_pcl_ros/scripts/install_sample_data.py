@@ -142,7 +142,7 @@ def main():
     download_data(
         path='sample/data/baxter_realsense_l515.bag',
         url='https://drive.google.com/uc?id=1RKZLA4J2_lzhCtvMTWxGQh4ykVVEeSAd',
-        md5='4dab24bd6e6a7fd5b9e86d053352cdfd',
+        md5='2bb80d7c31c62c944192b2dd0a75eddf',
     )
 
     download_data(

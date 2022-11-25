@@ -84,3 +84,21 @@ roslaunch audio_to_spectrogram sample_audio_to_spectrogram.launch
     - `~publish_rate` (`Double`, default: `image_width / spectrogram_period`)
 
       Publish rate [Hz] of spectrogram topic.
+
+## spectrum_plot.py
+
+  A script to publish frequency vs amplitude plot image.
+
+![](docs/images/spectrum.jpg)
+
+  - ### Publishing topics
+
+    - `~output/viz` (`sensor_msgs/Image`)
+
+      Frequency vs amplitude plot image.
+
+  - ### Subscribing topics
+
+    - `~spectrum` (`jsk_recognition_msgs/Spectrum`)
+
+      Spectrum data calculated from audio by FFT.

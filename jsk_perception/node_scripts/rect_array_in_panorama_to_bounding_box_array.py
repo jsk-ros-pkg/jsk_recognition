@@ -51,8 +51,6 @@ class RectArrayInPanoramaToBoundingBoxArray(object):
         self._duration_timeout = rospy.get_param( '~duration_timeout', 0.05 )
 
         try:
-            msg_panorama_image = rospy.wait_for_message(
-                '~panorama_image', Image, 10)
             msg_panorama_info = rospy.wait_for_message(
                 '~panorama_info', PanoramaInfo, 10)
         except (rospy.ROSException, rospy.ROSInterruptException) as e:
@@ -64,8 +62,8 @@ class RectArrayInPanoramaToBoundingBoxArray(object):
         self._theta_max = msg_panorama_info.theta_max
         self._phi_min = msg_panorama_info.phi_min
         self._phi_max = msg_panorama_info.phi_max
-        self._image_height = msg_panorama_image.height
-        self._image_width = msg_panorama_image.width
+        self._image_height = msg_panorama_info.image_height
+        self._image_width = msg_panorama_info.image_width
  
         self._tf_buffer = tf2_ros.Buffer()
         self._tf_listener = tf2_ros.TransformListener(self._tf_buffer)

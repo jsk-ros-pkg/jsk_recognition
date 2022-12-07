@@ -106,6 +106,7 @@ class DetectFaces(ConnectionBasedTransport):
         self.attributes_pub = self.advertise('~attributes', ClassificationResult, queue_size=1)
         self.landmarks_pub = self.advertise('~landmarks', PeoplePoseArray, queue_size=1)
         self.image_pub = self.advertise('~output', Image, queue_size=1)
+        self.image_comp_pub = self.advertise('~output/compressed', CompressedImage, queue_size=1)
         self.orig_image_pub = self.advertise('~image/compressed', CompressedImage, queue_size=1)
         #
         # To process latest message, we need to set buff_size must be large enough.
@@ -171,7 +172,8 @@ class DetectFaces(ConnectionBasedTransport):
     @property
     def visualize(self):
         return self.use_window \
-            or self.image_pub.get_num_connections() > 0
+            or self.image_pub.get_num_connections() > 0 \
+            or self.image_comp_pub.get_num_connections() > 0
 
     def image_callback(self, image):
         start_time = rospy.Time.now()
@@ -368,6 +370,13 @@ class DetectFaces(ConnectionBasedTransport):
         if self.image_pub.get_num_connections() > 0:
             self.image_pub.publish(self.bridge.cv2_to_imgmsg(
                 img_gray, encoding='bgr8'))
+
+        if self.image_comp_pub.get_num_connections() > 0:
+            msg = CompressedImage()
+            msg.header = image.header
+            msg.format = "jpeg"
+            msg.data = np.array(cv2.imencode('.jpg', img_gray)[1]).tostring()
+            self.image_comp_pub.publish(msg)
 
         if self.orig_image_pub.get_num_connections() > 0:
             self.orig_image_pub.publish(image)

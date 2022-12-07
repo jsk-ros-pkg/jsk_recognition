@@ -1,0 +1,77 @@
+<launch>
+  <arg name="launch_insta360" default="true" />
+  <arg name="launch_coral" default="true" />
+
+  <arg name="publish_image" default="true" />
+  <arg name="split_image" default="true" />
+  <arg name="camera_name" default="insta360" />
+  <arg name="create_panorama" default="true" />
+  <arg name="throttle" default="false" />
+  <arg name="panorama_resolution_mode" default="low" />
+  <arg name="resize" default="false" />
+
+  <arg name="frame_fixed" default="camera" />
+  <arg name="static_transform_publisher" default="true" />
+  <arg name="gui" default="true" />
+
+  <arg name="INPUT_IMAGE" default="/$(arg camera_name)/image_raw" doc="topic name of 360 camera image" />
+  <arg unless="$(arg resize)"
+       name="INPUT_PANORAMA_IMAGE" default="/dual_fisheye_to_panorama/output" />
+  <arg if="$(arg resize)"
+       name="INPUT_PANORAMA_IMAGE" default="/dual_fisheye_to_panorama/output/quater" />
+  <arg name="INPUT_PANORAMA_INFO" default="/dual_fisheye_to_panorama/panorama_info" />
+  <arg name="INPUT_CLASS" default="/edgetpu_panorama_object_detector/output/class" />
+  <arg name="INPUT_RECTS" default="/edgetpu_panorama_object_detector/output/rects" />
+
+  <include if="$(arg launch_insta360)"
+           file="$(find jsk_perception)/launch/insta360_air.launch">
+    <arg name="publish_image" value="$(arg publish_image)" />
+    <arg name="split_image" value="$(arg split_image)" />
+    <arg name="camera_name" value="$(arg camera_name)" />
+    <arg name="create_panorama" value="$(arg create_panorama)" />
+    <arg name="throttle" value="$(arg throttle)" />
+    <arg name="panorama_resolution_mode" value="$(arg panorama_resolution_mode)" />
+    <arg name="gui" value="false" />
+  </include>
+
+  <node if="$(arg resize)" pkg="nodelet" type="nodelet" name="panorama_image_resize"
+        args="standalone image_proc/resize">
+    <param name="scale_height" value="0.5" />
+    <param name="scale_width" value="0.5" />
+    <remap from="image" to="/dual_fisheye_to_panorama/output" />
+    <remap from="~image" to="/dual_fisheye_to_panorama/output/quater" />
+  </node>
+
+  <include if="$(arg launch_coral)"
+           file="$(find coral_usb)/launch/edgetpu_panorama_object_detector.launch">
+    <arg name="INPUT_IMAGE" value="$(arg INPUT_PANORAMA_IMAGE)" />
+  </include>
+
+  <node if="$(arg static_transform_publisher)"
+        name="camera_transform_publisher" pkg="tf" type="static_transform_publisher"
+        args="0 0 0 0 0 0 $(arg camera_name)_link camera 10"/>
+
+  <!-- rect_array_in_panorama_to_bounding_box_array -->
+  <node pkg="jsk_perception" type="rect_array_in_panorama_to_bounding_box_array.py"
+        name="rect_array_in_panorama_to_bounding_box_array">
+    <remap from="~panorama_info" to="$(arg INPUT_PANORAMA_INFO)" />
+    <remap from="~input_class" to="$(arg INPUT_CLASS)" />
+    <remap from="~input_rects" to="$(arg INPUT_RECTS)" />
+    <rosparam subst_value="true">
+        frame_fixed: $(arg frame_fixed)
+        dimensions_labels:
+            person: [0.5, 0.5, 1.5]
+    </rosparam>
+  </node>
+
+  <!-- visualize output of object detector -->
+  <node pkg="jsk_perception" type="draw_rects" name="draw_rects">
+    <remap from="~input" to="$(arg INPUT_PANORAMA_IMAGE)" />
+    <remap from="~input/rects" to="$(arg INPUT_RECTS)" />
+    <remap from="~input/class" to="$(arg INPUT_CLASS)" />
+  </node>
+
+  <node if="$(arg gui)" pkg="rviz" type="rviz" name="$(anon rviz)"
+        args="-d $(find jsk_perception)/sample/config/sample_rect_array_in_panorama_to_bounding_box_array.rviz" />
+
+</launch>

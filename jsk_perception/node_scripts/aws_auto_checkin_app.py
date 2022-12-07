@@ -210,11 +210,14 @@ class AutoCheckIn(ConnectionBasedTransport):
                                            cx - w // 2:cx + w // 2]
             ret = self.findface(img[image_roi_slice])
             if ret != None:
-                print(ret)
                 if ret['FaceMatches'] != []:
-                    face_id = self.dynamodb_table.get_item(
+                    item = self.dynamodb_table.get_item(
                         Key={'RekognitionId':
-                             ret['FaceMatches'][0]['Face']['FaceId']})['Item']['Name']
+                             ret['FaceMatches'][0]['Face']['FaceId']})
+                    if not 'Item' in item:
+                        rospy.loginfo("Item does not have FaceId {}".format(item))
+                        continue
+                    face_id = item['Item']['Name']
                     rospy.loginfo("FaceId: {}\n Similarity: {}".format(face_id, \
                                                                        ret['FaceMatches'][0]['Similarity']))
                     faces.faces.append(Face(face=Rect(cx - w // 2, cy - h // 2, w, h),

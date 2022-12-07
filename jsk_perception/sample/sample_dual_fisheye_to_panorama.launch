@@ -1,34 +1,5 @@
 <launch>
-  <arg name="gui" default="true"/>
+  <include file="$(find jsk_perception)/sample/sample_insta360_air.launch"
+           pass_all_args="true" />
 
-  <arg name="INPUT_IMAGE" default="/insta360/image_raw" doc="topic name of 360 camera image" />
-  <arg name="refine_align" default="false" doc="If true, panorama is improved by refine align process. Note that this process takes a large CPU load." />
-  <arg name="fovd" default="185.0" doc="Camera's Field of View [degree]" />
-  <arg name="save_unwarped" default="false" doc="Save unwarped fisheye images. This is useful to create MLS grids." />
-  <arg name="resolution_mode" default="high" doc="Resolution mode, 'high' or 'low'" />
-  <arg name="vital_rate" default="1.0" doc="Rate to determine if the nodelet is in health." />
-  <arg name="image_transport" default="raw"/>
-
-  <node name="dual_fisheye_to_panorama"
-        pkg="nodelet" type="nodelet"
-        args="standalone jsk_perception/DualFisheyeToPanorama">
-    <remap from="~input" to="$(arg INPUT_IMAGE)"/>
-    <param name="light_compen" value="false" />
-    <param name="refine_align" value="$(arg refine_align)" />
-    <param name="fovd" value="$(arg fovd)" />
-    <param name="save_unwarped" value="$(arg save_unwarped)" />
-    <param name="image_transport" value="$(arg image_transport)"/>
-    <rosparam
-        command="load"
-        file="$(find jsk_perception)/config/dual_fisheye_to_panorama/$(arg resolution_mode)_resolution_config.yaml"
-        subst_value="true"/>
-    <param name="vital_rate" value="$(arg vital_rate)" />
-  </node>
-
-  <group if="$(arg gui)">
-    <node name="image_view"
-          pkg="image_view" type="image_view">
-      <remap from="image" to="dual_fisheye_to_panorama/output"/>
-    </node>
-  </group>
 </launch>

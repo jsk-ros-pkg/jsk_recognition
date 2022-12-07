@@ -50,12 +50,14 @@ class RectArrayInPanoramaToBoundingBoxArray(object):
         self._dimensions_labels = rospy.get_param( '~dimensions_labels', {} )
         self._duration_timeout = rospy.get_param( '~duration_timeout', 0.05 )
 
-        try:
-            msg_panorama_info = rospy.wait_for_message(
-                '~panorama_info', PanoramaInfo, 10)
-        except (rospy.ROSException, rospy.ROSInterruptException) as e:
-            rospy.logerr('{}'.format(e))
-            sys.exit(1)
+        msg_panorama_info = None
+        while (not rospy.is_shutdown() and msg_panorama_info is None):
+            try:
+                msg_panorama_info = rospy.wait_for_message(
+                    '~panorama_info', PanoramaInfo, 10)
+            except (rospy.ROSException, rospy.ROSInterruptException) as e:
+                rospy.logerr('~panorama_info is not subscribed...')
+                rospy.logerr('waiting ~panorama_info for more 10 seconds')
 
         self._frame_panorama = msg_panorama_info.header.frame_id
         self._theta_min = msg_panorama_info.theta_min

@@ -1,0 +1,113 @@
+<launch>
+  <!-- insta360 air settings -->
+  <arg name="publish_image" default="true" />
+  <arg name="split_image" default="true" />
+  <arg name="use_usb_cam" default="false" />
+  <arg name="camera_name" default="insta360" />
+  <arg name="vendor" default="0x2e1a" />
+  <arg name="product" default="0x1000"/>
+  <!--
+  Available sizes for mjpeg are
+      1472 x 736  with 30 fps
+      2176 x 1088 with 30 fps
+      3008 x 1504 with 30 fps
+  -->
+  <arg name="width" default="3008" />
+  <arg name="height" default="1504" />
+  <arg name="video_mode" default="mjpeg" />
+  <arg name="frame_rate" default="30" />
+  <arg name="brightness" default="128" />
+  <arg name="create_panorama" default="true" />
+  <arg name="throttle" default="false" />
+  <arg if="$(arg throttle)" name="dual_fisheye_image" default="/$(arg camera_name)/throttled/image_raw" />
+  <arg unless="$(arg throttle)" name="dual_fisheye_image" default="/$(arg camera_name)/image_raw" />
+  <arg name="throttled_rate" default="1.0" />
+  <arg name="refine_align" default="false" />
+  <arg name="save_unwarped" default="false" />
+  <arg name="panorama_resolution_mode" default="high" />
+  <arg name="panorama_image_transport" default="raw" />
+  <arg name="gui" default="true" />
+
+  <!-- Publish camera image -->
+  <group if="$(arg publish_image)">
+    <!-- For melodic or newer -->
+    <include unless="$(arg use_usb_cam)" file="$(find jsk_perception)/launch/libuvc_camera.launch">
+      <arg name="camera_name" value="$(arg camera_name)" />
+      <arg name="vendor" value="$(arg vendor)" />
+      <arg name="product" value="$(arg product)" />
+      <arg name="height" value="$(arg height)" />
+      <arg name="width" value="$(arg width)" />
+      <arg name="video_mode" value="$(arg video_mode)" />
+      <arg name="frame_rate" value="$(arg frame_rate)" />
+      <arg name="brightness" value="$(arg brightness)" /> <!-- -32768 ~ 32767 -->
+      <arg name="gui" value="$(arg gui)" />
+    </include>
+    <!-- For kinetic or older -->
+    <include if="$(arg use_usb_cam)" file="$(find jsk_perception)/launch/usb_cam.launch">
+      <arg name="camera_name" value="$(arg camera_name)" />
+      <arg name="video_device" value="/dev/insta360" />
+      <arg name="height" value="$(arg height)" />
+      <arg name="width" value="$(arg width)" />
+      <arg name="video_mode" value="$(arg video_mode)" />
+      <arg name="frame_rate" value="$(arg frame_rate)" />
+      <arg name="brightness" value="$(arg brightness)" /> <!-- 0 ~ 255 -->
+      <arg name="gui" value="$(arg gui)" />
+    </include>
+  </group>
+
+  <!-- Split insta360 air image into 2 fisheye image -->
+  <node if="$(arg split_image)"
+        pkg="jsk_perception" name="split_image" type="split_image.py" output="screen">
+    <remap from="~input" to="/insta360/image_raw" />
+    <rosparam>
+      vertical_parts: 1
+      horizontal_parts: 2
+    </rosparam>
+  </node>
+
+  <group ns="insta360" if="$(arg throttle)">
+    <node name="throttle_camera_info"
+          pkg="nodelet" type="nodelet"
+          args="standalone jsk_topic_tools/LightweightThrottle"
+          respawn="true">
+      <remap from="~input" to="camera_info"/>
+      <remap from="~output" to="throttled/camera_info" />
+      <param name="update_rate" value="$(arg throttled_rate)" />
+    </node>
+    <node name="throttle_rgb"
+          pkg="nodelet" type="nodelet"
+          args="standalone jsk_topic_tools/LightweightThrottle"
+          respawn="true">
+      <remap from="~input" to="image_raw" />
+      <remap from="~output" to="throttled/image_raw" />
+      <param name="update_rate" value="$(arg throttled_rate)" />
+    </node>
+    <node name="throttle_rgb_compressed"
+          pkg="nodelet" type="nodelet"
+          args="standalone jsk_topic_tools/LightweightThrottle"
+          respawn="true">
+      <remap from="~input" to="image_raw/compressed" />
+      <remap from="~output" to="throttled/image_raw/compressed" />
+      <param name="update_rate" value="$(arg throttled_rate)" />
+    </node>
+  </group>
+
+  <include if="$(arg create_panorama)"
+	   file="$(find jsk_perception)/launch/dual_fisheye_to_panorama.launch">
+    <arg name="INPUT_IMAGE" value="$(arg dual_fisheye_image)" />
+    <arg name="fovd" value="210" />
+    <arg name="refine_align" value="$(arg refine_align)" />
+    <arg name="save_unwarped" value="$(arg save_unwarped)" />
+    <arg name="resolution_mode" value="$(arg panorama_resolution_mode)" />
+    <arg name="image_transport" value="$(arg panorama_image_transport)" />
+  </include>
+
+  <group if="$(arg gui)">
+    <node name="image_view" pkg="image_view" type="image_view">
+     <remap from="image" to="dual_fisheye_to_panorama/output" if="$(arg create_panorama)"/>
+     <remap from="image" to="$(arg dual_fisheye_image)" unless="$(arg create_panorama)"/>
+    </node>
+  </group>
+
+
+</launch>

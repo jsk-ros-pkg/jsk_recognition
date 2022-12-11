@@ -4,7 +4,7 @@ import base64
 import cv2
 from cv_bridge import CvBridge
 from dynamic_reconfigure.server import Server
-from jsk_perception.cfg import VQAQueryConfig
+from jsk_perception.cfg import VQAConfig
 from jsk_recognition_msgs.msg import QuestionAndAnswerText
 from jsk_recognition_msgs.msg import VQATaskAction
 from jsk_recognition_msgs.msg import VQATaskFeedback
@@ -55,22 +55,20 @@ class OFAClientNode(object):
                                                    auto_start=False)
         self.default_vqa_img = None
         self.vqa_as.start()
-        # TODO Add visual grounding
         # dynamic reconfigure
-        self._reconfigure_server = Server(VQAQueryConfig, self.config_cb)
+        self._reconfigure_server = Server(VQAConfig, self.config_cb)
 
     def config_cb(self, config, level):
-        self.caption_queries = config.caption_queries
-        self.vqa_queries = config.vqa_queries
+        self.questions = config.questions
         return config
 
     def caption_topic_cb(self, data):
         self.default_caption_img = data
-        if not self.caption_queries:
+        if not self.questions:
             return
         self.default_caption_img = data
         img_byte = ros_img_to_base(data, self._bridge)
-        queries = self.caption_queries.split(";")
+        queries = self.questions.split(";")
         req = json.dumps({"image": img_byte,
                           "queries": queries}).encode("utf-8")
         try:
@@ -133,10 +131,10 @@ class OFAClientNode(object):
 
     def vqa_topic_cb(self, data):
         self.default_vqa_img = data
-        if not self.vqa_queries:
+        if not self.questions:
             return
         img_byte = ros_img_to_base(data, self._bridge)
-        queries = self.vqa_queries.split(";")
+        queries = self.questions.split(";")
         req = json.dumps({"image": img_byte,
                           "queries": queries}).encode("utf-8")
         try:

@@ -1,4 +1,5 @@
 sensor_msgs/Image image
+sensor_msgs/CompressedImage compressed_image
 string[] questions
 ---
 jsk_recognition_msgs/VQAResult result

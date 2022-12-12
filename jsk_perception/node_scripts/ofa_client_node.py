@@ -14,11 +14,16 @@ import json
 import requests
 from requests.exceptions import ConnectionError
 import rospy
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import CompressedImage, Image
 from std_msgs.msg import String
 
 def ros_img_to_base(ros_img, bridge):
-    cv_img = bridge.imgmsg_to_cv2(ros_img, desired_encoding="bgr8")
+    if type(ros_img) is CompressedImage:
+        cv_img = bridge.compressed_imgmsg_to_cv2(ros_img, desired_encoding="bgr8")
+    elif type(ros_img) is Image:
+        cv_img = bridge.imgmsg_to_cv2(ros_img, desired_encoding="bgr8")
+    else:
+        raise RuntimeError("Unknown type {}".format(type(ros_img)))
     # convert to base64
     encimg = cv2.imencode(".png", cv_img)[1]
     img_str = encimg.tostring()
@@ -95,19 +100,27 @@ class OFAClientNode(object):
                 rospy.logerr("Invalid http status code: {}".format(str(response.status_code)))
 
     def caption_action_cb(self, goal):
-        success = True
         feedback = VQATaskFeedback()
         result = VQATaskResult()
         success = True
-        if goal.image.data:
-            result.result.image = goal.image
+        if goal.image.data and (not goal.image.compressed_image):
+            image = goal.image
+            result.result.image = image
+        elif (not goal.image.data) and goal.compressed_image.data:
+            image = goal.compressed_image
+            result.result.compressed_image = image
+        elif goal.image.data and goal.image.compressed_image:
+            rospy.logerr("Both image and compressed image can not be added simultaneously")
+            return
         else:
             rospy.loginfo("No images in goal message, so using subscribed image topic instead")
-            result.result.image = self.default_caption_img
-        img_byte = ros_img_to_base(result.result.image, self._bridge)
-        # creqte request
+            image = self.default_caption_img
+            result.result.image = image
+        img_byte = ros_img_to_base(image, self._bridge)
+        # create request
+        queries = goal.questions if goal.questions else self.questions.split(";")
         req = json.dumps({"image": img_byte,
-                          "queries": goal.questions}).encode("utf-8")
+                          "queries": queries}).encode("utf-8")
         try:
             response = self.send_request("caption", req)
             if response.status_code == 200:

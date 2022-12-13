@@ -19,7 +19,10 @@
        name="INPUT_PANORAMA_IMAGE" default="/dual_fisheye_to_panorama/output" />
   <arg if="$(arg resize)"
        name="INPUT_PANORAMA_IMAGE" default="/dual_fisheye_to_panorama/output/quater" />
-  <arg name="INPUT_PANORAMA_INFO" default="/dual_fisheye_to_panorama/panorama_info" />
+  <arg unless="$(arg resize)"
+       name="INPUT_PANORAMA_INFO" default="/dual_fisheye_to_panorama/panorama_info" />
+  <arg if="$(arg resize)"
+       name="INPUT_PANORAMA_INFO" default="/dual_fisheye_to_panorama/panorama_info/quater" />
   <arg name="INPUT_CLASS" default="/edgetpu_panorama_object_detector/output/class" />
   <arg name="INPUT_RECTS" default="/edgetpu_panorama_object_detector/output/rects" />
 
@@ -34,13 +37,22 @@
     <arg name="gui" value="false" />
   </include>
 
-  <node if="$(arg resize)" pkg="nodelet" type="nodelet" name="panorama_image_resize"
-        args="standalone image_proc/resize">
-    <param name="scale_height" value="0.5" />
-    <param name="scale_width" value="0.5" />
-    <remap from="image" to="/dual_fisheye_to_panorama/output" />
-    <remap from="~image" to="/dual_fisheye_to_panorama/output/quater" />
-  </node>
+  <group if="$(arg resize)">
+    <node pkg="nodelet" type="nodelet" name="panorama_image_resize"
+          args="standalone image_proc/resize">
+      <param name="scale_height" value="0.5" />
+      <param name="scale_width" value="0.5" />
+      <remap from="image" to="/dual_fisheye_to_panorama/output" />
+      <remap from="~image" to="/dual_fisheye_to_panorama/output/quater" />
+    </node>
+
+    <node pkg="jsk_recognition_utils" type="resize_panorama_info.py" name="panorama_info_resize">
+      <param name="scale_height" value="0.5" />
+      <param name="scale_width" value="0.5" />
+      <remap from="~input" to="/dual_fisheye_to_panorama/panorama_info" />
+      <remap from="~output" to="/dual_fisheye_to_panorama/panorama_info/quater" />
+    </node>
+  </group>
 
   <include if="$(arg launch_coral)"
            file="$(find coral_usb)/launch/edgetpu_panorama_object_detector.launch">

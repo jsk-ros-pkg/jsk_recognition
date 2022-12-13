@@ -8,7 +8,7 @@
   <node pkg="image_transport" type="republish" name="panorama_decompress"
         args="compressed in:=/dual_fisheye_to_panorama/output raw
                          out:=/dual_fisheye_to_panorama/output" />
-  <include file="$(find jsk_perception)/launch/rect_array_in_panorama_to_bounding_box_array.launch">
+  <include file="$(find jsk_perception)/launch/panorama_human_3d_detection.launch">
     <arg name="launch_insta360" value="false" />
     <arg name="launch_coral" value="false" />
     <arg name="static_transform_publisher" value="false" />

@@ -44,5 +44,5 @@ Duration of timeout for lookup transform
 ## Sample
 
 ```bash
-roslaunch jsk_perception sample_rect_array_in_panorama_to_bounding_box_array.launch
+roslaunch jsk_perception sample_human_3d_detection.launch
 ```

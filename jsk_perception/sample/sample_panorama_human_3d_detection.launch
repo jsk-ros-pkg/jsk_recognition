@@ -4,7 +4,7 @@
 
   <param name="/use_sim_time" value="true" />
   <node pkg="rosbag" name="rosbag_play" type="play"
-        args="$(find jsk_perception)/sample/data/sample_rect_array_in_panorama_to_bounding_box_array.bag --clock --loop" />
+        args="$(find jsk_perception)/sample/data/sample_panorama_human_3d_detection.bag --clock --loop" />
   <node pkg="image_transport" type="republish" name="panorama_decompress"
         args="compressed in:=/dual_fisheye_to_panorama/output raw
                          out:=/dual_fisheye_to_panorama/output" />

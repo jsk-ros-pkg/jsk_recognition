@@ -66,16 +66,26 @@ jobs:
             NOT_TEST_INSTALL : true
             USE_JENKINS: true
             DOCKER_IMAGE_JENKINS: ros-ubuntu:20.04-pcl
-            TEST_PKGS : 'jsk_recognition_msgs' # to skip test
             BEFORE_SCRIPT : "sudo pip install numpy==1.16.6; sudo pip install fcn chainercv chainer-mask-rcnn==0.3.0 decorator==4.4.2 chainer==6.7.0 protobuf==3.18.0 cupy-cuda91 pytesseract==0.3.6 torch==1.4.0;"
+            BUILD_PKGS: 'checkerboard_detector imagesift jsk_perception jsk_recognition_utils resized_image_transport'
             experimental : false
           - ROS_DISTRO: noetic
             USE_DEB: false
             NOT_TEST_INSTALL : true
             USE_JENKINS: true
             DOCKER_IMAGE_JENKINS: ros-ubuntu:20.04-pcl
+            TEST_PKGS : 'jsk_pcl_ros_utils jsk_pcl_ros'
             BEFORE_SCRIPT : "sudo pip install numpy==1.16.6; sudo pip install fcn chainercv chainer-mask-rcnn==0.3.0 decorator==4.4.2 chainer==6.7.0 protobuf==3.18.0 cupy-cuda91 pytesseract==0.3.6 torch==1.4.0;"
-            experimental : true
+            BUILD_PKGS: 'jsk_pcl_ros_utils jsk_pcl_ros'
+            experimental : false
+          - ROS_DISTRO: noetic
+            USE_DEB: false
+            NOT_TEST_INSTALL : true
+            USE_JENKINS: true
+            DOCKER_IMAGE_JENKINS: ros-ubuntu:20.04-pcl
+            TEST_PKGS : 'jsk_recognition_msgs' # to skip test
+            BEFORE_SCRIPT : "sudo pip install numpy==1.16.6; sudo pip install fcn chainercv chainer-mask-rcnn==0.3.0 decorator==4.4.2 chainer==6.7.0 protobuf==3.18.0 cupy-cuda91 pytesseract==0.3.6 torch==1.4.0;"
+            experimental : false
 
 
     steps:

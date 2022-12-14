@@ -447,8 +447,16 @@ catkin_install_python(
   PROGRAMS ${NODE_SCRIPT_PROGRAMS}
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/node_scripts
 )
+if(CATKIN_DEVEL_PREFIX)
+  add_custom_target(link_dir_mkdir
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/node_scripts)
+  foreach(SUB_DIR craft deep_sort hmr openpose)
+    add_custom_target(link_dir_${SUB_DIR} ALL
+      COMMAND ${CMAKE_COMMAND} -E create_symlink ${PROJECT_SOURCE_DIR}/node_scripts/${SUB_DIR} ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/node_scripts/${SUB_DIR})
+    add_dependencies(link_dir_${SUB_DIR} link_dir_mkdir)
+  endforeach()
+endif(CATKIN_DEVEL_PREFIX)
 endif()
-
 
 # ------------------------------------------------------------------------------------
 # Test

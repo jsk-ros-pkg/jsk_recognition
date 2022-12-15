@@ -140,7 +140,7 @@ generate_dynamic_reconfigure_options(
 
 find_package(OpenCV REQUIRED core imgproc)
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS} ${ml_classifiers_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")

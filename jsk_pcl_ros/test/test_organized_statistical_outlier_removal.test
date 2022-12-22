@@ -2,6 +2,7 @@
 
   <include file="$(find jsk_pcl_ros)/sample/sample_organized_statistical_outlier_removal.launch">
     <arg name="gui" value="false"/>
+    <arg name="RATE" value="0.25" />
   </include>
 
   <test test-name="test_organized_statistical_outlier_removal"

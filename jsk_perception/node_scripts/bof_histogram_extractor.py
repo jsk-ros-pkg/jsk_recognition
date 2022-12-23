@@ -43,7 +43,7 @@ class BoFHistogramExtractor(ConnectionBasedTransport):
             else:
                 self.bof = pickle.load(f, encoding='latin1')
         if (LooseVersion(get_distribution('scikit-learn').version) >=
-                LooseVersion('0.17.0')):
+                LooseVersion('0.17')):
             if 'n_jobs' not in self.bof.nn.__dict__ or not isinstance(self.bof.nn.n_jobs, int):
                 # In scikit-learn>=0.17.0,
                 # sklearn.neighbors.NearestNeighbors needs 'n_jobs' attribute.

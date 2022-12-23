@@ -89,12 +89,18 @@ namespace jsk_pcl_ros_utils
     const jsk_recognition_msgs::LabelArray::ConstPtr& label_msg)
   {
     jsk_recognition_msgs::ClusterPointIndices filtered_msg;
-    filtered_msg.header = cluster_msg->header;
-    // check if sizes match?
+    if(cluster_msg->cluster_indices.size() != label_msg->labels.size()) {
+      NODELET_WARN("the size of clusters(%lu) does not match with the size of labels(%lu)",
+                   cluster_msg->cluster_indices.size(),
+                   label_msg->labels.size());
+      return;
+    }
+
     for (size_t i = 0; i < label_msg->labels.size(); i++) {
       if(label_msg->labels[i].id == label_value_)
         filtered_msg.cluster_indices.push_back(cluster_msg->cluster_indices[i]);
     }
+    filtered_msg.header = cluster_msg->header;
     pub_.publish(filtered_msg);
   }
 

@@ -33,7 +33,7 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/snapit.h"
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include <geometry_msgs/PolygonStamped.h>
 #include <Eigen/StdVector>
 #include <pcl/ModelCoefficients.h>

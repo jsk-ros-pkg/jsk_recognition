@@ -173,5 +173,5 @@ namespace jsk_pcl_ros_utils
   }
 }
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros_utils::PolygonArrayLikelihoodFilter, nodelet::Nodelet);

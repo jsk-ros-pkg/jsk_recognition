@@ -36,7 +36,7 @@
 #include "jsk_pcl_ros_utils/polygon_array_transformer.h"
 #include <tf_conversions/tf_eigen.h>
 #include "jsk_recognition_utils/geo_util.h"
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 
 namespace jsk_pcl_ros_utils
 {

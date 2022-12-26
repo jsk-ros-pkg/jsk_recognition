@@ -34,7 +34,7 @@
 
 
 #include "jsk_pcl_ros/organize_pointcloud.h"
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 
 #include <pcl/common/centroid.h>
 

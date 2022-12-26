@@ -34,7 +34,7 @@
 
 
 #include "jsk_pcl_ros/octree_change_publisher.h"
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 
 namespace jsk_pcl_ros
 {

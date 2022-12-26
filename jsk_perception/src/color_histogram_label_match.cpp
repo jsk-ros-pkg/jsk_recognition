@@ -367,5 +367,5 @@ namespace jsk_perception
   
 }
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS (jsk_perception::ColorHistogramLabelMatch, nodelet::Nodelet);

@@ -39,7 +39,7 @@
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl_ros/transforms.h>
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include <dynamic_reconfigure/server.h>
 
 #include <pcl/range_image/range_image_planar.h>

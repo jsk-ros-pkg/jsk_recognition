@@ -37,7 +37,7 @@
 
 #include "jsk_recognition_msgs/ClusterPointIndices.h"
 #include <pcl/segmentation/impl/region_growing.hpp>
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 
 #include "jsk_recognition_utils/pcl_conversion_util.h"
 

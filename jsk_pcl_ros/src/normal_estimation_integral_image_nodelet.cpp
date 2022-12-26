@@ -34,7 +34,7 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/normal_estimation_integral_image.h"
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 
 #include <pcl/features/integral_image_normal.h>
 

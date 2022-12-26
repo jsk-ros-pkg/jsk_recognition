@@ -272,5 +272,5 @@ namespace jsk_pcl_ros
   boost::mutex RegionGrowingMultiplePlaneSegmentation::global_custom_condigion_function_mutex;
 }
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::RegionGrowingMultiplePlaneSegmentation, nodelet::Nodelet);

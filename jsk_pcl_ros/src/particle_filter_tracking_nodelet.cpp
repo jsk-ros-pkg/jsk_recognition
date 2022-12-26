@@ -38,7 +38,7 @@
 #include "jsk_pcl_ros/particle_filter_tracking.h"
 #include <pcl/tracking/impl/distance_coherence.hpp>
 #include <pcl/tracking/impl/approx_nearest_pair_point_cloud_coherence.hpp>
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include <jsk_topic_tools/rosparam_utils.h>
 #include <geometry_msgs/TwistStamped.h>
 #include <std_msgs/Bool.h>

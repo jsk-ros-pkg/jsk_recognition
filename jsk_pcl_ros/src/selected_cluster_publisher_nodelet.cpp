@@ -33,7 +33,7 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/selected_cluster_publisher.h"
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include <pcl/filters/extract_indices.h>
 
 #include "jsk_recognition_utils/pcl_conversion_util.h"

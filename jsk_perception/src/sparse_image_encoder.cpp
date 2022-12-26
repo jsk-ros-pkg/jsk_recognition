@@ -120,5 +120,5 @@ public:
 }; // end of SparseImageEncoder class definition
 } // end of jsk_perception namespace
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS(jsk_perception::SparseImageEncoder, nodelet::Nodelet);

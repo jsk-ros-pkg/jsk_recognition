@@ -35,7 +35,7 @@
 
 #include "jsk_pcl_ros/cluster_point_indices_decomposer.h"
 #include <cv_bridge/cv_bridge.h>
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/common/centroid.h>
 #include <pcl/common/common.h>

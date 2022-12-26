@@ -34,7 +34,7 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/handle_estimator.h"
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <eigen_conversions/eigen_msg.h>

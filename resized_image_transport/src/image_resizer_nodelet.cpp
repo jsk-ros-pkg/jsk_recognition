@@ -148,6 +148,6 @@ namespace resized_image_transport
   }
 }
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 typedef resized_image_transport::ImageResizer ImageResizer;
 PLUGINLIB_EXPORT_CLASS(ImageResizer, nodelet::Nodelet);

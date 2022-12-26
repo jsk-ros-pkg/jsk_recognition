@@ -203,5 +203,5 @@ namespace jsk_pcl_ros
   
 }
 
-#include <class_loader/class_loader.h>
+#include <class_loader/class_loader.hpp>
 CLASS_LOADER_REGISTER_CLASS(jsk_pcl_ros::PointCloudMoveitFilter, occupancy_map_monitor::OccupancyMapUpdater)

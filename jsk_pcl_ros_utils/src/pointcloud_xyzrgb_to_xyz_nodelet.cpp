@@ -84,5 +84,5 @@ void PointCloudXYZRGBToXYZ::convert(const sensor_msgs::PointCloud2::ConstPtr& cl
 
 }  // namespace jsk_pcl_ros_utils
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS(jsk_pcl_ros_utils::PointCloudXYZRGBToXYZ, nodelet::Nodelet);

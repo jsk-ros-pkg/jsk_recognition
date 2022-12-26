@@ -34,7 +34,7 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros_utils/plane_rejector.h"
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 
 #include <geometry_msgs/Vector3Stamped.h>
 #include <eigen_conversions/eigen_msg.h>

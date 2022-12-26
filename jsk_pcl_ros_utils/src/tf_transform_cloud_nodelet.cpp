@@ -34,7 +34,7 @@
 
 
 #include "jsk_pcl_ros_utils/tf_transform_cloud.h"
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 
 #include <tf2_ros/buffer_client.h>
 #include <pcl/common/centroid.h>

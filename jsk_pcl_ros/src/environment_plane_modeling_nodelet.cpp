@@ -44,7 +44,7 @@
 #include <pcl/filters/project_inliers.h>
 #include <jsk_recognition_msgs/SparseOccupancyGridArray.h>
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include <geometry_msgs/PoseArray.h>
 #include "jsk_recognition_utils/geo_util.h"
 #include "jsk_pcl_ros/grid_map.h"

@@ -34,7 +34,7 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/color_histogram_matcher.h"
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/common/centroid.h>
 #include <geometry_msgs/PoseStamped.h>

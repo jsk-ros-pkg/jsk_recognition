@@ -36,7 +36,7 @@
 #include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <pcl/common/common.h>
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 
 namespace jsk_pcl_ros
 {

@@ -98,6 +98,6 @@ namespace resized_image_transport
   }
 }
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 typedef resized_image_transport::LogPolar LogPolar;
 PLUGINLIB_EXPORT_CLASS(LogPolar, nodelet::Nodelet);

@@ -7,7 +7,7 @@
 #include <pcl/filters/extract_indices.h>
 
 #include <pcl_ros/pcl_nodelet.h>
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>

@@ -34,7 +34,7 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/multi_plane_extraction.h"
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/segmentation/extract_polygonal_prism_data.h>
 #include <jsk_recognition_utils/pcl_ros_util.h>

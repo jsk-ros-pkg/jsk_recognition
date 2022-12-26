@@ -45,7 +45,7 @@
 #include <pcl/features/integral_image_normal.h>
 
 #include "jsk_recognition_utils/pcl_conversion_util.h"
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 
 #include <boost/format.hpp>
 #include <pcl/common/centroid.h>

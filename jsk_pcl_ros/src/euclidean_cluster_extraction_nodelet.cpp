@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include "jsk_pcl_ros/euclidean_cluster_extraction_nodelet.h" 
 #include <jsk_recognition_utils/pcl_util.h>
 
@@ -608,6 +608,6 @@ namespace jsk_pcl_ros
   
 }
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::EuclideanClustering, nodelet::Nodelet);
 

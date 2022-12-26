@@ -115,7 +115,7 @@ namespace jsk_perception
   }
 }
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS (jsk_perception::Dilate, nodelet::Nodelet);
 PLUGINLIB_EXPORT_CLASS (jsk_perception::Erode, nodelet::Nodelet);
 PLUGINLIB_EXPORT_CLASS (jsk_perception::Opening, nodelet::Nodelet);

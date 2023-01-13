@@ -207,6 +207,7 @@ namespace jsk_pcl_ros
     std_srvs::Empty::Request& req,
     std_srvs::Empty::Response& res)
   {
+    boost::mutex::scoped_lock lock(mutex_);
     if (samples_.size() <= 1) {
       ROS_ERROR("no enough samples");
       return false;

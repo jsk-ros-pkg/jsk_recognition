@@ -252,6 +252,7 @@ namespace jsk_pcl_ros
     nonregistered_ros_cloud.header.stamp = ros::Time::now();
     nonregistered_ros_cloud.header.frame_id = frame_id_;
     pub_cloud_non_registered_.publish(nonregistered_ros_cloud);
+    return true;
   }
   
 }

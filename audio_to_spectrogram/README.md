@@ -157,3 +157,16 @@ roslaunch audio_to_spectrogram sample_audio_to_spectrogram.launch
     - `~spectrum` (`jsk_recognition_msgs/Spectrum`)
 
       Spectrum data calculated from audio by FFT.
+
+  - ### Parameters
+    - `~plot_amp_min` (`Double`, default: `0.0`)
+
+      Minimum value of amplitude in plot
+
+    - `~plot_amp_max` (`Double`, default: `20.0`)
+
+      Maximum value of amplitude in plot
+
+    - `~queue_size` (`Int`, default: `1000`)
+
+      Queue size of spectrum subscriber

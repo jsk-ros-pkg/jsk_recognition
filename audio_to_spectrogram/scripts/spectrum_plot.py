@@ -22,6 +22,9 @@ class SpectrumPlot(ConnectionBasedTransport):
 
     def __init__(self):
         super(SpectrumPlot, self).__init__()
+        self.plot_amp_min = rospy.get_param('~plot_amp_min', 0.0)
+        self.plot_amp_max = rospy.get_param('~plot_amp_max', 20.0)
+        self.queue_size = rospy.get_param('~queue_size', 1000)
         # Set matplotlib config
         self.fig = plt.figure(figsize=(8, 5))
         self.fig.suptitle('Spectrum plot', size=12)
@@ -38,7 +41,7 @@ class SpectrumPlot(ConnectionBasedTransport):
 
     def subscribe(self):
         self.sub_spectrum = rospy.Subscriber(
-            '~spectrum', Spectrum, self._cb, queue_size=1000)
+            '~spectrum', Spectrum, self._cb, queue_size=self.queue_size)
 
     def unsubscribe(self):
         self.sub_spectrum.unregister()
@@ -49,7 +52,7 @@ class SpectrumPlot(ConnectionBasedTransport):
         self.freq = np.array(msg.frequency)
         self.line.set_data(self.freq, self.amp)
         self.ax.set_xlim((self.freq.min(), self.freq.max()))
-        self.ax.set_ylim((0.0, 20))
+        self.ax.set_ylim((self.plot_amp_min, self.plot_amp_max))
         self.ax.legend(loc='upper right')
         if self.pub_img.get_num_connections() > 0:
             bridge = cv_bridge.CvBridge()

@@ -91,6 +91,8 @@
   <exec_depend>visualization_msgs</exec_depend>
   <exec_depend>yaml-cpp</exec_depend>
 
+  <test_depend>compressed_depth_image_transport</test_depend>
+  <test_depend>compressed_image_transport</test_depend>
   <test_depend>jsk_perception</test_depend>
   <test_depend>jsk_tools</test_depend>
   <test_depend>roslaunch</test_depend>

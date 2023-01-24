@@ -12,7 +12,8 @@
 
   <test test-name="test_convex_connected_voxels"
       name="test_convex_connected_voxels"
-      pkg="jsk_tools" type="test_topic_published.py">
+      pkg="jsk_tools" type="test_topic_published.py"
+      retry="3" time-limit="120">
     <rosparam>
       topic_0: /sample_convex_connected_voxels/output/indices
       timeout_0: 100

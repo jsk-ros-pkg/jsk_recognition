@@ -3,7 +3,7 @@
   <arg name="rosbag_play_args" default="--clock --loop" />
 
   <param name="/use_sim_time" value="true"/>
-  <param name="robot_description" command="$(find xacro)/xacro.py '$(find pr2_description)/robots/pr2.urdf.xacro'"/>
+  <param name="robot_description" command="$(find xacro)/xacro '$(find pr2_description)/robots/pr2.urdf.xacro'"/>
 
   <node name="rosbag_play"
         pkg="rosbag" type="play"

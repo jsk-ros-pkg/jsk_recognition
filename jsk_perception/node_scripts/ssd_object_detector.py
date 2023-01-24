@@ -186,9 +186,9 @@ class SSDObjectDetector(ConnectionBasedTransport):
 
         rect_msg = RectArray(header=msg.header)
         for bbox in bboxes:
-            rect = Rect(x=bbox[1], y=bbox[0],
-                        width= bbox[3] - bbox[1],
-                        height=bbox[2] - bbox[0])
+            rect = Rect(x=int(bbox[1]), y=int(bbox[0]),
+                        width= int(bbox[3] - bbox[1]),
+                        height=int(bbox[2] - bbox[0]))
             rect_msg.rects.append(rect)
 
         if self.profiling:

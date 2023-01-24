@@ -1,7 +1,7 @@
 <launch>
 
   <include file="$(find jsk_perception)/sample/sample_tile_image.launch">
-    <env name="DISPLAY" value="" />
+    <arg name="gui" value="false" />
   </include>
 
   <test test-name="test_tile_image"

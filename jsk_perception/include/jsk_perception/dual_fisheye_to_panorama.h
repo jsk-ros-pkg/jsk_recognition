@@ -50,6 +50,7 @@
 #include <jsk_perception/DualFisheyeConfig.h>
 
 #include <opencv2/opencv.hpp>
+#include <image_transport/image_transport.h>
 
 #include "jsk_perception/fisheye_stitcher.hpp"
 
@@ -76,8 +77,8 @@ namespace jsk_perception
 
     bool sticher_initialized_;
     boost::shared_ptr<stitcher::FisheyeStitcher> stitcher_;
-    ros::Subscriber sub_image_;
-    ros::Publisher pub_panorama_image_;
+    image_transport::Subscriber sub_image_;
+    image_transport::Publisher pub_panorama_image_;
     ros::Publisher pub_panorama_info_;
 
     jsk_recognition_msgs::PanoramaInfo msg_panorama_info_;
@@ -96,7 +97,6 @@ namespace jsk_perception
     int output_image_height_;
     int output_image_width_;
     std::string mls_map_path_;
-
   private:
   };
 }

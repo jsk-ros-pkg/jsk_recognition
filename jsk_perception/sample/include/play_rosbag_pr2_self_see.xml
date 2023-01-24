@@ -2,7 +2,7 @@
   <param name="/use_sim_time" value="true"/>
   <arg name="rosbag_play_args" default="--clock --loop" />
   <param name="robot_description"
-         command="$(find xacro)/xacro.py '$(find pr2_description)/robots/pr2.urdf.xacro'"/>
+         command="$(find xacro)/xacro '$(find pr2_description)/robots/pr2.urdf.xacro'"/>
 
   <node name="rosbag_play" pkg="rosbag" type="play"
         args="$(find jsk_perception)/sample/data/2019-07-18-15-37-50_pr2_self_see.bag $(arg rosbag_play_args)"/>

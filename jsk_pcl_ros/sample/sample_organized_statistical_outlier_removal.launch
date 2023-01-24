@@ -1,9 +1,11 @@
 <launch>
   <arg name="gui" default="true" />
+  <arg name="RATE" default="1.0" />
 
   <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_baxter_realsense_l515.xml">
     <arg name="launch_manager" value="true" />
     <arg name="manager" value="realsense_nodelet_manager" />
+    <arg name="RATE" value="$(arg RATE)" />
   </include>
 
   <include file="$(find jsk_pcl_ros)/launch/organized_statistical_outlier_removal.launch">

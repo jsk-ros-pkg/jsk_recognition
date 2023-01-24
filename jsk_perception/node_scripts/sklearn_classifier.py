@@ -3,7 +3,11 @@
 #
 from __future__ import division
 import gzip
-import cPickle as pickle
+import sys
+if sys.version_info.major <= 2:
+    import cPickle as pickle
+else:  # for python3
+    import _pickle as pickle
 
 import numpy as np
 from sklearn.preprocessing import normalize
@@ -23,7 +27,10 @@ class ScikitLearnClassifier(ConnectionBasedTransport):
     def _init_classifier(self):
         clf_path = rospy.get_param('~clf_path')
         with gzip.open(clf_path) as f:
-            self.clf = pickle.load(f)
+            if sys.version_info.major <= 2:
+                self.clf = pickle.load(f)
+            else:
+                self.clf = pickle.load(f, encoding='latin1')
 
     def subscribe(self):
         self.sub_hist = rospy.Subscriber('~input', VectorArray, self._predict)

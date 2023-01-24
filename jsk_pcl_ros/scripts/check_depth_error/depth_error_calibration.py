@@ -348,7 +348,7 @@ def updatePlot():
 def generateFrequencyMap():
     global width, height
     # bgr
-    img = np.tile(np.uint8([0,0,0]), (height / 10, width / 10, 1))
+    img = np.tile(np.uint8([0,0,0]), (height // 10, width // 10, 1))
     frequency = dict()
     for (u, v) in value_cache.keys():
         min_color = np.uint8([255, 0, 0])

@@ -11,10 +11,10 @@
   <test test-name="test_fcn_object_segmentation"
         name="test_fcn_object_segmentation"
         pkg="jsk_tools" type="test_topic_published.py"
-        retry="3">
+        time-limit="120">
     <rosparam>
       topic_0: /fcn_object_segmentation/output
-      timeout_0: 60
+      timeout_0: 120
     </rosparam>
   </test>
 

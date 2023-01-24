@@ -5,7 +5,7 @@
 
   <test test-name="test_ssd_object_detector"
         pkg="jsk_tools" type="test_topic_published.py"
-        retry="3">
+        retry="3" time-limit="120" >
     <rosparam>
       topic_0: /ssd_object_detector/output/image
       timeout_0: 120

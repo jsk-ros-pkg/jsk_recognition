@@ -9,9 +9,12 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <build_depend>dynamic_reconfigure</build_depend>
+
   <exec_depend>audio_capture</exec_depend>
   <exec_depend>audio_common_msgs</exec_depend>
   <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>dynamic_reconfigure</exec_depend>
   <exec_depend>image_view</exec_depend>
   <exec_depend>jsk_recognition_msgs</exec_depend>
   <exec_depend>jsk_topic_tools</exec_depend>

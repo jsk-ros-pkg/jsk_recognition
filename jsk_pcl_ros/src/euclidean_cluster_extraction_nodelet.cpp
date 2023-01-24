@@ -67,7 +67,9 @@ namespace jsk_pcl_ros
       if (std::isnan(p.x) || std::isnan(p.y) || std::isnan(p.z)) {
         continue;
       }
-      int index = voxel.getCentroidIndex(p);
+      // to avoid invalid access (or use * getGridCoordinates+getCentroidIndexAt) instead of getCentroidIndex.
+      const int index = voxel.getCentroidIndexAt(
+        voxel.getGridCoordinates(p.x, p.y, p.z));
       if (index == -1) {
         continue;
       }

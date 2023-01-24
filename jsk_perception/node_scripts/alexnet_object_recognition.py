@@ -30,7 +30,7 @@ from jsk_recognition_utils.chainermodels import AlexNet
 from jsk_recognition_utils.chainermodels import AlexNetBatchNormalization
 import rospy
 from sensor_msgs.msg import Image
-from vgg16_object_recognition import VGG16ObjectRecognition
+from jsk_perception.vgg16_object_recognition import VGG16ObjectRecognition
 
 
 class AlexNetObjectRecognition(VGG16ObjectRecognition):

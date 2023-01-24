@@ -73,6 +73,7 @@ class RegionalFeatureBasedObjectRecognition(ConnectionBasedTransport):
         rospy.loginfo('Fitting KNN from db')
         db = np.load(db_file)
         X, y, self.target_names = db['X'], db['y'], db['target_names']
+        self.target_names = np.array(list(map(lambda name: name.decode('utf-8') if hasattr(name, 'decode') else name, self.target_names)))
         self.knn = KNeighborsClassifier(n_neighbors=10)
         self.knn.fit(X, y)
         rospy.loginfo('Finished fitting KNN from db')

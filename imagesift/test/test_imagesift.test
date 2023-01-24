@@ -6,7 +6,8 @@
 
   <test test-name="test_imagesift"
         name="test_imagesift"
-        pkg="jsk_tools" type="test_topic_published.py">
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
     <rosparam>
       topic_0: /Feature0D
       timeout_0: 10

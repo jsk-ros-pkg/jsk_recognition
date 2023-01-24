@@ -1,5 +1,6 @@
-# FisheyeStitcher
-![](images/fisheye_stitcher.jpg)
+# DualFisheyeToPanorama
+
+![](images/dual_fisheye_to_panorama.jpg)
 
 Generate panorama image by stitching dual-fisheye camera images.
 This is ROS wrapper of [drNoob13/fisheyeStitcher](https://github.com/drNoob13/fisheyeStitcher)
@@ -14,7 +15,16 @@ This is ROS wrapper of [drNoob13/fisheyeStitcher](https://github.com/drNoob13/fi
 
   Output panorama image.
 
+  Output topic is published by `image_transport` plugins, so `~output/compressed` topic is also available.
+
 ## Parameters
+
+* `~image_transport` (String, default `raw`)
+
+  Image transport type for `~input` topic.
+
+  You can choose `compressed` and so on to subscribe `~input/compressed` compressed image.
+
 * `~light_compen` (Bool, default: false)
 
   Light Fall-off Compensation. The outer edge of the fisheye image has low brightness.

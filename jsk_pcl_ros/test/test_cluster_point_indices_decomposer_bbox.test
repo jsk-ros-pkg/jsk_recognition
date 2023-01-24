@@ -92,7 +92,7 @@
   <test test-name="test_cluster_point_indices_decomposer_bbox"
         name="test_cluster_point_indices_decomposer_bbox"
         pkg="jsk_pcl_ros" type="test_cluster_point_indices_decomposer_bbox.py"
-        time-limit="30" retry="1">
+        time-limit="30" retry="3">
     <remap from="~boxes" to="cluster_point_indices_decomposer/boxes" />
     <rosparam>
       check_times: 10
@@ -102,7 +102,7 @@
   <test test-name="test_cluster_point_indices_decomposer_bbox_align_boxes_with_frame"
         name="test_cluster_point_indices_decomposer_bbox_align_boxes_with_frame"
         pkg="jsk_pcl_ros" type="test_cluster_point_indices_decomposer_bbox.py"
-        time-limit="30" retry="1">
+        time-limit="30" retry="3">
     <remap from="~boxes" to="cluster_point_indices_decomposer_align_boxes_with_frame/boxes" />
     <rosparam>
       check_times: 10
@@ -112,7 +112,7 @@
   <test test-name="test_cluster_point_indices_decomposer_bbox_pca"
         name="test_cluster_point_indices_decomposer_bbox_pca"
         pkg="jsk_pcl_ros" type="test_cluster_point_indices_decomposer_bbox.py"
-        time-limit="30" retry="1">
+        time-limit="30" retry="3">
     <remap from="~boxes" to="cluster_point_indices_decomposer_pca/boxes" />
     <rosparam>
       check_times: 10

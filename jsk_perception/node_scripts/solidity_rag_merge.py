@@ -39,6 +39,8 @@ else:
 
 def rag_solidity(labels, connectivity=2):
 
+    if LooseVersion(skimage.__version__) >= '0.16.0':
+        RAG.node = RAG.nodes
     graph = RAG()
 
     # The footprint is constructed in such a way that the first

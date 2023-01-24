@@ -207,6 +207,7 @@ namespace jsk_pcl_ros
     std_srvs::Empty::Request& req,
     std_srvs::Empty::Response& res)
   {
+    boost::mutex::scoped_lock lock(mutex_);
     if (samples_.size() <= 1) {
       ROS_ERROR("no enough samples");
       return false;
@@ -251,6 +252,7 @@ namespace jsk_pcl_ros
     nonregistered_ros_cloud.header.stamp = ros::Time::now();
     nonregistered_ros_cloud.header.frame_id = frame_id_;
     pub_cloud_non_registered_.publish(nonregistered_ros_cloud);
+    return true;
   }
   
 }

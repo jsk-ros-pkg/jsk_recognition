@@ -3,7 +3,10 @@
 import roslib; roslib.load_manifest('jsk_perception')
 import rospy
 import numpy as np
-import thread
+try:
+    import thread
+except:
+    import _thread as thread
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import *
 from jsk_recognition_msgs.msg import Rect
@@ -37,10 +40,10 @@ def _MinMaxLock2nd(arr,ex_size,is_min):
     if is_min: idx = 0
     else: idx = 1
     status = cv2.minMaxLoc(arr)
-    pt1 = (max(status[2+idx][0]-ex_size[0]/2,0),
-           max(status[2+idx][1]-ex_size[1]/2,0))
-    pt2 = (min(status[2+idx][0]+ex_size[0]/2,arr.shape[1]),
-           min(status[2+idx][1]+ex_size[1]/2,arr.shape[0]))
+    pt1 = (max(status[2+idx][0]-int(ex_size[0]/2),0),
+           max(status[2+idx][1]-int(ex_size[1]/2),0))
+    pt2 = (min(status[2+idx][0]+int(ex_size[0]/2),arr.shape[1]),
+           min(status[2+idx][1]+int(ex_size[1]/2),arr.shape[0]))
     mask = np.ones((arr.shape[0], arr.shape[1]), dtype=np.uint8) * 255
     mask[pt1[0]:pt2[0], pt1[1]:pt2[1]] = 0
     status2 = cv2.minMaxLoc(arr, mask)
@@ -127,8 +130,8 @@ class MepConverter:
                 template_image = cv2.cvtColor(
                     ref_image_rect, cv2.COLOR_BGR2HSV)
 
-            self.templates[ref_id]['ref_point'] = (ref_rect[0]+ref_rect[2]/2,
-                                                   ref_rect[1]+ref_rect[3]/2)
+            self.templates[ref_id]['ref_point'] = (ref_rect[0]+int(ref_rect[2]/2),
+                                                   ref_rect[1]+int(ref_rect[3]/2))
             self.templates[ref_id]['ref_image'] = template_image
             rospy.loginfo("set ref_image id=%s, rect=%s", ref_id, ref_rect);
 
@@ -160,13 +163,13 @@ class MepConverter:
     def set_reference_point_callback (self, msg): # PointStamped
         self.lockobj.acquire()
         pt = (int(msg.point.x),int(msg.point.y))
-        rect = (pt[0]-self.default_template_size[0]/2,
-                pt[1]-self.default_template_size[1]/2,
+        rect = (pt[0]-int(self.default_template_size[0]/2),
+                pt[1]-int(self.default_template_size[1]/2),
                 self.default_template_size[0], self.default_template_size[1])
         self.set_reference(rect)
         print(rect)
-        search_rect = (pt[0]-self.default_search_size[0]/2,
-                       pt[1]-self.default_search_size[1]/2,
+        search_rect = (pt[0]-int(self.default_search_size[0]/2),
+                       pt[1]-int(self.default_search_size[1]/2),
                        self.default_search_size[0],self.default_search_size[1])
         self.set_template('',ser_frame=None, ser_rect=search_rect)
         self.lockobj.release()
@@ -204,7 +207,7 @@ class MepConverter:
                (template['ref_image'] is not None):
                 ref_pt = template['ref_point']
                 ref_size = template['ref_image'].shape
-                ref_rect = (ref_pt[0]-ref_size[0]/2,ref_pt[1]-ref_size[1]/2,ref_size[0],ref_size[1])
+                ref_rect = (ref_pt[0]-int(ref_size[0]/2),ref_pt[1]-int(ref_size[1]/2),ref_size[0],ref_size[1])
             self.set_template(ref_id=config['current_template_id'],
                               color=config['template_color_space'],
                               ref_rect=ref_rect,
@@ -270,8 +273,8 @@ class MepConverter:
                     status = MaxLock2nd(results,reference_size) # maximum for others
                     status = (1 - status[0], 1 - status[1], status[2], status[3])
 
-                result_pt = (status[2][0]+search_rect[0]+reference_size[0]/2,
-                             status[2][1]+search_rect[1]+reference_size[1]/2)
+                result_pt = (status[2][0]+search_rect[0]+int(reference_size[0]/2),
+                             status[2][1]+search_rect[1]+int(reference_size[1]/2))
 
                 # publish center position as result
                 result.child_frame_id = template_id
@@ -291,8 +294,8 @@ class MepConverter:
 
                 # self feedback
                 if self.auto_search_area:
-                    val_x = result_pt[0]-search_rect[2]/2
-                    val_y = result_pt[1]-search_rect[3]/2
+                    val_x = result_pt[0]-int(search_rect[2]/2)
+                    val_y = result_pt[1]-int(search_rect[3]/2)
                     ser_scale = max(2,5+np.log(status[0])) # ???
                     new_ser_rect = (
                         min(max(val_x,0),image_size[0]-search_rect[2]),
@@ -303,10 +306,10 @@ class MepConverter:
                 # draw on debug image
                 if self.show_debug_image:
                     cv2.rectangle(debug_image,
-                                  (result_pt[0] - reference_size[0]/2,
-                                   result_pt[1] - reference_size[1]/2),
-                                  (result_pt[0] + reference_size[0]/2,
-                                   result_pt[1] + reference_size[1]/2),
+                                  (result_pt[0] - int(reference_size[0]/2),
+                                   result_pt[1] - int(reference_size[1]/2)),
+                                  (result_pt[0] + int(reference_size[0]/2),
+                                   result_pt[1] + int(reference_size[1]/2)),
                                   color=(0, 0, 255))  # red
                     cv2.rectangle(debug_image,
                                   (search_rect[0], search_rect[1]),

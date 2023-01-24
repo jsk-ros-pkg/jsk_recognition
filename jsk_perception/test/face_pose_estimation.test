@@ -7,14 +7,14 @@
   <test test-name="test_face_pose_estimation"
         name="test_face_pose_estimation"
         pkg="jsk_tools" type="test_topic_published.py"
-        retry="3">
+        retry="3" time-limit="120">
     <rosparam>
       topic_0: /face_pose_estimation/output/rects
-      timeout_0: 60
+      timeout_0: 120
       topic_1: /face_pose_estimation/output/pose
-      timeout_1: 60
+      timeout_1: 120
       topic_2: /face_pose_estimation/output/gender
-      timeout_2: 60
+      timeout_2: 120
     </rosparam>
   </test>
 

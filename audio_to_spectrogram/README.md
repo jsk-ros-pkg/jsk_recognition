@@ -14,9 +14,9 @@ Here is an example using rosbag with 300Hz audio.
 roslaunch audio_to_spectrogram sample_audio_to_spectrogram.launch
 ```
 
-|Spectrum|Spectrogram|
-|---|---|
-|![](https://user-images.githubusercontent.com/19769486/82075694-9a7ac300-9717-11ea-899c-db6119a76d52.png)|![](https://user-images.githubusercontent.com/19769486/82075685-96e73c00-9717-11ea-9abc-e6e74104d666.png)|
+|Audio Amplitude|Spectrum|Spectrogram|
+|---|---|---|
+|<img src="docs/images/audio_amplitude.jpg" width="429">|![](https://user-images.githubusercontent.com/19769486/82075694-9a7ac300-9717-11ea-899c-db6119a76d52.png)|![](https://user-images.githubusercontent.com/19769486/82075685-96e73c00-9717-11ea-9abc-e6e74104d666.png)|
 
 # Scripts
 
@@ -43,7 +43,15 @@ roslaunch audio_to_spectrogram sample_audio_to_spectrogram.launch
 
       Period [s] to sample audio data for one FFT.
 
-    - `~depth` (`Int`, default: `16`)
+    - `~n_channel` (`Int`, default: `1`)
+
+      Number of channel of microphone.
+
+    - `~target_channel` (`Int`, default: `0`)
+
+      Target channel.
+
+    - `~bitdepth` (`Int`, default: `16`)
 
       Number of bits per audio data.
 
@@ -84,3 +92,68 @@ roslaunch audio_to_spectrogram sample_audio_to_spectrogram.launch
     - `~publish_rate` (`Double`, default: `image_width / spectrogram_period`)
 
       Publish rate [Hz] of spectrogram topic.
+
+## audio_amplitude_plot.py
+
+  A script to publish audio amplitude plot image.
+
+![](docs/images/audio_amplitude.jpg)
+
+  - ### Publishing topics
+
+    - `~output/viz` (`sensor_msgs/Image`)
+
+      Audio amplitude plot image.
+
+  - ### Subscribing topics
+
+    - `~audio` (`audio_common_msgs/AudioData`)
+
+      Audio stream data from microphone. The audio format must be `wave`.
+
+  - ### Parameters
+    - `~mic_sampling_rate` (`Int`, default: `16000`)
+
+      Sampling rate [Hz] of microphone. Namely, sampling rate of audio topic.
+
+    - `~n_channel` (`Int`, default: `1`)
+
+      Number of channel of microphone.
+
+    - `~target_channel` (`Int`, default: `0`)
+
+      Target channel.
+
+    - `~bitdepth` (`Int`, default: `16`)
+
+      Number of bits per audio data.
+
+    - `~maximum_amplitude` (`Int`, default: `10000`)
+
+      Maximum range of amplitude to plot.
+
+    - `~window_size` (`Double`, default: `10.0`)
+
+      Window size of sound input to plot.
+
+    - `~rate` (`Double`, default: `10.0`)
+
+      Publish rate [Hz] of audio amplitude image topic.
+
+## spectrum_plot.py
+
+  A script to publish frequency vs amplitude plot image.
+
+![](docs/images/spectrum.jpg)
+
+  - ### Publishing topics
+
+    - `~output/viz` (`sensor_msgs/Image`)
+
+      Frequency vs amplitude plot image.
+
+  - ### Subscribing topics
+
+    - `~spectrum` (`jsk_recognition_msgs/Spectrum`)
+
+      Spectrum data calculated from audio by FFT.

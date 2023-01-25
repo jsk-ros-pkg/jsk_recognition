@@ -5,8 +5,12 @@ Extract BoF histogram in realtime.
 """
 
 import gzip
-import cPickle as pickle
-from distutils.version import StrictVersion
+import sys
+if sys.version_info.major <= 2:
+    import cPickle as pickle
+else:  # for python3
+    import _pickle as pickle
+from distutils.version import LooseVersion
 from pkg_resources import get_distribution
 
 import numpy as np
@@ -34,14 +38,20 @@ class BoFHistogramExtractor(ConnectionBasedTransport):
         if bof_data is None:
             quit()
         with gzip.open(bof_data, 'rb') as f:
-            self.bof = pickle.load(f)
-        if (StrictVersion(get_distribution('scikit-learn').version) >=
-                StrictVersion('0.17.0')):
+            if sys.version_info.major <= 2:
+                self.bof = pickle.load(f)
+            else:
+                self.bof = pickle.load(f, encoding='latin1')
+        if (LooseVersion(get_distribution('scikit-learn').version) >=
+                LooseVersion('0.17')):
             if 'n_jobs' not in self.bof.nn.__dict__ or not isinstance(self.bof.nn.n_jobs, int):
                 # In scikit-learn>=0.17.0,
                 # sklearn.neighbors.NearestNeighbors needs 'n_jobs' attribute.
                 # https://github.com/jsk-ros-pkg/jsk_recognition/issues/1669
                 self.bof.nn.n_jobs = 1
+        # noetic uses newer scikit-learn which uses n_samples_fit_
+        if 'n_ssamples_fit_' not in self.bof.nn.__dict__:
+            self.bof.nn.n_samples_fit_ = self.bof.nn._fit_X.shape[0]
 
         self._pub = self.advertise('~output', VectorArray, queue_size=1)
         rospy.loginfo('Initialized BoF histogram extractor')
@@ -79,7 +89,7 @@ class BoFHistogramExtractor(ConnectionBasedTransport):
         decomposed = decompose_descriptors_with_label(
             descriptors=desc, positions=pos, label_img=label,
             skip_zero_label=True)
-        X = np.array(decomposed.values())
+        X = np.array(list(decomposed.values()))
         if X.size == 0:
             return
         X = self.bof.transform(X)

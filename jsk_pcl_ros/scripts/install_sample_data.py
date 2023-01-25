@@ -117,7 +117,7 @@ def main():
 
     download_data(
         path='sample/data/pr2_look_around_in_room_73b2.bag',
-        url='https://drive.google.com/uc?id=1X6S6CU6rC_c_KGlVZfvoTwsAhGS5jG27',
+        url='https://drive.google.com/uc?id=1gmEUanixU-3Fvsff-3e8LkXmZECJCcE2',
         md5='6e3dfda0ac4f23b7849f135ec9041e92',
     )
 
@@ -129,7 +129,7 @@ def main():
 
     download_data(
         path='sample/data/torus.pcd',
-        url='https://blog.innovotion.co.jp/wp-content/uploads/2018/08/torus.pcd',  # NOQA
+        url='https://drive.google.com/uc?id=18VRHlcbHNFw6Hi5ejLPMDI2iqaEdlpTU',
         md5='17ae9636f42403a20bf1b936c03bb35c',
         extract=False,
     )
@@ -142,7 +142,7 @@ def main():
     download_data(
         path='sample/data/baxter_realsense_l515.bag',
         url='https://drive.google.com/uc?id=1RKZLA4J2_lzhCtvMTWxGQh4ykVVEeSAd',
-        md5='4dab24bd6e6a7fd5b9e86d053352cdfd',
+        md5='2bb80d7c31c62c944192b2dd0a75eddf',
     )
 
     download_data(

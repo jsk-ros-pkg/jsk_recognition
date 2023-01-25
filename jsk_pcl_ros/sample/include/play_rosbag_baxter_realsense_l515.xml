@@ -6,11 +6,12 @@
   <arg name="RGB_IMAGE" value="/camera/color/image_rect_color" />
   <arg name="DEPTH_CAMERA_INFO" value="/camera/aligned_depth_to_color/camera_info" />
   <arg name="DEPTH_IMAGE" value="/camera/aligned_depth_to_color/image_raw" />
+  <arg name="RATE" default="1.0" />
 
   <param name="/use_sim_time" value="true"/>
 
   <node name="rosbag_play" pkg="rosbag" type="play"
-        args="$(find jsk_pcl_ros)/sample/data/baxter_realsense_l515.bag --clock --loop"/>
+        args="--rate $(arg RATE) $(find jsk_pcl_ros)/sample/data/baxter_realsense_l515.bag --clock --loop"/>
 
   <group ns="camera">
     <group ns="color">
@@ -23,11 +24,28 @@
     </group>
 
     <group ns="aligned_depth_to_color">
+      <node name="info_relay" pkg="topic_tools" type="relay"
+            args="compressed/camera_info camera_info" />
+      <node name="image_relay" pkg="topic_tools" type="relay"
+            args="compressed/image_raw/compressedDepth image_raw/compressedDepth" />
       <node name="republish"
             pkg="image_transport" type="republish"
             args="compressedDepth raw">
         <remap from="in" to="image_raw"/>
         <remap from="out" to="image_raw"/>
+      </node>
+    </group>
+
+    <group ns="depth">
+      <node name="info_relay" pkg="topic_tools" type="relay"
+            args="compressed/camera_info camera_info" />
+      <node name="image_relay" pkg="topic_tools" type="relay"
+            args="compressed/image_rect_raw/compressedDepth image_rect_raw/compressedDepth" />
+      <node name="republish"
+            pkg="image_transport" type="republish"
+            args="compressedDepth raw">
+        <remap from="in" to="image_rect_raw"/>
+        <remap from="out" to="image_rect_raw"/>
       </node>
     </group>
   </group>

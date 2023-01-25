@@ -51,10 +51,30 @@
     </rosparam>
   </node>
 
+  <!-- publish amplitude image -->
+  <node name="audio_amplitude_plot"
+        pkg="audio_to_spectrogram" type="audio_amplitude_plot.py" output="screen">
+    <remap from="~audio" to="$(arg audio_topic)" />
+    <rosparam subst_value="true">
+      n_channel: $(arg n_channel)
+      mic_sampling_rate: $(arg mic_sampling_rate)
+      bitdepth: $(arg bitdepth)
+    </rosparam>
+  </node>
+
+  <!-- publish frequency vs amplitude image -->
+  <node name="spectrum_plot"
+        pkg="audio_to_spectrogram" type="spectrum_plot.py" >
+    <remap from="~spectrum" to="/audio_to_spectrum/spectrum_filtered" />
+  </node>
+
   <group if="$(arg gui)">
-    <!-- visualize spectrum -->
-    <node pkg="audio_to_spectrogram" type="spectrum_plot.py" name="spectrum_plot"  >
-      <remap from="~spectrum" to="/audio_to_spectrum/spectrum_filtered" />
+    <node pkg="image_view" type="image_view" name="audio_amplitude_view"  >
+      <remap from="image" to="/audio_amplitude_plot/output/viz" />
+    </node>
+
+    <node pkg="image_view" type="image_view" name="spectrum_view"  >
+      <remap from="image" to="/spectrum_plot/output/viz" />
     </node>
 
     <!-- visualize spectrogram -->

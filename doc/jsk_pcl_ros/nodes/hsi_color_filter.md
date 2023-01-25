@@ -22,11 +22,11 @@ Filter pointcloud based on HSI range.
   Color space visualization for debugging
 
 ## Parameters
-* `~h_max` (Integer, default: `127`)
-* `~h_min` (Integer, default: `-128`)
-* `~s_max` (Integer, default: `255`)
-* `~s_min` (Integer, default: `0`)
-* `~i_max` (Integer, default: `255`)
-* `~i_min` (Integer, default: `0`)
+* `~h_limit_max` (Integer, default: `127`)
+* `~h_limit_min` (Integer, default: `-128`)
+* `~s_limit_max` (Integer, default: `255`)
+* `~s_limit_min` (Integer, default: `0`)
+* `~i_limit_max` (Integer, default: `255`)
+* `~i_limit_min` (Integer, default: `0`)
 
    Color range to filter.

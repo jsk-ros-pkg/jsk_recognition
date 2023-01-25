@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from label_image_classifier import LabelImageClassifier
+from jsk_perception.label_image_classifier import LabelImageClassifier
 import numpy as np
 import rospy
 

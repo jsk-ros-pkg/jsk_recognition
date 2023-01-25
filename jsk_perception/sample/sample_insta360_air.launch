@@ -27,6 +27,8 @@
   <arg name="mls_map_path" default="$(find jsk_perception)/config/fisheye_stitcher_grid_xd_yd_3840x1920.yml.gz" />
   <arg name="vital_rate" default="1.0" />
   <arg name="panorama_resolution_mode" default="high" />
+  <arg name="panorama_image_transport" default="raw"/>
+
   <arg name="gui" default="true" />
 
   <!-- Publish camera image -->
@@ -102,6 +104,7 @@
     <arg name="mls_map_path" value="$(arg mls_map_path)" />
     <arg name="vital_rate" value="$(arg vital_rate)" />
     <arg name="resolution_mode" value="$(arg panorama_resolution_mode)" />
+    <arg name="image_transport" value="$(arg panorama_image_transport)" />
   </include>
 
   <group if="$(arg gui)">

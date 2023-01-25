@@ -5,7 +5,8 @@
   <arg name="refine_align" default="false" doc="If true, panorama is improved by refine align process. Note that this process takes a large CPU load." />
   <arg name="fovd" default="185.0" doc="Camera's Field of View [degree]" />
   <arg name="save_unwarped" default="false" doc="Save unwarped fisheye images. This is useful to create MLS grids." />
-  <arg name="mls_map_path" default="$(find jsk_perception)/config/fisheye_stitcher_grid_xd_yd_3840x1920.yml.gz" doc="Yaml file for MLS grids." />
+  <arg name="resolution_mode" default="high" doc="Resolution mode, 'high' or 'low'" />
+  <arg name="image_transport" default="raw"/>
 
   <node name="dual_fisheye_to_panorama"
         pkg="nodelet" type="nodelet"
@@ -15,11 +16,14 @@
     <param name="refine_align" value="$(arg refine_align)" />
     <param name="fovd" value="$(arg fovd)" />
     <param name="save_unwarped" value="$(arg save_unwarped)" />
-    <param name="mls_map_path" value="$(arg mls_map_path)" />
+    <param name="image_transport" value="$(arg image_transport)"/>
+    <rosparam
+        command="load"
+        file="$(find jsk_perception)/config/dual_fisheye_to_panorama/$(arg resolution_mode)_resolution_config.yaml"
+        subst_value="true"/>
   </node>
 
   <group if="$(arg gui)">
-
     <node name="image_view"
           pkg="image_view" type="image_view">
       <remap from="image" to="dual_fisheye_to_panorama/output"/>

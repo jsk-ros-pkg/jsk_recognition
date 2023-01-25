@@ -6,6 +6,12 @@
   <arg name="camera_name" default="insta360" />
   <arg name="vendor" default="0x2e1a" />
   <arg name="product" default="0x1000"/>
+  <!--
+  Available sizes for mjpeg are
+      1472 x 736  with 30 fps
+      2176 x 1088 with 30 fps
+      3008 x 1504 with 30 fps
+  -->
   <arg name="width" default="3008" />
   <arg name="height" default="1504" />
   <arg name="video_mode" default="mjpeg" />
@@ -18,7 +24,9 @@
   <arg name="throttled_rate" default="1.0" />
   <arg name="refine_align" default="false" />
   <arg name="save_unwarped" default="false" />
-  <arg name="mls_map_path" default="$(find jsk_perception)/config/fisheye_stitcher_grid_xd_yd_3840x1920.yml.gz" />
+  <arg name="panorama_resolution_mode" default="high" />
+  <arg name="panorama_image_transport" default="raw"/>
+
   <arg name="gui" default="true" />
 
   <!-- Publish camera image -->
@@ -91,7 +99,8 @@
     <arg name="fovd" value="210" />
     <arg name="refine_align" value="$(arg refine_align)" />
     <arg name="save_unwarped" value="$(arg save_unwarped)" />
-    <arg name="mls_map_path" value="$(arg mls_map_path)" />
+    <arg name="resolution_mode" value="$(arg panorama_resolution_mode)" />
+    <arg name="image_transport" value="$(arg panorama_image_transport)" />
   </include>
 
   <group if="$(arg gui)">

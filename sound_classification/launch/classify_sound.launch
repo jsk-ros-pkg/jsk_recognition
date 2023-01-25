@@ -1,17 +1,36 @@
 <launch>
 
-  <arg name="gpu" default="0" />
+  <!-- audio_to_spectrogram arguments -->
+  <arg name="device" default="hw:0,0" />
+  <arg name="n_channel" default="2" />
+  <arg name="bitdepth" default="16" />
+  <arg name="mic_sampling_rate" default="44100" />
   <arg name="use_rosbag" default="false" />
-  <arg name="pause_rosbag" default="true" />
   <arg name="filename" default="/" />
   <arg name="use_microphone" default="true" />
+  <arg name="high_cut_freq" default="8000" />
+  <arg name="low_cut_freq" default="1" />
+  <arg name="spectrogram_period" default="1" />
+  <arg name="pause_rosbag" default="true" />
+
+  <!-- sound_classifier arguments -->
+  <arg name="gpu" default="0" />
+
+  <!-- visualization arguments -->
   <arg name="gui" default="true" />
 
   <include file="$(find sound_classification)/launch/audio_to_spectrogram.launch" >
+    <arg name="device" value="$(arg device)" />
+    <arg name="n_channel" value="$(arg n_channel)" />
+    <arg name="bitdepth" value="$(arg bitdepth)" />
+    <arg name="mic_sampling_rate" value="$(arg mic_sampling_rate)" />
     <arg name="use_rosbag" value="$(arg use_rosbag)" />
-    <arg name="pause_rosbag" value="$(arg pause_rosbag)" />
     <arg name="filename" value="$(arg filename)" />
     <arg name="use_microphone" value="$(arg use_microphone)" />
+    <arg name="high_cut_freq" value="$(arg high_cut_freq)" />
+    <arg name="low_cut_freq" value="$(arg low_cut_freq)" />
+    <arg name="spectrogram_period" value="$(arg spectrogram_period)" />
+    <arg name="pause_rosbag" value="$(arg pause_rosbag)" />
     <arg name="gui" value="false" />
   </include>
 

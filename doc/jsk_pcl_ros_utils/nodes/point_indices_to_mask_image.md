@@ -20,7 +20,7 @@ of organized pointcloud and original `sensor_msgs/Image`.
 * `~output `(`sensor_msg/Image`)
 
 
-   Mask image to get `~input` indices from the origina limage.
+   Mask image to get `~input` indices from the original image.
 
 
 ## Parameters

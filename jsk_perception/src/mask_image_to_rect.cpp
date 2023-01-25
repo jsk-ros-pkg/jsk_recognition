@@ -13,7 +13,7 @@
  *     notice, this list of conditions and the following disclaimer.
  *   * Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/o2r other materials provided
+ *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
  *   * Neither the name of the JSK Lab nor the names of its
  *     contributors may be used to endorse or promote products derived
@@ -39,12 +39,18 @@
 #include <opencv2/opencv.hpp>
 #include <sensor_msgs/image_encodings.h>
 #include <cv_bridge/cv_bridge.h>
+#include "jsk_recognition_utils/cv_utils.h"
 
 namespace jsk_perception
 {
   void MaskImageToRect::onInit()
   {
     DiagnosticNodelet::onInit();
+    srv_ = boost::make_shared<dynamic_reconfigure::Server<Config> >(*pnh_);
+    typename dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind(&MaskImageToRect::configCallback, this, _1, _2);
+    srv_->setCallback(f);
+
     pub_ = advertise<jsk_recognition_msgs::RectArray>(*pnh_, "output", 1);
     onInitPostProcess();
   }
@@ -61,6 +67,11 @@ namespace jsk_perception
     sub_mask_.shutdown();
   }
 
+  void MaskImageToRect::configCallback(Config& config, uint32_t level)
+  {
+    rect_type_ = config.rect_type;
+  }
+
   void MaskImageToRect::convert(
     const sensor_msgs::Image::ConstPtr& mask_msg)
   {
@@ -69,23 +80,46 @@ namespace jsk_perception
     cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(
       mask_msg, sensor_msgs::image_encodings::MONO8);
     cv::Mat mask = cv_ptr->image;
-    for (size_t j = 0; j < mask.rows; j++) {
-      for (size_t i = 0; i < mask.cols; i++) {
-        if (mask.at<uchar>(j, i) == 255) {
-          indices.push_back(cv::Point(i, j));
-        }
-      }
-    }
     jsk_recognition_msgs::RectArray rects;
     rects.header = mask_msg->header;
-    if (indices.size() > 0){
-      cv::Rect mask_rect = cv::boundingRect(indices);
-      jsk_recognition_msgs::Rect rect;
-      rect.x = mask_rect.x;
-      rect.y = mask_rect.y;
-      rect.width = mask_rect.width;
-      rect.height = mask_rect.height;
-      rects.rects.push_back(rect);
+
+    switch (rect_type_) {
+      case jsk_perception::MaskImageToRect_Whole: {
+        for (size_t j = 0; j < mask.rows; j++) {
+          for (size_t i = 0; i < mask.cols; i++) {
+            if (mask.at<uchar>(j, i) == 255) {
+              indices.push_back(cv::Point(i, j));
+            }
+          }
+        }
+
+        if (indices.size() > 0){
+          cv::Rect mask_rect = cv::boundingRect(indices);
+          jsk_recognition_msgs::Rect rect;
+          rect.x = mask_rect.x;
+          rect.y = mask_rect.y;
+          rect.width = mask_rect.width;
+          rect.height = mask_rect.height;
+          rects.rects.push_back(rect);
+        }
+        break;
+      }
+      case jsk_perception::MaskImageToRect_External: {
+        std::vector< std::vector<cv::Point> > contours;
+        std::vector<cv::Vec4i> hierarchy;
+        cv::findContours(mask, contours, hierarchy,
+                         CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+        for (size_t i = 0; i < contours.size(); ++i) {
+          cv::Rect cv_rect = jsk_recognition_utils::boundingRectFromContours(contours.at(i));
+          jsk_recognition_msgs::Rect rect;
+          rect.x = cv_rect.x;
+          rect.y = cv_rect.y;
+          rect.width = cv_rect.width;
+          rect.height = cv_rect.height;
+          rects.rects.push_back(rect);
+        }
+        break;
+      }
     }
     pub_.publish(rects);
   }

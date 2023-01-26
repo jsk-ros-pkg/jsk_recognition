@@ -16,9 +16,9 @@ class ObjectDetectionTfPublisher():
             self.br = tf.TransformBroadcaster()
             self.subscriber = rospy.Subscriber("ObjectDetection", ObjectDetection, self.simple_callback);
         else:
-            self.init_object_messages()
             self.frame_id = rospy.get_param("~frame_id", "object")
             self.subscriber = rospy.Subscriber("ObjectDetection", ObjectDetection, self.callback);
+            self.init_object_messages()
 
     def init_object_messages(self):
         if rospy.has_param('~checker_board_params/position_x'):

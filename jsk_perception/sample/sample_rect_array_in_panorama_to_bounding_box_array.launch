@@ -47,7 +47,6 @@
     type="rect_array_in_panorama_to_bounding_box_array.py"
     name="rect_array_in_panorama_to_bounding_box_array"
     >
-    <remap from="~panorama_image" to="$(arg INPUT_PANORAMA_IMAGE)" />
     <remap from="~panorama_info" to="$(arg INPUT_PANORAMA_INFO)" />
     <remap from="~input_class" to="$(arg INPUT_CLASS)" />
     <remap from="~input_rects" to="$(arg INPUT_RECTS)" />

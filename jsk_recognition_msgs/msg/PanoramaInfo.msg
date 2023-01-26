@@ -11,7 +11,13 @@ std_msgs/Header header
 string projection_model
 
 #######################################################################
-#                     Field of View Parameters                         #
+#                      Image shape info                               #
+#######################################################################
+uint32 image_height
+uint32 image_width
+
+#######################################################################
+#                     Field of View Parameters                        #
 #######################################################################
 float64 theta_min
 float64 theta_max

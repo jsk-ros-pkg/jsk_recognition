@@ -7,10 +7,6 @@ Sample is `sample_rect_array_in_panorama_to_bounding_box_array.launch`
 
 ## Subscribing Topics
 
-* `~panorama_image` (`sensor_msgs/Image`)
-
-Panorama image topic.
-
 * `~panorama_info` (`jsk_recognition_msgs/PanoramaInfo`)
 
 Panorama info topic.

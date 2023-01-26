@@ -253,7 +253,7 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
         elif depth_msg.encoding != '32FC1':
             rospy.logerr('Unsupported depth encoding: %s' % depth_msg.encoding)
 
-        hands_points, hands_point_scores, hands_score = self.hand_pose_estimate(img)
+        hands_points, hands_point_scores, hands_score = self.hand_pose_estimate(img, img_msg.header)
 
         hand_pose_2d_msg = self._create_2d_hand_pose_array_msgs(
             hands_points,
@@ -318,7 +318,7 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
         img = self.bridge.imgmsg_to_cv2(
             img_msg, desired_encoding='bgr8')
         hands_points, hands_point_scores, hands_score = \
-            self.hand_pose_estimate(img)
+            self.hand_pose_estimate(img, img_msg.header)
 
         hand_pose_msg = self._create_2d_hand_pose_array_msgs(
             hands_points,
@@ -358,18 +358,19 @@ class HandPoseEstimation2D(ConnectionBasedTransport):
             hand_pose_msg.poses.append(pose_msg)
         return hand_pose_msg
 
-    def hand_pose_estimate(self, bgr):
+    def hand_pose_estimate(self, bgr, header):
         if self.backend == 'torch':
-            return self._hand_pose_estimate_torch_backend(bgr)
+            return self._hand_pose_estimate_torch_backend(bgr, header)
         raise ValueError('Unsupported backend: {0}'.format(self.backend))
 
-    def _hand_pose_estimate_torch_backend(self, frame):
+    def _hand_pose_estimate_torch_backend(self, frame, header):
         hands_points, hands_rect, hands_point_scores, hands_score = \
             self.pyramid_inference(frame)
 
         if self.visualize:
             vis_img = self._draw_joints(frame, hands_points, hands_rect)
             vis_msg = self.bridge.cv2_to_imgmsg(vis_img, encoding='bgr8')
+            vis_msg.header = header
             self.image_pub.publish(vis_msg)
 
         return hands_points, hands_point_scores, hands_score

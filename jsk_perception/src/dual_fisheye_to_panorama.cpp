@@ -92,6 +92,8 @@ namespace jsk_perception
     msg_panorama_info_.theta_max = M_PI;
     msg_panorama_info_.phi_min = -M_PI;
     msg_panorama_info_.phi_max = M_PI;
+    msg_panorama_info_.image_height = output_image_height_;
+    msg_panorama_info_.image_width = output_image_width_;
 
     onInitPostProcess();
   }

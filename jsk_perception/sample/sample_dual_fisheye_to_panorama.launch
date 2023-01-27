@@ -1,5 +1,4 @@
 <launch>
   <include file="$(find jsk_perception)/sample/sample_insta360_air.launch"
            pass_all_args="true" />
-
 </launch>

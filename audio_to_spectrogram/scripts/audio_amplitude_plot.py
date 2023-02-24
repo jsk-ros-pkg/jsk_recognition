@@ -3,6 +3,8 @@
 
 from __future__ import division
 
+from distutils.version import LooseVersion
+import pkg_resources
 import cv_bridge
 from dynamic_reconfigure.server import Server
 from jsk_topic_tools import ConnectionBasedTransport
@@ -42,10 +44,22 @@ class AudioAmplitudePlot(ConnectionBasedTransport):
         if rate == 0:
             rospy.logwarn('You cannot set 0 as the rate; change it to 10.')
             rate = 10
-        self.timer = rospy.Timer(rospy.Duration(1.0 / rate), self.timer_cb)
+
+        timer_kwargs = dict(
+            period=rospy.Duration(1.0 / rate),
+            callback=self.timer_cb,
+            oneshot=False,
+        )
+        if (LooseVersion(pkg_resources.get_distribution('rospy').version) >=
+                LooseVersion('1.12.0')):
+            # on >=kinetic, it raises ROSTimeMovedBackwardsException
+            # when we use rosbag play --loop.
+            timer_kwargs['reset'] = True
+        self.timer = rospy.Timer(**timer_kwargs)
 
     def stop_timer(self):
         self.timer.shutdown()
+        self.timer = None
 
     def subscribe(self):
         self.audio_buffer.subscribe()

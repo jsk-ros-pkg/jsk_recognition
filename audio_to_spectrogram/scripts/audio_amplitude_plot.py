@@ -8,6 +8,8 @@ import pkg_resources
 import cv_bridge
 from dynamic_reconfigure.server import Server
 from jsk_topic_tools import ConnectionBasedTransport
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import rospy

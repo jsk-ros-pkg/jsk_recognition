@@ -5,6 +5,8 @@ from __future__ import division
 
 import cv_bridge
 from jsk_topic_tools import ConnectionBasedTransport
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import rospy

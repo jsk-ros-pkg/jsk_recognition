@@ -9,6 +9,7 @@ import cv_bridge
 from dynamic_reconfigure.server import Server
 from jsk_topic_tools import ConnectionBasedTransport
 import matplotlib
+from audio_to_spectrogram import check_matplotlib_version; check_matplotlib_version()
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np

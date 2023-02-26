@@ -54,7 +54,7 @@ class AudioAmplitudePlot(ConnectionBasedTransport):
             oneshot=False,
         )
         if (LooseVersion(pkg_resources.get_distribution('rospy').version) >=
-                LooseVersion('1.12.0')):
+                LooseVersion('1.12.0')) and rospy.get_param('/use_sim_time', None):
             # on >=kinetic, it raises ROSTimeMovedBackwardsException
             # when we use rosbag play --loop.
             timer_kwargs['reset'] = True

@@ -27,11 +27,17 @@ class SpectrumPlot(ConnectionBasedTransport):
         self.queue_size = rospy.get_param('~queue_size', 1000)
         # Set matplotlib config
         self.fig = plt.figure(figsize=(8, 5))
-        self.fig.suptitle('Spectrum plot', size=12)
         self.fig.subplots_adjust(left=0.1, right=0.95, top=0.90, bottom=0.1,
                                  wspace=0.2, hspace=0.6)
         self.ax = self.fig.add_subplot(1, 1, 1)
         self.ax.grid(True)
+        # self.fig.suptitle('Spectrum plot', size=12)
+        self.ax.set_title('Spectrum plot', fontsize=12)
+        # Use self.ax.set_title() instead of
+        # self.fig.suptitle() to use self.fig.tight_layout()
+        # preventing characters from being cut off
+        # cf. https://tm23forest.com/contents/matplotlib-tightlayout-with-figure-suptitle
+        #     https://matplotlib.org/2.2.4/tutorials/intermediate/tight_layout_guide.html
         self.ax.set_xlabel('Frequency [Hz]', fontsize=12)
         self.ax.set_ylabel('Amplitude', fontsize=12)
         self.line, = self.ax.plot([0, 0], label='Amplitude of Spectrum')
@@ -54,6 +60,7 @@ class SpectrumPlot(ConnectionBasedTransport):
         self.ax.set_xlim((self.freq.min(), self.freq.max()))
         self.ax.set_ylim((self.plot_amp_min, self.plot_amp_max))
         self.ax.legend(loc='upper right')
+        self.fig.tight_layout()
         if self.pub_img.get_num_connections() > 0:
             bridge = cv_bridge.CvBridge()
             img = convert_matplotlib_to_img(self.fig)

@@ -167,6 +167,6 @@ roslaunch audio_to_spectrogram sample_audio_to_spectrogram.launch
 
       Maximum value of amplitude in plot
 
-    - `~queue_size` (`Int`, default: `1000`)
+    - `~queue_size` (`Int`, default: `1`)
 
       Queue size of spectrum subscriber

@@ -24,7 +24,7 @@ class SpectrumPlot(ConnectionBasedTransport):
         super(SpectrumPlot, self).__init__()
         self.plot_amp_min = rospy.get_param('~plot_amp_min', 0.0)
         self.plot_amp_max = rospy.get_param('~plot_amp_max', 20.0)
-        self.queue_size = rospy.get_param('~queue_size', 1000)
+        self.queue_size = rospy.get_param('~queue_size', 1)
         # Set matplotlib config
         self.fig = plt.figure(figsize=(8, 5))
         self.fig.subplots_adjust(left=0.1, right=0.95, top=0.90, bottom=0.1,

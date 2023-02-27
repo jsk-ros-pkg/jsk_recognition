@@ -47,6 +47,10 @@ class AudioToSpectrum(object):
             '~spectrum', Spectrum, queue_size=1)
         self.pub_spectrum_filtered = rospy.Publisher(
             '~spectrum_filtered', Spectrum, queue_size=1)
+        self.pub_log_spectrum = rospy.Publisher(
+            '~log_spectrum', Spectrum, queue_size=1)
+        self.pub_log_spectrum_filtered = rospy.Publisher(
+            '~log_spectrum_filtered', Spectrum, queue_size=1)
 
         timer_kwargs = dict(
             period=rospy.Duration(1.0 / self.fft_exec_rate),
@@ -60,21 +64,34 @@ class AudioToSpectrum(object):
             timer_kwargs['reset'] = True
         self.timer = rospy.Timer(**timer_kwargs)
 
+    def publish_spectrum(self, pub, pub_filtered, amplitude):
+        spectrum_msg = Spectrum()
+        spectrum_msg.header.stamp = rospy.Time.now()
+        spectrum_msg.amplitude = amplitude
+        spectrum_msg.frequency = self.freq
+        pub.publish(spectrum_msg)
+        spectrum_msg.amplitude = amplitude[self.cutoff_mask]
+        spectrum_msg.frequency = self.freq[self.cutoff_mask]
+        pub_filtered.publish(spectrum_msg)
+
     def timer_cb(self, timer):
         if len(self.audio_buffer) != self.audio_buffer.audio_buffer_len:
             return
         audio_data = self.audio_buffer.read()
         # Calc spectrum by fft
         amplitude = np.fft.fft(audio_data * self.window_function)
-        amplitude = np.log(np.abs(amplitude))
-        spectrum_msg = Spectrum()
-        spectrum_msg.header.stamp = rospy.Time.now()
-        spectrum_msg.amplitude = amplitude
-        spectrum_msg.frequency = self.freq
-        self.pub_spectrum.publish(spectrum_msg)
-        spectrum_msg.amplitude = amplitude[self.cutoff_mask]
-        spectrum_msg.frequency = self.freq[self.cutoff_mask]
-        self.pub_spectrum_filtered.publish(spectrum_msg)
+        self.publish_spectrum(
+            self.pub_spectrum,
+            self.pub_spectrum_filtered,
+            np.abs(amplitude / (self.audio_buffer.audio_buffer_len / 2)),
+            # https://github.com/jsk-ros-pkg/jsk_recognition/issues/2761#issue-1550715400
+        )
+        self.publish_spectrum(
+            self.pub_log_spectrum,
+            self.pub_log_spectrum_filtered,
+            np.log(np.abs(amplitude)),
+            # https://github.com/jsk-ros-pkg/jsk_recognition/issues/2761#issuecomment-1445810380
+        )
 
 
 if __name__ == '__main__':

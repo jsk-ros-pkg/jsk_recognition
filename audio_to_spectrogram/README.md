@@ -24,10 +24,21 @@ roslaunch audio_to_spectrogram sample_audio_to_spectrogram.launch
   A script to convert audio to spectrum.
 
   - ### Publishing topics
-
     - `~spectrum` (`jsk_recognition_msgs/Spectrum`)
 
       Spectrum data calculated from audio by FFT.
+
+    - `~spectrum_filtered` (`jsk_recognition_msgs/Spectrum`)
+
+      Filtered spectrum data (`low_cut_freq`-`high_cut_freq`).
+
+    - `~log_spectrum` (`jsk_recognition_msgs/Spectrum`)
+
+      Log-scaled spectrum data.
+
+    - `~log_spectrum_filtered` (`jsk_recognition_msgs/Spectrum`)
+
+      Filtered log-scaled spectrum data (`low_cut_freq`-`high_cut_freq`).
 
   - ### Subscribing topics
     - `audio` (`audio_common_msgs/AudioData`)

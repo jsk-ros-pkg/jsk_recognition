@@ -11,6 +11,10 @@
     <rosparam>
       topic_0: /spectrum_to_spectrogram/spectrogram
       timeout_0: 30
+      topic_1: /audio_amplitude_plot/output/viz
+      timeout_1: 30
+      topic_2: /spectrum_plot/output/viz
+      timeout_2: 30
     </rosparam>
   </test>
 

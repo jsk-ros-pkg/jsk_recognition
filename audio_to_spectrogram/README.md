@@ -26,7 +26,9 @@ roslaunch audio_to_spectrogram sample_audio_to_spectrogram.launch
   - ### Publishing topics
     - `~spectrum` (`jsk_recognition_msgs/Spectrum`)
 
-      Spectrum data calculated from audio by FFT.
+      Spectrum data calculated from audio by FFT.  
+      Its amplitude is consistent with the amplitude of the original signal (unlike the usual "amplitude spectrum").  
+      See the comments in the source code for details.
 
     - `~spectrum_filtered` (`jsk_recognition_msgs/Spectrum`)
 
@@ -34,7 +36,9 @@ roslaunch audio_to_spectrogram sample_audio_to_spectrogram.launch
 
     - `~log_spectrum` (`jsk_recognition_msgs/Spectrum`)
 
-      Log-scaled spectrum data.
+      Log-scaled spectrum data.  
+      It is calculated by applying log to the absolute value of the FFT result (not "power spectrum").  
+      See the comments in the source code for details.
 
     - `~log_spectrum_filtered` (`jsk_recognition_msgs/Spectrum`)
 

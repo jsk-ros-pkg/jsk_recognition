@@ -79,18 +79,25 @@ class AudioToSpectrum(object):
             return
         audio_data = self.audio_buffer.read()
         # Calc spectrum by fft
-        amplitude = np.fft.fft(audio_data * self.window_function)
+        fft = np.fft.fft(audio_data * self.window_function)
         self.publish_spectrum(
             self.pub_spectrum,
             self.pub_spectrum_filtered,
-            np.abs(amplitude / (self.audio_buffer.audio_buffer_len / 2)),
+            np.abs(fft / (self.audio_buffer.audio_buffer_len / 2)),
+            # Usual "amplitude spectrum" is np.abs(fft),
+            # but we use the above equation to get "amplitude"
+            # consistent with the amplitude of the original signal.
             # https://github.com/jsk-ros-pkg/jsk_recognition/issues/2761#issue-1550715400
         )
         self.publish_spectrum(
             self.pub_log_spectrum,
             self.pub_log_spectrum_filtered,
-            np.log(np.abs(amplitude)),
+            np.log(np.abs(fft)),
+            # Usually, log is applied to "power spectrum" (np.abs(fft)**2):
+            # np.log(np.abs(fft)**2), 20*np.log10(np.abs(fft)), ...
+            # But we use the above equation for simplicity.
             # https://github.com/jsk-ros-pkg/jsk_recognition/issues/2761#issuecomment-1445810380
+            # http://makotomurakami.com/blog/2020/05/23/5266/
         )
 
 

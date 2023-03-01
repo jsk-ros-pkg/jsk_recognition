@@ -8,7 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_python_setup()
 
 generate_dynamic_reconfigure_options(
-  cfg/AudioAmplitudePlot.cfg
+  cfg/DataAmplitudePlot.cfg
 )
 
 catkin_package()

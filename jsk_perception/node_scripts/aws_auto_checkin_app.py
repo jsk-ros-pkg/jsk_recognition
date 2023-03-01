@@ -192,8 +192,8 @@ class AutoCheckIn(ConnectionBasedTransport):
                     face_id = self.dynamodb_table.get_item(
                         Key={'RekognitionId':
                              ret['FaceMatches'][0]['Face']['FaceId']})['Item']['Name']
-                    rospy.loginfo("FaceId: {}\n Similarity: {}".format(face_id, \
-                                                                       ret['FaceMatches'][0]['Similarity']))
+                    rospy.logdebug("FaceId: {}\n Similarity: {}".format(face_id, \
+                                                                        ret['FaceMatches'][0]['Similarity']))
                     faces.faces.append(Face(face=Rect(cx - w // 2, cy - h // 2, w, h),
                                             label=face_id,
                                             confidence=ret['FaceMatches'][0]['Similarity'] / 100.0))

@@ -1,5 +1,5 @@
 <!-- data flow  -->
-<!-- WrenchStamped (vector) -> scalar -> spectrum -> spectrogram -->
+<!-- WrenchStamped (vector) -> scalar -> spectrum -> filtered spectrum -> spectrogram -->
 
 <launch>
 
@@ -36,7 +36,7 @@
   <arg name="TARGET_CHANNEL" value="0" />  <!-- std_msgs/Float64/data is not array -->
 
   <!-- convert scalar topic to spectrum topic -->
-  <node pkg="audio_to_spectrogram" type="data_to_spectrum.py" name="data_to_spectrum" respawn="true">
+  <node pkg="audio_to_spectrogram" type="data_to_spectrum.py" name="scalar_to_spectrum" respawn="true">
     <remap from="~input" to="$(arg SCALAR_TOPIC)" />
     <rosparam subst_value="true">
       expression_to_get_data: $(arg EXPRESSION_TO_GET_DATA)
@@ -47,9 +47,27 @@
       bitdepth: $(arg BITDEPTH)
       n_channel: $(arg N_CHANNEL)
       target_channel: $(arg TARGET_CHANNEL)
+      fft_exec_rate: $(arg fft_exec_rate)
+    </rosparam>
+  </node>
+
+  <!-- filter spectrum -->
+  <node pkg="audio_to_spectrogram" type="spectrum_filter.py" name="spectrum_filter" respawn="true">
+    <remap from="~input" to="scalar_to_spectrum/spectrum" />
+    <rosparam subst_value="true">
+      data_sampling_rate: $(arg data_sampling_rate)
       high_cut_freq: $(arg high_cut_freq)
       low_cut_freq: $(arg low_cut_freq)
-      fft_exec_rate: $(arg fft_exec_rate)
+    </rosparam>
+  </node>
+
+  <!-- filter log spectrum -->
+  <node pkg="audio_to_spectrogram" type="spectrum_filter.py" name="log_spectrum_filter" respawn="true">
+    <remap from="~input" to="scalar_to_spectrum/log_spectrum" />
+    <rosparam subst_value="true">
+      data_sampling_rate: $(arg data_sampling_rate)
+      high_cut_freq: $(arg high_cut_freq)
+      low_cut_freq: $(arg low_cut_freq)
     </rosparam>
   </node>
 
@@ -75,13 +93,13 @@
   </group>
 
   <include file="$(find audio_to_spectrogram)/launch/spectrum_plot.launch">
-    <arg name="spectrum" value="data_to_spectrum/spectrum_filtered" />
+    <arg name="spectrum" value="spectrum_filter/output" />
     <arg name="plot_amp_max" value="0.2" />
     <arg name="gui" value="$(arg gui)" />
   </include>
 
   <include file="$(find audio_to_spectrogram)/launch/spectrum_to_spectrogram.launch">
-    <arg name="spectrum" value="data_to_spectrum/log_spectrum_filtered" />
+    <arg name="spectrum" value="log_spectrum_filter/output" />
     <arg name="spectrogram_period" value="$(arg spectrogram_period)" />
     <arg name="gui" value="$(arg gui)" />
   </include>

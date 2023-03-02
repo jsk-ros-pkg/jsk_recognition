@@ -12,12 +12,7 @@ from audio_to_spectrogram.data_buffer import DataBuffer
 
 class DataToSpectrum(object):
 
-    def __init__(
-        self,
-        data_buffer=None,
-        high_cut_freq=None,
-        low_cut_freq=None,
-    ):
+    def __init__(self, data_buffer=None):
         super(DataToSpectrum, self).__init__()
 
         if data_buffer is None:
@@ -33,18 +28,8 @@ class DataToSpectrum(object):
             0.0, 1.0, 1.0 / self.data_buffer.data_buffer_len)
         self.window_function = 0.54 - 0.46 * np.cos(
             2 * np.pi * window_function)
-        if high_cut_freq is None:
-            high_cut_freq = rospy.get_param('~high_cut_freq', 250)
-        if high_cut_freq > data_sampling_rate / 2:
-            rospy.logerr('Set high_cut_freq lower than {} Hz'.format(
-                data_sampling_rate / 2))
-        if low_cut_freq is None:
-            low_cut_freq = rospy.get_param('~low_cut_freq', 0)
         self.freq = np.fft.fftfreq(
             self.data_buffer.data_buffer_len, d=1./data_sampling_rate)
-        self.cutoff_mask = np.where(
-            (low_cut_freq <= self.freq) & (self.freq <= high_cut_freq),
-            True, False)
         # How many times fft is executed in one second
         # fft_exec_rate equals to output spectrogram hz
         self.fft_exec_rate = rospy.get_param('~fft_exec_rate', 50)
@@ -52,12 +37,8 @@ class DataToSpectrum(object):
         # Publisher and Subscriber
         self.pub_spectrum = rospy.Publisher(
             '~spectrum', Spectrum, queue_size=1)
-        self.pub_spectrum_filtered = rospy.Publisher(
-            '~spectrum_filtered', Spectrum, queue_size=1)
         self.pub_log_spectrum = rospy.Publisher(
             '~log_spectrum', Spectrum, queue_size=1)
-        self.pub_log_spectrum_filtered = rospy.Publisher(
-            '~log_spectrum_filtered', Spectrum, queue_size=1)
 
         timer_kwargs = dict(
             period=rospy.Duration(1.0 / self.fft_exec_rate),
@@ -71,15 +52,12 @@ class DataToSpectrum(object):
             timer_kwargs['reset'] = True
         self.timer = rospy.Timer(**timer_kwargs)
 
-    def publish_spectrum(self, pub, pub_filtered, amplitude):
+    def publish_spectrum(self, pub, amplitude):
         spectrum_msg = Spectrum()
         spectrum_msg.header.stamp = rospy.Time.now()
         spectrum_msg.amplitude = amplitude
         spectrum_msg.frequency = self.freq
         pub.publish(spectrum_msg)
-        spectrum_msg.amplitude = amplitude[self.cutoff_mask]
-        spectrum_msg.frequency = self.freq[self.cutoff_mask]
-        pub_filtered.publish(spectrum_msg)
 
     def timer_cb(self, timer):
         if len(self.data_buffer) != self.data_buffer.data_buffer_len:
@@ -89,7 +67,6 @@ class DataToSpectrum(object):
         fft = np.fft.fft(data * self.window_function)
         self.publish_spectrum(
             self.pub_spectrum,
-            self.pub_spectrum_filtered,
             np.abs(fft / (self.data_buffer.data_buffer_len / 2)),
             # Usual "amplitude spectrum" is np.abs(fft),
             # but we use the above equation to get "amplitude"
@@ -98,7 +75,6 @@ class DataToSpectrum(object):
         )
         self.publish_spectrum(
             self.pub_log_spectrum,
-            self.pub_log_spectrum_filtered,
             np.log(np.abs(fft)),
             # Usually, log is applied to "power spectrum" (np.abs(fft)**2):
             # np.log(np.abs(fft)**2), 20*np.log10(np.abs(fft)), ...

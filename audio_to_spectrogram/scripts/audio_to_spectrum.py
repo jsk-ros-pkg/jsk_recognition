@@ -13,8 +13,6 @@ class AudioToSpectrum(DataToSpectrum):
     def __init__(self):
         super(AudioToSpectrum, self).__init__(
             data_buffer=AudioBuffer.from_rosparam(auto_start=True),
-            high_cut_freq=rospy.get_param('~high_cut_freq', 800),
-            low_cut_freq=rospy.get_param('~low_cut_freq', 1),  # remove 0 Hz
         )
 
 

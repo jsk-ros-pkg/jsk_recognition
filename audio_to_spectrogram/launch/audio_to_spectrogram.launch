@@ -1,5 +1,5 @@
 <!-- data flow  -->
-<!-- audio -> spectrum -> spectrogram -->
+<!-- audio -> spectrum -> filtered spectrum -> spectrogram -->
 
 <launch>
 
@@ -13,7 +13,7 @@
   <arg name="fft_sampling_period" default="0.3" />
   <arg name="fft_exec_rate" default="50" />
   <arg name="high_cut_freq" default="800" />
-  <arg name="low_cut_freq" default="1" />
+  <arg name="low_cut_freq" default="1" />  <!-- default: remove 0Hz because this component is meaningless in audio -->
   <arg name="spectrogram_period" default="5" />
   <arg name="gui" default="true" />
 
@@ -38,9 +38,17 @@
       mic_sampling_rate: $(arg mic_sampling_rate)
       fft_sampling_period: $(arg fft_sampling_period)
       bitdepth: $(arg bitdepth)
+      fft_exec_rate: $(arg fft_exec_rate)
+    </rosparam>
+  </node>
+
+  <!-- filter log spectrum -->
+  <node pkg="audio_to_spectrogram" type="spectrum_filter.py" name="log_spectrum_filter" respawn="true">
+    <remap from="~input" to="audio_to_spectrum/log_spectrum" />
+    <rosparam subst_value="true">
+      data_sampling_rate: $(arg mic_sampling_rate)
       high_cut_freq: $(arg high_cut_freq)
       low_cut_freq: $(arg low_cut_freq)
-      fft_exec_rate: $(arg fft_exec_rate)
     </rosparam>
   </node>
 
@@ -62,12 +70,12 @@
   </group>
 
   <include file="$(find audio_to_spectrogram)/launch/spectrum_plot.launch">
-    <arg name="spectrum" value="audio_to_spectrum/log_spectrum_filtered" />
+    <arg name="spectrum" value="log_spectrum_filter/output" />
     <arg name="gui" value="$(arg gui)" />
   </include>
 
   <include file="$(find audio_to_spectrogram)/launch/spectrum_to_spectrogram.launch">
-    <arg name="spectrum" value="audio_to_spectrum/log_spectrum_filtered" />
+    <arg name="spectrum" value="log_spectrum_filter/output" />
     <arg name="spectrogram_period" value="$(arg spectrogram_period)" />
     <arg name="gui" value="$(arg gui)" />
   </include>

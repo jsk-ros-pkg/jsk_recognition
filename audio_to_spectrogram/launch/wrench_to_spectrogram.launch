@@ -1,0 +1,89 @@
+<!-- data flow  -->
+<!-- WrenchStamped (vector) -> scalar -> spectrum -> spectrogram -->
+
+<launch>
+
+  <arg name="how_to_get_scalar" default="element_extraction" />
+  <arg name="target_element" default="force.z" />
+  <arg name="data_sampling_rate" default="500" />
+  <arg name="wrench_topic" default="/ft_sensor" />
+  <arg name="fft_sampling_period" default="0.3" />
+  <arg name="fft_exec_rate" default="50" />
+  <arg name="high_cut_freq" default="250" />
+  <arg name="low_cut_freq" default="0" />
+  <arg name="spectrogram_period" default="5" />
+  <arg name="gui" default="true" />
+
+  <arg name="SCALAR_TOPIC" value="wrench_to_scalar/output" />
+
+  <arg if="$(eval arg('how_to_get_scalar') == 'element_extraction')"
+       name="WRENCH2SCALAR" value="m.wrench.$(arg target_element)" />
+  <arg if="$(eval arg('how_to_get_scalar') == 'force_norm')"
+       name="WRENCH2SCALAR" value="numpy.linalg.norm([m.wrench.force.x, m.wrench.force.y, m.wrench.force.z])" />
+  <arg if="$(eval arg('how_to_get_scalar') == 'torque_norm')"
+       name="WRENCH2SCALAR" value="numpy.linalg.norm([m.wrench.torque.x, m.wrench.torque.y, m.wrench.torque.z])" />
+
+  <node name="wrench_to_scalar"
+        pkg="topic_tools" type="transform"
+        args="$(arg wrench_topic) $(arg SCALAR_TOPIC) std_msgs/Float64 '$(arg WRENCH2SCALAR)' --wait-for-start"
+        respawn="true" />
+
+  <arg name="EXPRESSION_TO_GET_DATA" value="m.data" />
+  <arg name="IS_INTEGER" value="false" />  <!-- std_msgs/Float64/data is not integer -->
+  <arg name="IS_SIGNED" value="true" />  <!-- std_msgs/Float64/data is signed -->
+  <arg name="BITDEPTH" value="64" />  <!-- std_msgs/Float64/data is 64-bit -->
+  <arg name="N_CHANNEL" value="1" />  <!-- std_msgs/Float64/data is not array -->
+  <arg name="TARGET_CHANNEL" value="0" />  <!-- std_msgs/Float64/data is not array -->
+
+  <!-- convert scalar topic to spectrum topic -->
+  <node pkg="audio_to_spectrogram" type="data_to_spectrum.py" name="data_to_spectrum" respawn="true">
+    <remap from="~input" to="$(arg SCALAR_TOPIC)" />
+    <rosparam subst_value="true">
+      expression_to_get_data: $(arg EXPRESSION_TO_GET_DATA)
+      data_sampling_rate: $(arg data_sampling_rate)
+      fft_sampling_period: $(arg fft_sampling_period)
+      is_integer: $(arg IS_INTEGER)
+      is_signed: $(arg IS_SIGNED)
+      bitdepth: $(arg BITDEPTH)
+      n_channel: $(arg N_CHANNEL)
+      target_channel: $(arg TARGET_CHANNEL)
+      high_cut_freq: $(arg high_cut_freq)
+      low_cut_freq: $(arg low_cut_freq)
+      fft_exec_rate: $(arg fft_exec_rate)
+    </rosparam>
+  </node>
+
+  <!-- publish amplitude image -->
+  <node name="data_amplitude_plot"
+        pkg="audio_to_spectrogram" type="data_amplitude_plot.py" output="screen">
+    <remap from="~input" to="$(arg SCALAR_TOPIC)" />
+    <rosparam subst_value="true">
+      expression_to_get_data: $(arg EXPRESSION_TO_GET_DATA)
+      data_sampling_rate: $(arg data_sampling_rate)
+      is_integer: $(arg IS_INTEGER)
+      is_signed: $(arg IS_SIGNED)
+      bitdepth: $(arg BITDEPTH)
+      n_channel: $(arg N_CHANNEL)
+      target_channel: $(arg TARGET_CHANNEL)
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node pkg="image_view" type="image_view" name="data_amplitude_view"  >
+      <remap from="image" to="data_amplitude_plot/output/viz" />
+    </node>
+  </group>
+
+  <include file="$(find audio_to_spectrogram)/launch/spectrum_plot.launch">
+    <arg name="spectrum" value="data_to_spectrum/spectrum_filtered" />
+    <arg name="plot_amp_max" value="0.2" />
+    <arg name="gui" value="$(arg gui)" />
+  </include>
+
+  <include file="$(find audio_to_spectrogram)/launch/spectrum_to_spectrogram.launch">
+    <arg name="spectrum" value="data_to_spectrum/log_spectrum_filtered" />
+    <arg name="spectrogram_period" value="$(arg spectrogram_period)" />
+    <arg name="gui" value="$(arg gui)" />
+  </include>
+
+</launch>

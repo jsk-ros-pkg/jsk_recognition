@@ -1,0 +1,33 @@
+<launch>
+
+  <arg name="spectrum" />
+  <arg name="spectrogram_height" default="300"/>
+  <arg name="spectrogram_width" default="300"/>
+  <arg name="spectrogram_period" default="5"/>
+  <arg name="gui" default="true" />
+  <arg name="do_dynamic_scaling" default="true"/>  <!-- default: set all pixels between 0 and 255 -->
+  <arg name="colormap" default="2"/>  <!-- default: jet colormap -->
+
+  <!-- convert spectrum topic to spectrogram topic -->
+  <node pkg="audio_to_spectrogram" type="spectrum_to_spectrogram.py" name="spectrum_to_spectrogram" respawn="true">
+    <remap from="~spectrum" to="$(arg spectrum)" />
+    <rosparam subst_value="true">
+      image_height: $(arg spectrogram_height)
+      image_width: $(arg spectrogram_width)
+      spectrogram_period: $(arg spectrogram_period)
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <!-- visualize spectrogram -->
+    <!-- you can get spectrogram image topic from /spectrogram_view/output-->
+    <node pkg="image_view" type="image_view" name="spectrogram_view"  >
+      <remap from="image" to="spectrum_to_spectrogram/spectrogram" />
+      <rosparam subst_value="true">
+        do_dynamic_scaling: $(arg do_dynamic_scaling)
+        colormap: $(arg colormap)
+      </rosparam>
+    </node>
+  </group>
+
+</launch>

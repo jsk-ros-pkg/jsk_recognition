@@ -76,6 +76,7 @@
 
   <include file="$(find audio_to_spectrogram)/launch/spectrum_plot.launch">
     <arg name="spectrum" value="log_spectrum_filter/output" />
+    <arg name="plotter_name" value="log_spectrum_plot" />
     <arg name="gui" value="$(arg gui)" />
   </include>
 

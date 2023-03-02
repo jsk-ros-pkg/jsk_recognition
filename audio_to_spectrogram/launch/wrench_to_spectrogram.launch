@@ -89,7 +89,16 @@
 
   <include file="$(find audio_to_spectrogram)/launch/spectrum_plot.launch">
     <arg name="spectrum" value="scalar_to_spectrum/normalized_half_spectrum" />
+    <arg name="plotter_name" value="normalized_half_spectrum_plot" />
     <arg name="plot_amp_max" value="0.2" />
+    <arg name="gui" value="$(arg gui)" />
+  </include>
+
+  <include file="$(find audio_to_spectrogram)/launch/spectrum_plot.launch">
+    <arg name="spectrum" value="log_spectrum_filter/output" />
+    <arg name="plotter_name" value="log_spectrum_plot" />
+    <arg name="plot_amp_min" value="-10.0" />
+    <arg name="plot_amp_max" value="10.0" />
     <arg name="gui" value="$(arg gui)" />
   </include>
 

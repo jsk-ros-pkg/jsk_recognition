@@ -9,7 +9,9 @@
   <arg name="colormap" default="2"/>  <!-- default: jet colormap -->
 
   <!-- convert spectrum topic to spectrogram topic -->
-  <node pkg="audio_to_spectrogram" type="spectrum_to_spectrogram.py" name="spectrum_to_spectrogram" respawn="true">
+  <node name="spectrum_to_spectrogram"
+        pkg="audio_to_spectrogram" type="spectrum_to_spectrogram.py"
+        respawn="true">
     <remap from="~spectrum" to="$(arg spectrum)" />
     <rosparam subst_value="true">
       image_height: $(arg spectrogram_height)

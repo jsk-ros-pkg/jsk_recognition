@@ -37,6 +37,8 @@ class DataToSpectrum(object):
         # Publisher and Subscriber
         self.pub_spectrum = rospy.Publisher(
             '~spectrum', Spectrum, queue_size=1)
+        self.pub_norm_half_spectrum = rospy.Publisher(
+            '~normalized_half_spectrum', Spectrum, queue_size=1)
         self.pub_log_spectrum = rospy.Publisher(
             '~log_spectrum', Spectrum, queue_size=1)
 
@@ -52,30 +54,47 @@ class DataToSpectrum(object):
             timer_kwargs['reset'] = True
         self.timer = rospy.Timer(**timer_kwargs)
 
-    def publish_spectrum(self, pub, amplitude):
+    def publish_spectrum(self, pub, stamp, amp, freq):
         spectrum_msg = Spectrum()
-        spectrum_msg.header.stamp = rospy.Time.now()
-        spectrum_msg.amplitude = amplitude
-        spectrum_msg.frequency = self.freq
+        spectrum_msg.header.stamp = stamp
+        spectrum_msg.amplitude = amp
+        spectrum_msg.frequency = freq
         pub.publish(spectrum_msg)
 
     def timer_cb(self, timer):
         if len(self.data_buffer) != self.data_buffer.data_buffer_len:
             return
         data = self.data_buffer.read()
+        stamp = rospy.Time.now()
         # Calc spectrum by fft
         fft = np.fft.fft(data * self.window_function)
         self.publish_spectrum(
             self.pub_spectrum,
-            np.abs(fft / (self.data_buffer.data_buffer_len / 2)),
-            # Usual "amplitude spectrum" is np.abs(fft),
-            # but we use the above equation to get "amplitude"
-            # consistent with the amplitude of the original signal.
+            stamp,
+            np.abs(fft),
+            self.freq,
+            # Usual "amplitude spectrum".
+            # https://ryo-iijima.com/fftresult/
+        )
+        self.publish_spectrum(
+            self.pub_norm_half_spectrum,
+            stamp,
+            np.abs(fft[self.freq >= 0] /
+                   (self.data_buffer.data_buffer_len / 2.0)),
+            self.freq[self.freq >= 0],
+            # Spectrum which is "half"
+            # (having non-negative frequencies (0Hz-Nyquist frequency))
+            # and is "normalized"
+            # (consistent with the amplitude of the original signal)
+            # https://ryo-iijima.com/fftresult/
+            # https://stackoverflow.com/questions/63211851/why-divide-the-output-of-numpy-fft-by-n
             # https://github.com/jsk-ros-pkg/jsk_recognition/issues/2761#issue-1550715400
         )
         self.publish_spectrum(
             self.pub_log_spectrum,
+            stamp,
             np.log(np.abs(fft)),
+            self.freq,
             # Usually, log is applied to "power spectrum" (np.abs(fft)**2):
             # np.log(np.abs(fft)**2), 20*np.log10(np.abs(fft)), ...
             # But we use the above equation for simplicity.

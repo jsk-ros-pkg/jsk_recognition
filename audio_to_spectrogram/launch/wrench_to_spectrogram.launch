@@ -10,7 +10,7 @@
   <arg name="fft_sampling_period" default="0.3" />
   <arg name="fft_exec_rate" default="50" />
   <arg name="high_cut_freq" default="250" />
-  <arg name="low_cut_freq" default="0" />
+  <arg name="low_cut_freq" default="5" />  <!-- default: remove constant offset of force torque sensor (e.g., end effector's weight) which is bad for spectrogram color variety -->
   <arg name="spectrogram_period" default="5" />
   <arg name="gui" default="true" />
 
@@ -36,7 +36,9 @@
   <arg name="TARGET_CHANNEL" value="0" />  <!-- std_msgs/Float64/data is not array -->
 
   <!-- convert scalar topic to spectrum topic -->
-  <node pkg="audio_to_spectrogram" type="data_to_spectrum.py" name="scalar_to_spectrum" respawn="true">
+  <node name="scalar_to_spectrum"
+        pkg="audio_to_spectrogram" type="data_to_spectrum.py"
+        respawn="true">
     <remap from="~input" to="$(arg SCALAR_TOPIC)" />
     <rosparam subst_value="true">
       expression_to_get_data: $(arg EXPRESSION_TO_GET_DATA)
@@ -51,18 +53,10 @@
     </rosparam>
   </node>
 
-  <!-- filter spectrum -->
-  <node pkg="audio_to_spectrogram" type="spectrum_filter.py" name="spectrum_filter" respawn="true">
-    <remap from="~input" to="scalar_to_spectrum/spectrum" />
-    <rosparam subst_value="true">
-      data_sampling_rate: $(arg data_sampling_rate)
-      high_cut_freq: $(arg high_cut_freq)
-      low_cut_freq: $(arg low_cut_freq)
-    </rosparam>
-  </node>
-
   <!-- filter log spectrum -->
-  <node pkg="audio_to_spectrogram" type="spectrum_filter.py" name="log_spectrum_filter" respawn="true">
+  <node name="log_spectrum_filter"
+        pkg="audio_to_spectrogram" type="spectrum_filter.py"
+        respawn="true">
     <remap from="~input" to="scalar_to_spectrum/log_spectrum" />
     <rosparam subst_value="true">
       data_sampling_rate: $(arg data_sampling_rate)
@@ -73,7 +67,8 @@
 
   <!-- publish amplitude image -->
   <node name="data_amplitude_plot"
-        pkg="audio_to_spectrogram" type="data_amplitude_plot.py" output="screen">
+        pkg="audio_to_spectrogram" type="data_amplitude_plot.py"
+        output="screen">
     <remap from="~input" to="$(arg SCALAR_TOPIC)" />
     <rosparam subst_value="true">
       expression_to_get_data: $(arg EXPRESSION_TO_GET_DATA)
@@ -93,7 +88,7 @@
   </group>
 
   <include file="$(find audio_to_spectrogram)/launch/spectrum_plot.launch">
-    <arg name="spectrum" value="spectrum_filter/output" />
+    <arg name="spectrum" value="scalar_to_spectrum/normalized_half_spectrum" />
     <arg name="plot_amp_max" value="0.2" />
     <arg name="gui" value="$(arg gui)" />
   </include>

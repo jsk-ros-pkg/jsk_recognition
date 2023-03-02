@@ -65,7 +65,14 @@
     </rosparam>
   </node>
 
-  <!-- publish amplitude image -->
+  <!-- convert spectrum topic to spectrogram topic -->
+  <include file="$(find audio_to_spectrogram)/launch/spectrum_to_spectrogram.launch">
+    <arg name="spectrum" value="log_spectrum_filter/output" />
+    <arg name="spectrogram_period" value="$(arg spectrogram_period)" />
+    <arg name="gui" value="$(arg gui)" />
+  </include>
+
+  <!-- visualize amplitude image -->
   <node name="data_amplitude_plot"
         pkg="audio_to_spectrogram" type="data_amplitude_plot.py"
         output="screen">
@@ -80,31 +87,24 @@
       target_channel: $(arg TARGET_CHANNEL)
     </rosparam>
   </node>
-
   <group if="$(arg gui)">
     <node pkg="image_view" type="image_view" name="data_amplitude_view"  >
       <remap from="image" to="data_amplitude_plot/output/viz" />
     </node>
   </group>
 
+  <!-- visualize frequency vs amplitude image -->
   <include file="$(find audio_to_spectrogram)/launch/spectrum_plot.launch">
     <arg name="spectrum" value="scalar_to_spectrum/normalized_half_spectrum" />
     <arg name="plotter_name" value="normalized_half_spectrum_plot" />
     <arg name="plot_amp_max" value="0.2" />
     <arg name="gui" value="$(arg gui)" />
   </include>
-
   <include file="$(find audio_to_spectrogram)/launch/spectrum_plot.launch">
     <arg name="spectrum" value="log_spectrum_filter/output" />
     <arg name="plotter_name" value="log_spectrum_plot" />
     <arg name="plot_amp_min" value="-10.0" />
     <arg name="plot_amp_max" value="10.0" />
-    <arg name="gui" value="$(arg gui)" />
-  </include>
-
-  <include file="$(find audio_to_spectrogram)/launch/spectrum_to_spectrogram.launch">
-    <arg name="spectrum" value="log_spectrum_filter/output" />
-    <arg name="spectrogram_period" value="$(arg spectrogram_period)" />
     <arg name="gui" value="$(arg gui)" />
   </include>
 

@@ -56,7 +56,14 @@
     </rosparam>
   </node>
 
-  <!-- publish amplitude image -->
+  <!-- convert spectrum topic to spectrogram topic -->
+  <include file="$(find audio_to_spectrogram)/launch/spectrum_to_spectrogram.launch">
+    <arg name="spectrum" value="log_spectrum_filter/output" />
+    <arg name="spectrogram_period" value="$(arg spectrogram_period)" />
+    <arg name="gui" value="$(arg gui)" />
+  </include>
+
+  <!-- visualize amplitude image -->
   <node name="audio_amplitude_plot"
         pkg="audio_to_spectrogram" type="audio_amplitude_plot.py"
         output="screen">
@@ -67,22 +74,16 @@
       bitdepth: $(arg bitdepth)
     </rosparam>
   </node>
-
   <group if="$(arg gui)">
     <node pkg="image_view" type="image_view" name="audio_amplitude_view"  >
       <remap from="image" to="audio_amplitude_plot/output/viz" />
     </node>
   </group>
 
+  <!-- visualize frequency vs amplitude image -->
   <include file="$(find audio_to_spectrogram)/launch/spectrum_plot.launch">
     <arg name="spectrum" value="log_spectrum_filter/output" />
     <arg name="plotter_name" value="log_spectrum_plot" />
-    <arg name="gui" value="$(arg gui)" />
-  </include>
-
-  <include file="$(find audio_to_spectrogram)/launch/spectrum_to_spectrogram.launch">
-    <arg name="spectrum" value="log_spectrum_filter/output" />
-    <arg name="spectrogram_period" value="$(arg spectrogram_period)" />
     <arg name="gui" value="$(arg gui)" />
   </include>
 

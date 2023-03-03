@@ -69,7 +69,7 @@
     <!-- visualize spectrum -->
     <!-- Note that this is spectrum before noise subtraction -->
     <!-- <node pkg="audio_to_spectrogram" type="spectrum_plot.py" name="spectrum_plot"  > -->
-    <!--   <remap from="~spectrum" to="/audio_to_spectrum/log_spectrum_filtered" /> -->
+    <!--   <remap from="~spectrum" to="/spectrogram_source_filter/output" /> -->
     <!-- </node> -->
 
     <!-- visualize spectrogram -->

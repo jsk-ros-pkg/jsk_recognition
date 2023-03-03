@@ -8,10 +8,14 @@
   <arg name="bitdepth" default="16" />
   <arg name="mic_sampling_rate" default="16000" />
   <arg name="n_channel" default="1" />
+  <arg name="target_channel" default="0" />
   <arg name="device" default="hw:0,0" />
   <arg name="audio_topic" default="/audio" />
   <arg name="fft_sampling_period" default="0.3" />
   <arg name="fft_exec_rate" default="50" />
+  <arg name="audio_amp_plot_max_amp" default="10000.0" />
+  <arg name="audio_amp_plot_window_size" default="10.0" />
+  <arg name="audio_amp_plot_rate" default="10.0" />
   <arg name="spectrogram_source" default="audio_to_spectrum/log_spectrum" />
   <arg name="high_cut_freq" default="800" />
   <arg name="low_cut_freq" default="1" />  <!-- default: remove 0Hz because this component is meaningless in audio -->
@@ -34,18 +38,19 @@
   </node>
 
   <!-- convert audio topic to spectrum topic -->
-  <node name="audio_to_spectrum"
-        pkg="audio_to_spectrogram" type="audio_to_spectrum.py"
-        respawn="true">
-    <remap from="~audio" to="$(arg audio_topic)" />
-    <rosparam subst_value="true">
-      n_channel: $(arg n_channel)
-      mic_sampling_rate: $(arg mic_sampling_rate)
-      fft_sampling_period: $(arg fft_sampling_period)
-      bitdepth: $(arg bitdepth)
-      fft_exec_rate: $(arg fft_exec_rate)
-    </rosparam>
-  </node>
+  <include file="$(find audio_to_spectrogram)/launch/audio_to_spectrum.launch">
+    <arg name="audio_topic" value="$(arg audio_topic)" />
+    <arg name="n_channel" value="$(arg n_channel)" />
+    <arg name="target_channel" value="$(arg target_channel)" />
+    <arg name="mic_sampling_rate" value="$(arg mic_sampling_rate)" />
+    <arg name="fft_sampling_period" value="$(arg fft_sampling_period)" />
+    <arg name="bitdepth" value="$(arg bitdepth)" />
+    <arg name="fft_exec_rate" value="$(arg fft_exec_rate)" />
+    <arg name="audio_amp_plot_max_amp" value="$(arg audio_amp_plot_max_amp)" />
+    <arg name="audio_amp_plot_window_size" value="$(arg audio_amp_plot_window_size)" />
+    <arg name="audio_amp_plot_rate" value="$(arg audio_amp_plot_rate)" />
+    <arg name="gui" value="$(arg gui)" />
+  </include>
 
   <!-- convert spectrum topic to spectrogram topic -->
   <include file="$(find audio_to_spectrogram)/launch/spectrum_to_spectrogram.launch">
@@ -58,22 +63,5 @@
     <arg name="preprocessed_spectrum_plot_amp_max" value="$(arg preprocessed_spectrogram_source_plot_amp_max)" />
     <arg name="gui" value="$(arg gui)" />
   </include>
-
-  <!-- visualize amplitude image -->
-  <node name="audio_amplitude_plot"
-        pkg="audio_to_spectrogram" type="audio_amplitude_plot.py"
-        output="screen">
-    <remap from="~audio" to="$(arg audio_topic)" />
-    <rosparam subst_value="true">
-      n_channel: $(arg n_channel)
-      mic_sampling_rate: $(arg mic_sampling_rate)
-      bitdepth: $(arg bitdepth)
-    </rosparam>
-  </node>
-  <group if="$(arg gui)">
-    <node pkg="image_view" type="image_view" name="audio_amplitude_view"  >
-      <remap from="image" to="audio_amplitude_plot/output/viz" />
-    </node>
-  </group>
 
 </launch>

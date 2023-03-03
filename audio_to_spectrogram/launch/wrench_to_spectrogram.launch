@@ -1,5 +1,5 @@
 <!-- data flow  -->
-<!-- WrenchStamped (vector) -> scalar -> spectrum -> spectrogram -->
+<!-- WrenchStamped (structured data) -> scalar data -> spectrum -> spectrogram -->
 
 <launch>
 
@@ -9,15 +9,20 @@
   <arg name="wrench_topic" default="/ft_sensor" />
   <arg name="fft_sampling_period" default="0.3" />
   <arg name="fft_exec_rate" default="50" />
-  <arg name="spectrogram_source" default="scalar_to_spectrum/log_spectrum" />
+  <arg name="data_amp_plot_max_amp" default="10.0" />
+  <arg name="data_amp_plot_window_size" default="10.0" />
+  <arg name="data_amp_plot_rate" default="10.0" />
+  <arg name="spectrogram_source" default="data_to_spectrum/log_spectrum" />
   <arg name="high_cut_freq" default="250" />
   <arg name="low_cut_freq" default="5" />  <!-- default: remove constant offset of force torque sensor (e.g., end effector's weight) which is bad for spectrogram color variety -->
   <arg name="spectrogram_period" default="5" />
   <arg name="preprocessed_spectrogram_source_plot_amp_min" default="-10.0" />
   <arg name="preprocessed_spectrogram_source_plot_amp_max" default="10.0" />
+  <arg name="normalized_half_spectrum_plot_amp_min" default="0.0" />
+  <arg name="normalized_half_spectrum_plot_amp_max" default="0.2" />
   <arg name="gui" default="true" />
 
-  <arg name="SCALAR_TOPIC" value="wrench_to_scalar/output" />
+  <arg name="DATA_TOPIC" value="wrench_to_scalar_data/output" />
 
   <arg if="$(eval arg('how_to_get_scalar') == 'element_extraction')"
        name="WRENCH2SCALAR" value="m.wrench.$(arg target_element)" />
@@ -26,35 +31,28 @@
   <arg if="$(eval arg('how_to_get_scalar') == 'torque_norm')"
        name="WRENCH2SCALAR" value="numpy.linalg.norm([m.wrench.torque.x, m.wrench.torque.y, m.wrench.torque.z])" />
 
-  <node name="wrench_to_scalar"
+  <node name="wrench_to_scalar_data"
         pkg="topic_tools" type="transform"
-        args="$(arg wrench_topic) $(arg SCALAR_TOPIC) std_msgs/Float64 '$(arg WRENCH2SCALAR)' --wait-for-start"
+        args="$(arg wrench_topic) $(arg DATA_TOPIC) std_msgs/Float64 '$(arg WRENCH2SCALAR)' --wait-for-start"
         respawn="true" />
 
-  <arg name="EXPRESSION_TO_GET_DATA" value="m.data" />
-  <arg name="IS_INTEGER" value="false" />  <!-- std_msgs/Float64/data is not integer -->
-  <arg name="IS_SIGNED" value="true" />  <!-- std_msgs/Float64/data is signed -->
-  <arg name="BITDEPTH" value="64" />  <!-- std_msgs/Float64/data is 64-bit -->
-  <arg name="N_CHANNEL" value="1" />  <!-- std_msgs/Float64/data is not array -->
-  <arg name="TARGET_CHANNEL" value="0" />  <!-- std_msgs/Float64/data is not array -->
-
-  <!-- convert scalar topic to spectrum topic -->
-  <node name="scalar_to_spectrum"
-        pkg="audio_to_spectrogram" type="data_to_spectrum.py"
-        respawn="true">
-    <remap from="~input" to="$(arg SCALAR_TOPIC)" />
-    <rosparam subst_value="true">
-      expression_to_get_data: $(arg EXPRESSION_TO_GET_DATA)
-      data_sampling_rate: $(arg data_sampling_rate)
-      fft_sampling_period: $(arg fft_sampling_period)
-      is_integer: $(arg IS_INTEGER)
-      is_signed: $(arg IS_SIGNED)
-      bitdepth: $(arg BITDEPTH)
-      n_channel: $(arg N_CHANNEL)
-      target_channel: $(arg TARGET_CHANNEL)
-      fft_exec_rate: $(arg fft_exec_rate)
-    </rosparam>
-  </node>
+  <!-- convert data topic to spectrum topic -->
+  <include file="$(find audio_to_spectrogram)/launch/data_to_spectrum.launch">
+    <arg name="data_topic" value="$(arg DATA_TOPIC)" />
+    <arg name="expression_to_get_data" value="m.data" />  <!-- std_msgs/Float64 data field -->
+    <arg name="data_sampling_rate" value="$(arg data_sampling_rate)" />
+    <arg name="fft_sampling_period" value="$(arg fft_sampling_period)" />
+    <arg name="is_integer" value="false" />  <!-- std_msgs/Float64 data is not integer -->
+    <arg name="is_signed" value="true" />  <!-- std_msgs/Float64 data is signed -->
+    <arg name="bitdepth" value="64" />  <!-- std_msgs/Float64 data has 64 bits -->
+    <arg name="n_channel" value="1" />  <!-- std_msgs/Float64 data is not array -->
+    <arg name="target_channel" value="0" />  <!-- std_msgs/Float64 data is not array -->
+    <arg name="fft_exec_rate" value="$(arg fft_exec_rate)" />
+    <arg name="data_amp_plot_max_amp" value="$(arg data_amp_plot_max_amp)" />
+    <arg name="data_amp_plot_window_size" value="$(arg data_amp_plot_window_size)" />
+    <arg name="data_amp_plot_rate" value="$(arg data_amp_plot_rate)" />
+    <arg name="gui" value="$(arg gui)" />
+  </include>
 
   <!-- convert spectrum topic to spectrogram topic -->
   <include file="$(find audio_to_spectrogram)/launch/spectrum_to_spectrogram.launch">
@@ -68,32 +66,13 @@
     <arg name="gui" value="$(arg gui)" />
   </include>
 
-  <!-- visualize amplitude image -->
-  <node name="data_amplitude_plot"
-        pkg="audio_to_spectrogram" type="data_amplitude_plot.py"
-        output="screen">
-    <remap from="~input" to="$(arg SCALAR_TOPIC)" />
-    <rosparam subst_value="true">
-      expression_to_get_data: $(arg EXPRESSION_TO_GET_DATA)
-      data_sampling_rate: $(arg data_sampling_rate)
-      is_integer: $(arg IS_INTEGER)
-      is_signed: $(arg IS_SIGNED)
-      bitdepth: $(arg BITDEPTH)
-      n_channel: $(arg N_CHANNEL)
-      target_channel: $(arg TARGET_CHANNEL)
-    </rosparam>
-  </node>
-  <group if="$(arg gui)">
-    <node pkg="image_view" type="image_view" name="data_amplitude_view"  >
-      <remap from="image" to="data_amplitude_plot/output/viz" />
-    </node>
-  </group>
-
-  <!-- visualize frequency vs amplitude image -->
+  <!-- visualize frequency vs amplitude image of normalized half spectrum -->
+  <!-- Unlike audio, normalized amplitude is meaningful in force torque sensor (the same magnitude as the real force/torque) -->
   <include file="$(find audio_to_spectrogram)/launch/spectrum_plot.launch">
-    <arg name="spectrum" value="scalar_to_spectrum/normalized_half_spectrum" />
+    <arg name="spectrum" value="data_to_spectrum/normalized_half_spectrum" />
     <arg name="plotter_name" value="normalized_half_spectrum_plot" />
-    <arg name="plot_amp_max" value="0.2" />
+    <arg name="plot_amp_min" value="$(arg normalized_half_spectrum_plot_amp_min)" />
+    <arg name="plot_amp_max" value="$(arg normalized_half_spectrum_plot_amp_max)" />
     <arg name="gui" value="$(arg gui)" />
   </include>
 

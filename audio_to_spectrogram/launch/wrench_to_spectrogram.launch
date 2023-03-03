@@ -1,5 +1,5 @@
 <!-- data flow  -->
-<!-- WrenchStamped (vector) -> scalar -> spectrum -> filtered spectrum -> spectrogram -->
+<!-- WrenchStamped (vector) -> scalar -> spectrum -> spectrogram -->
 
 <launch>
 
@@ -9,9 +9,12 @@
   <arg name="wrench_topic" default="/ft_sensor" />
   <arg name="fft_sampling_period" default="0.3" />
   <arg name="fft_exec_rate" default="50" />
+  <arg name="spectrogram_source" default="scalar_to_spectrum/log_spectrum" />
   <arg name="high_cut_freq" default="250" />
   <arg name="low_cut_freq" default="5" />  <!-- default: remove constant offset of force torque sensor (e.g., end effector's weight) which is bad for spectrogram color variety -->
   <arg name="spectrogram_period" default="5" />
+  <arg name="preprocessed_spectrogram_source_plot_amp_min" default="-10.0" />
+  <arg name="preprocessed_spectrogram_source_plot_amp_max" default="10.0" />
   <arg name="gui" default="true" />
 
   <arg name="SCALAR_TOPIC" value="wrench_to_scalar/output" />
@@ -53,22 +56,15 @@
     </rosparam>
   </node>
 
-  <!-- filter log spectrum -->
-  <node name="log_spectrum_filter"
-        pkg="audio_to_spectrogram" type="spectrum_filter.py"
-        respawn="true">
-    <remap from="~input" to="scalar_to_spectrum/log_spectrum" />
-    <rosparam subst_value="true">
-      data_sampling_rate: $(arg data_sampling_rate)
-      high_cut_freq: $(arg high_cut_freq)
-      low_cut_freq: $(arg low_cut_freq)
-    </rosparam>
-  </node>
-
   <!-- convert spectrum topic to spectrogram topic -->
   <include file="$(find audio_to_spectrogram)/launch/spectrum_to_spectrogram.launch">
-    <arg name="spectrum" value="log_spectrum_filter/output" />
+    <arg name="spectrum" value="$(arg spectrogram_source)" />
+    <arg name="data_sampling_rate" value="$(arg data_sampling_rate)" />
+    <arg name="high_cut_freq" value="$(arg high_cut_freq)" />
+    <arg name="low_cut_freq" value="$(arg low_cut_freq)" />
     <arg name="spectrogram_period" value="$(arg spectrogram_period)" />
+    <arg name="preprocessed_spectrum_plot_amp_min" value="$(arg preprocessed_spectrogram_source_plot_amp_min)" />
+    <arg name="preprocessed_spectrum_plot_amp_max" value="$(arg preprocessed_spectrogram_source_plot_amp_max)" />
     <arg name="gui" value="$(arg gui)" />
   </include>
 
@@ -98,13 +94,6 @@
     <arg name="spectrum" value="scalar_to_spectrum/normalized_half_spectrum" />
     <arg name="plotter_name" value="normalized_half_spectrum_plot" />
     <arg name="plot_amp_max" value="0.2" />
-    <arg name="gui" value="$(arg gui)" />
-  </include>
-  <include file="$(find audio_to_spectrogram)/launch/spectrum_plot.launch">
-    <arg name="spectrum" value="log_spectrum_filter/output" />
-    <arg name="plotter_name" value="log_spectrum_plot" />
-    <arg name="plot_amp_min" value="-10.0" />
-    <arg name="plot_amp_max" value="10.0" />
     <arg name="gui" value="$(arg gui)" />
   </include>
 

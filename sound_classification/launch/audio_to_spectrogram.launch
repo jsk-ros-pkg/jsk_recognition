@@ -59,7 +59,7 @@
   <!-- mono spectrogram -> preprocessed mono spectrogram -->
   <!-- Spectral subtraction by spectral subtraction method -->
   <node pkg="sound_classification" type="preprocess_gray_image.py" name="preprocess_gray_image" >
-    <remap from="~input" to="/spectrum_to_spectrogram/spectrogram" />
+    <remap from="~input" to="spectrum_to_spectrogram/spectrogram" />
   </node>
 
   <!-- End: Data conversion -->
@@ -69,12 +69,12 @@
     <!-- visualize spectrum -->
     <!-- Note that this is spectrum before noise subtraction -->
     <!-- <node pkg="audio_to_spectrogram" type="spectrum_plot.py" name="spectrum_plot"  > -->
-    <!--   <remap from="~spectrum" to="/spectrogram_source_filter/output" /> -->
+    <!--   <remap from="~spectrum" to="spectrogram_source_filter/output" /> -->
     <!-- </node> -->
 
     <!-- visualize spectrogram -->
     <node pkg="image_view" type="image_view" name="spectrogram_view"  >
-      <remap from="image" to="/preprocess_gray_image/output_normalized" />
+      <remap from="image" to="preprocess_gray_image/output_normalized" />
       <rosparam>
         <!-- set all pixels between 0 and 255 -->
         do_dynamic_scaling: true

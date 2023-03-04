@@ -706,7 +706,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
                         cv2.fillConvexPoly(roi2, polygon - np.array([left, top]), color)
                         cv2.addWeighted(roi, 0.4, roi2, 0.6, 0.0, dst=roi)
                     #
-                    offset += len(self.index2handname) / 2
+                    offset += int(len(self.index2handname) / 2)
 
         return img
 
@@ -812,8 +812,8 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         for i, heatmap in enumerate(hmaps):
             conf = heatmap.max()
             cds = np.array(np.where(heatmap==conf)).flatten().tolist()
-            py = cy + cds[0] - hand_bgr.shape[0] / 2
-            px = cx + cds[1] - hand_bgr.shape[1] / 2
+            py = cy + cds[0] - int(hand_bgr.shape[0] / 2)
+            px = cx + cds[1] - int(hand_bgr.shape[1] / 2)
             keypoints.append({'x': px, 'y': py, 'score': conf,
                               'limb': self.index2handname[idx_offset+i]})
         return keypoints

@@ -121,6 +121,8 @@
   <!-- ALPHABETICAL ORDER -->
 
   <!-- ALPHABETICAL ORDER -->
+  <test_depend>compressed_depth_image_transport</test_depend>
+  <test_depend>compressed_image_transport</test_depend>
   <test_depend>jsk_tools</test_depend>
   <test_depend>roslaunch</test_depend>
   <test_depend>roslint</test_depend>

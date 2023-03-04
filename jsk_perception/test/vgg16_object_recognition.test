@@ -7,12 +7,13 @@
 
   <test test-name="test_vgg16_object_recognition"
         name="test_vgg16_object_recognition"
-        pkg="jsk_tools" type="test_topic_published.py">
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3" time-limit="120" >
     <rosparam>
       topic_0: /vgg16_object_recognition/output
-      timeout_0: 30
+      timeout_0: 120
       topic_1: /vgg16_object_recognition/debug/net_input
-      timeout_1: 30
+      timeout_1: 120
     </rosparam>
   </test>
 

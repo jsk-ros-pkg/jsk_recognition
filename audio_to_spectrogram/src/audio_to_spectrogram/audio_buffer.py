@@ -16,7 +16,7 @@ class AudioBuffer(DataBuffer):
 
         super(AudioBuffer, self).__init__(
             topic_name=topic_name,
-            expr_to_get_data='m.data',
+            expr_to_get_data='m.data',  # field of audio_common_msgs/AudioData
             input_sample_rate=input_sample_rate,
             window_size=window_size,
             is_integer=True,

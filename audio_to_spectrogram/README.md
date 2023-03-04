@@ -95,7 +95,9 @@ roslaunch audio_to_spectrogram sample_audio_to_spectrogram.launch
   - ### Parameters
     - `~expression_to_get_data` (`String`, default: `m.data`)
 
-      Python expression to get data from the input message "m". For example, if your input is `std_msgs/Float64`, it is `m.data`.
+      Python expression to get data from the input message `m`. For example, if your input is `std_msgs/Float64`, it is `m.data`.  
+      Just accessing a field of `m` is recommended.  
+      If you want to do a complex calculation (e.g., using `numpy`), use `transform` of `topic_tools` before this node.
 
     - `~data_sampling_rate` (`Int`, default: `500`)
 
@@ -254,7 +256,9 @@ roslaunch audio_to_spectrogram sample_audio_to_spectrogram.launch
   - ### Parameters
     - `~expression_to_get_data` (`String`, default: `m.data`)
 
-      Python expression to get data from the input message "m"
+      Python expression to get data from the input message `m`. For example, if your input is `std_msgs/Float64`, it is `m.data`.  
+      Just accessing a field of `m` is recommended.  
+      If you want to do a complex calculation (e.g., using `numpy`), use `transform` of `topic_tools` before this node.
 
     - `~data_sampling_rate` (`Int`, default: `500`)
 

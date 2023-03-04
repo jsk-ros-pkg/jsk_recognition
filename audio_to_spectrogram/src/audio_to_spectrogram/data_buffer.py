@@ -142,7 +142,7 @@ class DataBuffer(object):
             m = self.input_fn(m)
         data = eval(self.expr_to_get_data)
         data_type = type(data)
-        if data_type is str:
+        if data_type is bytes:
             data_buffer = np.frombuffer(data, dtype=self.dtype)
         elif (data_type is list) or (data_type is tuple):
             data_buffer = np.fromiter(data, dtype=self.dtype)

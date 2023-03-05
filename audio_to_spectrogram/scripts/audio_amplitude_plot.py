@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import rospy
-import sensor_msgs.msg
 
 from audio_to_spectrogram import AudioBuffer
 from audio_to_spectrogram import DataAmplitudePlot

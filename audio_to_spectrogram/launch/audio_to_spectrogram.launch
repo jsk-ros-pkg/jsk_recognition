@@ -5,6 +5,7 @@
 
   <arg name="launch_audio_capture" default="true" />
 
+  <arg name="audio_capture_ns" default="/" />
   <arg name="bitdepth" default="16" />
   <arg name="mic_sampling_rate" default="16000" />
   <arg name="n_channel" default="1" />
@@ -25,7 +26,8 @@
   <arg name="gui" default="true" />
 
   <!-- Publish audio topic from microphone -->
-  <node name="audio_capture" pkg="audio_capture" type="audio_capture"
+  <node name="audio_capture" ns="$(arg audio_capture_ns)"
+        pkg="audio_capture" type="audio_capture"
         if="$(arg launch_audio_capture)"
         respawn="true">
     <rosparam subst_value="true">

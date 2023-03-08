@@ -1,6 +1,6 @@
 # audio_to_spectrogram
 
-This package converts audio data to spectrum and spectrogram data.
+This package converts audio data (or other time-series data) to spectrum and spectrogram data.
 
 # Usage
 By following command, you can publish audio, spectrum and spectrogram topics. Please set correct args for your microphone configuration, such as mic\_sampling\_rate or bitdepth.
@@ -17,6 +17,16 @@ roslaunch audio_to_spectrogram sample_audio_to_spectrogram.launch
 |Audio Amplitude|Spectrum|Spectrogram|
 |---|---|---|
 |<img src="docs/images/audio_amplitude.jpg" width="429">|![](https://user-images.githubusercontent.com/19769486/82075694-9a7ac300-9717-11ea-899c-db6119a76d52.png)|![](https://user-images.githubusercontent.com/19769486/82075685-96e73c00-9717-11ea-9abc-e6e74104d666.png)|
+
+You can also convert data other than audio to spectrum and spectrogram data using this package.  
+Here is an example using rosbag of a force torque sensor sensing drill vibration.
+```bash
+roslaunch audio_to_spectrogram sample_wrench_to_spectrogram.launch
+```
+
+|Z-axis Force Amplitude|Normalized Half Spectrum|Spectrogram Source Spectrum|Spectrogram|
+|---|---|---|---|
+|<img src="docs/images/wrench_amplitude.jpg">|<img src="docs/images/wrench_normalized_half_spectrum.jpg">|<img src="docs/images/wrench_spectrogram_source.jpg">|<img src="docs/images/wrench_spectrogram.jpg">|
 
 # Scripts
 

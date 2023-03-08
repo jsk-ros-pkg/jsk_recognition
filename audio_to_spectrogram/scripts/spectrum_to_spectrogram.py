@@ -4,6 +4,8 @@ import cv2
 from cv_bridge import CvBridge
 import numpy as np
 import rospy
+from distutils.version import LooseVersion
+import pkg_resources
 
 from jsk_recognition_msgs.msg import Spectrum
 from sensor_msgs.msg import Image
@@ -34,10 +36,18 @@ class SpectrumToSpectrogram(object):
             '~spectrogram', Image, queue_size=1)
         publish_rate = rospy.get_param(
             '~publish_rate', float(self.image_width / self.spectrogram_period))
-        rospy.Timer(
-            rospy.Duration(
-                1.0 / publish_rate),
-            self.timer_cb)
+
+        timer_kwargs = dict(
+            period=rospy.Duration(1.0 / publish_rate),
+            callback=self.timer_cb,
+            oneshot=False,
+        )
+        if (LooseVersion(pkg_resources.get_distribution('rospy').version) >=
+                LooseVersion('1.12.0')) and rospy.get_param('/use_sim_time', None):
+            # on >=kinetic, it raises ROSTimeMovedBackwardsException
+            # when we use rosbag play --loop.
+            timer_kwargs['reset'] = True
+        self.timer = rospy.Timer(**timer_kwargs)
         self.bridge = CvBridge()
 
     def audio_cb(self, msg):

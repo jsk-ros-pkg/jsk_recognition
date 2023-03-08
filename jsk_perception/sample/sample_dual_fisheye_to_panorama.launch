@@ -6,6 +6,8 @@
   <arg name="fovd" default="185.0" doc="Camera's Field of View [degree]" />
   <arg name="save_unwarped" default="false" doc="Save unwarped fisheye images. This is useful to create MLS grids." />
   <arg name="resolution_mode" default="high" doc="Resolution mode, 'high' or 'low'" />
+  <arg name="vital_rate" default="1.0" doc="Rate to determine if the nodelet is in health." />
+  <arg name="image_transport" default="raw"/>
 
   <node name="dual_fisheye_to_panorama"
         pkg="nodelet" type="nodelet"
@@ -15,10 +17,12 @@
     <param name="refine_align" value="$(arg refine_align)" />
     <param name="fovd" value="$(arg fovd)" />
     <param name="save_unwarped" value="$(arg save_unwarped)" />
+    <param name="image_transport" value="$(arg image_transport)"/>
     <rosparam
         command="load"
         file="$(find jsk_perception)/config/dual_fisheye_to_panorama/$(arg resolution_mode)_resolution_config.yaml"
         subst_value="true"/>
+    <param name="vital_rate" value="$(arg vital_rate)" />
   </node>
 
   <group if="$(arg gui)">

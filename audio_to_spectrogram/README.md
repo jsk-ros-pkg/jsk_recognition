@@ -327,14 +327,18 @@ roslaunch audio_to_spectrogram sample_wrench_to_spectrogram.launch
       Spectrum data calculated from audio by FFT.
 
   - ### Parameters
-    - `~plot_amp_min` (`Double`, default: `0.0`)
+    - `~min_amp` (`Double`, default: `0.0`)
 
-      Minimum value of amplitude in plot
+      Minimum value of amplitude in plot.
 
-    - `~plot_amp_max` (`Double`, default: `20.0`)
+    - `~max_amp` (`Double`, default: `20.0`)
 
-      Maximum value of amplitude in plot
+      Maximum value of amplitude in plot.
 
     - `~queue_size` (`Int`, default: `1`)
 
-      Queue size of spectrum subscriber
+      Queue size of spectrum subscriber.
+
+    - `~max_rate` (`Double`, default: `-1`)
+
+      Maximum publish rate [Hz] of frequency vs amplitude plot image. Setting this value low reduces CPU load. `-1` means no maximum limit.

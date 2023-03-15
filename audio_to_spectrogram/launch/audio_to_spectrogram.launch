@@ -21,8 +21,10 @@
   <arg name="high_cut_freq" default="800" />
   <arg name="low_cut_freq" default="1" />  <!-- default: remove 0Hz because this component is meaningless in audio -->
   <arg name="spectrogram_period" default="5" />
-  <arg name="preprocessed_spectrogram_source_plot_amp_min" default="0.0" />
-  <arg name="preprocessed_spectrogram_source_plot_amp_max" default="20.0" />
+  <arg name="preprocessed_spectrogram_source_plot_min_amp" default="0.0" />
+  <arg name="preprocessed_spectrogram_source_plot_max_amp" default="20.0" />
+  <arg name="preprocessed_spectrogram_source_plot_queue_size" default="1" />
+  <arg name="preprocessed_spectrogram_source_plot_max_rate" default="-1" />
   <arg name="gui" default="true" />
 
   <!-- Publish audio topic from microphone -->
@@ -61,8 +63,10 @@
     <arg name="high_cut_freq" value="$(arg high_cut_freq)" />
     <arg name="low_cut_freq" value="$(arg low_cut_freq)" />
     <arg name="spectrogram_period" value="$(arg spectrogram_period)" />
-    <arg name="preprocessed_spectrum_plot_amp_min" value="$(arg preprocessed_spectrogram_source_plot_amp_min)" />
-    <arg name="preprocessed_spectrum_plot_amp_max" value="$(arg preprocessed_spectrogram_source_plot_amp_max)" />
+    <arg name="preprocessed_spectrum_plot_min_amp" value="$(arg preprocessed_spectrogram_source_plot_min_amp)" />
+    <arg name="preprocessed_spectrum_plot_max_amp" value="$(arg preprocessed_spectrogram_source_plot_max_amp)" />
+    <arg name="preprocessed_spectrum_plot_queue_size" value="$(arg preprocessed_spectrogram_source_plot_queue_size)" />
+    <arg name="preprocessed_spectrum_plot_max_rate" value="$(arg preprocessed_spectrogram_source_plot_max_rate)" />
     <arg name="gui" value="$(arg gui)" />
   </include>
 

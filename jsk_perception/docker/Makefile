@@ -19,25 +19,26 @@ PARAMURLS = parameter_urls.txt
 # OFA parameters
 OFAPARAMFILES = $(foreach param, $(OFAPARAMS), $(PARAMDIR)/$(param))
 
+all: ofa
+
 # TODO check command wget exists, nvidia-driver version
 
 # TODO add clip
-download:
+$(PARAMDIR)/.download:
 	@if [ ! -d $(PARAMDIR) ]; then\
 		mkdir -p $(PARAMDIR); \
 	fi
 	wget -c -i $(PARAMURLS) -P $(PARAMDIR)
+	touch $(PARAMDIR)/.download
 
-ofa: download
+ofa: $(PARAMDIR)/.download
 	$(BUILDIMAGE) $(OFAPROJECT) -t $(OFAIMAGE) -f $(OFAPROJECT)/Dockerfile
-
-all: ofa
 
 # TODO add clip, glip
 clean:
 	@$(REMOVEIMAGE) $(OFAIMAGE)
 
 wipe: clean
-	rm -fr $(CONFIGDIR)
+	rm -fr $(PARAMDIR)
 
-.PHONY: clean wipe
+.PHONY: clean wipe ofa

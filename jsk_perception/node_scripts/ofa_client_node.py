@@ -69,7 +69,7 @@ class OFAClientNode(object):
         req = json.dumps({"image": img_byte,
                           "queries": queries}).encode("utf-8")
         try:
-            response = self.send_request("caption", req) # FIXME or vqa_gen
+            response = self.send_request(self.vqa_type, req)
         except ConnectionError as e:
             rospy.logwarn_once("Cannot establish the connection with API server. Is it running?")
         else:
@@ -114,7 +114,7 @@ class OFAClientNode(object):
         req = json.dumps({"image": img_byte,
                           "queries": queries}).encode("utf-8")
         try:
-            response = self.send_request("caption", req) # FIXME or vqa_gen
+            response = self.send_request(self.vqa_type, req) # FIXME or vqa_gen
             if response.status_code == 200:
                 json_result = json.loads(response.text)["results"]
                 for res in json_result:

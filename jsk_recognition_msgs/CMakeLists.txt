@@ -116,7 +116,7 @@ add_service_files(FILES
 
 add_action_files(FILES
   VQATask.action
-  ClipTask.action
+  ClassificationTask.action
   )
 
 generate_messages(

@@ -11,7 +11,7 @@ import os
 
 class VQAClient(object):
     def __init__(self):
-        self.ac_caption_client = actionlib.SimpleActionClient("/vqa/caption_server", VQATaskAction)
+        self.ac_caption_client = actionlib.SimpleActionClient("/vqa/vqa_server", VQATaskAction)
         self._bridge = CvBridge()
 
     def request(self, questions_path, image_path, output_dir=None):

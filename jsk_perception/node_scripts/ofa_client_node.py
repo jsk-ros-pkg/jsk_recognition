@@ -36,24 +36,17 @@ class OFAClientNode(object):
         # inference server configuration
         self.host = rospy.get_param("~host", default="localhost")
         self.port = rospy.get_param("~port", default=8888)
-        # Caption
-        self.caption_image_sub = rospy.Subscriber("~caption_image", Image,
-                                                  callback=self.caption_topic_cb, queue_size=1, buff_size=2**26)
-        self.caption_result_pub = rospy.Publisher("~caption_result", VQAResult, queue_size=1)
-        self.caption_image_pub = rospy.Publisher("~caption_result/image", Image, queue_size=1) # add asked image publisher for slow inference
-        self.caption_multi_vis_pub = rospy.Publisher("~caption_result/visualize", String, queue_size=1)
-        self.caption_as = actionlib.SimpleActionServer("~caption_server",
-                                                       VQATaskAction,
-                                                       execute_cb=self.caption_action_cb,
-                                                       auto_start=False)
-        self.caption_as.start()
-        self.default_caption_img = None
-        # VQA
+        self.vqa_type = rospy.get_param("~vqa_type", default="caption") # caption, vqa_gen. caption is better than vqa_gen in OFA
+        if self.vqa_type not in ["caption", "vqa_gen"]:
+            raise RuntimeError("VQA type must be caption or vqa_gen")
+        # subscriber
         self.vqa_image_sub = rospy.Subscriber("~vqa_image", Image,
                                               callback=self.vqa_topic_cb, queue_size=1, buff_size=2**26)
+        # publisher
         self.vqa_result_pub = rospy.Publisher("~vqa_result", VQAResult, queue_size=1)
         self.vqa_image_pub = rospy.Publisher("~vqa_result/image", Image, queue_size=1) # add asked image publisher for slow inference
         self.vqa_multi_vis_pub = rospy.Publisher("~vqa_result/visualize", String, queue_size=1)
+        # action server
         self.vqa_as = actionlib.SimpleActionServer("~vqa_server",
                                                    VQATaskAction,
                                                    execute_cb=self.vqa_action_cb,
@@ -67,81 +60,6 @@ class OFAClientNode(object):
         self.questions = config.questions
         return config
 
-    def caption_topic_cb(self, data):
-        self.default_caption_img = data
-        if not self.questions:
-            return
-        self.default_caption_img = data
-        img_byte = ros_img_to_base(data, self._bridge)
-        queries = self.questions.split(";")
-        req = json.dumps({"image": img_byte,
-                          "queries": queries}).encode("utf-8")
-        try:
-            response = self.send_request("caption", req)
-        except ConnectionError:
-            rospy.logwarn_once("Cannot establish the connection with API server. Is it running?")
-        else:
-            if response.status_code == 200:
-                json_result = json.loads(response.text)
-                msg = VQAResult()
-                msg.image = data
-                multi_vis = ""
-                for result in json_result["results"]:
-                    result_msg = QuestionAndAnswerText()
-                    result_msg.question = result["question"]
-                    result_msg.answer = result["answer"]
-                    msg.result.append(result_msg)
-                    multi_vis += "Q:{}\n A:{}\n".format(result["question"],
-                                                        result["answer"])
-                self.caption_image_pub.publish(data)
-                self.caption_result_pub.publish(msg)
-                self.caption_multi_vis_pub.publish(multi_vis)
-            else:
-                rospy.logerr("Invalid http status code: {}".format(str(response.status_code)))
-
-    def caption_action_cb(self, goal):
-        feedback = VQATaskFeedback()
-        result = VQATaskResult()
-        success = True
-        if goal.image.data and (not goal.image.compressed_image):
-            image = goal.image
-            result.result.image = image
-        elif (not goal.image.data) and goal.compressed_image.data:
-            image = goal.compressed_image
-            result.result.compressed_image = image
-        elif goal.image.data and goal.image.compressed_image:
-            rospy.logerr("Both image and compressed image can not be added simultaneously")
-            return
-        else:
-            rospy.loginfo("No images in goal message, so using subscribed image topic instead")
-            image = self.default_caption_img
-            result.result.image = image
-        img_byte = ros_img_to_base(image, self._bridge)
-        # create request
-        queries = goal.questions if goal.questions else self.questions.split(";")
-        req = json.dumps({"image": img_byte,
-                          "queries": queries}).encode("utf-8")
-        try:
-            response = self.send_request("caption", req)
-            if response.status_code == 200:
-                json_result = json.loads(response.text)["results"]
-                for res in json_result:
-                    msg = QuestionAndAnswerText()
-                    msg.question = res["question"]
-                    msg.answer = res["answer"]
-                    result.result.result.append(msg)
-            else:
-                rospy.logerr("Invalid http status code: {}".format(str(response.status_code)))
-                return
-        except Exception as e:
-            rospy.logerr(str(e))
-            feedback.status = str(e)
-            success = False
-        finally:
-            self.caption_as.publish_feedback(feedback)
-            result.done = success
-            self.caption_as.set_succeeded(result)
-
     def vqa_topic_cb(self, data):
         self.default_vqa_img = data
         if not self.questions:
@@ -151,7 +69,7 @@ class OFAClientNode(object):
         req = json.dumps({"image": img_byte,
                           "queries": queries}).encode("utf-8")
         try:
-            response = self.send_request("vqa_gen", req)
+            response = self.send_request("caption", req) # FIXME or vqa_gen
         except ConnectionError as e:
             rospy.logwarn_once("Cannot establish the connection with API server. Is it running?")
         else:
@@ -177,24 +95,33 @@ class OFAClientNode(object):
         success = True
         feedback = VQATaskFeedback()
         result = VQATaskResult()
-        if goal.image.data:
-            result.result.image = goal.image
+        if goal.image.data and (not goal.compressed_image.data):
+            image = goal.image
+            result.result.image = image
+        elif (not goal.image.data) and goal.compressed_image.data:
+            image = goal.compressed_image
+            result.result.compressed_image = image
+        elif goal.image.data and goal.image.compressed_image.data:
+            rospy.logerr("Both image and compressed image can not be added simultaneously")
+            return
         else:
             rospy.loginfo("No images in goal message, so using subscribed image topic instead")
-            result.result.image = self.default_vqa_img
-        img_byte = ros_img_to_base(result.result.image, self._bridge)
-        # creqte request
+            image = self.default_vqa_img
+            result.result.image = image
+        img_byte = ros_img_to_base(image, self._bridge)
+        # create request
+        queries = goal.questions if goal.questions else self.questions.split(";")
         req = json.dumps({"image": img_byte,
-                          "queries": goal.queries}).encode("utf-8")
+                          "queries": queries}).encode("utf-8")
         try:
-            response = self.send_request("vqa_gen", req)
+            response = self.send_request("caption", req) # FIXME or vqa_gen
             if response.status_code == 200:
                 json_result = json.loads(response.text)["results"]
                 for res in json_result:
                     msg = QuestionAndAnswerText()
                     msg.question = res["question"]
                     msg.answer = res["answer"]
-                    result.result.append(msg)
+                    result.result.result.append(msg)
             else:
                 rospy.logerr("Invalid http status code: {}".format(str(response.status_code)))
                 return

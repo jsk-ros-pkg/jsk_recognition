@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser(description="JSK Vision and Language API runner
 parser.add_argument("model", choices=CONTAINERS.keys(),
                     help="Vision and Language model you want to run", type=str)
 parser.add_argument("-p", "--port", default=8888, help="Port of the API server", type=int)
-parser.add_argument("--ofa_task", default="all",
+parser.add_argument("--ofa_task", default="caption",
                     help="Tasks to be loaded in OFA. OFA loads all tasks by default and requires large amount of GPU RAM")
 parser.add_argument("--ofa_model_scale", default="huge", choices=OFA_MODEL_SCALES,
                     help="Scale of parameters to be read in OFA. Use huge by default")

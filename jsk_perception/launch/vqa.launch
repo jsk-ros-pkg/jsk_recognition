@@ -4,14 +4,12 @@
   <arg name="port" default="8888" />
   <arg name="gui" default="false" />
   <arg name="run_api" default="false" />
-  <arg name="CAPTION_INPUT_IMAGE" default="caption_image" />
   <arg name="VQA_INPUT_IMAGE" default="vqa_image" />
 
   <node name="ofa_api" pkg="jsk_perception" type="run_jsk_vil_api" output="log"
         args="ofa -p $(arg port)" if="$(arg run_api)" />
 
   <node name="vqa" pkg="jsk_perception" type="ofa_client_node.py" output="screen">
-    <remap from="~caption_image" to="$(arg CAPTION_INPUT_IMAGE)" />
     <remap from="~vqa_image" to="$(arg VQA_INPUT_IMAGE)" />
     <rosparam subst_value="true">
       host: $(arg host)

@@ -12,8 +12,12 @@ CLIPIMAGE = jsk-clip-server
 BUILDIMAGE = docker build
 REMOVEIMAGE = docker rmi
 # configuration directories
-CONFIGDIR = $(shell echo ${HOME}/.jsk_vil_apis)
-PARAMDIR = $(CONFIGDIR)/params
+ifdef ROS_HOME
+CONFIGDIR = $(ROS_HOME)/data/jsk_perception
+else
+CONFIGDIR = $(HOME)/.ros/data/jsk_perception
+endif
+PARAMDIR = $(CONFIGDIR)/vil_params
 # Download files
 PARAMURLS = parameter_urls.txt
 # OFA parameters

@@ -28,8 +28,8 @@ if __name__ == "__main__":
     if import_rospy and len(sys.argv) != len(rospy.myargv()): # roslaunch
         rospy.init_node("jsk_vil_docker_manager")
     port_option = "{}:8080".format(str(args.port))
-    _home = os.environ["HOME"]
-    mount_option = "{}:/var/mount".format(os.path.join(_home, ".jsk_vil_apis"))
+    _ros_home = os.getenv("ROS_HOME", os.path.join(os.environ["HOME"],".ros"))
+    mount_option = "{}:/var/mount/params".format(os.path.join(_ros_home, "data", "jsk_perception", "vil_params"))
     docker_image = "{}:latest".format(CONTAINERS[args.model])
 
     cmd = ["docker", "run", "--rm", "-it", "--gpus", "all",

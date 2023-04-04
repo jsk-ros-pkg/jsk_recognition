@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <arg name="host" default="localhost" />
+  <arg name="port" default="8888" />
+  <arg name="gui" default="false" />
+  <arg name="run_api" default="false" />
+  <arg name="CLASSIFICATION_INPUT_IMAGE" default="image" />
+
+  <node name="classification_api" pkg="jsk_perception" type="run_jsk_vil_api" output="log"
+        args="clip -p $(arg port)" if="$(arg run_api)" />
+
+  <node name="classification" pkg="jsk_perception" type="classification_client_node.py" output="screen">
+    <remap from="~image" to="$(arg CLASSIFICATION_INPUT_IMAGE)" />
+    <rosparam subst_value="true">
+      host: $(arg host)
+      port: $(arg port)
+    </rosparam>
+  </node>
+
+  <include file="$(find jsk_perception)/launch/ofa_gui.launch" if="$(arg gui)" />
+
+</launch>

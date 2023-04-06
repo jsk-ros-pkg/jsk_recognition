@@ -13,13 +13,18 @@ from jsk_recognition_msgs.msg import ClassificationResult
 import json
 import requests
 import rospy
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, CompressedImage
 from std_msgs.msg import String
 
 bridge = CvBridge()
 
 def ros_img_to_base(ros_img):
-    cv_img = bridge.imgmsg_to_cv2(ros_img, desired_encoding="bgr8")
+    if type(ros_img) is CompressedImage:
+        cv_img = bridge.compressed_imgmsg_to_cv2(ros_img, desired_encoding="bgr8")
+    elif type(ros_img) is Image:
+        cv_img = bridge.imgmsg_to_cv2(ros_img, desired_encoding="bgr8")
+    else:
+        raise RuntimeError("Unknown type {}".format(type(ros_img)))
     # convert to base64
     encimg = cv2.imencode(".png", cv_img)[1]
     img_str = encimg.tostring()
@@ -53,35 +58,22 @@ class ClipClientNode:
     def clip_topic_cb(self, data):
         img_byte = ros_img_to_base(data)
         queries = self.query.split(";")
-        req = json.dumps({"image": img_byte,
-                          "queries": queries}).encode("utf-8")
-        response = self.send_request(req)
-        results = json.loads(response.text)["results"]
-        if response.status_code == 200:
-            msg = ClassificationResult()
-            msg.header = data.header
-            labels = []
-            label_names = []
-            label_proba = []
-            probabilities = []
-            msg.classifier = 'clip'
-            msg.target_names = queries
-            for result in results:
-                labels.append(result["question"])
-                probabilities.append(float(result["probability"]))
-            # publish visualization message
-            labels = [label for _,label in sorted(zip(probabilities, labels), reverse=True)]
-            probabilities.sort(reverse=True)
-            msg.labels = list(range(len(labels)))
-            msg.label_names = labels
-            msg.probabilities = probabilities
-            vis_msg = ""
-            for i, label in enumerate(labels):
-                vis_msg += "{}: {:.2f}% ".format(label, probabilities[i]*100)
-            print(vis_msg)
+
+        msg = self.get_classification_result(img_byte, queries)
+
+        if msg:
+            # publish debug image
             self.clip_image_pub.publish(data)
-            self.clip_vis_pub.publish(vis_msg)
+
+            # publish classification result
+            msg.header = data.header
             self.clip_result_pub.publish(msg)
+
+            # publish probabilities result as string
+            vis_msg = ""
+            for i, label in enumerate(msg.labels):
+                vis_msg += "{}: {:.2f}% ".format(label, msg.probabilities[i]*100)
+            self.clip_vis_pub.publish(vis_msg)
         else:
             rospy.logerr("Invalid http status code: {}".format(str(response.status_code)))
 
@@ -89,28 +81,25 @@ class ClipClientNode:
         success = True
         feedback = ClassificationTaskFeedback()
         result = ClassificationTaskResult()
-        if goal.image.data:
-            # result.image = goal.image
-            img_byte = ros_img_to_base(goal.image)
+        if goal.image.data and (not goal.compressed_image.data):
+            image = goal.image
+        elif (not goal.image.data) and goal.compressed_image.data:
+            image = goal.compressed_image
+        elif goal.image.data and goal.image.compressed_image.data:
+            rospy.logerr("Both image and compressed image can not be added simultaneously")
+            return
         else:
             rospy.loginfo("No images in goal message, so using subscribed image topic instead")
-            result.image = self.default_img
-            img_byte = ros_img_to_base(result.image)
+            image = self.default_img
+        img_byte = ros_img_to_base(image)
         # creqte request
         req = json.dumps({"image": img_byte,
                           "queries": goal.queries}).encode("utf-8")
         try:
-            response = self.send_request(req)
-            if response.status_code == 200:
-                result_dic = json.loads(response.text)["results"]
-                classification = ClassificationResult()
-                for r in result_dic:
-                    classification.labels.append(len(classification.label_names))
-                    classification.label_names.append(r["question"])
-                    classification.probabilities.append(float(r["probability"]))
-                classification.classifier = 'clip'
-                classification.target_names = goal.queries
-                result.result = classification
+            msg = self.get_classification_result(img_byte, goal.queries)
+            if msg:
+                msg.header = goal.image.header
+                result.result = msg
             else:
                 rospy.logerr("Invalid http status code: {}".format(str(response.status_code)))
                 return
@@ -122,6 +111,32 @@ class ClipClientNode:
             self.clip_as.publish_feedback(feedback)
             result.done = success
             self.clip_as.set_succeeded(result)
+
+
+    def get_classification_result(self, img_byte, queries):
+        req = json.dumps({"image": img_byte,
+                          "queries": queries}).encode("utf-8")
+        response = self.send_request(req)
+        if response.status_code == 200:
+            result_dic = json.loads(response.text)["results"]
+            labels = []
+            probabilities = []
+            for r in result_dic:
+                labels.append(r["question"])
+                probabilities.append(float(r["probability"]))
+            labels = [label for _,label in sorted(zip(probabilities, labels), reverse=True)]
+            probabilities.sort(reverse=True)
+            # build ClassificationResult message
+            msg = ClassificationResult()
+            msg.labels = list(range(len(labels)))
+            msg.label_names = labels
+            msg.probabilities = probabilities
+            msg.classifier = 'clip'
+            msg.target_names = queries
+            return msg
+        else:
+            rospy.logerr("Invalid http status code: {}".format(str(response.status_code)))
+            return None
 
     def send_request(self, content):
         url = "http://{}:{}/inference".format(self.host, str(self.port))

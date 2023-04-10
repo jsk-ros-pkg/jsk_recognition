@@ -34,11 +34,12 @@ class Inference:
             text_features = self.model.encode_text(text_inputs)
         image_features /= image_features.norm(dim=-1, keepdim=True)
         text_features /= text_features.norm(dim=-1, keepdim=True)
-        similarity = (100.0 * image_features @ text_features.T).softmax(dim=-1)
-        values, indices = similarity[0].topk(len(texts))
+        probability = (100.0 * image_features @ text_features.T).softmax(dim=-1)
+        similarity = (text_features.cpu().numpy() @ image_features.cpu().numpy().T).T[0]  # cosine similarity
+        values, indices = probability[0].topk(len(texts))
         results = {}
         for value, index in zip(values, indices):
-            results[texts[index]] = value.item()
+            results[texts[index]] = (value.item(), float(similarity[index]))
         return results
 
 # run
@@ -60,7 +61,7 @@ if __name__ == "__main__":
         infer_results = infer.infer(img, texts)
         results = []
         for q in infer_results:
-            results.append({"question": q, "probability": infer_results[q]})
+            results.append({"question": q, "probability": infer_results[q][0], "similarity": infer_results[q][1]})
         return Response(response=json.dumps({"results": results}), status=200)
     
     app.run("0.0.0.0", 8080, threaded=True)

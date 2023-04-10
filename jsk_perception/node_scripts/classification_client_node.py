@@ -71,8 +71,11 @@ class ClipClientNode:
 
             # publish probabilities result as string
             vis_msg = ""
-            for i, label in enumerate(msg.labels):
+            for i, label in enumerate(msg.label_names):
                 vis_msg += "{}: {:.2f}% ".format(label, msg.probabilities[i]*100)
+            vis_msg += "\n"
+            for i, label in enumerate(msg.label_names):
+                vis_msg += "{}: {:.2f}% ".format(label, msg.label_proba[i]*100)
             self.clip_vis_pub.publish(vis_msg)
         else:
             rospy.logerr("Invalid http status code: {}".format(str(response.status_code)))
@@ -121,16 +124,20 @@ class ClipClientNode:
             result_dic = json.loads(response.text)["results"]
             labels = []
             probabilities = []
+            similarities = []
             for r in result_dic:
                 labels.append(r["question"])
                 probabilities.append(float(r["probability"]))
+                similarities.append(float(r["similarity"]))
             labels = [label for _,label in sorted(zip(probabilities, labels), reverse=True)]
             probabilities.sort(reverse=True)
+            similarities.sort(reverse=True)
             # build ClassificationResult message
             msg = ClassificationResult()
             msg.labels = list(range(len(labels)))
             msg.label_names = labels
-            msg.probabilities = probabilities
+            msg.label_proba = similarities     # cosine similarities
+            msg.probabilities = probabilities   # sum(probabilities) is 1
             msg.classifier = 'clip'
             msg.target_names = queries
             return msg

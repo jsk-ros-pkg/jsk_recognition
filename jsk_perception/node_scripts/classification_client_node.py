@@ -34,10 +34,10 @@ class ClipClientNode:
         # clip task
         self.clip_image_sub = rospy.Subscriber("~image", Image,
                                                   callback=self.clip_topic_cb, queue_size=1, buff_size=2**26)
-        self.clip_result_pub = rospy.Publisher("~clip_result", ClassificationResult, queue_size=1)
-        self.clip_image_pub = rospy.Publisher("~clip_result/image", Image, queue_size=1) # add asked image publisher for slow inference
-        self.clip_vis_pub = rospy.Publisher("~clip_result/probabilities/visualize", String, queue_size=1)
-        self.clip_as = actionlib.SimpleActionServer("~clip_server",
+        self.clip_result_pub = rospy.Publisher("~classification_result", ClassificationResult, queue_size=1)
+        self.clip_image_pub = rospy.Publisher("~classification_result/image", Image, queue_size=1) # add asked image publisher for slow inference
+        self.clip_vis_pub = rospy.Publisher("~classification_result/probabilities/visualize", String, queue_size=1)
+        self.clip_as = actionlib.SimpleActionServer("~classification_server",
                                                     ClassificationTaskAction,
                                                     execute_cb=self.clip_action_cb,
                                                     auto_start=False)

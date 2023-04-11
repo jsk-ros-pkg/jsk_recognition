@@ -1,3 +1,1 @@
-sensor_msgs/Image image
-sensor_msgs/CompressedImage compressed_image
 jsk_recognition_msgs/QuestionAndAnswerText[] result

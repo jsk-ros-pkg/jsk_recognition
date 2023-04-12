@@ -6,7 +6,7 @@ import rospy
 from sensor_msgs.msg import Image
 
 def cb(image):
-    ac = actionlib.SimpleActionClient("/vqa/vqa_server" , jsk_recognition_msgs.msg.VQATaskAction)
+    ac = actionlib.SimpleActionClient("/vqa/inference_server" , jsk_recognition_msgs.msg.VQATaskAction)
     ac.wait_for_server()
     goal = jsk_recognition_msgs.msg.VQATaskGoal()
     goal.image = image

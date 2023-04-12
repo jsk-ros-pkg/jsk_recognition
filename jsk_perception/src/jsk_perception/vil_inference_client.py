@@ -141,8 +141,8 @@ class ClipClientNode(DockerInferenceClientBase):
 
     def topic_cb(self, data):
         if not self.config: rospy.logwarn("No queries"); return
-        if not self.config.query: rospy.logwarn("No queries"); return
-        queries = self.config.query.split(";")
+        if not self.config.queries: rospy.logwarn("No queries"); return
+        queries = self.config.queries.split(";")
         try:
             msg = self.inference(data, queries)
         except Exception: return

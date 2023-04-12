@@ -9,7 +9,7 @@
   <node name="classification_api" pkg="jsk_perception" type="run_jsk_vil_api" output="log"
         args="clip -p $(arg port)" if="$(arg run_api)" />
 
-  <node name="classification" pkg="jsk_perception" type="classification_client_node.py" output="screen">
+  <node name="classification" pkg="jsk_perception" type="classification_node.py" output="screen">
     <remap from="~image" to="$(arg CLASSIFICATION_INPUT_IMAGE)" />
     <rosparam subst_value="true">
       host: $(arg host)

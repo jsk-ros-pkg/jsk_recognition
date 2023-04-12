@@ -6,7 +6,8 @@ import rospy
 from sensor_msgs.msg import Image
 
 def cb(image):
-    ac = actionlib.SimpleActionClient("/clip/clip_server" , jsk_recognition_msgs.msg.ClassificationTaskAction)
+    ac = actionlib.SimpleActionClient("/classification/inference_server",
+                                      jsk_recognition_msgs.msg.ClassificationTaskAction)
     ac.wait_for_server()
     goal = jsk_recognition_msgs.msg.ClassificationTaskGoal()
     goal.image = image

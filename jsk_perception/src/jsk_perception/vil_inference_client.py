@@ -16,6 +16,7 @@ from jsk_recognition_msgs.msg import (ClassificationResult,
                                       QuestionAndAnswerText, VQAResult,
                                       VQATaskAction, VQATaskFeedback,
                                       VQATaskResult)
+from requests.exceptions import ConnectionError
 from sensor_msgs.msg import CompressedImage, Image
 from std_msgs.msg import String
 
@@ -53,7 +54,6 @@ class DockerInferenceClientBase(object):
         self.action_feedback = action_feedback
         self.action_result = action_result
         self.reconfigure_server = Server(server_config, self.config_cb)
-        self.config = None
         self.action_server.start()
 
     def ros_img_to_base(self, ros_img):
@@ -117,15 +117,16 @@ class DockerInferenceClientBase(object):
         url = "http://{}:{}/{}".format(self.host, str(self.port), self.app_name)
         try:
             response = requests.post(url, data=content)
-        except ConnectionError:
+        except ConnectionError as e:
             rospy.logwarn_once("Cannot establish the connection with API server. Is it running?")
-            return None
+            raise e
         else:
             if response.status_code == 200:
                 return response
             else:
-                rospy.logerr("Invalid http status code: {}".format(str(response.status_code)))
-                return None
+                err_msg = "Invalid http status code: {}".format(str(response.status_code))
+                rospy.logerr(err_msg)
+                raise RuntimeError(err_msg)
 
 
 class ClipClientNode(DockerInferenceClientBase):
@@ -142,7 +143,9 @@ class ClipClientNode(DockerInferenceClientBase):
         if not self.config: rospy.logwarn("No queries"); return
         if not self.config.query: rospy.logwarn("No queries"); return
         queries = self.config.query.split(";")
-        msg = self.inference(data, queries)
+        try:
+            msg = self.inference(data, queries)
+        except Exception: return
         # publish debug image
         self.image_pub.publish(data)
         # publish classification result
@@ -210,7 +213,6 @@ class OFAClientNode(DockerInferenceClientBase):
         response = self.send_request(req)
         json_result = json.loads(response.text)
         msg = self.result_topic_type()
-        msg.image = img_msg
         for result in json_result["results"]:
             result_msg = QuestionAndAnswerText()
             result_msg.question = result["question"]
@@ -219,10 +221,11 @@ class OFAClientNode(DockerInferenceClientBase):
         return msg
 
     def topic_cb(self, data):
-        if not self.config: rospy.logwarn("No questions"); return
         if not self.config.questions: rospy.logwarn("No questions"); return
         queries = self.config.questions.split(";")
-        msg = self.inference(data, queries)
+        try:
+            msg = self.inference(data, queries)
+        except Exception: return
         self.image_pub.publish(data)
         self.result_pub.publish(msg)
         vis = ""

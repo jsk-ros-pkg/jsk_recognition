@@ -37,6 +37,7 @@ The code is open source, and `available on github`_.
    checkerboard_detector/index
    imagesift/index
    jsk_perception/index
+   jsk_perception_3rdparty/index
    jsk_pcl_ros/index
    jsk_pcl_ros_utils/index
    jsk_recognition_msgs/index

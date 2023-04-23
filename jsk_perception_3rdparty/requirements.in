@@ -1,0 +1,2 @@
+pymatting==1.1.7  # for rembg
+onnxruntime==1.10.0  # for rembg

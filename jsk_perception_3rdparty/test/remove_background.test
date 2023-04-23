@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_perception_3rdparty)/sample/sample_remove_background.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_remove_background"
+        name="test_emove_background"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3" time-limit="60">
+    <rosparam>
+      topic_0: /remove_background/output
+      timeout_0: 30
+      topic_0: /remove_background/output/raw
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

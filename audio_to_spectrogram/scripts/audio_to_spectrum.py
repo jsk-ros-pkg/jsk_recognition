@@ -2,6 +2,8 @@
 
 import numpy as np
 import rospy
+from distutils.version import LooseVersion
+import pkg_resources
 
 from audio_common_msgs.msg import AudioData
 from jsk_recognition_msgs.msg import Spectrum
@@ -45,7 +47,18 @@ class AudioToSpectrum(object):
             '~spectrum', Spectrum, queue_size=1)
         self.pub_spectrum_filtered = rospy.Publisher(
             '~spectrum_filtered', Spectrum, queue_size=1)
-        rospy.Timer(rospy.Duration(1. / self.fft_exec_rate), self.timer_cb)
+
+        timer_kwargs = dict(
+            period=rospy.Duration(1.0 / self.fft_exec_rate),
+            callback=self.timer_cb,
+            oneshot=False,
+        )
+        if (LooseVersion(pkg_resources.get_distribution('rospy').version) >=
+                LooseVersion('1.12.0')) and rospy.get_param('/use_sim_time', None):
+            # on >=kinetic, it raises ROSTimeMovedBackwardsException
+            # when we use rosbag play --loop.
+            timer_kwargs['reset'] = True
+        self.timer = rospy.Timer(**timer_kwargs)
 
     def timer_cb(self, timer):
         if len(self.audio_buffer) != self.audio_buffer.audio_buffer_len:

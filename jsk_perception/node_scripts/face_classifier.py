@@ -1,15 +1,11 @@
 #!/usr/bin/env python
 
-from jsk_recognition_utils.face_recognizer import FaceRecognizer
-
-from jsk_recognition_msgs.msg import Rect
-from jsk_recognition_msgs.msg import RectArray
-from jsk_recognition_msgs.msg import Label
-from jsk_recognition_msgs.msg import LabelArray
-
-import rospy
 import cv_bridge
+import rospy
 from sensor_msgs.msg import Image
+
+from jsk_recognition_msgs.msg import Label, LabelArray, Rect, RectArray
+from jsk_recognition_utils.face_recognizer import FaceRecognizer
 
 
 class FaceClassifier:
@@ -28,7 +24,7 @@ class FaceClassifier:
         self.pub_rects = rospy.Publisher(
             '~output/rects', RectArray, queue_size=1)
         self.pub_labels = rospy.Publisher(
-            '~output/labels', LabelsArray, queue_size=1)
+            '~output/labels', LabelArray, queue_size=1)
 
     def callback(self, msg):
 
@@ -37,7 +33,7 @@ class FaceClassifier:
 
         msg_rects = RectArray()
         msg_rects.header = msg.header
-        msg_rects.rects = [Rect(x=loc[0], y=loc[1], width=loc[2]-loc[0], height=loc[3]-loc[1] for loc in locations]
+        msg_rects.rects = [Rect(x=loc[0], y=loc[1], width=loc[2]-loc[0], height=loc[3]-loc[1]) for loc in locations]
         msg_labels=LabelArray()
         msg_labels.header = msg.header
         msg_labels.labels = [Label(id=-1, name=name) for name in names]

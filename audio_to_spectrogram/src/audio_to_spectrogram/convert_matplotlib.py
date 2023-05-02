@@ -7,6 +7,7 @@ except ModuleNotFoundError:
 
 import numpy as np
 import PIL
+import PIL.Image
 
 
 def convert_matplotlib_to_img(fig):

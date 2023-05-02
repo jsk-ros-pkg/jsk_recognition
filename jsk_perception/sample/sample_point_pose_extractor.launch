@@ -1,0 +1,40 @@
+<launch>
+  <arg name="gui" default="true" />
+
+  <node name="raw_image_bgr"
+        pkg="jsk_perception" type="image_publisher.py">
+    <remap from="~output" to="~image_color" />
+    <remap from="~output/camera_info" to="~camera_info" />
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/image/items_in_shelf.jpg
+      encoding: bgr8
+      publish_info: true
+      fovx: 84.1
+      fovy: 53.8
+    </rosparam>
+  </node>
+
+  <node name="nodelet_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager" output="screen"/>
+
+  <node name="imagesift"
+        pkg="nodelet" type="nodelet"
+        args="load imagesift/ImageSift nodelet_manager">
+    <remap from="image" to="/raw_image_bgr/image_color"/>
+    <remap from="camera_info" to="/raw_image_bgr/camera_info" />
+  </node>
+
+  <node name="point_pose_extractor"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/PointPoseExtractor nodelet_manager"
+        respawn="false" output="screen" required="true" >
+    <rosparam subst_value="true">
+      template_filename: $(find jsk_perception)/sample/image/pai_no_mi.jpg
+      template_id: 0
+      object_width: 0.145
+      object_height: 0.128
+      viewer_window: $(arg gui)
+    </rosparam>
+  </node>
+</launch>

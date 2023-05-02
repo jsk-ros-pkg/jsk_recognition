@@ -22,7 +22,7 @@ Subscribing Topic
 Publishing Topic
 ----------------
 
-* ``~faces`` (``opencv_msgs/FaceArrayStamped``)
+* ``~faces`` (``opencv_apps/FaceArrayStamped``)
 
   Detected face positions, facial landmarks, emotions, presence of beard, sunglasses, and so on.
 

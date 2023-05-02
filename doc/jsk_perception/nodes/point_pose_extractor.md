@@ -8,7 +8,8 @@
 
 - `/ImageFeature0D` (`posedetection_msgs::ImageFeature0D`)
 
-  Image, camera and tempalte feature information. 
+  Image, camera and template feature information.
+  You can use [ImageShift](https://jsk-docs.readthedocs.io/projects/jsk_recognition/en/latest/imagesift/nodes/imagesift.html) to get it.
 
 ## Publishing Topics
 
@@ -30,61 +31,74 @@
 
 - `/tf` (`tf2_msgs/TFMessage`)
 
-  Detected Object Frame.
+  Detected Object Frame when `~publish_tf` is set to true.
 
 ## Parameters
 
-- `~template_filename` (str default: "/sample/opencv-logo2.png")
-  + path to template image
-- `~object_width` (float)
-  + Width of template image
-- `~object_height` (float)
-  + Height of template image
-- `~reprojection_threshold` (float default: 3.0)
-- `~distanceratio_threshold` (float default: 0.49)
-- `~error_threshold` (float default: 50.0)
-- `~theta_step` (float default: 5.0)
-- `~phi_step` (float default: 5.0)
-- `~viewer_window` (bool default: true)
-- `~window_name` (str default: "sample1")
-- `~autosize` (bool default: false)
-- `~publish_null_object_detection` (bool default: false)
-- `~publish_tf` (bool defaut: false)
- + If set to true, detected object pose is also broadcasted as tf frame.
-- `~child_frame_id` (string default: "matching")
- + frame_id of detected object when `~broadcast_tf` is set to true.
+- `~template_filename` (str default: `"/sample/opencv-logo2.png"`)
+
+  path to template image
+
+- `~object_width` (float default: `0.06`)
+
+  Width of template image
+  
+- `~object_height` (float default: `0.0739`)
+
+  Height of template image
+
+- `~relative_pose` (str default: `"0 0 0 0 0 0 1"`)
+
+  Coordinate of the object relative to the texture
+  
+- `~reprojection_threshold` (float default: `3.0`)
+- `~distanceratio_threshold` (float default: `0.49`)
+- `~error_threshold` (float default: `50.0`)
+- `~theta_step` (float default: `5.0`)
+- `~phi_step` (float default: `5.0`)
+- `~viewer_window` (bool default: `true`)
+- `~window_name` (str default: `"sample1"`)
+- `~autosize` (bool default: `false`)
+
+  The window size is automatically adjusted to fit the displayed image, and you cannot change the window size manually.
+
+- `~publish_null_object_detection` (bool default: `false`)
+- `~publish_tf` (bool defaut: `false`)
+
+  If set to true, detected object pose is also broadcasted as tf frame.
+
+- `~child_frame_id` (string default: `"matching"`)
+
+  frame_id of detected object when `~publish_tf` is set to true.
 
 ## Service 
 
-- `/SetTemplate` 
+- `/SetTemplate` (`SetTemplate`)
 
   Used to add another template.
 
+## Mouse Event
+
+![](images/point_pose_extractor_mouse.png)
+
+  Set template from viewer window.
+
+  To specify the range of template, left-click four corners clockwise from upper left. Selected points are reset by right-clicking.
+
+  After all four points are selected, you can input template's width, height and filename. The filename should have an extention.
+  
 ## Sample
 
 `sample_point_pose_extractor.launch`
-```
-<launch>
-  <node name="nodelet_manager"
-        pkg="nodelet" type="nodelet"
-        args="manager" />
-  <node name="imagesift"
-        pkg="nodelet" type="nodelet"
-        args="load imagesift/ImageSift nodelet_manager">
-    <remap from="image" to="<rgb camera image topic name>"/>
-    <remap from="camera_info" to="<rgb camera info topic name>" />
-  </node>
-  <node name="point_pose_extractor" pkg="jsk_perception" type="point_pose_extractor"
-        respawn="true" output="screen"/>
-</launch>
-``` 
 
 ```
-roslaunch sample_point_pose_extractor.launch  
+roslaunch jsk_perception sample_point_pose_extractor.launch
 rostopic echo /ObjectDetection
 ```
 
 ### Example of how to run set_template service 
+
+  `client.call` is available only after the node receives `ImageFeature0D`.
 
 ```
 #!/usr/bin/env python

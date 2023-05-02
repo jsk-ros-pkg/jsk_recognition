@@ -49,7 +49,15 @@ namespace jsk_pcl_ros_utils
     timer_.stop();
   }
 
-  void PointCloudToPCD::timerCallback (const ros::TimerEvent& event)
+  void PointCloudToPCD::timerCallback (const ros::TimerEvent& event) {
+    savePCD();
+  }
+
+  bool PointCloudToPCD::savePCDCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res) {
+    savePCD();
+  }
+
+  void PointCloudToPCD::savePCD()
   {
     pcl::PCLPointCloud2::ConstPtr cloud;
     cloud = ros::topic::waitForMessage<pcl::PCLPointCloud2>("input", *pnh_);
@@ -107,6 +115,7 @@ namespace jsk_pcl_ros_utils
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f = boost::bind(&PointCloudToPCD::configCallback, this, _1, _2);
     srv_->setCallback (f);
+    srv_save_pcd_server_ = pnh_->advertiseService("save_pcd", &PointCloudToPCD::savePCDCallback, this);
     tf_listener_ = jsk_recognition_utils::TfListenerSingleton::getInstance();
     if(binary_)
     {
@@ -133,7 +142,10 @@ namespace jsk_pcl_ros_utils
     compressed_ = config.compressed;
     fixed_frame_ = config.fixed_frame;
     duration_ = config.duration;
-    timer_ = pnh_->createTimer(ros::Duration(duration_), boost::bind(&PointCloudToPCD::timerCallback, this, _1));
+    timer_.stop();
+    if (duration_ > 0) {
+      timer_ = pnh_->createTimer(ros::Duration(duration_), boost::bind(&PointCloudToPCD::timerCallback, this, _1));
+    }
   }
 }
 

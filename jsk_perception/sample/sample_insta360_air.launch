@@ -27,6 +27,7 @@
   <arg name="panorama_resolution_mode" default="high" />
   <arg name="panorama_image_transport" default="raw"/>
 
+  <arg name="vital_rate" default="1.0" />
   <arg name="gui" default="true" />
   <arg name="launch_manager" default="true" />
   <arg name="manager" default="insta360_nodelet_manager" />
@@ -119,6 +120,7 @@
     <arg name="nodelet_command" default="$(arg nodelet_command)" />
     <arg name="resolution_mode" value="$(arg panorama_resolution_mode)" />
     <arg name="image_transport" value="$(arg panorama_image_transport)" />
+    <arg name="vital_rate" value="$(arg vital_rate)" />
   </include>
 
   <group if="$(arg gui)">

@@ -293,6 +293,7 @@
   <class name="jsk_perception/PointPoseExtractor"
          type="jsk_perception::PointPoseExtractor"
          base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_perception/RemoveBlurredFrames"
          type="jsk_perception::RemoveBlurredFrames"
          base_class_type="nodelet::Nodelet">

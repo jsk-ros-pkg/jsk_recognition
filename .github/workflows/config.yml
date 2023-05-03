@@ -14,7 +14,7 @@ jobs:
       matrix:
         include:
           - ROS_DISTRO: indigo
-            USE_DEB: true
+            USE_DEB: false
             NOT_TEST_INSTALL : true
             USE_JENKINS: true
             DOCKER_IMAGE_JENKINS: ros-ubuntu:14.04-pcl

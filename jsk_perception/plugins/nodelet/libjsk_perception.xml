@@ -302,4 +302,8 @@
          type="jsk_perception::VideoToScene"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_perception/SplitImage"
+         type="jsk_perception::SplitImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
 </library>

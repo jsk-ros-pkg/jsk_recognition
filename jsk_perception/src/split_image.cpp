@@ -50,9 +50,9 @@ namespace jsk_perception{
         for(int i=0; i<vertical_parts_; i++){
             for(int j=0; j<horizontal_parts_; j++){
                 std::string pub_name = "output/vertical0"
-                    + std::to_string(i)
+                    + boost::to_string(i)
                     + "/horizontal0"
-                    + std::to_string(j);
+                    + boost::to_string(j);
                 ros::Publisher pub_ = advertise<sensor_msgs::Image>(*pnh_, pub_name, 1);
                 pubs_.push_back(pub_);
             }

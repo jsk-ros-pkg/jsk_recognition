@@ -58,7 +58,10 @@
   </group>
 
   <!-- Split insta360 air image into 2 fisheye image -->
-  <node pkg="jsk_perception" name="split_image" type="split_image.py" output="screen">
+  <node name="split_image"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_perception/SplitImage"
+        respawn="true">
     <remap from="~input" to="/insta360/image_raw" />
     <rosparam>
       vertical_parts: 1

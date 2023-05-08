@@ -1,0 +1,20 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <param name="/use_sim_time" value="true" />
+  <node pkg="rosbag" name="rosbag_play" type="play"
+        args="$(find jsk_perception)/sample/data/sample_panorama_human_3d_detection.bag --clock --loop" />
+  <node pkg="image_transport" type="republish" name="panorama_decompress"
+        args="compressed in:=/dual_fisheye_to_panorama/output raw
+                         out:=/dual_fisheye_to_panorama/output" />
+  <include file="$(find jsk_perception)/launch/panorama_human_3d_detection.launch">
+    <arg name="launch_insta360" value="false" />
+    <arg name="launch_coral" value="false" />
+    <arg name="static_transform_publisher" value="false" />
+    <arg name="resize" value="true" />
+    <arg name="gui" value="true" />
+  </include>
+
+
+</launch>

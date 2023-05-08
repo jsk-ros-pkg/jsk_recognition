@@ -79,7 +79,7 @@
   <group ns="insta360" if="$(arg throttle)">
     <node name="throttle_camera_info"
           pkg="nodelet" type="nodelet"
-          args="standalone jsk_topic_tools/LightweightThrottle"
+          args="load jsk_topic_tools/LightweightThrottle /$(arg MANAGER)"
           respawn="true">
       <remap from="~input" to="camera_info"/>
       <remap from="~output" to="throttled/camera_info" />
@@ -87,7 +87,7 @@
     </node>
     <node name="throttle_rgb"
           pkg="nodelet" type="nodelet"
-          args="standalone jsk_topic_tools/LightweightThrottle"
+          args="load jsk_topic_tools/LightweightThrottle /$(arg MANAGER)"
           respawn="true">
       <remap from="~input" to="image_raw" />
       <remap from="~output" to="throttled/image_raw" />
@@ -95,7 +95,7 @@
     </node>
     <node name="throttle_rgb_compressed"
           pkg="nodelet" type="nodelet"
-          args="standalone jsk_topic_tools/LightweightThrottle"
+          args="load jsk_topic_tools/LightweightThrottle /$(arg MANAGER)"
           respawn="true">
       <remap from="~input" to="image_raw/compressed" />
       <remap from="~output" to="throttled/image_raw/compressed" />

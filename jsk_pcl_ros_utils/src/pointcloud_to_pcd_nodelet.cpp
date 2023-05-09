@@ -58,7 +58,7 @@ namespace jsk_pcl_ros_utils
       return;
     }
   
-    ROS_INFO ("Received %d data points in frame %s with the following fields: %s",
+    NODELET_INFO ("Received %d data points in frame %s with the following fields: %s",
             (int)cloud->width * cloud->height,
             cloud->header.frame_id.c_str (),
             pcl::getFieldsList (*cloud).c_str ());
@@ -67,7 +67,7 @@ namespace jsk_pcl_ros_utils
     Eigen::Quaternionf q = Eigen::Quaternionf::Identity ();
     if (!fixed_frame_.empty ()) {
         if (!tf_listener_->waitForTransform (fixed_frame_, cloud->header.frame_id, pcl_conversions::fromPCL (cloud->header).stamp, ros::Duration (duration_))) {
-        ROS_WARN("Could not get transform!");
+        NODELET_WARN("Could not get transform!");
         return;
       }
       tf::StampedTransform transform_stamped;
@@ -81,7 +81,7 @@ namespace jsk_pcl_ros_utils
   
     std::stringstream ss;
     ss << prefix_ << cloud->header.stamp << ".pcd";
-    ROS_INFO ("Data saved to %s", ss.str ().c_str ());
+    NODELET_INFO ("Data saved to %s", ss.str ().c_str ());
   
     pcl::PCDWriter writer;
     if(binary_)
@@ -112,16 +112,16 @@ namespace jsk_pcl_ros_utils
     {
       if(compressed_)
       {
-        ROS_INFO_STREAM ("Saving as binary compressed PCD");
+        NODELET_INFO("Saving as binary compressed PCD") ;
       }
       else
       {
-        ROS_INFO_STREAM ("Saving as binary PCD");
+        NODELET_INFO("Saving as binary PCD");
       }
     }
     else
     {
-      ROS_INFO_STREAM ("Saving as binary PCD");
+      NODELET_INFO("Saving as ASCII PCD");
     }
   }
 

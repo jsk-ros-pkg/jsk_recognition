@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <arg name="INPUT_IMAGE" />
+  <arg name="OUTPUT_IMAGE" default="$(arg INPUT_IMAGE)/output" />
+  <arg name="IMAGE_TRANSPORT" default="raw" />
+  <arg name="DEFAULT_NAMESPACE" default="video_to_scene" />
+  <arg name="launch_manager" default="true" />
+  <arg name="manager" default="manager" />
+  <arg name="min_percent" default="5" />
+  <arg name="max_percent" default="20" />
+
+  <node pkg="nodelet" type="nodelet" name="$(arg manager)"
+        args="manager" output="screen" if="$(arg launch_manager)" />
+
+  <node pkg="nodelet" type="nodelet" name="$(arg DEFAULT_NAMESPACE)"
+        args="load jsk_perception/VideoToScene $(arg manager)"
+        respawn="true"
+        output="screen">
+    <param name="~image_transport" value="$(arg IMAGE_TRANSPORT)" />
+    <param name="~min_percent" value="$(arg min_percent)" />
+    <param name="~max_percent" value="$(arg max_percent)" />
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~output" to="$(arg OUTPUT_IMAGE)" />
+  </node>
+</launch>

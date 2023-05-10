@@ -9,6 +9,13 @@ By following command, you can publish audio, spectrum and spectrogram topics. Pl
 roslaunch audio_to_spectrogram audio_to_spectrogram.launch
 ```
 
+Its data conversion pipeline is as follows:
+```
+audio_to_spectrum.py -> spectrum
+                     -> normalized_half_spectrum
+                     -> log_spectrum             -> preprocess node(s) -> preprocessed spectrum -> spectrum_to_spectrogram.py -> spectrogram
+```
+
 Here is an example using rosbag with 300Hz audio.
 ```bash
 roslaunch audio_to_spectrogram sample_audio_to_spectrogram.launch

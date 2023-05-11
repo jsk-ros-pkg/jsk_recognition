@@ -55,6 +55,7 @@ namespace jsk_pcl_ros_utils
 
   bool PointCloudToPCD::savePCDCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res) {
     savePCD();
+    return true;
   }
 
   void PointCloudToPCD::savePCD()
@@ -143,7 +144,7 @@ namespace jsk_pcl_ros_utils
     fixed_frame_ = config.fixed_frame;
     duration_ = config.duration;
     timer_.stop();
-    if (duration_ > 0) {
+    if (duration_ != 0) {
       timer_ = pnh_->createTimer(ros::Duration(duration_), boost::bind(&PointCloudToPCD::timerCallback, this, _1));
     }
   }

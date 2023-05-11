@@ -44,5 +44,4 @@ Parameters
 
   Saving duration. You can change saving frequency with this parameter.
   If the duration is greater than 0.0, the pcd data is stored continuously under the set duration.
-  If the duration is less than 0.0, service could be used.
-  The minimum of duration is -1.0.
+  When you want to use this as ROS service, set the duration to 0.0.

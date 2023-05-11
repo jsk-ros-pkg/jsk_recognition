@@ -293,6 +293,7 @@ jsk_add_nodelet(src/kmeans.cpp "jsk_perception/KMeans" "kmeans")
 jsk_add_nodelet(src/draw_rects.cpp "jsk_perception/DrawRects" "draw_rects")
 jsk_add_nodelet(src/remove_blurred_frames.cpp "jsk_perception/RemoveBlurredFrames" "remove_blurred_frames")
 jsk_add_nodelet(src/split_image.cpp "jsk_perception/SplitImage" "split_image")
+jsk_add_nodelet(src/skeleton_with_depth.cpp "jsk_perception/SkeletonWithDepth" "skeleton_with_depth")
 if("${OpenCV_VERSION}" VERSION_GREATER "2.9.9")  # >= 3.0.0
   jsk_add_nodelet(src/video_to_scene.cpp "jsk_perception/VideoToScene" "video_to_scene")
   jsk_add_nodelet(src/bing.cpp "jsk_perception/Bing" "bing")

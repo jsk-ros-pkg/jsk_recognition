@@ -29,6 +29,13 @@
 
   <arg name="vital_rate" default="1.0" />
   <arg name="gui" default="true" />
+  <arg name="launch_manager" default="true" />
+  <arg name="MANAGER" default="insta360_manager" />
+
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet" args="manager"
+        if="$(arg launch_manager)"
+        output="screen" />
 
   <!-- Publish camera image -->
   <group if="$(arg publish_image)">
@@ -58,7 +65,10 @@
   </group>
 
   <!-- Split insta360 air image into 2 fisheye image -->
-  <node pkg="jsk_perception" name="split_image" type="split_image.py" output="screen">
+  <node name="split_image"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/SplitImage $(arg MANAGER)"
+        respawn="true">
     <remap from="~input" to="/insta360/image_raw" />
     <rosparam>
       vertical_parts: 1
@@ -69,7 +79,7 @@
   <group ns="insta360" if="$(arg throttle)">
     <node name="throttle_camera_info"
           pkg="nodelet" type="nodelet"
-          args="standalone jsk_topic_tools/LightweightThrottle"
+          args="load jsk_topic_tools/LightweightThrottle /$(arg MANAGER)"
           respawn="true">
       <remap from="~input" to="camera_info"/>
       <remap from="~output" to="throttled/camera_info" />
@@ -77,7 +87,7 @@
     </node>
     <node name="throttle_rgb"
           pkg="nodelet" type="nodelet"
-          args="standalone jsk_topic_tools/LightweightThrottle"
+          args="load jsk_topic_tools/LightweightThrottle /$(arg MANAGER)"
           respawn="true">
       <remap from="~input" to="image_raw" />
       <remap from="~output" to="throttled/image_raw" />
@@ -85,7 +95,7 @@
     </node>
     <node name="throttle_rgb_compressed"
           pkg="nodelet" type="nodelet"
-          args="standalone jsk_topic_tools/LightweightThrottle"
+          args="load jsk_topic_tools/LightweightThrottle /$(arg MANAGER)"
           respawn="true">
       <remap from="~input" to="image_raw/compressed" />
       <remap from="~output" to="throttled/image_raw/compressed" />
@@ -103,6 +113,8 @@
     <arg name="resolution_mode" value="$(arg panorama_resolution_mode)" />
     <arg name="image_transport" value="$(arg panorama_image_transport)" />
     <arg name="vital_rate" value="$(arg vital_rate)" />
+    <arg name="launch_manager" value="false" />
+    <arg name="MANAGER" value="$(arg MANAGER)" />
   </include>
 
   <group if="$(arg gui)">

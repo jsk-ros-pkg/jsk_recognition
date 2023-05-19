@@ -8,6 +8,7 @@
   <arg name="resolution_mode" default="high" doc="Resolution mode, 'high' or 'low'" />
   <arg name="vital_rate" default="1.0" doc="Rate to determine if the nodelet is in health." />
   <arg name="image_transport" default="raw"/>
+  <arg name="always_subscribe" default="false"/>
 
   <arg name="launch_manager" default="true" />
   <arg name="MANAGER" default="dual_fisheye_to_panorama_manager" />
@@ -26,6 +27,7 @@
     <param name="fovd" value="$(arg fovd)" />
     <param name="save_unwarped" value="$(arg save_unwarped)" />
     <param name="image_transport" value="$(arg image_transport)"/>
+    <param name="always_subscribe" value="$(arg always_subscribe)"/>
     <rosparam
         command="load"
         file="$(find jsk_perception)/config/dual_fisheye_to_panorama/$(arg resolution_mode)_resolution_config.yaml"

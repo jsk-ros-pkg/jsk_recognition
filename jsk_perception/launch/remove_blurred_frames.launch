@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <arg name="INPUT_IMAGE" />
+  <arg name="OUTPUT_IMAGE" default="$(arg INPUT_IMAGE)/blurred_frames_removed" />
+  <arg name="OUTPUT_MASK" default="$(arg INPUT_IMAGE)/laplacian_mask" />
+  <arg name="OUTPUT_VAR" default="$(arg INPUT_IMAGE)/laplacian_var" />
+  <arg name="OUTPUT_NON_BLURRED_IMAGE" default="$(arg INPUT_IMAGE)/non_blurred_frame" />
+  <arg name="DEFAULT_NAMESPACE" default="remove_blurred_frames" />
+  <arg name="launch_manager" default="true" />
+  <arg name="manager" default="manager" />
+
+  <node pkg="nodelet" type="nodelet" name="$(arg manager)"
+        args="manager" output="screen" if="$(arg launch_manager)" />
+
+  <node pkg="nodelet" type="nodelet" name="$(arg DEFAULT_NAMESPACE)"
+        args="load jsk_perception/RemoveBlurredFrames $(arg manager)"
+        respawn="true"
+        output="screen">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~output" to="$(arg OUTPUT_IMAGE)" />
+    <remap from="~output/mask" to="$(arg OUTPUT_MASK)" />
+    <remap from="~output/var" to="$(arg OUTPUT_VAR)" />
+  </node>
+
+  <group ns="$(arg INPUT_IMAGE)" >
+    <node name="morphology_close"
+      pkg="nodelet" type="nodelet"
+      args="load jsk_perception/Closing /$(arg manager)"
+      output="screen" >
+      <remap from="~input" to="$(arg OUTPUT_MASK)" />
+      <param name="size" value="5" />
+    </node>
+    <node name="morphology_open"
+      pkg="nodelet" type="nodelet"
+      args="load jsk_perception/Closing /$(arg manager)"
+      output="screen" >
+      <remap from="~input" to="morphology_close/output" />
+      <param name="size" value="5" />
+    </node>
+
+    <node name="apply_mask_image"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_perception/ApplyMaskImage /$(arg manager)">
+      <remap from="~input" to="$(arg INPUT_IMAGE)" />
+      <remap from="~input/mask" to="morphology_open/output" />
+      <remap from="~output" to="$(arg OUTPUT_NON_BLURRED_IMAGE)" />
+      <rosparam>
+        approximate_sync: true
+        clip: false
+      </rosparam>
+    </node>
+    <group ns="apply_mask_image" >
+      <node name="republish"
+            pkg="image_transport" type="republish"
+            args="raw compressed">
+        <remap from="in" to="$(arg OUTPUT_NON_BLURRED_IMAGE)" />
+        <remap from="out" to="$(arg OUTPUT_NON_BLURRED_IMAGE)" />
+      </node>
+    </group>
+  </group>
+  
+</launch>

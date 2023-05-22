@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_perception)/sample/include/play_rosbag_fetch_go_to_kitchen.xml">
+    <arg name="start_time" value="60" />
+    <arg name="duration_time" value="20" />
+  </include>
+
+  <include file="$(find jsk_perception)/launch/remove_blurred_frames.launch" >
+    <arg name="INPUT_IMAGE" value="/head_camera/rgb/image_rect_color" />
+    <arg name="launch_manager" value="false" />
+    <arg name="manager" value="rosbag_play_nodelet_manager" />
+  </include>
+
+  <node name="rviz" pkg="rviz" type="rviz"
+        args="-d $(find jsk_perception)/sample/config/sample_remove_blurred_frames.rviz"
+        if="$(arg gui)" />
+
+</launch>

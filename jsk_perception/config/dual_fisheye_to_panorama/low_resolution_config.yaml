@@ -1,0 +1,10 @@
+mls_map_path: $(find jsk_perception)/config/dual_fisheye_to_panorama/fisheye_stitcher_grid_xd_yd_2000x1000.yml.gz
+blend_image_width: 2000
+blend_image_height: 1000
+blend_param_p_wid: 30
+blend_param_p_x1: 75
+blend_param_p_x2: 885
+blend_param_row_start: 295
+blend_param_row_end: 660
+output_image_width: 2000
+output_image_height: 1000

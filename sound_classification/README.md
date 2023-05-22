@@ -18,7 +18,7 @@ ROS package to classify sound stream.
     ```bash
     mkdir ~/sound_classification_ws/src -p
     cd ~/sound_classification_ws/src
-    git clone https://github.com/708yamaguchi/sound_classification.git
+    git clone https://github.com/jsk-ros-pkg/jsk_recognition.git
     rosdep install --from-paths . --ignore-src -y -r
     cd ..
     catkin build sound_classification
@@ -26,18 +26,13 @@ ROS package to classify sound stream.
     ```
 
 1. Install other packages.
-    - Some pip packages which are not managed in rosdep are needed.
-        ```bash
-        cd ~/sound_classification_ws/src/sound_classification
-        pip install -r requirements.txt
-        ```
-    - cuda and cupy are needed for chainer. See https://docs-cupy.chainer.org/en/stable/compatibility.html
+    - cuda and cupy are needed for chainer. See [installation guide of JSK](../doc/install_chainer_gpu.rst)
     - Using GPU is highly recommended.
 
 ## Usage
 
-1. Write your microphone parameters to `audio_to_spectrogram.launch`'s arg tags.
-    - In particular, `device`, `n_channel`, `bitdepth` and `sample_rate` need to be specified.
+1. Check and specify your microphone parameters.
+    - In particular, `device`, `n_channel`, `bitdepth` and `mic_sampling_rate` need to be known.
     - The example bash commands to get these params are below:
         ```bash
         # For device. In this example, card 0 and device 0, so device:="hw:0,0"
@@ -53,7 +48,8 @@ ROS package to classify sound stream.
         $ pactl list short sources
         1       alsa_input.pci-0000_00_1f.3.analog-stereo       module-alsa-card.c      s16le 2ch 44100Hz       SUSPENDED
         ```
-    - If you use `/audio` topic from other computer and do not want to publish `/audio`, set `use_microphone:=false` at each launch flie.
+    - Pass these params to each launch file as arguments when launching (e.g., `device:=hw:0,0 n_channel:=2 bitdepth:=16 mic_sampling_rate:=44100`).
+    - If you use `/audio` topic from other computer and do not want to publish `/audio`, set `use_microphone:=false` at each launch file when launching.
 
 1. Save environmental noise to `train_data/noise.npy`.
     - By subtracting noise, spectrograms become clear.

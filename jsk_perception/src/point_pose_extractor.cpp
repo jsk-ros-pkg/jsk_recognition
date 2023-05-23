@@ -344,12 +344,12 @@ namespace jsk_perception
     server.setCallback(f);
 
     it = new image_transport::ImageTransport(*pnh_);
-    _client = pnh_->serviceClient<posedetection_msgs::Feature0DDetect>("/Feature0DDetect");
-    _pub = advertise<posedetection_msgs::ObjectDetection>(*pnh_, "/ObjectDetection", 10);
-    _pub_agg = advertise<posedetection_msgs::ObjectDetection>(*pnh_, "/ObjectDetection_agg", 10);
-    _pub_pose = advertise<geometry_msgs::PoseStamped>(*pnh_, "/object_pose", 10);
+    _client = nh_->serviceClient<posedetection_msgs::Feature0DDetect>("Feature0DDetect");
+    _pub = advertise<posedetection_msgs::ObjectDetection>(*nh_, "ObjectDetection", 10);
+    _pub_agg = advertise<posedetection_msgs::ObjectDetection>(*nh_, "ObjectDetection_agg", 10);
+    _pub_pose = advertise<geometry_msgs::PoseStamped>(*nh_, "object_pose", 10);
     _debug_pub = it->advertise("debug_image", 1);
-    _server = pnh_->advertiseService("/SetTemplate", &PointPoseExtractor::settemplate_cb, this);
+    _server = nh_->advertiseService("SetTemplate", &PointPoseExtractor::settemplate_cb, this);
     _initialized = false;
 
     onInitPostProcess();
@@ -357,7 +357,7 @@ namespace jsk_perception
 
   void PointPoseExtractor::subscribe()
   {
-    _sub = pnh_->subscribe("/ImageFeature0D", 1,
+    _sub = nh_->subscribe("ImageFeature0D", 1,
                            &PointPoseExtractor::imagefeature_cb, this);
   }
 

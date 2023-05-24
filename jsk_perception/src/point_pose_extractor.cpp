@@ -344,6 +344,9 @@ namespace jsk_perception
     server.setCallback(f);
 
     it = new image_transport::ImageTransport(*pnh_);
+    // Use nh_ instead of pnh_ for backward compatibility.
+    // See https://github.com/jsk-ros-pkg/jsk_recognition/pull/2779 and 
+    // https://github.com/jsk-ros-pkg/jsk_recognition/pull/2778
     _client = nh_->serviceClient<posedetection_msgs::Feature0DDetect>("Feature0DDetect");
     _pub = advertise<posedetection_msgs::ObjectDetection>(*nh_, "ObjectDetection", 10);
     _pub_agg = advertise<posedetection_msgs::ObjectDetection>(*nh_, "ObjectDetection_agg", 10);

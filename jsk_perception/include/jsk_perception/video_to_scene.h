@@ -1,8 +1,8 @@
-// -*- mode: c++ -*-
+// -*- mode: C++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2016, JSK Lab
+ *  Copyright (c) 2022, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,46 +32,50 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
+/*
+ * video_to_scene.h
+ * Author: Kei Okada <k-okada@jsk.t.u-tokyo.ac.jp>
+ */
 
-#ifndef JSK_PCL_POINTCLOUD_TO_PCD_H_
-#define JSK_PCL_POINTCLOUD_TO_PCD_H_
+#ifndef VIDEO_TO_SCENE_H_
+#define VIDEO_TO_SCENE_H_
 
-#include <pcl_ros/pcl_nodelet.h>
-#include <pcl/point_types.h>
-#include <jsk_recognition_utils/tf_listener_singleton.h>
-
-#include <sensor_msgs/PointCloud2.h>
-#include <std_srvs/Empty.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <dynamic_reconfigure/server.h>
-#include <jsk_pcl_ros_utils/PointCloudToPCDConfig.h>
+#include <jsk_perception/VideoToSceneConfig.h>
+#include <sensor_msgs/Image.h>
+#include <opencv2/opencv.hpp>
+#include <opencv2/bgsegm.hpp>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+#include <std_msgs/Float64.h>
+#include <image_transport/image_transport.h>
 
-namespace jsk_pcl_ros_utils
-{
-  class PointCloudToPCD: public pcl_ros::PCLNodelet
-  {
-  public:
-    virtual ~PointCloudToPCD();
-    typedef PointCloudToPCDConfig Config;
-  protected:
-    virtual void onInit();
-    virtual void timerCallback (const ros::TimerEvent& event);
-    virtual void configCallback(Config &config, uint32_t level);
-    void savePCD();
-    bool savePCDCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
-    boost::mutex mutex_;
-    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
-    ros::Timer timer_;
-    std::string filename_;
-    std::string ext_;
-    double duration_;
-    std::string prefix_;
-    bool binary_;
-    bool compressed_;
-    std::string fixed_frame_;
-    tf::TransformListener* tf_listener_;
-    ros::ServiceServer srv_save_pcd_server_;
-  private:
-  };
+
+namespace jsk_perception{
+    class VideoToScene: public jsk_topic_tools::DiagnosticNodelet{
+    public:
+        typedef VideoToSceneConfig Config;
+    VideoToScene() : DiagnosticNodelet("VideoToScene") {}
+    protected:
+        virtual void onInit();
+        virtual void subscribe();
+        virtual void unsubscribe();
+        virtual void work(const sensor_msgs::Image::ConstPtr& image_msg);
+        virtual void configCallback(Config &config, uint32_t level);
+
+        boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
+        image_transport::Subscriber sub_;
+        boost::shared_ptr<image_transport::ImageTransport> it_;
+        image_transport::Publisher pub_;
+        boost::mutex mutex_;
+    private:
+        cv::Ptr<cv::bgsegm::BackgroundSubtractorGMG> bgsubtractor;
+        int min_percent_;
+        int max_percent_;
+        bool captured_;
+
+    };
 }
 
-#endif
+#endif // VIDEO_TO_SCENE_H_

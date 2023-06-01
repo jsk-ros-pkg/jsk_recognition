@@ -2,7 +2,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2016, JSK Lab
+ *  Copyright (c) 2023, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,46 +32,38 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
+/*
+ * split_image.h
+ * Author: Yoshiki Obinata <obinata@jsk.imi.i.u-tokyo.ac.jp>
+ */
 
-#ifndef JSK_PCL_POINTCLOUD_TO_PCD_H_
-#define JSK_PCL_POINTCLOUD_TO_PCD_H_
 
-#include <pcl_ros/pcl_nodelet.h>
-#include <pcl/point_types.h>
-#include <jsk_recognition_utils/tf_listener_singleton.h>
+#ifndef SPLIT_IMAGE_H_
+#define SPLIT_IMAGE_H_
 
-#include <sensor_msgs/PointCloud2.h>
-#include <std_srvs/Empty.h>
-#include <dynamic_reconfigure/server.h>
-#include <jsk_pcl_ros_utils/PointCloudToPCDConfig.h>
+#include <cv_bridge/cv_bridge.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <sensor_msgs/Image.h>
 
-namespace jsk_pcl_ros_utils
-{
-  class PointCloudToPCD: public pcl_ros::PCLNodelet
-  {
-  public:
-    virtual ~PointCloudToPCD();
-    typedef PointCloudToPCDConfig Config;
-  protected:
-    virtual void onInit();
-    virtual void timerCallback (const ros::TimerEvent& event);
-    virtual void configCallback(Config &config, uint32_t level);
-    void savePCD();
-    bool savePCDCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
-    boost::mutex mutex_;
-    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
-    ros::Timer timer_;
-    std::string filename_;
-    std::string ext_;
-    double duration_;
-    std::string prefix_;
-    bool binary_;
-    bool compressed_;
-    std::string fixed_frame_;
-    tf::TransformListener* tf_listener_;
-    ros::ServiceServer srv_save_pcd_server_;
-  private:
-  };
-}
+namespace jsk_perception{
 
-#endif
+    class SplitImage : public jsk_topic_tools::DiagnosticNodelet{
+
+    public:
+        SplitImage() : DiagnosticNodelet("SplitImage"){}
+        virtual ~SplitImage();
+    protected:
+        virtual void onInit();
+        virtual void subscribe();
+        virtual void unsubscribe();
+        virtual void splitImage(const sensor_msgs::Image::ConstPtr& image_msg);
+
+        ros::Subscriber sub_;
+        std::vector<ros::Publisher> pubs_;
+        int vertical_parts_;
+        int horizontal_parts_;
+    private:
+    };
+};
+
+#endif // SPLIT_IMAGE_H_

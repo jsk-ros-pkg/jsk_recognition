@@ -61,7 +61,7 @@ catkin_package(
 # Cythonize pyx files
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(UseCython)
-add_subdirectory(python/${PROJECT_NAME})
+# add_subdirectory(python/${PROJECT_NAME})
 
 find_package(OpenCV REQUIRED core imgproc)
 find_package(PCL REQUIRED)

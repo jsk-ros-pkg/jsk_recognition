@@ -1,10 +1,10 @@
 # vqa_node.py
-![][images/vqa.png]
+![](images/vqa.png)
 
 The ROS node for Visual Question Answering(VQA).
 
 ## System Configuration
-![][images/large_scale_vil_system.pdf]
+![](images/large_scale_vil_system.png)
 
 This node requires to work with the Docker Container for inference. Please build the container at first following Setup instruction.
 

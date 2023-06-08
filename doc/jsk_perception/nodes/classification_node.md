@@ -1,11 +1,11 @@
 # classification_node.py
 
-![][images/clip.png]
+![](images/clip.png)
 
 The ROS node for Classification with CLIP.
 
 ## System Configuration
-![][images/large_scale_vil_system.pdf]
+![](images/large_scale_vil_system.png)
 
 This node requires to work with the Docker Container for inference. Please build the container at first following Setup instruction.
 

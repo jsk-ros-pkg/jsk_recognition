@@ -87,7 +87,7 @@ namespace jsk_recognition_utils
     double gl, alp;
     int idx;
     Eigen::Vector3f p;
-    distanceWithInfo(from, p, gl, idx, alp);
+    return distanceWithInfo(from, p, gl, idx, alp);
   }
 
   double PolyLine::distance(const Eigen::Vector3f& from,
@@ -95,7 +95,7 @@ namespace jsk_recognition_utils
   {
     double gl, alp;
     int idx;
-    distanceWithInfo(from, foot_point, gl, idx, alp);
+    return distanceWithInfo(from, foot_point, gl, idx, alp);
   }
 
   void PolyLine::getDirection(int index, Eigen::Vector3f& output) const

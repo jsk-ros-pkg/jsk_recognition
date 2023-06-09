@@ -151,6 +151,8 @@ generate_dynamic_reconfigure_options(
   cfg/VirtualCameraMono.cfg
   cfg/AWSDetectFaces.cfg
   cfg/RemoveBlurredFrames.cfg
+  cfg/VQA.cfg
+  cfg/Classification.cfg
   cfg/VideoToScene.cfg
 )
 

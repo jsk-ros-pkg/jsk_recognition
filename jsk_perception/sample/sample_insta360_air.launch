@@ -36,6 +36,7 @@
         pkg="nodelet" type="nodelet" args="manager"
         if="$(arg launch_manager)"
         output="screen" />
+  <arg name="always_subscribe" default="false" />
 
   <!-- Publish camera image -->
   <group if="$(arg publish_image)">
@@ -115,6 +116,7 @@
     <arg name="vital_rate" value="$(arg vital_rate)" />
     <arg name="launch_manager" value="false" />
     <arg name="MANAGER" value="$(arg MANAGER)" />
+    <arg name="always_subscribe" value="$(arg always_subscribe)" />
   </include>
 
   <group if="$(arg gui)">

@@ -189,14 +189,19 @@ class AutoCheckIn(ConnectionBasedTransport):
             ret = self.findface(img[image_roi_slice])
             if ret != None:
                 if ret['FaceMatches'] != []:
-                    face_id = self.dynamodb_table.get_item(
-                        Key={'RekognitionId':
-                             ret['FaceMatches'][0]['Face']['FaceId']})['Item']['Name']
-                    rospy.loginfo("FaceId: {}\n Similarity: {}".format(face_id, \
-                                                                       ret['FaceMatches'][0]['Similarity']))
-                    faces.faces.append(Face(face=Rect(cx - w // 2, cy - h // 2, w, h),
-                                            label=face_id,
-                                            confidence=ret['FaceMatches'][0]['Similarity'] / 100.0))
+                    try:
+                        face_id = self.dynamodb_table.get_item(
+                            Key={'RekognitionId':
+                                 ret['FaceMatches'][0]['Face']['FaceId']})['Item']['Name']
+                        rospy.loginfo("FaceId: {}\n Similarity: {}".format(face_id, \
+                                                                           ret['FaceMatches'][0]['Similarity']))
+                        faces.faces.append(Face(face=Rect(cx - w // 2, cy - h // 2, w, h),
+                                                label=face_id,
+                                                confidence=ret['FaceMatches'][0]['Similarity'] / 100.0))
+                    except KeyError as e:
+                        rospy.logwarn(
+                            "{}: Dynamodb does not have FaceID: {}".format(
+                                e, ret['FaceMatches'][0]['Face']['FaceID']))
 
             if self.use_window: # copy colored face rectangle to img_gray
                 img_gray[image_roi_slice] = img[image_roi_slice]

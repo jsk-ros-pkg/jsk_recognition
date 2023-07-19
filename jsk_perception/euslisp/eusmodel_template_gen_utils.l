@@ -44,7 +44,7 @@
 	(list template-include width height trans)
 	))))
 
-(defun gen-detection-nodes (obj)
+(defun gen-detection-nodes (obj &key remap-args)
   (let (nodes)
     (setq nodes
 	  (mapcar
@@ -59,6 +59,7 @@
 		   (setq quat (matrix2quaternion (send trans :rot)))
 		   (instance rosnode :init "jsk_perception" "point_pose_extractor"
 			     :name (format nil "point_pose_extractor_~a" (send obj :name))
+                             :remap_args remap-args
 			     :params
       (list
        (instance rosparam :init :name "window_name" :value (send obj :name))
@@ -71,7 +72,17 @@
 	   (send obj :faces)))
     (remove nil nodes)))
 
-(defun gen-all-launch (objects launch-file-name &key (ns nil))
+(defun gen-all-launch (objects launch-file-name &key (ns nil)
+                                                  (image-remap-args nil)
+                                                  (gen-image-feature nil)
+                                                  (image-topic "image")
+                                                  (image-topic-transport "raw")
+                                                  (image-feature-pkg "imagesift") (image-feature-type "imagesift")
+                                                  (gen-object-marker nil)
+                                                  (objectdetection-remap-args nil)
+                                                  (object-builder "(make-cube 60 60 60)")
+                                                  (object-frame-id "/map")
+                                                  )
   ;; generate launchfile
   (with-open-file
    (launch-f launch-file-name :direction :output)
@@ -84,7 +95,25 @@
 		     (send obj :name)))
        (setq obj-include
              (format nil "$(find ~A)/template/_~x_~A.xml" *pkgname* (system::address obj) (send obj :name)))
-       (setq nodes (gen-detection-nodes obj))
+       (setq nodes (gen-detection-nodes obj :remap-args image-remap-args))
+       (if gen-image-feature
+           (push (instance rosnode :init image-feature-pkg image-feature-type
+                           :name (format nil "~A_~A" image-feature-type (send obj :name))
+                           :remap_args image-remap-args
+                           :params (list (instance rosparam :init :name "image_transport" :value image-topic-transport))
+                           ) nodes))
+       (when gen-object-marker
+         (let* ((aface (car (mapcan #'(lambda (aface) (if (send aface :get :gl-textureimage) (list aface))) (send obj :faces))))
+                (tmpl-info (get-template-info obj aface)))
+           (push (instance rosnode :init "jsk_perception" "kalman-filtered-objectdetection-marker.l"
+                           :name (format nil "objectdetection_marker_~A" (send obj :name))
+                           :remap_args objectdetection-remap-args
+                           :params (list (instance rosparam :init :name "object_builder" :value object-builder)
+                                         (instance rosparam :init :name "frame_id" :value object-frame-id)
+                                         (instance rosparam :init :name "object_width" :value (* (elt tmpl-info 1) 0.001))
+                                         (instance rosparam :init :name "object_height" :value (* (elt tmpl-info 2) 0.001))
+                                         )
+                           ) nodes)))
        (send-all nodes :namespace ns)
        (setq xmllist (append (list "launch" nil)
 			     (send-all nodes :list)))

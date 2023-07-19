@@ -33,6 +33,14 @@
     (send obj :name "lipton_milktea_box")
     obj))
 
+(defun make-jetson-box ()
+  (let ((obj (make-cube 200 200 120)))
+    (setq aface (send obj :face 0))
+    (send obj :paste-texture-to-face aface
+          :file "jetson-box.png")
+    (send obj :name "jetson_box")
+    obj))
+
 ;; < 2 >
 ;; . generate launch file
 (defun generate-launcher ()
@@ -40,7 +48,18 @@
   (gen-all-launch (list (make-sony-rimokon) (make-sharp-rimokon))
 		  "rimokon-pose.launch" :ns "/narrow_stereo/left" )
   (gen-all-launch (list (make-lipton-tea-box))
-		  "milktea-box.launch" :ns "/narrow_stereo/left"))
+		  "milktea-box.launch" :ns "/narrow_stereo/left")
+  (gen-all-launch (list (make-jetson-box))
+                  "jetson-box.launch" :ns "/realsense_torso/color"
+                  :image-remap-args '(("image" "image_rect_color"))
+                  :gen-image-feature t
+                  :image-topic "image_rect_color"
+                  :image-topic-transport "compressed"
+                  :gen-object-marker t
+                  :objectdetection-remap-args '(("input/ObjectDetection" "ObjectDetection"))
+                  :object-builder "(make-cube 200 200 120)"
+                  :object-frame-id "/base"
+                  ))
 (warn ";; (generate-launcher)~%")
 
 ;; < 3 >

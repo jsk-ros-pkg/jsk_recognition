@@ -23,7 +23,7 @@
 	     (origin (send (car (rassoc #f(0 0) texco)) :pvertex aface))
 	     (vx (v- (send (car (rassoc #f(1 0) texco)) :pvertex aface) origin))
 	     (vy (v- (send (car (rassoc #f(0 1) texco)) :pvertex aface) origin))
-	     (width (norm vx)) (height (norm vy))
+	     (width (norm vx)) (height (norm vy)) (depth (norm (v- (cadr (car (send obj :faces-intersect-with-point-vector (cadr (send aface :centroid)) (v- (send aface :normal))))) (cadr (send aface :centroid)))))
 	     (trans-rot (make-matrix 3 3)))
         (setq vx (scale (/ 1.0 width) vx) vy (scale (/ 1.0 height) vy))
         (set-matrix-column trans-rot 0 vy) ;; ny
@@ -41,10 +41,10 @@
           (if (null (probe-file (send (pathname template) :directory-string)))
               (unix::mkdir (send (pathname template) :directory-string)))
 	  (unix::system (format nil "cp -f ~a ~a" imgfile template)))
-	(list template-include width height trans)
+	(list template-include width height trans depth)
 	))))
 
-(defun gen-detection-nodes (obj &key remap-args)
+(defun gen-detection-nodes (obj &key remap-args (publish-tf nil) (child-frame-id "matching"))
   (let (nodes)
     (setq nodes
 	  (mapcar
@@ -66,8 +66,12 @@
        (instance rosparam :init :name "template_filename" :value (car tmpl-info))
        (instance rosparam :init :name "object_width" :value (* (elt tmpl-info 1) 0.001))
        (instance rosparam :init :name "object_height" :value (* (elt tmpl-info 2) 0.001))
+       (instance rosparam :init :name "object_depth" :value (* (elt tmpl-info 4) 0.001))
        (instance rosparam :init :name "relative_pose" :value (concatenate float-vector (scale 0.001 (send trans :pos)) (subseq quat 1) (subseq quat 0 1)))
-       (instance rosparam :init :name "viewer_window" :value "false"))
+       (instance rosparam :init :name "viewer_window" :value "false")
+       (instance rosparam :init :name "publish_tf" :value (if publish-tf "true" "false"))
+       (instance rosparam :init :name "child_frame_id" :value child-frame-id)
+       )
 			     ))))
 	   (send obj :faces)))
     (remove nil nodes)))
@@ -79,9 +83,11 @@
                                                   (image-topic-transport "raw")
                                                   (image-feature-pkg "imagesift") (image-feature-type "imagesift")
                                                   (gen-object-marker nil)
+                                                  (objectdetection-solve-tf nil)
                                                   (objectdetection-remap-args nil)
                                                   (object-builder "(make-cube 60 60 60)")
                                                   (object-frame-id "/map")
+                                                  (publish-tf nil) (child-frame-id "matching")
                                                   )
   ;; generate launchfile
   (with-open-file
@@ -95,7 +101,7 @@
 		     (send obj :name)))
        (setq obj-include
              (format nil "$(find ~A)/template/_~x_~A.xml" *pkgname* (system::address obj) (send obj :name)))
-       (setq nodes (gen-detection-nodes obj :remap-args image-remap-args))
+       (setq nodes (gen-detection-nodes obj :remap-args image-remap-args :publish-tf publish-tf :child-frame-id child-frame-id))
        (if gen-image-feature
            (push (instance rosnode :init image-feature-pkg image-feature-type
                            :name (format nil "~A_~A" image-feature-type (send obj :name))
@@ -110,6 +116,7 @@
                            :remap_args objectdetection-remap-args
                            :params (list (instance rosparam :init :name "object_builder" :value object-builder)
                                          (instance rosparam :init :name "frame_id" :value object-frame-id)
+                                         (instance rosparam :init :name "solve_tf" :value (if objectdetection-solve-tf "true" "false"))
                                          (instance rosparam :init :name "object_width" :value (* (elt tmpl-info 1) 0.001))
                                          (instance rosparam :init :name "object_height" :value (* (elt tmpl-info 2) 0.001))
                                          )

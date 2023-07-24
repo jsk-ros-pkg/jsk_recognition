@@ -34,7 +34,7 @@
     obj))
 
 (defun make-jetson-box ()
-  (let ((obj (make-cube 200 200 120)))
+  (let ((obj (make-cube 220 220 140)))
     (setq aface (send obj :face 0))
     (send obj :paste-texture-to-face aface
           :file "jetson-box.png")
@@ -49,17 +49,20 @@
 		  "rimokon-pose.launch" :ns "/narrow_stereo/left" )
   (gen-all-launch (list (make-lipton-tea-box))
 		  "milktea-box.launch" :ns "/narrow_stereo/left")
-  (gen-all-launch (list (make-jetson-box))
-                  "jetson-box.launch" :ns "/realsense_torso/color"
-                  :image-remap-args '(("image" "image_rect_color"))
-                  :gen-image-feature t
-                  :image-topic "image_rect_color"
-                  :image-topic-transport "compressed"
-                  :gen-object-marker t
-                  :objectdetection-remap-args '(("input/ObjectDetection" "ObjectDetection"))
-                  :object-builder "(make-cube 200 200 120)"
-                  :object-frame-id "/base"
-                  ))
+  (let ((obj (make-jetson-box)))
+    (gen-all-launch (list obj)
+                    "jetson-box.launch" :ns "/realsense_torso/color"
+                    :image-remap-args '(("image" "image_rect_color"))
+                    :gen-image-feature t
+                    :image-topic "image_rect_color"
+                    :image-topic-transport "compressed"
+                    :gen-object-marker t
+                    :objectdetection-solve-tf nil
+                    :objectdetection-remap-args '(("input/ObjectDetection" "ObjectDetection"))
+                    :object-builder (format nil "(make-cube ~A ~A ~A)" (elt (car (send obj :csg)) 1) (elt (car (send obj :csg)) 2) (elt (car (send obj :csg)) 3))
+                    :publish-tf t
+                    ))
+  )
 (warn ";; (generate-launcher)~%")
 
 ;; < 3 >

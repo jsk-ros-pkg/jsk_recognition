@@ -7,7 +7,7 @@
 (ros::roseus-add-msgs "posedetection_msgs")
 
 (setq *map-id* (ros::get-param "~frame_id" "/map"))
-(setq *solve-tf* t)
+(setq *solve-tf* (ros::get-param "~solve_tf" t))
 (setq *object-width* (ros::get-param "~object_width" 0))
 (setq *object-height* (ros::get-param "~object_height" 0))
 (setq *relative-pose-str* (ros::get-param "~relative_pose" "0 0 0 0 0 0 1"))

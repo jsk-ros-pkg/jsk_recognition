@@ -57,8 +57,7 @@
                     :image-topic "image_rect_color"
                     :image-topic-transport "compressed"
                     :gen-object-marker t
-                    :object-frame-id "/base"
-                    :objectdetection-solve-tf t
+                    :objectdetection-solve-tf nil
                     :objectdetection-remap-args '(("input/ObjectDetection" "ObjectDetection"))
                     :object-builder (format nil "(make-cube ~A ~A ~A)" (elt (car (send obj :csg)) 1) (elt (car (send obj :csg)) 2) (elt (car (send obj :csg)) 3))
                     :publish-tf t

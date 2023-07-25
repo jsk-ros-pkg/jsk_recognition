@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 # Author: Yuki Furuta <furushchev@jsk.imi.i.u-tokyo.ac.jp>
 
-from __future__ import print_function
-
 import argparse
 import copy
 import json
@@ -12,27 +10,10 @@ import os
 import sys
 import yaml
 
+import cv2
+
+cv2.setNumThreads(0)
 # chainer
-import itertools, pkg_resources
-from distutils.version import LooseVersion
-if LooseVersion(pkg_resources.get_distribution("chainer").version) >= LooseVersion('7.0.0') and \
-        sys.version_info.major == 2:
-    print('''Please install chainer < 7.0.0:
-
-    sudo pip install chainer==6.7.0
-
-c.f https://github.com/jsk-ros-pkg/jsk_recognition/pull/2485
-''', file=sys.stderr)
-    sys.exit(1)
-if [p for p in list(itertools.chain(*[pkg_resources.find_distributions(_) for _ in sys.path])) if "cupy-" in p.project_name ] == []:
-    print('''Please install CuPy
-
-    sudo pip install cupy-cuda[your cuda version]
-i.e.
-    sudo pip install cupy-cuda91
-
-''', file=sys.stderr)
-    # sys.exit(1)
 import chainer
 from chainer import serializers
 from chainer import training
@@ -64,7 +45,6 @@ class SSDDataset(chainer.dataset.DatasetMixin):
             if os.path.splitext(name)[1] != '.jpg':
                 continue
             self.img_filenames.append(os.path.join(base_dir, name))
-        print("------!")
 
     def __len__(self):
         return len(self.img_filenames)
@@ -89,9 +69,9 @@ class SSDDataset(chainer.dataset.DatasetMixin):
             try:
                 l = self.label_names.index(anno_i['label_class'])
             except Exception as e:
-                print("Failed to index label class: {}".format(anno_i), file=sys.stderr)
-                print("image file name: {}".format(img_filename), file=sys.stderr)
-                print("annotation file name: {}".format(anno_filename), file=sys.stderr)
+                print >> sys.stderr, "Failed to index label class: {}".format(anno_i)
+                print >> sys.stderr, "image file name: {}".format(img_filename)
+                print >> sys.stderr, "annotation file name: {}".format(anno_filename)
                 continue
             bbox.append(
                 [center_y - h / 2, center_x - w / 2,
@@ -174,13 +154,13 @@ if __name__ == '__main__':
     p.add_argument("--val", help="path to validation dataset directory. If this argument is not specified, train dataset is used with ratio train:val = 8:2.", default=None)
     p.add_argument("--base-model", help="base model name", default="voc0712")
     p.add_argument("--batchsize", "-b", type=int, default=16)
-    p.add_argument("--iteration", type=int, default=120000)
+    p.add_argument("--iteration", type=int, default=20000)
     p.add_argument("--gpu", "-g", type=int, default=-1)  # use CPU by default
     p.add_argument("--out", "-o", type=str, default="results")
     p.add_argument("--resume", type=str, default="")
     p.add_argument("--lr", type=float, default=1e-4)
     p.add_argument("--val-iter", type=int, default=100)
-    p.add_argument("--log-iter", type=int, default=10)
+    p.add_argument("--log-iter", type=int, default=1)
     p.add_argument("--model-iter", type=int, default=200)
 
     args = p.parse_args()
@@ -189,7 +169,7 @@ if __name__ == '__main__':
     with open(args.label_file, "r") as f:
         label_names = tuple(yaml.load(f))
 
-    print("Loaded %d labels" % len(label_names))
+    print "Loaded %d labels" % len(label_names)
 
     if args.val is None:
         dataset = SSDDataset(args.train, label_names)
@@ -199,7 +179,7 @@ if __name__ == '__main__':
         train = SSDDataset(args.train, label_names)
         test  = SSDDataset(args.val, label_names)
 
-    print("train: {}, test: {}".format(len(train), len(test)))
+    print "train: {}, test: {}".format(len(train), len(test))
 
     pretrained_model = SSD300(pretrained_model=args.base_model)
 
@@ -218,10 +198,9 @@ if __name__ == '__main__':
 
     train = TransformDataset(
         train, Transform(model.coder, model.insize, model.mean))
-    train_iter = chainer.iterators.MultiprocessIterator(
+    train_iter = chainer.iterators.MultithreadIterator(
         train, args.batchsize)
 
-    print("test")
     test_iter = chainer.iterators.SerialIterator(
         test, args.batchsize,
         repeat=False, shuffle=False)
@@ -239,7 +218,7 @@ if __name__ == '__main__':
         train_iter, optimizer, device=args.gpu)
     trainer = training.Trainer(
         updater, (args.iteration, "iteration"), args.out)
-    print("aaa")
+
     val_interval = args.val_iter, "iteration"
     trainer.extend(
         DetectionVOCEvaluator(
@@ -257,16 +236,12 @@ if __name__ == '__main__':
         trigger=log_interval)
     trainer.extend(extensions.ProgressBar(update_interval=10))
 
-    print("bbb")
-
     trainer.extend(extensions.snapshot(), trigger=val_interval)
     trainer.extend(
         extensions.snapshot_object(model, 'model_iter_{.updater.iteration}'),
         trigger=(args.model_iter, 'iteration'))
 
-    print("ccc")
     if args.resume:
         serializers.load_npz(args.resume, trainer)
 
     trainer.run()
-    print("ddd")

@@ -247,8 +247,11 @@ class HumanMeshRecovery(ConnectionBasedTransport):
         self.pose_pub.publish(people_pose_msg)
 
     def _create_people_pose_array_msgs(self, people_joint_positions, header):
+        # print(people_joint_positions)
         people_pose_msg = PeoplePoseArray(header=header)
+        # print('len(people_joint_positions)', len(people_joint_positions))
         for i, person_joint_positions in enumerate(people_joint_positions):
+            # print('detection person number', i)
             pose_msg = PeoplePose()
             for j, joint_pose in enumerate(person_joint_positions):
                 pose_msg.limb_names.append(str(j))

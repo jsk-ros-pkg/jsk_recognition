@@ -18,6 +18,7 @@ class SpectrumToSpectrogram(object):
 
     def __init__(self):
         super(SpectrumToSpectrogram, self).__init__()
+        print("aaaaaaaaa")
         # Set spectrogram shape
         self.image_height = rospy.get_param('~image_height', 300)
         self.image_width = rospy.get_param('~image_width', 300)
@@ -51,6 +52,7 @@ class SpectrumToSpectrogram(object):
         self.bridge = CvBridge()
 
     def audio_cb(self, msg):
+        #print("audio cb")
         # Add spectrum msg to buffer
         spectrum = np.array(msg.amplitude, dtype=np.float32)
         self.spectrogram = np.concatenate(
@@ -65,8 +67,10 @@ class SpectrumToSpectrogram(object):
                 break
 
     def timer_cb(self, timer):
+        print("timer cb")
         if self.spectrogram.shape[0] == 0:
             return
+        #print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
         # Reshape spectrogram
         spectrogram = self.spectrogram.transpose(1, 0)[::-1, :]
         spectrogram = cv2.resize(
@@ -74,6 +78,7 @@ class SpectrumToSpectrogram(object):
         # Publish spectrogram
         spectrogram_msg = self.bridge.cv2_to_imgmsg(spectrogram, '32FC1')
         spectrogram_msg.header.stamp = self.spectrum_stamp[-1]
+        #print(spectrogram_msg)
         self.pub_spectrogram.publish(spectrogram_msg)
 
 

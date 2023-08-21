@@ -23,8 +23,16 @@
 	     (origin (send (car (rassoc #f(0 0) texco)) :pvertex aface))
 	     (vx (v- (send (car (rassoc #f(1 0) texco)) :pvertex aface) origin))
 	     (vy (v- (send (car (rassoc #f(0 1) texco)) :pvertex aface) origin))
-	     (width (norm vx)) (height (norm vy)) (depth (norm (v- (cadr (car (send obj :faces-intersect-with-point-vector (cadr (send aface :centroid)) (v- (send aface :normal))))) (cadr (send aface :centroid)))))
+	     (width (norm vx)) (height (norm vy)) obj_tmp depth
 	     (trans-rot (make-matrix 3 3)))
+        (cond ((derivedp obj faceset)
+               (setq obj_tmp obj))
+              ((derivedp obj cascaded-link)
+               (setq obj_tmp (apply #'convex-hull-3d (send-all (send obj :bodies) :vertices))))
+              (t
+               (warning-message 3 "unknown object class ~A~%" (send obj :super))
+               ))
+        (setq depth (norm (v- (cadr (car (send obj_tmp :faces-intersect-with-point-vector (cadr (send aface :centroid)) (v- (send aface :normal))))) (cadr (send aface :centroid)))))
         (setq vx (scale (/ 1.0 width) vx) vy (scale (/ 1.0 height) vy))
         (set-matrix-column trans-rot 0 vy) ;; ny
         (set-matrix-column trans-rot 1 vx) ;; nx
@@ -50,8 +58,6 @@
 	  (mapcar
 	   #'(lambda(aface)
 	       (let* ((teximg (send aface :get :gl-textureimage))
-		      (imgpath (pathname (send teximg :name)))
-		      (imgname (str+ (send imgpath :name) "." (send imgpath :type)))
 		      (tmpl-info (get-template-info obj aface))
 		      trans quat)
 		 (when (and teximg tmpl-info)

@@ -39,9 +39,9 @@
 
   <!-- Collect spectrogram with sound class, only when the robot is in sound. -->
   <node pkg="sound_classification" type="sound_saver.py" name="sound_saver" output="screen">
-    <remap from="~in_sound" to="/sound_detector_volume/in_sound" />
-    <remap from="~input" to="/preprocess_gray_image/output_normalized" />
-    <remap from="~input_raw" to="/spectrum_to_spectrogram/spectrogram" />
+    <remap from="~in_sound" to="sound_detector_volume/in_sound" />
+    <remap from="~input" to="preprocess_gray_image/output_normalized" />
+    <remap from="~input_raw" to="spectrum_to_spectrogram/spectrogram" />
     <rosparam subst_value="true">
       <!-- params below is enabled only when save_data is true -->
       save_data_rate: $(arg save_data_rate) <!-- related to spectrogram_period -->
@@ -54,7 +54,7 @@
   <!-- Detect sound based on pixel value sum (nearly equals to volume) -->
   <node pkg="sound_classification" type="sound_detector_volume.py"
         name="sound_detector_volume" respawn="true" output="screen">
-    <remap from="~input" to="/preprocess_gray_image/output" />
+    <remap from="~input" to="preprocess_gray_image/output" />
     <rosparam subst_value="true">
       power_per_pixel_threshold: $(arg threshold)
       lazy: false

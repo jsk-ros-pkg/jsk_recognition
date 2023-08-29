@@ -1,0 +1,61 @@
+<launch>
+
+  <arg name="data_topic" />
+  <arg name="expression_to_get_data" default="m.data" />
+  <arg name="data_sampling_rate" default="500" />
+  <arg name="fft_sampling_period" default="0.3" />
+  <arg name="is_integer" default="false" />
+  <arg name="is_signed" default="true" />
+  <arg name="bitdepth" default="64" />
+  <arg name="n_channel" default="1" />
+  <arg name="target_channel" default="0" />
+  <arg name="fft_exec_rate" default="50" />
+  <arg name="data_amp_plot_max_amp" default="10.0" />
+  <arg name="data_amp_plot_window_size" default="10.0" />
+  <arg name="data_amp_plot_rate" default="10.0" />
+  <arg name="gui" default="true" />
+
+  <!-- convert data topic to spectrum topic -->
+  <node name="data_to_spectrum"
+        pkg="audio_to_spectrogram" type="data_to_spectrum.py"
+        respawn="true">
+    <remap from="~input" to="$(arg data_topic)" />
+    <rosparam subst_value="true">
+      expression_to_get_data: $(arg expression_to_get_data)
+      data_sampling_rate: $(arg data_sampling_rate)
+      fft_sampling_period: $(arg fft_sampling_period)
+      is_integer: $(arg is_integer)
+      is_signed: $(arg is_signed)
+      bitdepth: $(arg bitdepth)
+      n_channel: $(arg n_channel)
+      target_channel: $(arg target_channel)
+      fft_exec_rate: $(arg fft_exec_rate)
+    </rosparam>
+  </node>
+
+  <!-- publish amplitude image -->
+  <node name="data_amplitude_plot"
+        pkg="audio_to_spectrogram" type="data_amplitude_plot.py"
+        output="screen">
+    <remap from="~input" to="$(arg data_topic)" />
+    <rosparam subst_value="true">
+      expression_to_get_data: $(arg expression_to_get_data)
+      data_sampling_rate: $(arg data_sampling_rate)
+      is_integer: $(arg is_integer)
+      is_signed: $(arg is_signed)
+      bitdepth: $(arg bitdepth)
+      n_channel: $(arg n_channel)
+      target_channel: $(arg target_channel)
+      maximum_amplitude: $(arg data_amp_plot_max_amp)
+      window_size: $(arg data_amp_plot_window_size)
+      rate: $(arg data_amp_plot_rate)
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node pkg="image_view" type="image_view" name="data_amplitude_view"  >
+      <remap from="image" to="data_amplitude_plot/output/viz" />
+    </node>
+  </group>
+
+</launch>

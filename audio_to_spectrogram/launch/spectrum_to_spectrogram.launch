@@ -1,0 +1,65 @@
+<launch>
+
+  <arg name="spectrum" />
+  <arg name="data_sampling_rate" default="500" />
+  <arg name="high_cut_freq" default="250" />
+  <arg name="low_cut_freq" default="5" />
+  <arg name="spectrogram_height" default="300"/>
+  <arg name="spectrogram_width" default="300"/>
+  <arg name="spectrogram_period" default="5"/>
+  <arg name="preprocessed_spectrum_plot_min_amp" default="-10.0" />
+  <arg name="preprocessed_spectrum_plot_max_amp" default="10.0" />
+  <arg name="preprocessed_spectrum_plot_queue_size" default="1" />
+  <arg name="preprocessed_spectrum_plot_max_rate" default="-1" />
+  <arg name="gui" default="true" />
+  <arg name="do_dynamic_scaling" default="true"/>  <!-- default: set all pixels between 0 and 255 -->
+  <arg name="colormap" default="2"/>  <!-- default: jet colormap -->
+
+  <!-- preprocess spectrum -->
+  <node name="spectrogram_source_filter"
+        pkg="audio_to_spectrogram" type="spectrum_filter.py"
+        respawn="true">
+    <remap from="~input" to="$(arg spectrum)" />
+    <rosparam subst_value="true">
+      data_sampling_rate: $(arg data_sampling_rate)
+      high_cut_freq: $(arg high_cut_freq)
+      low_cut_freq: $(arg low_cut_freq)
+    </rosparam>
+  </node>
+
+  <!-- convert spectrum topic to spectrogram topic -->
+  <node name="spectrum_to_spectrogram"
+        pkg="audio_to_spectrogram" type="spectrum_to_spectrogram.py"
+        respawn="true">
+    <remap from="~spectrum" to="spectrogram_source_filter/output" />
+    <rosparam subst_value="true">
+      image_height: $(arg spectrogram_height)
+      image_width: $(arg spectrogram_width)
+      spectrogram_period: $(arg spectrogram_period)
+    </rosparam>
+  </node>
+
+  <!-- visualize frequency vs amplitude image -->
+  <include file="$(find audio_to_spectrogram)/launch/spectrum_plot.launch">
+    <arg name="spectrum" value="spectrogram_source_filter/output" />
+    <arg name="plotter_name" value="preprocessed_spectrogram_source_plot" />
+    <arg name="min_amp" value="$(arg preprocessed_spectrum_plot_min_amp)" />
+    <arg name="max_amp" value="$(arg preprocessed_spectrum_plot_max_amp)" />
+    <arg name="queue_size" value="$(arg preprocessed_spectrum_plot_queue_size)" />
+    <arg name="max_rate" value="$(arg preprocessed_spectrum_plot_max_rate)" />
+    <arg name="gui" value="$(arg gui)" />
+  </include>
+
+  <group if="$(arg gui)">
+    <!-- visualize spectrogram -->
+    <!-- you can get spectrogram image topic from /spectrogram_view/output-->
+    <node pkg="image_view" type="image_view" name="spectrogram_view"  >
+      <remap from="image" to="spectrum_to_spectrogram/spectrogram" />
+      <rosparam subst_value="true">
+        do_dynamic_scaling: $(arg do_dynamic_scaling)
+        colormap: $(arg colormap)
+      </rosparam>
+    </node>
+  </group>
+
+</launch>

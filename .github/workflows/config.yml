@@ -70,6 +70,7 @@ jobs:
             BUILD_PKGS: 'checkerboard_detector imagesift jsk_perception jsk_recognition_utils resized_image_transport'
             EXTRA_DEB: ros-noetic-pr2-description
             experimental : false
+            CATKIN_TOOLS_CONFIG_OPTIONS : "-DBUILD_JSK_PERCEPTION_API_DOCKER_IMAGES=ON"
           - ROS_DISTRO: noetic
             USE_DEB: false
             NOT_TEST_INSTALL : true

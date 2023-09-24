@@ -392,6 +392,17 @@ else(roseus_FOUND)
   message(WARNING "could not find 'roseus' so skip eusmodel_template_gen.l and pose_detector_auto_gen_sample.l")
 endif(roseus_FOUND)
 
+# Build JSK perception docker images
+if(NOT BUILD_JSK_PERCEPTION_API_DOCKER_IMAGES)
+  set(BUILD_JSK_PERCEPTION_API_DOCKER_IMAGES OFF)
+endif()
+if(BUILD_JSK_PERCEPTION_API_DOCKER_IMAGES)
+  message(STATUS "Build JSK perception docker API images")
+  add_custom_target(build_jsk_perception_docker_images
+    COMMAND make -f ${CMAKE_CURRENT_SOURCE_DIR}/docker
+    COMMENT "Build JSK perception docker API images")
+endif()
+
 # ------------------------------------------------------------------------------------
 # Install
 # ------------------------------------------------------------------------------------

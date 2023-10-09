@@ -6,7 +6,7 @@ conda==4.9.2
 conda-build==3.21.4
 decorator==4.4.2
 dnspython==2.1.0
-Flask==2.2.3
+Flask==2.2.5
 ftfy==6.1.1
 importlib-metadata==6.1.0
 itsdangerous==2.1.2

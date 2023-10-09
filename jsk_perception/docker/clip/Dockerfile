@@ -7,8 +7,9 @@ RUN apt -o Acquire::AllowInsecureRepositories=true update \
     libopencv-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-RUN pip install flask opencv-python\
-    && pip install ftfy regex tqdm # pip deps of CLIP
+# use requirements.txt generetaed by `pip freeze | grep ==` in the container created on 2023-03-31
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt
 RUN pip install git+https://github.com/openai/CLIP.git
 RUN mkdir -p /workspace/Clip
 COPY server.py /workspace/Clip

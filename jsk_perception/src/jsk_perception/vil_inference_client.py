@@ -155,9 +155,9 @@ class ClipClientNode(DockerInferenceClientBase):
         vis_msg = ""
         for i, label in enumerate(msg.label_names):
             vis_msg += "{}: {:.2f}% ".format(label, msg.probabilities[i]*100)
-        vis_msg += "\n"
+        vis_msg += "\n\nCosine Similarity\n"
         for i, label in enumerate(msg.label_names):
-            vis_msg += "{}: {:.2f}% ".format(label, msg.label_proba[i]*100)
+            vis_msg += "{}: {:.4f} ".format(label, msg.label_proba[i]*100)
         self.vis_pub.publish(vis_msg)
 
     def create_queries(self, goal):

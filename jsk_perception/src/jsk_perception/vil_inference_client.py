@@ -211,6 +211,7 @@ class DINOClientNode(DockerInferenceClientBase):
                                            DetectionTaskFeedback,
                                            DetectionTaskResult,
                                            "detection")
+        self.model_name = rospy.get_param("~model", default="dino")
         self.pub_class = rospy.Publisher('~class', ClassificationResult, queue_size=1)
         self.pub_rects = rospy.Publisher('~rects', RectArray, queue_size=1)
         self.pub_image = rospy.Publisher('~output/image', Image, queue_size=1)
@@ -255,7 +256,7 @@ class DINOClientNode(DockerInferenceClientBase):
         classification_msg.label_names = labels
         classification_msg.label_proba = scores     # cosine similarities
         classification_msg.probabilities = scores   # sum(probabilities) is 1
-        classification_msg.classifier = 'dino'
+        classification_msg.classifier = self.model_name
         classification_msg.target_names = queries
         self.pub_class.publish(classification_msg)
 

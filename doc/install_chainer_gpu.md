@@ -45,7 +45,7 @@ Version Compatibilities for 18.04
 Install CUDA
 ------------
 
-- Ubuntu 14.04 : Download deb file from https://developer.nvidia.com/cuda-downloads?target_os=Linux::
+- Ubuntu 14.04 : Download deb file from https://developer.nvidia.com/cuda-downloads?target_os=Linux:
 
 ```bash
     # If you'd like to use CUDA8.0 on Ubuntu 14.04.
@@ -56,7 +56,7 @@ Install CUDA
     sudo apt-get install cuda
 ```
 
-  - Add below to your `~/.bashrc`::
+  - Add below to your `~/.bashrc`:
 
     ```bash
     # setup cuda & cudnn
@@ -76,7 +76,7 @@ Install CUDA
     ```
 
 
-- Ubuntu 16.04 : Download deb file from https://developer.nvidia.com/cuda-downloads?target_os=Linux::
+- Ubuntu 16.04 : Download deb file from https://developer.nvidia.com/cuda-downloads?target_os=Linux:
 
 ```bash
     # If you'd like to use CUDA9.2 on Ubuntu 16.04.
@@ -91,7 +91,7 @@ Install CUDA
   sudo apt install nvidia-cuda-toolkit
   sudo apt install nvidia-cuda-dev
 
-- (Experimental) Ubuntu 18.04 : CUDA 10.2 is the latest version which supports `jsk_perception`. Download deb file from https://developer.nvidia.com/cuda-downloads?target_os=Linux::
+- (Experimental) Ubuntu 18.04 : CUDA 10.2 is the latest version which supports `jsk_perception`. Download deb file from https://developer.nvidia.com/cuda-downloads?target_os=Linux:
 
     ```bash
     # If you'd like to use CUDA10.2 on Ubuntu 18.04.
@@ -156,7 +156,7 @@ Install Cupy
 - (Default) Chainer 6.7.0 requires CuPy 6.7.0 and if you have CUDA 9.1, you can use CuPy pre-compiled binary package.
 
 
-  - Pre-compiled Install Cupy for CUDA 9.1 ::
+  - Pre-compiled Install Cupy for CUDA 9.1 :
 
     ```bash
     sudo pip install cupy-cuda91==6.7.0
@@ -164,7 +164,7 @@ Install Cupy
 
 - (Experimental) If you have newer CUDA version. You need to install CuPy with source distribution. This requires CUDNN before you run `pip install cupy` .
 
-  - Source Install Cupy for CUDA 10.2 ::
+  - Source Install Cupy for CUDA 10.2 :
 
     ```bash
     sudo pip install -vvv cupy --no-cache-dir
@@ -192,7 +192,7 @@ Install PyTorch
 Try Chainer Samples
 -----------
 
-You can try to run samples to check if the installation succeeded::
+You can try to run samples to check if the installation succeeded:
 
     roslaunch jsk_perception sample_fcn_object_segmentation.launch gpu:=0
     roslaunch jsk_perception sample_people_pose_estimation_2d.launch GPU:=0
@@ -201,7 +201,7 @@ You can try to run samples to check if the installation succeeded::
 Try PyTorch Samples
 -----------
 
-You can try to run samples to check if the installation succeeded::
+You can try to run samples to check if the installation succeeded:
 
     roslaunch jsk_perception sample_hand_pose_estimation_2d.launch gpu:=0
 

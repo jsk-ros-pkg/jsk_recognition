@@ -62,7 +62,7 @@ make
 
   Default categories used for subscribing image topic. 
 
-  We can send multiple queries with separating semicolon.
+  You can send multiple queries with separating semicolon.
 
 ### Run inference container on another host or another terminal
 In the remote GPU machine,

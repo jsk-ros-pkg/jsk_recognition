@@ -63,7 +63,7 @@ make
 
   Default questions used for subscribing image topic. 
 
-  We can send multiple questions with separating semicolon like the below.
+  You can send multiple questions with separating semicolon like the below.
   ```
   What does this image describe?; What kinds of objects exists?
   ```

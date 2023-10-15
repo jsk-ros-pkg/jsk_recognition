@@ -138,6 +138,7 @@ class ClipClientNode(DockerInferenceClientBase):
                                            ClassificationTaskFeedback,
                                            ClassificationTaskResult,
                                            "inference")
+        self.model_name = rospy.get_param("~model", default="clip")
 
     def topic_cb(self, data):
         if not self.config: rospy.logwarn("No queries"); return
@@ -185,7 +186,7 @@ class ClipClientNode(DockerInferenceClientBase):
         msg.label_names = labels
         msg.label_proba = similarities     # cosine similarities
         msg.probabilities = probabilities   # sum(probabilities) is 1
-        msg.classifier = 'clip'
+        msg.classifier = self.model_name
         msg.target_names = queries
         return msg
 

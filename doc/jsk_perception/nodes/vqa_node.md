@@ -65,7 +65,7 @@ make
 
   You can send multiple questions with separating semicolon like the below.
   ```
-  What does this image describe?; What kinds of objects exists?
+  What does this image describe?;What kinds of objects exists?
   ```
 
 ## Sample

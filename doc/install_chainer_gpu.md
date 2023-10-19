@@ -15,7 +15,7 @@ Requirements
 Version Compatibilities for 18.04
 ---------------------------------
 
-(Recommended) Use CUDA 9.1 from Official ubuntu repository [https://packages.ubuntu.com/bionic/nvidia-cuda-dev](https://packages.ubuntu.com/bionic/nvidia-cuda-dev)
+(Recommended) Use CUDA 9.1 from Official ubuntu repository [https://launchpad.net/ubuntu/bionic/+package/nvidia-cuda-dev](https://launchpad.net/ubuntu/bionic/+package/nvidia-cuda-dev)
 
 - Chainer
 

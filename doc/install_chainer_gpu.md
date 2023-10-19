@@ -15,37 +15,37 @@ Requirements
 Version Compatibilities for 18.04
 ---------------------------------
 
-(Recommended) Use CUDA 9.1 from Official ubuntu repository (https://packages.ubuntu.com/bionic/nvidia-cuda-dev)
+(Recommended) Use CUDA 9.1 from Official ubuntu repository [https://packages.ubuntu.com/bionic/nvidia-cuda-dev](https://packages.ubuntu.com/bionic/nvidia-cuda-dev)
 
 - Chainer
 
-  - chainer == 6.7.0 (last version supoprting python2. See https://github.com/chainer/chainer/releases/tag/v6.7.0)
-  - cupy-cuda91 == 6.7.0 (chainer v6.7.0 requires cupy/cudnn for hardware acceleration support https://docs.chainer.org/en/v6.7.0/install.html)
+  - chainer == 6.7.0 (last version supoprting python2. See [https://github.com/chainer/chainer/releases/tag/v6.7.0](https://github.com/chainer/chainer/releases/tag/v6.7.0)
+  - cupy-cuda91 == 6.7.0 (chainer v6.7.0 requires cupy/cudnn for hardware acceleration support [https://docs.chainer.org/en/v6.7.0/install.html](https://docs.chainer.org/en/v6.7.0/install.html)
 
 - PyTorch
 
-  - pytorch == 1.1.0 (Latest pytorch version supporting CUDA 9.1 https://download.pytorch.org/whl/cu90/torch_stable.html)
-  - CUDA >= 9.0 (Minimum required version for PyTorch 1.1.0 https://pytorch.org/get-started/previous-versions/#v110)
+  - pytorch == 1.1.0 (Latest pytorch version supporting CUDA 9.1 [https://download.pytorch.org/whl/cu90/torch_stable.html](https://download.pytorch.org/whl/cu90/torch_stable.html)
+  - CUDA >= 9.0 (Minimum required version for PyTorch 1.1.0 [https://pytorch.org/get-started/previous-versions/#v110](https://pytorch.org/get-started/previous-versions/#v110)
 
-(Experimental) Use CUDA 10.2 from Nvidia Developer's site (https://developer.nvidia.com/cuda-10.2-download-archive)
+(Experimental) Use CUDA 10.2 from Nvidia Developer's site [https://developer.nvidia.com/cuda-10.2-download-archive](https://developer.nvidia.com/cuda-10.2-download-archive)
 
 - Chainer
 
-  - chainer == 6.7.0 (last version supoprting python2. See https://github.com/chainer/chainer/releases/tag/v6.7.0)
-  - cupy >=6.7.0,<7.0.0 (chainer v6.7.0 requires cupy/cudnn for hardware acceleration support https://docs.chainer.org/en/v6.7.0/install.html)
+  - chainer == 6.7.0 (last version supoprting python2. See [https://github.com/chainer/chainer/releases/tag/v6.7.0](https://github.com/chainer/chainer/releases/tag/v6.7.0)
+  - cupy >=6.7.0,<7.0.0 (chainer v6.7.0 requires cupy/cudnn for hardware acceleration support [https://docs.chainer.org/en/v6.7.0/install.html](https://docs.chainer.org/en/v6.7.0/install.html)
   - cuDNN < 8 (cupy 6.7.0 requires cuDNN v5000= and <=v7999)
-  - CUDA 10.2 (cuDNN v7.6.5 requires CUDA 10.2 https://developer.nvidia.com/rdp/cudnn-archive)
+  - CUDA 10.2 (cuDNN v7.6.5 requires CUDA 10.2 [https://developer.nvidia.com/rdp/cudnn-archive](https://developer.nvidia.com/rdp/cudnn-archive))
 
 - PyTorch
 
   - pytorch >= 1.4.0
-  - CUDA >= 9.2 (Minimum required version for PyTorch https://pytorch.org/get-started/previous-versions/#v140)
-  - Driver Version >= 396.26 (From CUDA Toolkit and Corresponding Driver Versions in https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html)
+  - CUDA >= 9.2 (Minimum required version for PyTorch [https://pytorch.org/get-started/previous-versions/#v140](https://pytorch.org/get-started/previous-versions/#v140)
+  - Driver Version >= 396.26 (From CUDA Toolkit and Corresponding Driver Versions in [https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html)
 
 Install CUDA
 ------------
 
-- Ubuntu 14.04 : Download deb file from https://developer.nvidia.com/cuda-downloads?target_os=Linux:
+- Ubuntu 14.04 : Download deb file from [https://developer.nvidia.com/cuda-downloads?target_os=Linux](https://developer.nvidia.com/cuda-downloads?target_os=Linux):
 
 ```bash
     # If you'd like to use CUDA8.0 on Ubuntu 14.04.
@@ -76,7 +76,7 @@ Install CUDA
     ```
 
 
-- Ubuntu 16.04 : Download deb file from https://developer.nvidia.com/cuda-downloads?target_os=Linux:
+- Ubuntu 16.04 : Download deb file from [https://developer.nvidia.com/cuda-downloads?target_os=Linux](https://developer.nvidia.com/cuda-downloads?target_os=Linux):
 
 ```bash
     # If you'd like to use CUDA9.2 on Ubuntu 16.04.
@@ -124,11 +124,11 @@ Install CUDA
 Install CUDNN
 -------------
 
-- If you install `pip install cupy-cuda91`, you do not need to install CUDNN manually. (c.f. https://github.com/jsk-ros-pkg/jsk_visualization/issues/809). Thus, default 18.04 user can use CUDA 9.1 and `cupy-cuda91==6.7.0` for `chainer==6.7.0` and you can SKIP this section.
+- If you install `pip install cupy-cuda91`, you do not need to install CUDNN manually. (c.f. [https://github.com/jsk-ros-pkg/jsk_visualization/issues/809](https://github.com/jsk-ros-pkg/jsk_visualization/issues/809)). Thus, default 18.04 user can use CUDA 9.1 and `cupy-cuda91==6.7.0` for `chainer==6.7.0` and you can SKIP this section.
 
   Installing CUDNN manually only requires for experimental user who install CUDA 10.2 manually.
 
-- You need to login at https://developer.nvidia.com/cudnn
+- You need to login at [https://developer.nvidia.com/cudnn](https://developer.nvidia.com/cudnn)
 - Go to cuDNN Download and choose version
 - Download deb files of cuDNN Runtime Library and cuDNN Developer Library
 
@@ -174,7 +174,7 @@ Install Cupy
 Install PyTorch
 ---------------
 
-- 18.04 provides CUDA 9.1 by defualt. To install PyTorch compatible with this version, download following wheel from https://download.pytorch.org/whl/cu90/torch_stable.html, and install manually.
+- 18.04 provides CUDA 9.1 by defualt. To install PyTorch compatible with this version, download following wheel from [https://download.pytorch.org/whl/cu90/torch_stable.html](https://download.pytorch.org/whl/cu90/torch_stable.html), and install manually.
 
 ```bash
    sudo pip install torch-1.1.0-cp27-cp27mu-linux_x86_64.whl
@@ -187,7 +187,7 @@ Install PyTorch
    sudo pip install torch==1.4.0
 ```
 
-- See https://github.com/jsk-ros-pkg/jsk_recognition/pull/2601#issuecomment-876948260 for more info.
+- See [https://github.com/jsk-ros-pkg/jsk_recognition/pull/2601#issuecomment-876948260](https://github.com/jsk-ros-pkg/jsk_recognition/pull/2601#issuecomment-876948260) for more info.
 
 Try Chainer Samples
 -----------

@@ -53,6 +53,9 @@ Publishing Topic
 
   Attributes of the face, such as emotions, presence of beard, sunglasses, and so on, with confidence.
 
+  The max value of the confidence is ``100.0`` if you set ``~confidence_percentage`` is ``true``.
+  The max value of the confidence is ``1.0`` if you set ``~confidence_percentage`` is ``false``.
+
 * ``~landmarks`` (``jsk_recognition_msgs/PeoplePoseArray``)
 
   The location of landmarks on the face.
@@ -101,6 +104,12 @@ Parameters
 * ``~always_subscribe`` (Bool, Default: ``True``)
 
   Set true to process even if not one subscribing.
+
+* ``~confidence_percentage`` (Bool, Default: ``True``)
+
+  Format confidence in percentage.
+  If this param is ``true``, the max value of confidence is ``100.0``.
+  If this param is ``false``, the max value of confidence is ``1.0``.
 
 Example
 -------

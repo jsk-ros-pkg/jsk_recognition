@@ -22,9 +22,15 @@ class SpectrumPlot(ConnectionBasedTransport):
 
     def __init__(self):
         super(SpectrumPlot, self).__init__()
-        self.plot_amp_min = rospy.get_param('~plot_amp_min', 0.0)
-        self.plot_amp_max = rospy.get_param('~plot_amp_max', 20.0)
+        self.min_amp = rospy.get_param('~min_amp', 0.0)
+        self.max_amp = rospy.get_param('~max_amp', 20.0)
         self.queue_size = rospy.get_param('~queue_size', 1)
+        max_rate = rospy.get_param('~max_rate', -1)
+        if max_rate > 0:
+            self.min_period = 1.0 / max_rate
+        else:
+            self.min_period = -1
+        self.prev_pub_tm = None
         # Set matplotlib config
         self.fig = plt.figure(figsize=(8, 5))
         self.fig.subplots_adjust(left=0.1, right=0.95, top=0.90, bottom=0.1,
@@ -53,12 +59,23 @@ class SpectrumPlot(ConnectionBasedTransport):
         self.sub_spectrum.unregister()
 
     def _cb(self, msg):
+        # Keep max_rate
+        if self.min_period > 0:
+            curr_tm = rospy.Time.now().to_sec()
+            if self.prev_pub_tm is not None:
+                elapsed_tm = curr_tm - self.prev_pub_tm
+                if elapsed_tm < 0:
+                    # Time moved backwards (e.g., rosbag play --loop)
+                    pass
+                elif elapsed_tm < self.min_period:
+                    return
+            self.prev_pub_tm = curr_tm
         # Plot spectrum
         self.amp = np.array(msg.amplitude)
         self.freq = np.array(msg.frequency)
         self.line.set_data(self.freq, self.amp)
         self.ax.set_xlim((self.freq.min(), self.freq.max()))
-        self.ax.set_ylim((self.plot_amp_min, self.plot_amp_max))
+        self.ax.set_ylim((self.min_amp, self.max_amp))
         self.ax.legend(loc='upper right')
         self.fig.tight_layout()
         if self.pub_img.get_num_connections() > 0:

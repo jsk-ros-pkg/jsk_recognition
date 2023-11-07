@@ -15,7 +15,8 @@
   <buildtool_depend condition="$ROS_PYTHON_VERSION == 3">python3-setuptools</buildtool_depend>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>cython</build_depend>
+  <build_depend condition="$ROS_PYTHON_VERSION==2">cython</build_depend>
+  <build_depend condition="$ROS_PYTHON_VERSION==3">cython3</build_depend>
   <build_depend>eigen_conversions</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>geometry_msgs</build_depend>

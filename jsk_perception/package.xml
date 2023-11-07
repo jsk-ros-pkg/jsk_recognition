@@ -94,6 +94,8 @@
   <exec_depend>python-fcn-pip</exec_depend>  <!-- pip -->
   <!-- }} install fcn -->
   <exec_depend version_lt="0.3.7">python-pytesseract-pip</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-requests</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-requests</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-sklearn</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-sklearn</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-yaml</exec_depend>
@@ -124,6 +126,7 @@
   <test_depend>jsk_tools</test_depend>
   <test_depend>roslaunch</test_depend>
   <test_depend>roslint</test_depend>
+  <test_depend>rosservice</test_depend>
   <test_depend>rostest</test_depend>
   <!-- ALPHABETICAL ORDER -->
 

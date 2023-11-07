@@ -6,6 +6,7 @@
   <arg name="run_api" default="false" />
   <arg name="model" default="clip" />
   <arg name="CLASSIFICATION_INPUT_IMAGE" default="image" />
+  <arg name="image_transport" default="raw" />
 
   <node name="classification_api" pkg="jsk_perception" type="run_jsk_vil_api" output="log"
         args="(arg model) -p $(arg port)" if="$(arg run_api)" />
@@ -16,6 +17,7 @@
       host: $(arg host)
       port: $(arg port)
       model: $(arg model)
+      image_transport: $(arg image_transport)
     </rosparam>
   </node>
 

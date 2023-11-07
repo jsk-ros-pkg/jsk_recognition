@@ -62,7 +62,12 @@ make
 * `~questions` (string, default: `what does this image describe?`) 
 
   Default questions used for subscribing image topic. 
-  
+
+  You can send multiple questions with separating semicolon like the below.
+  ```
+  What does this image describe?;What kinds of objects exists?
+  ```
+
 ## Sample
 
 ### Run inference container on another host or another terminal

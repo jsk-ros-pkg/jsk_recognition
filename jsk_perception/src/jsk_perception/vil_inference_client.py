@@ -39,13 +39,27 @@ class DockerInferenceClientBase(object):
         # default inference image
         self.default_img = None
         # ROS
-        self.image_sub = rospy.Subscriber("~image", Image,
-                                          callback=self.topic_cb,
-                                          queue_size=1,
-                                          buff_size=2**26)
+        self.transport_hint = rospy.get_param('~image_transport', 'raw')
+        if self.transport_hint == 'compressed':
+            self.image_sub = rospy.Subscriber(
+                "{}/compressed".format(rospy.resolve_name('~image')),
+                CompressedImage,
+                callback=self.topic_cb,
+                queue_size=1,
+                buff_size=2**26
+            )
+
+        else:
+            self.image_sub = rospy.Subscriber("~image", Image,
+                                              callback=self.topic_cb,
+                                              queue_size=1,
+                                              buff_size=2**26)
         self.result_topic_type = result_topic
         self.result_pub = rospy.Publisher("~result", result_topic, queue_size=1)
-        self.image_pub = rospy.Publisher("~result/image", Image, queue_size=1)
+        if self.transport_hint == 'compressed':
+            self.image_pub = rospy.Publisher("~result/image/compressed", CompressedImage, queue_size=1)
+        else:
+            self.image_pub = rospy.Publisher("~result/image", Image, queue_size=1)
         self.vis_pub = rospy.Publisher("~visualize", String, queue_size=1)
         self.action_server = actionlib.SimpleActionServer("~inference_server",
                                                           action,

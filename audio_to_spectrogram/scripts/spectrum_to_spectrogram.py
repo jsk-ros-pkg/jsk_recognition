@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import division
+
 import cv2
 from cv_bridge import CvBridge
 import numpy as np

@@ -31,7 +31,7 @@ class DrawRects(ConnectionBasedTransport):
             'use_classification_result'])
         self.approximate_sync = rospy.get_param('~approximate_sync', DrawRectsConfig.defaults['approximate_sync'])
         self.queue_size = rospy.get_param('~queue_size', DrawRectsConfig.defaults['queue_size'])
-        self.transport_hint = rospy.get_param('~image_transport', 'compressed')
+        self.transport_hint = rospy.get_param('~image_transport', 'raw')
         rospy.loginfo("Using transport {}".format(self.transport_hint))
         #
         # To process latest message, we need to set buff_size must be large enough.

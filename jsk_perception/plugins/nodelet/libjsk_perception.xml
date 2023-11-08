@@ -143,6 +143,9 @@
   <class name="jsk_perception/UnapplyMaskImage" type="jsk_perception::UnapplyMaskImage"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_perception/InvertMaskImage" type="jsk_perception::InvertMaskImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_perception/GridLabel" type="jsk_perception::GridLabel"
          base_class_type="nodelet::Nodelet">
   </class>

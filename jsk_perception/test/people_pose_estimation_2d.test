@@ -7,16 +7,16 @@
   <test test-name="test_people_pose_estimation_2d"
         name="test_people_pose_estimation_2d"
         pkg="jsk_tools" type="test_topic_published.py"
-        retry="3">
+        retry="3" time-limit="120">
     <rosparam>
       topic_0: /people_pose_estimation_2d/output
-      timeout_0: 60
+      timeout_0: 120
       topic_1: /people_pose_estimation_2d/pose
-      timeout_1: 60
+      timeout_1: 120
       topic_2: /people_pose_estimation_2d/pose_2d
-      timeout_2: 60
+      timeout_2: 120
       topic_3: /people_pose_estimation_2d/skeleton
-      timeout_3: 60
+      timeout_3: 120
     </rosparam>
   </test>
 

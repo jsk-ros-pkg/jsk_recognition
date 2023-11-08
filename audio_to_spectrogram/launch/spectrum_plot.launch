@@ -1,0 +1,29 @@
+<launch>
+
+  <arg name="spectrum" />
+  <arg name="plotter_name" default="spectrum_plot" />
+  <arg name="min_amp" default="0.0" />
+  <arg name="max_amp" default="20.0" />
+  <arg name="queue_size" default="1" />
+  <arg name="max_rate" default="-1" />
+  <arg name="gui" default="true" />
+
+  <!-- publish frequency vs amplitude image -->
+  <node name="$(arg plotter_name)"
+        pkg="audio_to_spectrogram" type="spectrum_plot.py">
+    <remap from="~spectrum" to="$(arg spectrum)" />
+    <rosparam subst_value="true">
+      min_amp: $(arg min_amp)
+      max_amp: $(arg max_amp)
+      queue_size: $(arg queue_size)
+      max_rate: $(arg max_rate)
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node pkg="image_view" type="image_view" name="$(arg plotter_name)_view">
+      <remap from="image" to="$(arg plotter_name)/output/viz" />
+    </node>
+  </group>
+
+</launch>

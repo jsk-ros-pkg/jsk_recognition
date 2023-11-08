@@ -12,6 +12,12 @@ Subscribing Topic
 * ``~input`` (``sensor_msgs/PoinCloud2``)
 
 
+Advertising Services
+-----------------
+* ``~save_pcd`` (``std_srvs/Empty``)
+
+  Convert PointCloud2 to pcd, saved under `{prefix}{stamp}.pcd`.
+
 Parameters
 ----------
 
@@ -37,3 +43,5 @@ Parameters
 * ``duration`` (Double, default: ``1.0``)
 
   Saving duration. You can change saving frequency with this parameter.
+  If the duration is greater than 0.0, the pcd data is stored continuously under the set duration.
+  When you want to use this as ROS service, set the duration to 0.0.

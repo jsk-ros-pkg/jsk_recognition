@@ -13,7 +13,7 @@
  *     notice, this list of conditions and the following disclaimer.
  *   * Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/o2r other materials provided
+ *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
  *   * Neither the name of the JSK Lab nor the names of its
  *     contributors may be used to endorse or promote products derived
@@ -50,6 +50,7 @@
 #include <jsk_perception/DualFisheyeConfig.h>
 
 #include <opencv2/opencv.hpp>
+#include <image_transport/image_transport.h>
 
 #include "jsk_perception/fisheye_stitcher.hpp"
 
@@ -76,8 +77,8 @@ namespace jsk_perception
 
     bool sticher_initialized_;
     boost::shared_ptr<stitcher::FisheyeStitcher> stitcher_;
-    ros::Subscriber sub_image_;
-    ros::Publisher pub_panorama_image_;
+    image_transport::Subscriber sub_image_;
+    image_transport::Publisher pub_panorama_image_;
     ros::Publisher pub_panorama_info_;
 
     jsk_recognition_msgs::PanoramaInfo msg_panorama_info_;
@@ -86,8 +87,16 @@ namespace jsk_perception
     bool   enb_ra_;
     bool  save_unwarped_;
     float  fovd_;
+    int blend_image_height_;
+    int blend_image_width_;
+    int blend_param_p_wid_;
+    int blend_param_p_x1_;
+    int blend_param_p_x2_;
+    int blend_param_row_start_;
+    int blend_param_row_end_;
+    int output_image_height_;
+    int output_image_width_;
     std::string mls_map_path_;
-
   private:
   };
 }

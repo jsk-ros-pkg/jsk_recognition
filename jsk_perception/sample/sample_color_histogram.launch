@@ -24,8 +24,9 @@
       use_window: $(arg gui)
     </rosparam>
   </node>
+  <!-- workaround until https://github.com/jsk-ros-pkg/jsk_common/pull/1774 is merged and released -->
   <node name="publish_mouse_event"
-        pkg="image_view2" type="publish_mouse_event.py">
+        pkg="jsk_perception" type="publish_mouse_event.py">
     <remap from="~plus_rect_event" to="image_publisher/output/image/event" />
     <rosparam>
       image_width: 256

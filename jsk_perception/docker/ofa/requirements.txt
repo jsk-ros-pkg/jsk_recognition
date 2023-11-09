@@ -58,7 +58,7 @@ pandas==1.5.3
 pkginfo==1.7.0
 portalocker==2.7.0
 protobuf==3.19.6
-pyarrow==11.0.0
+pyarrow==14.0.1
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycocoevalcap==1.2

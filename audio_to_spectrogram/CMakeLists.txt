@@ -8,7 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_python_setup()
 
 generate_dynamic_reconfigure_options(
-  cfg/AudioAmplitudePlot.cfg
+  cfg/DataAmplitudePlot.cfg
 )
 
 catkin_package()
@@ -41,4 +41,10 @@ if(CATKIN_ENABLE_TESTING)
   find_package(catkin REQUIRED COMPONENTS rostest roslaunch)
   add_rostest(test/audio_to_spectrogram.test)
   roslaunch_add_file_check(launch/audio_to_spectrogram.launch)
+  if(NOT $ENV{ROS_DISTRO} STRLESS "kinetic")
+    # Under kinetic, eval cannot be used in launch files
+    # http://wiki.ros.org/roslaunch/XML#substitution_args
+    add_rostest(test/wrench_to_spectrogram.test)
+    roslaunch_add_file_check(launch/wrench_to_spectrogram.launch)
+  endif()
 endif()

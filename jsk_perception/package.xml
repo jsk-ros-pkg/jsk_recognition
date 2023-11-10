@@ -55,6 +55,7 @@
   <exec_depend>cv_bridge</exec_depend>
   <exec_depend>dynamic_reconfigure</exec_depend>
   <exec_depend>eigen</exec_depend>
+  <exec_depend>fetch_description</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>image_geometry</exec_depend>
   <exec_depend>image_transport</exec_depend>
@@ -93,6 +94,8 @@
   <exec_depend>python-fcn-pip</exec_depend>  <!-- pip -->
   <!-- }} install fcn -->
   <exec_depend version_lt="0.3.7">python-pytesseract-pip</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-requests</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-requests</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-sklearn</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-sklearn</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-yaml</exec_depend>
@@ -118,9 +121,12 @@
   <!-- ALPHABETICAL ORDER -->
 
   <!-- ALPHABETICAL ORDER -->
+  <test_depend>compressed_depth_image_transport</test_depend>
+  <test_depend>compressed_image_transport</test_depend>
   <test_depend>jsk_tools</test_depend>
   <test_depend>roslaunch</test_depend>
   <test_depend>roslint</test_depend>
+  <test_depend>rosservice</test_depend>
   <test_depend>rostest</test_depend>
   <!-- ALPHABETICAL ORDER -->
 

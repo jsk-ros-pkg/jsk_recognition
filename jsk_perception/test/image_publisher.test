@@ -36,6 +36,26 @@
       timeout_12: 10
       topic_13: /raw_image_rgba/camera_info
       timeout_13: 10
+      topic_14: /raw_image_bgr_16bit/image_color
+      timeout_14: 10
+      topic_15: /raw_image_bgr_16bit/camera_info
+      timeout_15: 10
+      topic_16: /raw_image_rgb_16bit/image_color
+      timeout_16: 10
+      topic_17: /raw_image_rgb_16bit/camera_info
+      timeout_17: 10
+      topic_18: /mask_image_16bit/mask
+      timeout_18: 10
+      topic_19: /mask_image_16bit/camera_info
+      timeout_19: 10
+      topic_20: /raw_image_bgra_16bit/image_color
+      timeout_20: 10
+      topic_21: /raw_image_bgra_16bit/camera_info
+      timeout_21: 10
+      topic_22: /raw_image_rgba_16bit/image_color
+      timeout_22: 10
+      topic_23: /raw_image_rgba_16bit/camera_info
+      timeout_23: 10
     </rosparam>
   </test>
 

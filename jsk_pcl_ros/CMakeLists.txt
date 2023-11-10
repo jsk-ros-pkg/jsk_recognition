@@ -140,7 +140,7 @@ generate_dynamic_reconfigure_options(
 
 find_package(OpenCV REQUIRED core imgproc)
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS} ${ml_classifiers_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
@@ -380,6 +380,12 @@ jsk_pcl_nodelet(src/ppf_registration_nodelet.cpp
   "jsk_pcl/PPFRegistration" "ppf_registration")
 jsk_pcl_nodelet(src/organized_statistical_outlier_removal_nodelet.cpp
   "jsk_pcl/OrganizedStatisticalOutlierRemoval" "organized_statistical_outlier_removal")
+# container_occupancy_detector requires tf2_eigen which is not released in indigo
+find_package(tf2_eigen QUIET)
+if (tf2_eigen_FOUND)
+  jsk_pcl_nodelet(src/container_occupancy_detector_nodelet.cpp
+    "jsk_pcl/ContainerOccupancyDetector" "container_occupancy_detector")
+endif()
 
 # kinfu.h uses jsk_rviz_plugins/OverlayText.h, but jsk_recognition should not depends on jsk_visualization
 find_package(jsk_rviz_plugins QUIET)
@@ -499,10 +505,34 @@ install(TARGETS ${jsk_pcl_ros_install_libraries}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
-install(DIRECTORY config euslisp launch plugins sample scripts test
+install(DIRECTORY config euslisp launch plugins test
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   USE_SOURCE_PERMISSIONS
 )
+if($ENV{ROS_DISTRO} STREQUAL "indigo") # on noetic it needs catkin_install_python to support Python3 and it does not work on indigo for some reason...
+install(DIRECTORY sample scripts
+   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+   USE_SOURCE_PERMISSIONS
+   )
+else()
+install(DIRECTORY sample scripts
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  USE_SOURCE_PERMISSIONS
+  PATTERN "*"
+  PATTERN "*/*.py" EXCLUDE
+)
+
+file(GLOB SCRIPT_PROGRAMS scripts/*.py)
+catkin_install_python(
+  PROGRAMS ${SCRIPT_PROGRAMS}
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/scripts
+)
+file(GLOB SAMPLE_SCRIPT_PROGRAMS sample/*.py)
+catkin_install_python(
+  PROGRAMS ${SAMPLE_SCRIPT_PROGRAMS}
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/sample
+)
+endif()
 
 if (CATKIN_ENABLE_TESTING)
   find_package(jsk_perception REQUIRED)
@@ -626,6 +656,9 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/test_voxel_grid_downsample.test)
     add_rostest(test/test_voxel_grid_large_scale.test)
     add_rostest(test/test_organized_statistical_outlier_removal.test)
+    if(tf2_eigen_FOUND)
+      add_rostest(test/test_container_occupancy_detector.test)
+    endif()
   endif()
   roslaunch_add_file_check(launch/openni_local.launch)
   roslaunch_add_file_check(launch/openni2_local.launch)

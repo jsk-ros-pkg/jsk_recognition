@@ -32,7 +32,8 @@
 
   <node name="selected_cluster_publisher"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/SelectedClusterPublisher /sample_manager">
+        args="load jsk_pcl/SelectedClusterPublisher /sample_manager"
+        respawn="true" >
     <remap from="~input" to="/right_hand_camera/depth_registered/points"/>
     <remap from="~indices" to="/euclidean_clustering/output"/>
     <remap from="~selected_index" to="/index_publisher/output"/>

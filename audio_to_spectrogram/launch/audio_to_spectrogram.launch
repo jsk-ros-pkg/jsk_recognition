@@ -2,20 +2,34 @@
 <!-- audio -> spectrum -> spectrogram -->
 
 <launch>
+
   <arg name="launch_audio_capture" default="true" />
 
+  <arg name="audio_capture_ns" default="/" />
   <arg name="bitdepth" default="16" />
   <arg name="mic_sampling_rate" default="16000" />
   <arg name="n_channel" default="1" />
+  <arg name="target_channel" default="0" />
   <arg name="device" default="hw:0,0" />
   <arg name="audio_topic" default="/audio" />
+  <arg name="fft_sampling_period" default="0.3" />
+  <arg name="fft_exec_rate" default="50" />
+  <arg name="audio_amp_plot_max_amp" default="10000.0" />
+  <arg name="audio_amp_plot_window_size" default="10.0" />
+  <arg name="audio_amp_plot_rate" default="10.0" />
+  <arg name="spectrogram_source" default="audio_to_spectrum/log_spectrum" />
   <arg name="high_cut_freq" default="800" />
-  <arg name="low_cut_freq" default="1" />
+  <arg name="low_cut_freq" default="1" />  <!-- default: remove 0Hz because this component is meaningless in audio -->
   <arg name="spectrogram_period" default="5" />
+  <arg name="preprocessed_spectrogram_source_plot_min_amp" default="0.0" />
+  <arg name="preprocessed_spectrogram_source_plot_max_amp" default="20.0" />
+  <arg name="preprocessed_spectrogram_source_plot_queue_size" default="1" />
+  <arg name="preprocessed_spectrogram_source_plot_max_rate" default="-1" />
   <arg name="gui" default="true" />
 
   <!-- Publish audio topic from microphone -->
-  <node name="audio_capture" pkg="audio_capture" type="audio_capture"
+  <node name="audio_capture" ns="$(arg audio_capture_ns)"
+        pkg="audio_capture" type="audio_capture"
         if="$(arg launch_audio_capture)"
         respawn="true">
     <rosparam subst_value="true">
@@ -28,46 +42,32 @@
   </node>
 
   <!-- convert audio topic to spectrum topic -->
-  <node pkg="audio_to_spectrogram" type="audio_to_spectrum.py" name="audio_to_spectrum" respawn="true">
-    <remap from="~audio" to="$(arg audio_topic)" />
-    <rosparam subst_value="true">
-      n_channel: $(arg n_channel)
-      mic_sampling_rate: $(arg mic_sampling_rate)
-      fft_sampling_period: 0.3
-      bitdepth: $(arg bitdepth)
-      high_cut_freq: $(arg high_cut_freq)
-      low_cut_freq: $(arg low_cut_freq)
-      fft_exec_rate: 50
-    </rosparam>
-  </node>
+  <include file="$(find audio_to_spectrogram)/launch/audio_to_spectrum.launch">
+    <arg name="audio_topic" value="$(arg audio_topic)" />
+    <arg name="n_channel" value="$(arg n_channel)" />
+    <arg name="target_channel" value="$(arg target_channel)" />
+    <arg name="mic_sampling_rate" value="$(arg mic_sampling_rate)" />
+    <arg name="fft_sampling_period" value="$(arg fft_sampling_period)" />
+    <arg name="bitdepth" value="$(arg bitdepth)" />
+    <arg name="fft_exec_rate" value="$(arg fft_exec_rate)" />
+    <arg name="audio_amp_plot_max_amp" value="$(arg audio_amp_plot_max_amp)" />
+    <arg name="audio_amp_plot_window_size" value="$(arg audio_amp_plot_window_size)" />
+    <arg name="audio_amp_plot_rate" value="$(arg audio_amp_plot_rate)" />
+    <arg name="gui" value="$(arg gui)" />
+  </include>
 
   <!-- convert spectrum topic to spectrogram topic -->
-  <node pkg="audio_to_spectrogram" type="spectrum_to_spectrogram.py" name="spectrum_to_spectrogram" respawn="true">
-    <remap from="~spectrum" to="/audio_to_spectrum/spectrum_filtered" />
-    <rosparam subst_value="true">
-      image_height: 300
-      image_width: 300
-      spectrogram_period: $(arg spectrogram_period)
-    </rosparam>
-  </node>
-
-  <group if="$(arg gui)">
-    <!-- visualize spectrum -->
-    <node pkg="audio_to_spectrogram" type="spectrum_plot.py" name="spectrum_plot"  >
-      <remap from="~spectrum" to="/audio_to_spectrum/spectrum_filtered" />
-    </node>
-
-    <!-- visualize spectrogram -->
-    <!-- you can get spectrogram image topic from /spectrogram_view/output-->
-    <node pkg="image_view" type="image_view" name="spectrogram_view"  >
-      <remap from="image" to="/spectrum_to_spectrogram/spectrogram" />
-      <rosparam>
-        <!-- set all pixels between 0 and 255 -->
-        do_dynamic_scaling: true
-        <!-- use jet colormap -->
-        colormap: 2
-      </rosparam>
-    </node>
-  </group>
+  <include file="$(find audio_to_spectrogram)/launch/spectrum_to_spectrogram.launch">
+    <arg name="spectrum" value="$(arg spectrogram_source)" />
+    <arg name="data_sampling_rate" value="$(arg mic_sampling_rate)" />
+    <arg name="high_cut_freq" value="$(arg high_cut_freq)" />
+    <arg name="low_cut_freq" value="$(arg low_cut_freq)" />
+    <arg name="spectrogram_period" value="$(arg spectrogram_period)" />
+    <arg name="preprocessed_spectrum_plot_min_amp" value="$(arg preprocessed_spectrogram_source_plot_min_amp)" />
+    <arg name="preprocessed_spectrum_plot_max_amp" value="$(arg preprocessed_spectrogram_source_plot_max_amp)" />
+    <arg name="preprocessed_spectrum_plot_queue_size" value="$(arg preprocessed_spectrogram_source_plot_queue_size)" />
+    <arg name="preprocessed_spectrum_plot_max_rate" value="$(arg preprocessed_spectrogram_source_plot_max_rate)" />
+    <arg name="gui" value="$(arg gui)" />
+  </include>
 
 </launch>

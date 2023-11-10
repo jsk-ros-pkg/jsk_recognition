@@ -9,7 +9,8 @@
 
   <node name="border_estimator"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/BorderEstimator sample_manager">
+        args="load jsk_pcl/BorderEstimator sample_manager"
+        respawn="true" >
     <remap from="~input" to="/kinect_head/depth_registered/points"/>
     <remap from="~input_camera_info" to="/kinect_head/rgb/camera_info"/>
   </node>

@@ -40,7 +40,8 @@
 
   <node name="handle_estimator"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/HandleEstimator /sample_manager">
+        args="load jsk_pcl/HandleEstimator /sample_manager"
+        respawn="true" >
     <remap from="~input" to="/plane_extraction_left_hand_camera/output"/>
     <remap from="~input_box" to="bbox_array_to_bbox/output"/>
     <remap from="~selected_index" to="sample_int_publisher_from_pose_array/output"/>

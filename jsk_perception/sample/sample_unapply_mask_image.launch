@@ -4,10 +4,12 @@
   <include file="$(find jsk_perception)/sample/sample_apply_mask_image.launch">
     <arg name="gui" value="false"/>
   </include>
+  <arg name="MANAGER" default="sample_manager" />
 
   <node name="unapply_mask_image"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_perception/UnapplyMaskImage">
+        args="load jsk_perception/UnapplyMaskImage $(arg MANAGER)"
+        respawn="true" >
     <remap from="~input" to="apply_mask_image/output"/>
     <remap from="~input/mask" to="mask_publisher/output"/>
     <rosparam>

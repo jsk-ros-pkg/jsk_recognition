@@ -21,6 +21,8 @@
       timeout_4: 30
       topic_5: /plane_reasoner/output/horizontal/polygons
       timeout_5: 30
+      check_after_kill_node: true
+      node_names: [plane_reasoner,]
     </rosparam>
   </test>
 

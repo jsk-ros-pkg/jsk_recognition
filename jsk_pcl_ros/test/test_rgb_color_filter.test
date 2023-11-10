@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /pcl_nodelet/rgb_output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [/pcl_nodelet/rgb_filter,]
     </rosparam>
   </test>
 

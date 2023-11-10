@@ -6,10 +6,12 @@
   <arg name="INPUT_INDICES" default="/mask_rcnn_instance_segmentation/output/cluster_indices" />
 
   <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_hsr_multiobjects_in_shelf.xml" />
+  <arg name="MANAGER" value="/head_rgbd_sensor_remote/head_rgbd_sensor_remote_nodelet_manager" />
 
   <node name="multi_euclidean_clustering"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/EuclideanClustering"
+        args="load jsk_pcl/EuclideanClustering $(arg MANAGER)"
+        respawn="true"
         output="screen">
     <remap from="~input/cluster_indices" to="$(arg INPUT_INDICES)" />
     <remap from="~input" to="$(arg INPUT_CLOUD)" />
@@ -27,7 +29,8 @@
 
   <node name="multi_euclidean_cluster_point_indices_decomposer"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/ClusterPointIndicesDecomposer">
+        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)"
+        respawn="true">
     <remap from="~input" to="$(arg INPUT_CLOUD)" />
     <remap from="~target" to="/multi_euclidean_clustering/output" />
     <rosparam>
@@ -40,7 +43,8 @@
 
   <node name="cluster_point_indices_decomposer"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/ClusterPointIndicesDecomposer">
+        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)"
+        respawn="true">
     <remap from="~input" to="$(arg INPUT_CLOUD)" />
     <remap from="~target" to="$(arg INPUT_INDICES)" />
     <rosparam>

@@ -6,8 +6,14 @@
     <arg name="gui" value="false" />
   </include>
 
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
   <node name="bounding_box_array_to_bounding_box"
-        pkg="jsk_pcl_ros_utils" type="bounding_box_array_to_bounding_box">
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/BoundingBoxArrayToBoundingBox sample_manager"
+        respawn="true" >
     <remap from="~input" to="bounding_box_array_publisher/output" />
     <rosparam>
       index: 5

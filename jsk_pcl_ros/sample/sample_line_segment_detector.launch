@@ -40,7 +40,8 @@
 
   <node name="line_segment_detector"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/LineSegmentDetector"
+        args="load jsk_pcl/LineSegmentDetector line_segment_manager"
+        respawn="true"
         output="screen">
     <remap from="~input" to="$(arg FILTERED_CLOUD)" />
     <remap from="~input_indices" to="/euclidean_clustering/output" />

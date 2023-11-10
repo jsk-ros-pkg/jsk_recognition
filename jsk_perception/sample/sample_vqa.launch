@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <arg name="run_api" default="true" />
+  <arg name="gui" default="true" />
+  <arg name="VQA_INPUT_IMAGE" default="/usb_cam/image_raw" />
+
+  <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" />
+
+  <include file="$(find jsk_perception)/launch/vqa.launch" >
+    <arg name="run_api" value="$(arg run_api)" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="VQA_INPUT_IMAGE" value="$(arg VQA_INPUT_IMAGE)" />
+  </include>
+
+</launch>

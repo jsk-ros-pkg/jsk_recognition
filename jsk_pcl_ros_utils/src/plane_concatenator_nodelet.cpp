@@ -13,7 +13,7 @@
  *     notice, this list of conditions and the following disclaimer.
  *   * Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/o2r other materials provided
+ *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
  *   * Neither the name of the JSK Lab nor the names of its
  *     contributors may be used to endorse or promote products derived
@@ -61,6 +61,17 @@ namespace jsk_pcl_ros_utils
       *pnh_, "output/coefficients", 1);
 
     onInitPostProcess();
+  }
+
+  PlaneConcatenator::~PlaneConcatenator() {
+    // message_filters::Synchronizer needs to be called reset
+    // before message_filters::Subscriber is freed.
+    // Calling reset fixes the following error on shutdown of the nodelet:
+    // terminate called after throwing an instance of
+    // 'boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >'
+    //     what():  boost: mutex lock failed in pthread_mutex_lock: Invalid argument
+    // Also see https://github.com/ros/ros_comm/issues/720 .
+    sync_.reset();
   }
 
   void PlaneConcatenator::subscribe()
@@ -219,7 +230,9 @@ namespace jsk_pcl_ros_utils
     pcl::ModelCoefficients::Ptr refined_coefficients(new pcl::ModelCoefficients);
     seg.segment(*refined_inliers, *refined_coefficients);
     if (refined_inliers->indices.size() > 0) {
-      return refined_coefficients;
+      pcl::ModelCoefficients::Ptr fixed_refined_coefficients(new pcl::ModelCoefficients);
+      forceToDirectOrigin(refined_coefficients, fixed_refined_coefficients);
+      return fixed_refined_coefficients;
     }
     else {
       return original_coefficients;
@@ -267,6 +280,23 @@ namespace jsk_pcl_ros_utils
     min_size_ = config.min_size;
     min_area_ = config.min_area;
     max_area_ = config.max_area;
+  }
+
+  void PlaneConcatenator::forceToDirectOrigin(
+    const pcl::ModelCoefficients::Ptr& coefficients,
+    pcl::ModelCoefficients::Ptr& output_coefficients)
+  {
+    jsk_recognition_utils::Plane plane(coefficients->values);
+
+    Eigen::Vector3f p = plane.getPointOnPlane();
+    Eigen::Vector3f n = plane.getNormal();
+    if (p.dot(n) < 0) {
+      output_coefficients = coefficients;
+    }
+    else {
+      jsk_recognition_utils::Plane flip = plane.flip();
+      flip.toCoefficients(output_coefficients->values);
+    }
   }
 }
 

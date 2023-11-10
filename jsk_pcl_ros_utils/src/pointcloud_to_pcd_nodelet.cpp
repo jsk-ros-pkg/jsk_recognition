@@ -13,7 +13,7 @@
  *     notice, this list of conditions and the following disclaimer.
  *   * Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/o2r other materials provided
+ *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
  *   * Neither the name of the JSK Lab nor the names of its
  *     contributors may be used to endorse or promote products derived
@@ -49,7 +49,16 @@ namespace jsk_pcl_ros_utils
     timer_.stop();
   }
 
-  void PointCloudToPCD::timerCallback (const ros::TimerEvent& event)
+  void PointCloudToPCD::timerCallback (const ros::TimerEvent& event) {
+    savePCD();
+  }
+
+  bool PointCloudToPCD::savePCDCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res) {
+    savePCD();
+    return true;
+  }
+
+  void PointCloudToPCD::savePCD()
   {
     pcl::PCLPointCloud2::ConstPtr cloud;
     cloud = ros::topic::waitForMessage<pcl::PCLPointCloud2>("input", *pnh_);
@@ -58,7 +67,7 @@ namespace jsk_pcl_ros_utils
       return;
     }
   
-    ROS_INFO ("Received %d data points in frame %s with the following fields: %s",
+    NODELET_INFO ("Received %d data points in frame %s with the following fields: %s",
             (int)cloud->width * cloud->height,
             cloud->header.frame_id.c_str (),
             pcl::getFieldsList (*cloud).c_str ());
@@ -67,7 +76,7 @@ namespace jsk_pcl_ros_utils
     Eigen::Quaternionf q = Eigen::Quaternionf::Identity ();
     if (!fixed_frame_.empty ()) {
         if (!tf_listener_->waitForTransform (fixed_frame_, cloud->header.frame_id, pcl_conversions::fromPCL (cloud->header).stamp, ros::Duration (duration_))) {
-        ROS_WARN("Could not get transform!");
+        NODELET_WARN("Could not get transform!");
         return;
       }
       tf::StampedTransform transform_stamped;
@@ -81,7 +90,7 @@ namespace jsk_pcl_ros_utils
   
     std::stringstream ss;
     ss << prefix_ << cloud->header.stamp << ".pcd";
-    ROS_INFO ("Data saved to %s", ss.str ().c_str ());
+    NODELET_INFO ("Data saved to %s", ss.str ().c_str ());
   
     pcl::PCDWriter writer;
     if(binary_)
@@ -107,21 +116,22 @@ namespace jsk_pcl_ros_utils
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f = boost::bind(&PointCloudToPCD::configCallback, this, _1, _2);
     srv_->setCallback (f);
+    srv_save_pcd_server_ = pnh_->advertiseService("save_pcd", &PointCloudToPCD::savePCDCallback, this);
     tf_listener_ = jsk_recognition_utils::TfListenerSingleton::getInstance();
     if(binary_)
     {
       if(compressed_)
       {
-        ROS_INFO_STREAM ("Saving as binary compressed PCD");
+        NODELET_INFO("Saving as binary compressed PCD") ;
       }
       else
       {
-        ROS_INFO_STREAM ("Saving as binary PCD");
+        NODELET_INFO("Saving as binary PCD");
       }
     }
     else
     {
-      ROS_INFO_STREAM ("Saving as binary PCD");
+      NODELET_INFO("Saving as ASCII PCD");
     }
   }
 
@@ -133,7 +143,10 @@ namespace jsk_pcl_ros_utils
     compressed_ = config.compressed;
     fixed_frame_ = config.fixed_frame;
     duration_ = config.duration;
-    timer_ = pnh_->createTimer(ros::Duration(duration_), boost::bind(&PointCloudToPCD::timerCallback, this, _1));
+    timer_.stop();
+    if (duration_ != 0) {
+      timer_ = pnh_->createTimer(ros::Duration(duration_), boost::bind(&PointCloudToPCD::timerCallback, this, _1));
+    }
   }
 }
 

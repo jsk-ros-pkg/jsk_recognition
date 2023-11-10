@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <include file="$(find jsk_perception)/sample/sample_video_to_scene.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_video_to_scene"
+        name="test_video_to_scene"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="20" retry="3">
+    <rosparam>
+      topic_0: /kinect_head/rgb/image_rect_color/output
+      timeout_0: 20
+      topic_1: /kinect_head/rgb/image_rect_color/output/compressed
+      timeout_1: 20
+      check_after_kill_node: true
+      node_names: [video_to_scene,]
+    </rosparam>
+  </test>
+
+</launch>

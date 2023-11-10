@@ -13,6 +13,8 @@
       timeout_0: 30
       topic_1: /polygon_array_color_histogram/debug/polygon_image
       timeout_1: 30
+      check_after_kill_node: true
+      node_names: [polygon_array_color_histogram,]
     </rosparam>
   </test>
 

@@ -13,7 +13,7 @@
  *     notice, this list of conditions and the following disclaimer.
  *   * Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/o2r other materials provided
+ *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
  *   * Neither the name of the JSK Lab nor the names of its
  *     contributors may be used to endorse or promote products derived
@@ -89,6 +89,7 @@ namespace jsk_pcl_ros
       jsk_recognition_msgs::ModelCoefficientsArray,
       jsk_recognition_msgs::ClusterPointIndices > SyncPolicy;
     EnvironmentPlaneModeling(): DiagnosticNodelet("EnvironmentPlaneModeling") {}
+    virtual ~EnvironmentPlaneModeling();
   protected:
     virtual void onInit();
 

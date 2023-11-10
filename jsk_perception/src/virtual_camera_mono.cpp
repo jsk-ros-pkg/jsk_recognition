@@ -1,70 +1,34 @@
-#include <ros/ros.h>
-#include <dynamic_reconfigure/server.h>
-#include <jsk_topic_tools/log_utils.h>
-#include <jsk_topic_tools/rosparam_utils.h>
-#include <image_transport/image_transport.h>
-#include <image_geometry/pinhole_camera_model.h>
-#include <tf/transform_listener.h>
-#include <tf/transform_broadcaster.h>
-#include <cv_bridge/cv_bridge.h>
-#if ( CV_MAJOR_VERSION >= 4)
-#else
-#include <opencv/cv.hpp>
-#include <opencv/highgui.h>
-#endif
+#include "jsk_perception/virtual_camera_mono.h"
 
+#include <jsk_topic_tools/rosparam_utils.h>
+#include <cv_bridge/cv_bridge.h>
 #include <string>
 #include <vector>
-#include <boost/assign.hpp>
-#include <boost/thread.hpp>
 
-#include <geometry_msgs/Polygon.h>
-#include <geometry_msgs/PolygonStamped.h>
-
-#include <jsk_perception/VirtualCameraMonoConfig.h>
-
-
-class VirtualCameraMono
+namespace jsk_perception
 {
-  ros::NodeHandle nh_,private_nh_;
-  boost::shared_ptr<dynamic_reconfigure::Server<jsk_perception::VirtualCameraMonoConfig> > srv_;
-  image_transport::ImageTransport it_,it_priv_;
-  image_transport::CameraSubscriber sub_;
-  image_transport::CameraPublisher pub_;
-  int subscriber_count_;
-  tf::TransformListener tf_listener_;
-  image_geometry::PinholeCameraModel cam_model_;
-  tf::TransformBroadcaster tf_broadcaster_;
-  ros::Subscriber sub_trans_, sub_poly_;
-
-  tf::StampedTransform trans_; // transform to virtual camera
-  geometry_msgs::PolygonStamped poly_; // target polygon to transform image
-  int interpolation_method_;
-
-public:
-  VirtualCameraMono() : private_nh_("~"), it_(nh_), it_priv_(private_nh_), subscriber_count_(0)
+  void VirtualCameraMono::onInit()
   {
-    image_transport::SubscriberStatusCallback connect_cb = boost::bind(&VirtualCameraMono::connectCb, this, _1);
-    image_transport::SubscriberStatusCallback disconnect_cb = boost::bind(&VirtualCameraMono::disconnectCb, this, _1);
-    pub_ = it_priv_.advertiseCamera("image", 1, connect_cb, disconnect_cb);
+    DiagnosticNodelet::onInit();
+    pub_ = advertiseCamera(*pnh_, "image", 1);
 
     dynamic_reconfigure::Server<jsk_perception::VirtualCameraMonoConfig>::CallbackType f =
       boost::bind(&VirtualCameraMono::configCb, this, _1, _2);
-    srv_ = boost::make_shared<dynamic_reconfigure::Server<jsk_perception::VirtualCameraMonoConfig> >(private_nh_);
+    srv_ = boost::make_shared<dynamic_reconfigure::Server<jsk_perception::VirtualCameraMonoConfig> >(*pnh_);
     srv_->setCallback(f);
 
-    private_nh_.param("frame_id", trans_.frame_id_, std::string("/elevator_inside_panel"));
-    private_nh_.param("child_frame_id", trans_.child_frame_id_, std::string("/virtual_camera_frame"));
+    pnh_->param("frame_id", trans_.frame_id_, std::string("/elevator_inside_panel"));
+    pnh_->param("child_frame_id", trans_.child_frame_id_, std::string("/virtual_camera_frame"));
     ROS_INFO("VirutalCmaeraMono(%s) frame_id: %s, chid_frame_id: %s", ros::this_node::getName().c_str(), trans_.frame_id_.c_str(), trans_.child_frame_id_.c_str());
-
+    pnh_->param("queue_size", queue_size_, 1);
     std::vector<double> initial_pos, initial_rot;
-    if (jsk_topic_tools::readVectorParameter(private_nh_, "initial_pos", initial_pos)) {
+    if (jsk_topic_tools::readVectorParameter(*pnh_, "initial_pos", initial_pos)) {
       trans_.setOrigin(tf::Vector3(initial_pos[0], initial_pos[1], initial_pos[2]));
     }
     else {
       trans_.setOrigin(tf::Vector3(0.7, 0, 0));
     }
-    if (jsk_topic_tools::readVectorParameter(private_nh_, "initial_rot", initial_rot)) {
+    if (jsk_topic_tools::readVectorParameter(*pnh_, "initial_rot", initial_rot)) {
       trans_.setRotation(tf::Quaternion(initial_rot[0], initial_rot[1], initial_rot[2], initial_rot[3]));
     }
     else {
@@ -81,12 +45,13 @@ public:
     pt.x=0, pt.y=1, pt.z=-1; poly_.polygon.points.push_back(pt);
 
     // parameter subscriber
-    sub_trans_ = nh_.subscribe<geometry_msgs::TransformStamped>("view_point", 1, &VirtualCameraMono::transCb, this);
-    sub_poly_ = nh_.subscribe<geometry_msgs::PolygonStamped>("target_polygon", 1, &VirtualCameraMono::polyCb, this);
+    sub_trans_ = nh_->subscribe<geometry_msgs::TransformStamped>("view_point", 1, &VirtualCameraMono::transCb, this);
+    sub_poly_ = nh_->subscribe<geometry_msgs::PolygonStamped>("target_polygon", 1, &VirtualCameraMono::polyCb, this);
 
+    onInitPostProcess();
   }
 
-  void configCb(const jsk_perception::VirtualCameraMonoConfig &config, uint32_t level)
+  void VirtualCameraMono::configCb(Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock(mutex_);
     switch (config.interpolation_method) {
@@ -111,41 +76,25 @@ public:
     }
   }
 
-  void connectCb(const image_transport::SingleSubscriberPublisher&)
-  {
-    if (subscriber_count_ == 0){
-      subscribe();
-    }
-    subscriber_count_++;
-    ROS_DEBUG("connected new node. current subscriber: %d", subscriber_count_);
-  }
-
-  void disconnectCb(const image_transport::SingleSubscriberPublisher&)
-  {
-    subscriber_count_--;
-    if (subscriber_count_ == 0) {
-      unsubscribe();
-    }
-    ROS_DEBUG("disconnected node. current subscriber: %d", subscriber_count_);
-  }
-
-  void subscribe()
+  void VirtualCameraMono::subscribe()
   {
     ROS_INFO("Subscribing to image topic");
-    sub_ = it_.subscribeCamera("image", 1, &VirtualCameraMono::imageCb, this);
+    it_.reset(new image_transport::ImageTransport(*nh_));
+    sub_ = it_->subscribeCamera("image", queue_size_, &VirtualCameraMono::imageCb, this);
     ros::V_string names = boost::assign::list_of("image");
     jsk_topic_tools::warnNoRemap(names);
   }
 
-  void unsubscribe()
+  void VirtualCameraMono::unsubscribe()
   {
     ROS_INFO("Unsubscibing from image topic");
     sub_.shutdown();
   }
 
-  void imageCb(const sensor_msgs::ImageConstPtr& image_msg,
+  void VirtualCameraMono::imageCb(const sensor_msgs::ImageConstPtr& image_msg,
                const sensor_msgs::CameraInfoConstPtr& info_msg)
   {
+    vital_checker_->poke();
     cv_bridge::CvImagePtr cv_ptr;
     cv::Mat image;
     try {
@@ -179,10 +128,10 @@ public:
   }
 
   // subscribe target polygon
-  void polyCb(const geometry_msgs::PolygonStampedConstPtr& poly) { poly_ = *poly; }
+  void VirtualCameraMono::polyCb(const geometry_msgs::PolygonStampedConstPtr& poly) { poly_ = *poly; }
 
   // subscribe virtual camera pose
-  void transCb(const geometry_msgs::TransformStampedConstPtr& tf)
+  void VirtualCameraMono::transCb(const geometry_msgs::TransformStampedConstPtr& tf)
   {
     trans_.frame_id_ = tf->header.frame_id;
     trans_.child_frame_id_ = tf->child_frame_id;
@@ -194,7 +143,7 @@ public:
   }
 
   // poly is plane only
-  bool TransformImage(cv::Mat src, cv::Mat dest,
+  bool VirtualCameraMono::TransformImage(cv::Mat src, cv::Mat dest,
 		      tf::StampedTransform& trans, geometry_msgs::PolygonStamped& poly,
 		      image_geometry::PinholeCameraModel& cam_model_)
   {
@@ -238,14 +187,7 @@ public:
     }
     return true;
   }
-};
-
-int main(int argc, char **argv)
-{
-  ros::init(argc, argv, "virtual_camera_mono");
-
-  VirtualCameraMono vcam;
-
-  ros::spin();
 }
 
+#include <pluginlib/class_list_macros.h>
+PLUGINLIB_EXPORT_CLASS (jsk_perception::VirtualCameraMono, nodelet::Nodelet);

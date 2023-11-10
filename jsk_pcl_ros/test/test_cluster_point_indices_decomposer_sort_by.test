@@ -15,6 +15,11 @@
       timeout_1: 30
       topic_2: /cluster_point_indices_decomposer_cloud_size/boxes
       timeout_2: 30
+      check_after_kill_node: true
+      node_names:
+        - cluster_point_indices_decomposer
+        - cluster_point_indices_decomposer_cloud_size
+        - cluster_point_indices_decomposer_z_axis
     </rosparam>
   </test>
 

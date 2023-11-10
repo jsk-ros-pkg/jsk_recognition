@@ -19,6 +19,8 @@
       timeout_3: 30
       topic_4: /border_estimator/output_range_image
       timeout_4: 30
+      check_after_kill_node: true
+      node_names: [border_estimator,]
     </rosparam>
   </test>
 

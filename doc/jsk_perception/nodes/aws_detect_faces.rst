@@ -14,14 +14,15 @@ Please refer to `DetectFaces <https://github.com/awsdocs/amazon-rekognition-deve
 Subscribing Topic
 -----------------
 
-* ``~input`` (``sensor_msgs/Image``)
+* ``image/compressed`` (``sensor_msgs/CompressedImage``)
 
   Input image.
+  This topic name is resolved from ``image``.
 
 Publishing Topic
 ----------------
 
-* ``~faces`` (``opencv_msgs/FaceArrayStamped``)
+* ``~faces`` (``opencv_apps/FaceArrayStamped``)
 
   Detected face positions, facial landmarks, emotions, presence of beard, sunglasses, and so on.
 
@@ -59,6 +60,11 @@ Publishing Topic
 * ``~output`` (``sensor_msgs/Image``)
 
   Visualization image of detected faces.
+
+* ``~image`` (``sensor_msgs/Image``)
+
+  Passthourgh input image. This message contains face detected image
+  when ``~always_publish`` is false.
 
 
 Parameters
@@ -100,6 +106,10 @@ Parameters
 * ``~always_subscribe`` (Bool, Default: ``True``)
 
   Set true to process even if not one subscribing.
+
+* ``~always_publish`` (Bool, Default: ``True``)
+
+  Set false to publish only when face is detected.
 
 Example
 -------

@@ -1,0 +1,50 @@
+<launch>
+  <arg name="gui" default="false" />
+
+  <node name="raw_image_bgr"
+        pkg="jsk_perception" type="image_publisher.py">
+    <remap from="~output" to="~image_color" />
+    <remap from="~output/camera_info" to="~camera_info" />
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/image/items_in_shelf.jpg
+      encoding: bgr8
+      publish_info: true
+      fovx: 84.1
+      fovy: 53.8
+    </rosparam>
+  </node>
+
+  <group ns="/test_template_matching">
+    <node name="imagesift" pkg="imagesift" type="imagesift"
+          output="screen" >
+      <remap from="image" to="/raw_image_bgr/image_color" />
+      <remap from="camera_info" to="/raw_image_bgr/camera_info"/>
+    </node>
+    <node name="point_pose_extractor" pkg="jsk_perception" type="point_pose_extractor"
+          output="screen">
+      <rosparam subst_value="true">
+        template_filename: $(find jsk_perception)/sample/image/pai_no_mi.jpg
+        template_id: 0
+        object_width: 0.145
+        object_height: 0.128
+        viewer_window: $(arg gui)
+      </rosparam>
+    </node>
+  </group>
+
+  <test test-name="test_group_ns_point_pose_extractor"
+        name="test_group_ns_point_pose_extractor"
+        pkg="jsk_tools" type="test_topic_published.py" >
+    <rosparam>
+      topic_0: /test_template_matching/ObjectDetection
+      timeout_0: 30
+      topic_1: /test_template_matching/ObjectDetection_agg
+      timeout_1: 30
+      topic_2: /test_template_matching/object_pose
+      timeout_2: 30
+      topic_3: /test_template_matching/point_pose_extractor/debug_image
+      timeout_3: 30
+    </rosparam>
+  </test>
+
+</launch>

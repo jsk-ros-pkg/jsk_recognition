@@ -1,5 +1,11 @@
 <launch>
   <arg name="gui" default="true"/>
+  <arg name="launch_manager" default="true" />
+  <arg name="MANAGER" default="nodelet_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet"
+        args="manager"
+        if="$(arg launch_manager)" />
 
   <node name="sample_rgb_image_publisher"
         pkg="jsk_recognition_utils" type="sample_image_publisher.py">
@@ -60,7 +66,8 @@
 
   <node name="depth_image_error"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl_utils/DepthImageError">
+        args="load jsk_pcl_utils/DepthImageError $(arg MANAGER)"
+        respawn="true">
     <remap from="~image" to="camera/depth_registered/sw_registered/image_rect"/>
     <remap from="~camera_info" to="camera/depth_registered/sw_registered/camera_info"/>
     <remap from="~point" to="checkerboard_detector/output/corner_point"/>

@@ -173,8 +173,10 @@ class AutoCheckIn(ConnectionBasedTransport):
                 CollectionId=self.COLLECTION_ID, Image={'Bytes': encoded_face_image.tobytes()},
                 FaceMatchThreshold=self.FACE_SIMILARITY_THRESHOLD, MaxFaces=self.MAX_FACES)
             return res
+        except self.rekognition.exceptions.InvalidParameterException as e:
+            rospy.logdebug("No faces detected")
         except Exception as e:
-            print(e)
+            rospy.logerr(e)
 
         return None
 
@@ -211,18 +213,23 @@ class AutoCheckIn(ConnectionBasedTransport):
             ret = self.findface(img[image_roi_slice])
             if ret != None:
                 if ret['FaceMatches'] != []:
-                    item = self.dynamodb_table.get_item(
-                        Key={'RekognitionId':
-                             ret['FaceMatches'][0]['Face']['FaceId']})
-                    if not 'Item' in item:
-                        rospy.loginfo("Item does not have FaceId {}".format(item))
-                        continue
-                    face_id = item['Item']['Name']
-                    rospy.loginfo("FaceId: {}\n Similarity: {}".format(face_id, \
-                                                                       ret['FaceMatches'][0]['Similarity']))
-                    faces.faces.append(Face(face=Rect(cx - w // 2, cy - h // 2, w, h),
-                                            label=face_id,
-                                            confidence=ret['FaceMatches'][0]['Similarity'] / 100.0))
+                    try:
+                      item = self.dynamodb_table.get_item(
+                          Key={'RekognitionId':
+                               ret['FaceMatches'][0]['Face']['FaceId']})
+                      if not 'Item' in item:
+                          rospy.loginfo("Item does not have FaceId {}".format(item))
+                          continue
+                      face_id = item['Item']['Name']
+                      rospy.logdebug("FaceId: {}\n Similarity: {}".format(face_id, \
+                                                                          ret['FaceMatches'][0]['Similarity']))
+                      faces.faces.append(Face(face=Rect(cx - w // 2, cy - h // 2, w, h),
+                                              label=face_id,
+                                              confidence=ret['FaceMatches'][0]['Similarity'] / 100.0))
+                    except KeyError as e:
+                        rospy.logwarn(
+                            "{}: Dynamodb does not have FaceID: {}".format(
+                                e, ret['FaceMatches'][0]['Face']['FaceID']))
 
             if self.use_window: # copy colored face rectangle to img_gray
                 img_gray[image_roi_slice] = img[image_roi_slice]

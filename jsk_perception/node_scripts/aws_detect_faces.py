@@ -162,7 +162,7 @@ class DetectFaces(ConnectionBasedTransport):
         return config
 
     def process_attributes(self, text, img, bbox):
-        rospy.loginfo("    {}".format(text))
+        rospy.logdebug("    {}".format(text))
         if self.use_window:
             cv2.putText(img, text,
                         (bbox.x + bbox.height // 2 + 8, bbox.y - bbox.width // 2 + self.offset), cv2.FONT_HERSHEY_PLAIN,
@@ -213,7 +213,7 @@ class DetectFaces(ConnectionBasedTransport):
         landmarks_msgs.poses = []
 
         # See https://docs.aws.amazon.com/rekognition/latest/dg/API_DetectFaces.html for detail
-        rospy.loginfo("Found {} faces".format(len(faces['FaceDetails'])))
+        rospy.logdebug("Found {} faces".format(len(faces['FaceDetails'])))
         for face in faces['FaceDetails']:
 
             # Bounding box of the face
@@ -387,7 +387,7 @@ class DetectFaces(ConnectionBasedTransport):
         self.landmarks_pub.publish(landmarks_msgs)
 
         # debug info
-        rospy.loginfo("processing time {} on message taken at {} sec ago".format(
+        rospy.logdebug("processing time {} on message taken at {} sec ago".format(
             (rospy.Time.now() - start_time).to_sec(),
             (rospy.Time.now() - image.header.stamp).to_sec()))
 

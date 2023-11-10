@@ -36,7 +36,7 @@
 #include "jsk_perception/dual_fisheye_to_panorama.h"
 #include <jsk_topic_tools/log_utils.h>
 #include <cv_bridge/cv_bridge.h>
-#include <sensor_msgs/Image.h>
+#include <image_transport/image_transport.h>
 #include <sensor_msgs/image_encodings.h>
 #include <jsk_recognition_msgs/PanoramaInfo.h>
 #include <algorithm>
@@ -78,7 +78,7 @@ namespace jsk_perception
     ROS_INFO("blend_param_row_end : %d", blend_param_row_end_);
     ROS_INFO("output_image_height : %d", output_image_height_);
     ROS_INFO("output_image_width  : %d", output_image_width_);
-    pub_panorama_image_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
+    pub_panorama_image_ = advertiseImage(*pnh_, "output", 1);
     pub_panorama_info_ = advertise<jsk_recognition_msgs::PanoramaInfo>(*pnh_, "panorama_info", 1);
 
     sticher_initialized_ = false;
@@ -92,6 +92,8 @@ namespace jsk_perception
     msg_panorama_info_.theta_max = M_PI;
     msg_panorama_info_.phi_min = -M_PI;
     msg_panorama_info_.phi_max = M_PI;
+    msg_panorama_info_.image_height = output_image_height_;
+    msg_panorama_info_.image_width = output_image_width_;
 
     onInitPostProcess();
   }
@@ -103,7 +105,9 @@ namespace jsk_perception
 
   void DualFisheyeToPanorama::subscribe()
   {
-    sub_image_ = pnh_->subscribe("input", 1, &DualFisheyeToPanorama::rectify, this);
+    image_transport::ImageTransport it(*pnh_);
+    image_transport::TransportHints hints("raw", ros::TransportHints(), *pnh_, "image_transport");
+    sub_image_ = it.subscribe(pnh_->resolveName("input"), 1, &DualFisheyeToPanorama::rectify, this, hints);
     ros::V_string names = boost::assign::list_of("~input");
     jsk_topic_tools::warnNoRemap(names);
   }

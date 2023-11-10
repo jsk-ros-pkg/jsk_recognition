@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_invert_mask_image.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_invert_mask_image"
+        name="test_invert_mask_image"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /invert_mask_image/output
+      timeout_0: 30
+      check_after_kill_node: true
+      node_names: [invert_mask_image,]
+    </rosparam>
+  </test>
+
+</launch>

@@ -12,14 +12,16 @@
       publish_info: true
       fovx: 84.1
       fovy: 53.8
+      rate: 60.0
     </rosparam>
   </node>
 
-  <node pkg="jsk_perception" name="split_image" type="split_image.py" output="screen">
+  <node type="split_image" pkg="jsk_perception" name="split_image" output="screen">
     <remap from="~input" to="image_publisher/image_color" />
     <rosparam>
       vertical_parts: 2
       horizontal_parts: 2
+      always_subscribe: true
     </rosparam>
   </node>
 

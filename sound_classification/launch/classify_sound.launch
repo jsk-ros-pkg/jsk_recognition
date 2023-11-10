@@ -36,7 +36,7 @@
 
   <!-- Classify sounds -->
   <node pkg="sound_classification" type="sound_classifier.py" name="sound_classifier" output="screen" >
-    <remap from="~input" to="/preprocess_gray_image/output_normalized" />
+    <remap from="~input" to="preprocess_gray_image/output_normalized" />
     <rosparam subst_value="true">
       gpu: $(arg gpu)
       model_name: nin
@@ -47,11 +47,11 @@
   <group if="$(arg gui)">
     <node name="sound_classification_result"
           pkg="sound_classification" type="draw_classification_result.py" >
-      <remap from="~input" to="/sound_classifier/output" />
-      <remap from="~input/image" to="/sound_classifier/debug/net_input" />
+      <remap from="~input" to="sound_classifier/output" />
+      <remap from="~input/image" to="sound_classifier/debug/net_input" />
     </node>
     <node pkg="image_view" type="image_view" name="classification_result_view"  >
-      <remap from="image" to="/sound_classification_result/output" />
+      <remap from="image" to="sound_classification_result/output" />
     </node>
   </group>
 

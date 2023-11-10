@@ -24,6 +24,8 @@ class Block():
         return self.rect.width - another.rect.width
     def __cmp__(self, another): # python2
         return self.max_cmp(another) or self.min_cmp(another) or self.height_cmp(another) or self.width_cmp(another) or 0
+    def __lt__(self, another): # python3
+        return self.max_cmp(another) or self.min_cmp(another) or self.height_cmp(another) or self.width_cmp(another) or 0
         
 class Packer():
     def __init__(self):

@@ -27,15 +27,34 @@ class DrawRects(ConnectionBasedTransport):
         self.colors = np.array(np.clip(
             labelcolormap() * 255, 0, 255), dtype=np.uint8)
         self.subs = []
-        self.use_classification_result = DrawRectsConfig.defaults[
-            'use_classification_result']
-        self.approximate_sync = DrawRectsConfig.defaults['approximate_sync']
-        self.queue_size = DrawRectsConfig.defaults['queue_size']
+        self.use_classification_result = rospy.get_param('~use_classification_result', DrawRectsConfig.defaults[
+            'use_classification_result'])
+        self.approximate_sync = rospy.get_param('~approximate_sync', DrawRectsConfig.defaults['approximate_sync'])
+        self.queue_size = rospy.get_param('~queue_size', DrawRectsConfig.defaults['queue_size'])
+        self.transport_hint = rospy.get_param('~image_transport', 'raw')
+        rospy.loginfo("Using transport {}".format(self.transport_hint))
+        #
+        # To process latest message, we need to set buff_size must be large enough.
+        # we need to set buff_size larger than message size to use latest message for callback
+        # 640*480(image size) / 5 (expected compressed rate) *
+        #            70 (number of message need to be drop 70 x 30msec = 2100msec processing time)
+        #
+        # c.f. https://answers.ros.org/question/220502/image-subscriber-lag-despite-queue-1/
+        #
+        self.buff_size = rospy.get_param('~buff_size', 640 * 480 * 3 // 5 * 70)
+        rospy.loginfo("rospy.Subscriber buffer size : {}".format(self.buff_size))
+
+        self.bridge = cv_bridge.CvBridge()
+
         self._srv_dynparam = dynamic_reconfigure.server.Server(
             DrawRectsConfig, self._config_callback)
 
-        self.pub_viz = self.advertise(
-            '~output', sensor_msgs.msg.Image, queue_size=1)
+        if self.transport_hint == 'compressed':
+            self.pub_viz = self.advertise(
+                '{}/compressed'.format(rospy.resolve_name('~output')), sensor_msgs.msg.CompressedImage, queue_size=1)
+        else:
+            self.pub_viz = self.advertise(
+                '~output', sensor_msgs.msg.Image, queue_size=1)
 
     def _config_callback(self, config, level):
         need_resubscribe = False
@@ -67,7 +86,10 @@ class DrawRects(ConnectionBasedTransport):
         return config
 
     def subscribe(self):
-        sub_image = message_filters.Subscriber('~input', sensor_msgs.msg.Image)
+        if self.transport_hint == 'compressed':
+            sub_image = message_filters.Subscriber('{}/compressed'.format(rospy.resolve_name('~input')), sensor_msgs.msg.CompressedImage, buff_size=self.buff_size)
+        else:
+            sub_image = message_filters.Subscriber('~input', sensor_msgs.msg.Image, buff_size=self.buff_size)
         sub_rects = message_filters.Subscriber('~input/rects', RectArray)
         warn_no_remap('~input', '~input/rects')
 
@@ -78,24 +100,33 @@ class DrawRects(ConnectionBasedTransport):
             subs.append(sub_class)
 
         if self.approximate_sync:
-            slop = rospy.get_param('~slop', 0.1)
-            sync = message_filters.ApproximateTimeSynchronizer(
+            slop = rospy.get_param('~slop', 1.0)
+            self.sync = message_filters.ApproximateTimeSynchronizer(
                 subs,
                 queue_size=self.queue_size, slop=slop)
-            sync.registerCallback(self.draw_rects_callback)
+            self.sync.registerCallback(self.draw_rects_callback)
         else:
-            sync = message_filters.TimeSynchronizer(
+            self.sync = message_filters.TimeSynchronizer(
                 subs, queue_size=self.queue_size)
-            sync.registerCallback(self.draw_rects_callback)
+            self.sync.registerCallback(self.draw_rects_callback)
         self.subs = subs
+        rospy.loginfo("  approximate_sync : {}".format(self.approximate_sync))
+        rospy.loginfo("  queue_size : {}".format(self.queue_size))
 
     def unsubscribe(self):
         for sub in self.subs:
             sub.sub.unregister()
 
     def draw_rects_callback(self, img_msg, rects_msg, class_msg=None):
-        bridge = cv_bridge.CvBridge()
-        cv_img = bridge.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
+        start_time = rospy.Time.now()
+        if self.transport_hint == 'compressed':
+            # decode compressed image
+            np_arr = np.fromstring(img_msg.data, np.uint8)
+            cv_img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+            if img_msg.format.find("compressed rgb") > -1:
+                cv_img = cv_img[:, :, ::-1]
+        else:
+            cv_img = self.bridge.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
 
         img = cv2.resize(cv_img, None,
                          fx=self.resolution_factor,
@@ -130,9 +161,18 @@ class DrawRects(ConnectionBasedTransport):
                     color=(255, 255, 255),
                     background_color=tuple(color),
                     offset_x=self.rect_boldness / 2.0)
-        viz_msg = bridge.cv2_to_imgmsg(img, encoding='bgr8')
+        if self.transport_hint == 'compressed':
+            viz_msg = sensor_msgs.msg.CompressedImage()
+            viz_msg.format = "jpeg"
+            viz_msg.data = np.array(cv2.imencode('.jpg', img)[1]).tostring()
+        else:
+            viz_msg = self.bridge.cv2_to_imgmsg(img, encoding='bgr8')
         viz_msg.header = img_msg.header
         self.pub_viz.publish(viz_msg)
+
+        rospy.loginfo("processing time {} on message taken at {} sec ago".format(
+            (rospy.Time.now() - start_time).to_sec(),
+            (rospy.Time.now() - img_msg.header.stamp).to_sec()))
 
 
 if __name__ == '__main__':

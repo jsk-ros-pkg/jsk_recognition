@@ -2,6 +2,7 @@
   <arg name="gui" default="true" doc="set false if you do not want to display window" />
   <arg name="use_usb_cam" default="false" doc="set true to use USB camera image as input"/>
   <arg name="attributes" default="ALL" doc="set either ALL or DEFAULT for returning attributes"/>
+  <arg name="always_publish" default="true" doc="set false not to publish result when face is not detected" />
 
   <node name="usb_cam" pkg="usb_cam" type="usb_cam_node"
         if="$(arg use_usb_cam)" >
@@ -21,6 +22,7 @@
       use_window: $(arg gui)
       aws_credentials_path: /tmp/aws.json
       always_subscribe: true
+      always_publish: $(arg always_publish)
       attributes: $(arg attributes)
     </rosparam>
   </node>

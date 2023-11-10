@@ -2,6 +2,13 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fixed typo of Software License Agreement. and/o2r to and/or (`#2727 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2727>`_)
+* use %f instead of %d (`#2708 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2708>`_)
+
+* Contributors: Amir Tulegenov, Ravi Joshi, Iory Yanokura
+
 1.2.15 (2020-10-10)
 -------------------
 

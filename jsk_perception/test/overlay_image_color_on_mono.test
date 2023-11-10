@@ -10,6 +10,8 @@
     <rosparam>
       topic_0: /overlay_image_color_on_mono/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [overlay_image_color_on_mono,]
     </rosparam>
   </test>
 

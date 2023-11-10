@@ -125,8 +125,12 @@ namespace jsk_pcl_ros
         sub_.shutdown();
       }
     }
-    
-    ~ResizePointsPublisher() { }
+
+    ~ResizePointsPublisher() {
+      if (use_indices_) {
+        sync_.reset();
+      }
+    }
 
     template<class T> void filter (const sensor_msgs::PointCloud2::ConstPtr &input) {
       filter<T>(input, PCLIndicesMsg::ConstPtr());

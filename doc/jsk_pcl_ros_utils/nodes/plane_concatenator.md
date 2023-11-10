@@ -20,6 +20,7 @@ Concatenate near planes and build new set of planes.
 * `~output/coefficients` (`jsk_recognition_msgs/ModelCoefficientsArray`)
 
   Concatenated planes. Coefficients parameters are refined by RANSAC.
+  If the coefficients are not concatenated, they will be output as is, but if they are refined by RANSAC, they will be forced to face the origin of the frame.
 
 ## Parameters
 * `~connect_angular_threshold` (Double, default: `0.1`)

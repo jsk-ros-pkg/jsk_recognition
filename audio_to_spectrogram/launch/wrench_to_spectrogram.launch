@@ -1,0 +1,87 @@
+<!-- data flow  -->
+<!-- WrenchStamped (structured data) -> scalar data -> spectrum -> spectrogram -->
+
+<launch>
+
+  <arg name="how_to_get_scalar" default="element_extraction" />
+  <arg name="target_element" default="force.z" />
+  <arg name="data_sampling_rate" default="500" />
+  <arg name="wrench_topic" default="/ft_sensor" />
+  <arg name="fft_sampling_period" default="0.3" />
+  <arg name="fft_exec_rate" default="50" />
+  <arg name="data_amp_plot_max_amp" default="10.0" />
+  <arg name="data_amp_plot_window_size" default="10.0" />
+  <arg name="data_amp_plot_rate" default="10.0" />
+  <arg name="spectrogram_source" default="data_to_spectrum/log_spectrum" />
+  <arg name="high_cut_freq" default="250" />
+  <arg name="low_cut_freq" default="5" />  <!-- default: remove constant offset of force torque sensor (e.g., end effector's weight) which is bad for spectrogram color variety -->
+  <arg name="spectrogram_period" default="5" />
+  <arg name="preprocessed_spectrogram_source_plot_min_amp" default="-10.0" />
+  <arg name="preprocessed_spectrogram_source_plot_max_amp" default="10.0" />
+  <arg name="preprocessed_spectrogram_source_plot_queue_size" default="1" />
+  <arg name="preprocessed_spectrogram_source_plot_max_rate" default="-1" />
+  <arg name="normalized_half_spectrum_plot_min_amp" default="0.0" />
+  <arg name="normalized_half_spectrum_plot_max_amp" default="0.2" />
+  <arg name="normalized_half_spectrum_plot_queue_size" default="1" />
+  <arg name="normalized_half_spectrum_plot_max_rate" default="-1" />
+  <arg name="gui" default="true" />
+
+  <arg name="DATA_TOPIC" value="wrench_to_scalar_data/output" />
+
+  <arg if="$(eval arg('how_to_get_scalar') == 'element_extraction')"
+       name="WRENCH2SCALAR" value="m.wrench.$(arg target_element)" />
+  <arg if="$(eval arg('how_to_get_scalar') == 'force_norm')"
+       name="WRENCH2SCALAR" value="numpy.linalg.norm([m.wrench.force.x, m.wrench.force.y, m.wrench.force.z])" />
+  <arg if="$(eval arg('how_to_get_scalar') == 'torque_norm')"
+       name="WRENCH2SCALAR" value="numpy.linalg.norm([m.wrench.torque.x, m.wrench.torque.y, m.wrench.torque.z])" />
+
+  <node name="wrench_to_scalar_data"
+        pkg="topic_tools" type="transform"
+        args="$(arg wrench_topic) $(arg DATA_TOPIC) std_msgs/Float64 '$(arg WRENCH2SCALAR)' --wait-for-start"
+        respawn="true" />
+
+  <!-- convert data topic to spectrum topic -->
+  <include file="$(find audio_to_spectrogram)/launch/data_to_spectrum.launch">
+    <arg name="data_topic" value="$(arg DATA_TOPIC)" />
+    <arg name="expression_to_get_data" value="m.data" />  <!-- std_msgs/Float64 data field -->
+    <arg name="data_sampling_rate" value="$(arg data_sampling_rate)" />
+    <arg name="fft_sampling_period" value="$(arg fft_sampling_period)" />
+    <arg name="is_integer" value="false" />  <!-- std_msgs/Float64 data is not integer -->
+    <arg name="is_signed" value="true" />  <!-- std_msgs/Float64 data is signed -->
+    <arg name="bitdepth" value="64" />  <!-- std_msgs/Float64 data has 64 bits -->
+    <arg name="n_channel" value="1" />  <!-- std_msgs/Float64 data is not array -->
+    <arg name="target_channel" value="0" />  <!-- std_msgs/Float64 data is not array -->
+    <arg name="fft_exec_rate" value="$(arg fft_exec_rate)" />
+    <arg name="data_amp_plot_max_amp" value="$(arg data_amp_plot_max_amp)" />
+    <arg name="data_amp_plot_window_size" value="$(arg data_amp_plot_window_size)" />
+    <arg name="data_amp_plot_rate" value="$(arg data_amp_plot_rate)" />
+    <arg name="gui" value="$(arg gui)" />
+  </include>
+
+  <!-- convert spectrum topic to spectrogram topic -->
+  <include file="$(find audio_to_spectrogram)/launch/spectrum_to_spectrogram.launch">
+    <arg name="spectrum" value="$(arg spectrogram_source)" />
+    <arg name="data_sampling_rate" value="$(arg data_sampling_rate)" />
+    <arg name="high_cut_freq" value="$(arg high_cut_freq)" />
+    <arg name="low_cut_freq" value="$(arg low_cut_freq)" />
+    <arg name="spectrogram_period" value="$(arg spectrogram_period)" />
+    <arg name="preprocessed_spectrum_plot_min_amp" value="$(arg preprocessed_spectrogram_source_plot_min_amp)" />
+    <arg name="preprocessed_spectrum_plot_max_amp" value="$(arg preprocessed_spectrogram_source_plot_max_amp)" />
+    <arg name="preprocessed_spectrum_plot_queue_size" value="$(arg preprocessed_spectrogram_source_plot_queue_size)" />
+    <arg name="preprocessed_spectrum_plot_max_rate" value="$(arg preprocessed_spectrogram_source_plot_max_rate)" />
+    <arg name="gui" value="$(arg gui)" />
+  </include>
+
+  <!-- visualize frequency vs amplitude image of normalized half spectrum -->
+  <!-- Unlike audio, normalized amplitude is meaningful in force torque sensor (the same magnitude as the real force/torque) -->
+  <include file="$(find audio_to_spectrogram)/launch/spectrum_plot.launch">
+    <arg name="spectrum" value="data_to_spectrum/normalized_half_spectrum" />
+    <arg name="plotter_name" value="normalized_half_spectrum_plot" />
+    <arg name="min_amp" value="$(arg normalized_half_spectrum_plot_min_amp)" />
+    <arg name="max_amp" value="$(arg normalized_half_spectrum_plot_max_amp)" />
+    <arg name="queue_size" value="$(arg normalized_half_spectrum_plot_queue_size)" />
+    <arg name="max_rate" value="$(arg normalized_half_spectrum_plot_max_rate)" />
+    <arg name="gui" value="$(arg gui)" />
+  </include>
+
+</launch>

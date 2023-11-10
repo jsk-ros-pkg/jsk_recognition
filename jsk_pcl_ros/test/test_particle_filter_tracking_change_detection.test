@@ -38,6 +38,8 @@
       timeout_12: 30
       topic_13: /tracker_status_info/text
       timeout_13: 30
+      check_after_kill_node: true
+      node_names: [particle_filter_tracking,]
     </rosparam>
   </test>
 

@@ -19,6 +19,10 @@ import re
 from PIL import Image as PIL_Image
 from PIL import ExifTags as PIL_ExifTags
 from jsk_recognition_msgs.msg import ExifTags, ExifGPSInfo
+import imghdr
+
+from jsk_recognition_utils.depth import depth_to_compressed_depth
+
 
 class ImagePublisher(object):
 
@@ -38,6 +42,10 @@ class ImagePublisher(object):
             ImagePublisherConfig, self._cb_dyn_reconfig)
         self.pub = rospy.Publisher('~output', Image, queue_size=1)
         self.pub_compressed = rospy.Publisher('{}/compressed'.format(rospy.resolve_name('~output')), CompressedImage, queue_size=1)
+        if self.encoding == '32FC1':
+            self.pub_compressed = rospy.Publisher(
+                '{}/compressedDepth'.format(rospy.resolve_name('~output')),
+                CompressedImage, queue_size=1)
         self.publish_info = rospy.get_param('~publish_info', True)
         if self.publish_info:
             self.pub_info = rospy.Publisher(
@@ -105,6 +113,7 @@ class ImagePublisher(object):
     def _cb_dyn_reconfig(self, config, level):
         file_name = config['file_name']
         config['file_name'] = os.path.abspath(file_name)
+        self.dst_format = imghdr.what(file_name)
         img = cv2.imread(file_name, cv2.IMREAD_UNCHANGED)
         if img is None:
             rospy.logwarn('Could not read image file: {}'.format(file_name))
@@ -167,7 +176,9 @@ class ImagePublisher(object):
     def cv2_to_imgmsg(self, img, encoding):
         bridge = cv_bridge.CvBridge()
         # resolve encoding
-        if getCvType(encoding) in [cv2.CV_8UC1, cv2.CV_16UC1, cv2.CV_32FC1]:
+        cv_type = getCvType(encoding)
+        dst_format = self.dst_format
+        if cv_type in [cv2.CV_8UC1, cv2.CV_16UC1, cv2.CV_32FC1]:
             # mono8
             if len(img.shape) == 3:
                 if img.shape[2] == 4:
@@ -175,36 +186,72 @@ class ImagePublisher(object):
                 else:
                     code = cv2.COLOR_BGR2GRAY
                 img = cv2.cvtColor(img, code)
-            if getCvType(encoding) == cv2.CV_16UC1:
+            if cv_type == cv2.CV_16UC1:
                 # 16UC1
+                # png compression on 16-bit images
+                dst_format = 'png'
                 img = img.astype(np.float32)
-                img = img / 255 * (2 ** 16)
+                img = np.clip(img / 255.0 * (2 ** 16 - 1), 0, 2 ** 16 - 1)
                 img = img.astype(np.uint16)
-            elif getCvType(encoding) == cv2.CV_32FC1:
+            elif cv_type == cv2.CV_32FC1:
                 # 32FC1
                 img = img.astype(np.float32)
-                img /= 255
-        elif getCvType(encoding) == cv2.CV_8UC3 and len(img.shape) == 3:
+                img /= 255.0
+                comp_depth_msg = depth_to_compressed_depth(img)
+                return bridge.cv2_to_imgmsg(img, encoding=encoding), comp_depth_msg
+            comp_img = img
+            target_format = encoding
+        elif cv_type == cv2.CV_8UC3 and len(img.shape) == 3:
             # 8UC3
             # BGRA, BGR -> BGR
-            img = img[:, :, :3]
+            img = comp_img = img[:, :, :3]
+            target_format = 'bgr8'
             # BGR -> RGB
-            if encoding in ('rgb8', 'rgb16'):
+            if encoding == 'rgb8':
                 img = img[:, :, ::-1]
-        elif (getCvType(encoding) == cv2.CV_8UC4 and
+        elif cv_type == cv2.CV_16UC3 and len(img.shape) == 3:
+            # png compression on 16-bit images
+            dst_format = 'png'
+            # 16UC3
+            # BGRA, BGR -> BGR
+            img = img[:, :, :3]
+            # convert to 16UC3 image.
+            img = img.astype(np.float32)
+            img = np.clip(img / 255.0 * (2 ** 16 - 1), 0, 2 ** 16 - 1)
+            img = comp_img = img.astype(np.uint16)
+            target_format = 'bgr16'
+            # BGR -> RGB
+            if encoding == 'rgb16':
+                img = img[:, :, ::-1]
+        elif (cv_type == cv2.CV_8UC4 and
                 len(img.shape) == 3 and img.shape[2] == 4):
+            comp_img = img[:, :, :3]
+            target_format = 'bgr8'
             # 8UC4
-            if encoding in ('rgba8', 'rgba16'):
+            if encoding == 'rgba8':
+                # BGRA -> RGBA
+                img = img[:, :, [2, 1, 0, 3]]
+        elif (cv_type == cv2.CV_16UC4 and
+                len(img.shape) == 3 and img.shape[2] == 4):
+            # convert to 16UC4 image.
+            img = img.astype(np.float32)
+            img = np.clip(img / 255.0 * (2 ** 16 - 1), 0, 2 ** 16 - 1)
+            img = img.astype(np.uint16)
+            comp_img = img[:, :, :3]
+            target_format = 'bgr16'
+            if encoding == 'rgba16':
                 # BGRA -> RGBA
                 img = img[:, :, [2, 1, 0, 3]]
         else:
             rospy.logerr('unsupported encoding: {0}'.format(encoding))
             return
-        compressed_msg = CompressedImage()
-        compressed_msg.format = "jpeg"
-        compressed_msg.data = np.array(
-            cv2.imencode('.jpg', img)[1]).tostring()
-        return bridge.cv2_to_imgmsg(img, encoding=encoding), compressed_msg
+        compmsg = bridge.cv2_to_compressed_imgmsg(comp_img, dst_format=dst_format)
+        # compressed format is separated by ';'.
+        # https://github.com/ros-perception/image_transport_plugins/blob/f0afd122ed9a66ff3362dc7937e6d465e3c3ccf7/compressed_image_transport/src/compressed_publisher.cpp#L116-L128
+        compmsg.format = '{}; {} compressed {}'.format(
+            encoding, dst_format, target_format)
+        return bridge.cv2_to_imgmsg(img, encoding=encoding), compmsg
+
 
 
 if __name__ == '__main__':

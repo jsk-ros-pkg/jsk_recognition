@@ -23,7 +23,8 @@
 
   <node name="region_growing_segmentation"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/RegionGrowingSegmentation sample_manager">
+        args="load jsk_pcl/RegionGrowingSegmentation sample_manager"
+        respawn="true">
     <remap from="~input" to="pass_through/output"/>
     <rosparam>
       max_size: 50000

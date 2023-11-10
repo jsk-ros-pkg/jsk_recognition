@@ -7,6 +7,14 @@ Publish image from loaded file.
 ## Publishing Topics
 * `~output` (`sensor_msgs/Image`)
 
+* `~output/compressed` (`sensor_msgs/CompressedImage`)
+
+  Compressed Image.
+
+* `~output/compressedDepth` (`sensor_msgs/CompressedImage`)
+
+  Compressed Depth Image. This is valid when encoding is `32FC1`.
+
 * `~output/camera_info` (`sensor_msgs/CameraInfo`)
 
 ## Parameters

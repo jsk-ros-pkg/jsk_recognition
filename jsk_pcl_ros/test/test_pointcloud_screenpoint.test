@@ -1,6 +1,7 @@
 <launch>
   <include file="$(find jsk_pcl_ros)/sample/sample_pointcloud_screenpoint.launch">
     <arg name="gui" value="false"/>
+    <arg name="publish_rate" value="0.1" />
   </include>
 
   <test test-name="test_pointcloud_screenpoint_published"
@@ -18,6 +19,8 @@
       timeout_3: 30
       topic_4: /pointcloud_screenpoint_client/output/ray_marker_array
       timeout_4: 30
+      check_after_kill_node: true
+      node_names: [pointcloud_screenpoint, pointcloud_screenpoint_client]
     </rosparam>
   </test>
 

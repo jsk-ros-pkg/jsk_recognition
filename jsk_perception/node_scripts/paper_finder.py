@@ -168,6 +168,7 @@ class PaperFinder(ConnectionBasedTransport):
             '~output/length', std_msgs.msg.Float32MultiArray, queue_size=1)
         self.bridge = cv_bridge.CvBridge()
         self.camera_info_msg = None
+        self.cameramodel = None
 
     def subscribe(self):
         queue_size = rospy.get_param('~queue_size', 10)
@@ -232,8 +233,9 @@ class PaperFinder(ConnectionBasedTransport):
             self.image_pub.publish(vis_msg)
 
     def _cb_with_depth(self, img_msg, depth_msg):
-        if self.camera_info_msg is None:
+        if self.camera_info_msg is None or self.cameramodel is None:
             rospy.loginfo("Waiting camera info ...")
+            return
         bridge = self.bridge
         try:
             cv_image = bridge.imgmsg_to_cv2(img_msg, 'bgr8')

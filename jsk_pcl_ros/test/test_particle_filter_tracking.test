@@ -32,6 +32,8 @@
       timeout_9: 30
       topic_10: /particle_filter_tracking/output/no_move_raw
       timeout_10: 30
+      check_after_kill_node: true
+      node_names: [particle_filter_tracking,]
     </rosparam>
   </test>
 

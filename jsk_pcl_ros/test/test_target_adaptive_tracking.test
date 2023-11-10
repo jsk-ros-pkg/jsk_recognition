@@ -29,6 +29,8 @@
       timeout_8: 30
       topic_9: /target_adaptive_tracking/supervoxel/tdp_indices
       timeout_9: 30
+      check_after_kill_node: true
+      node_names: [target_adaptive_tracking,]
     </rosparam>
   </test>
 

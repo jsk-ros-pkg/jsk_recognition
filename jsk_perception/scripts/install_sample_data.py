@@ -156,6 +156,14 @@ def main():
         extract=False,
     )
 
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/fetch_go_to_kitchen.bag',
+        url='https://drive.google.com/uc?id=1QL_PqvdVtWBTTqiFGYzODayVXln3ee9w',
+        md5='6c633e25a534b4ba058b880869909de8',
+        extract=False
+    )
+
 
 if __name__ == '__main__':
     main()

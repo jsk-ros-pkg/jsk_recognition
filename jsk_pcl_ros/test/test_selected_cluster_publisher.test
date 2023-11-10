@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /selected_cluster_publisher/output
       timeout_0: 30
+      check_after_kill_node: true
+      node_names: [selected_cluster_publisher,]
     </rosparam>
   </test>
 

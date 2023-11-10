@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <arg name="POINTCLOUD_INPUT" />
+  <arg name="CONTAINER_BOXES_INPUT" default="container/boxes" />
+  <arg name="DEFAULT_NAMESPACE" default="container_occupancy_detector" />
+  <arg name="manager" default="manager" />
+  <arg name="approximate_sync" default="false" />
+  <arg name="queue_size" default="100" />
+
+  <node pkg="nodelet" type="nodelet" name="$(arg manager)"
+        args="manager" output="screen" />
+
+  <node pkg="nodelet" type="nodelet" name="$(arg DEFAULT_NAMESPACE)_rearrange_bounding_box_for_attention_clipper"
+        args="load jsk_pcl/RearrangeBoundingBox $(arg manager)"
+        output="screen">
+    <remap from="~input" to="$(arg CONTAINER_BOXES_INPUT)"/>
+    <remap from="~output"
+           to="$(arg DEFAULT_NAMESPACE)/rearrange_bounding_box_for_attention_clipper/rescaled_containers"/>
+    <rosparam>
+      scale_z: 2.0
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="$(arg DEFAULT_NAMESPACE)_attention_clipper"
+        args="load jsk_pcl/AttentionClipper $(arg manager)"
+        output="screen">
+    <remap from="~input/points" to="$(arg POINTCLOUD_INPUT)" />
+    <remap from="~input/box_array"
+           to="$(arg DEFAULT_NAMESPACE)/rearrange_bounding_box_for_attention_clipper/rescaled_containers" />
+    <remap from="~output/box_array"
+           to="$(arg DEFAULT_NAMESPACE)/attention_clipper/rescaled_containers" />
+    <remap from="~output/cluster_point_indices"
+           to="$(arg DEFAULT_NAMESPACE)/attention_clipper/rescaled_containers/cluster_point_indices" />
+    <rosparam>
+      use_multiple_attention: true
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="$(arg DEFAULT_NAMESPACE)_rearrange_bounding_box_for_occupancy_detector"
+        args="load jsk_pcl/RearrangeBoundingBox $(arg manager)"
+        output="screen">
+    <remap from="~input" to="$(arg DEFAULT_NAMESPACE)/attention_clipper/rescaled_containers"/>
+    <remap from="~output"
+           to="$(arg DEFAULT_NAMESPACE)/containers"/>
+    <rosparam>
+      scale_z: 0.5
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="$(arg DEFAULT_NAMESPACE)"
+        args="load jsk_pcl/ContainerOccupancyDetector $(arg manager)"
+        output="screen" >
+    <remap from="~container/boxes" to="$(arg DEFAULT_NAMESPACE)/containers" />
+    <remap from="~container/points" to="$(arg POINTCLOUD_INPUT)" />
+    <remap from="~container/point_indices"
+           to="$(arg DEFAULT_NAMESPACE)/attention_clipper/rescaled_containers/cluster_point_indices" />
+    <rosparam>
+      approximate_sync: $(arg approximate_sync)
+      queue_size: $(arg queue_size)
+    </rosparam>
+  </node>
+
+</launch>

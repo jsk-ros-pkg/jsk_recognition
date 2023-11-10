@@ -13,7 +13,7 @@
  *     notice, this list of conditions and the following disclaimer.
  *   * Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/o2r other materials provided
+ *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
  *   * Neither the name of the JSK Lab nor the names of its
  *     contributors may be used to endorse or promote products derived
@@ -65,6 +65,8 @@ namespace jsk_pcl_ros
   void OrganizedMultiPlaneSegmentation::onInit()
   {
     ConnectionBasedNodelet::onInit();
+    previous_checked_connection_status_for_plane_ = jsk_topic_tools::NOT_SUBSCRIBED;
+    previous_checked_connection_status_for_normal_ = jsk_topic_tools::NOT_SUBSCRIBED;
     pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
     //////////////////////////////////////////////////////////
     // prepare diagnostics
@@ -748,48 +750,57 @@ namespace jsk_pcl_ros
     diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
     if (estimate_normal_) {
-      bool alivep = normal_estimation_vital_checker_->isAlive();
-      if (alivep) {
-        stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "NormalEstimation running");
-        jsk_topic_tools::addDiagnosticInformation(
-          "Time to estimate normal", normal_estimation_time_acc_, stat);
-        // normal estimation parameters
-        if (estimation_method_ == 0) {
-          stat.add("Estimation Method", "AVERAGE_3D_GRADIENT");
+      if (connection_status_ == jsk_topic_tools::SUBSCRIBED) {
+        if (previous_checked_connection_status_for_normal_ != connection_status_) {
+          // Poke when start subscribing.
+          normal_estimation_vital_checker_->poke();
         }
-        else if (estimation_method_ == 1) {
-          stat.add("Estimation Method", "COVARIANCE_MATRIX");
-        }
-        else if (estimation_method_ == 2) {
-          stat.add("Estimation Method", "AVERAGE_DEPTH_CHANGE");
-        }
-        if (border_policy_ignore_) {
-          stat.add("Border Policy", "ignore");
+        bool alivep = normal_estimation_vital_checker_->isAlive();
+        if (alivep) {
+          stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "NormalEstimation running");
+          jsk_topic_tools::addDiagnosticInformation(
+                                                    "Time to estimate normal", normal_estimation_time_acc_, stat);
+          // normal estimation parameters
+          if (estimation_method_ == 0) {
+            stat.add("Estimation Method", "AVERAGE_3D_GRADIENT");
+          }
+          else if (estimation_method_ == 1) {
+            stat.add("Estimation Method", "COVARIANCE_MATRIX");
+          }
+          else if (estimation_method_ == 2) {
+            stat.add("Estimation Method", "AVERAGE_DEPTH_CHANGE");
+          }
+          if (border_policy_ignore_) {
+            stat.add("Border Policy", "ignore");
+          }
+          else {
+            stat.add("Border Policy", "mirror");
+          }
+          stat.add("Max Depth Change Factor", max_depth_change_factor_);
+          stat.add("Normal Smoothing Size", normal_smoothing_size_);
+          if (depth_dependent_smoothing_) {
+            stat.add("Depth Dependent Smooting", "Enabled");
+          }
+          else {
+            stat.add("Depth Dependent Smooting", "Disabled");
+          }
+          if (publish_normal_) {
+            stat.add("Publish Normal", "Enabled");
+          }
+          else {
+            stat.add("Publish Normal", "Disabled");
+          }
         }
         else {
-          stat.add("Border Policy", "mirror");
+          stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR,
+                       (boost::format("NormalEstimation not running for %f sec")
+                        % normal_estimation_vital_checker_->deadSec()).str());
         }
-        stat.add("Max Depth Change Factor", max_depth_change_factor_);
-        stat.add("Normal Smoothing Size", normal_smoothing_size_);
-        if (depth_dependent_smoothing_) {
-          stat.add("Depth Dependent Smooting", "Enabled");
-        }
-        else {
-          stat.add("Depth Dependent Smooting", "Disabled");
-        }
-        if (publish_normal_) {
-          stat.add("Publish Normal", "Enabled");
-        }
-        else {
-          stat.add("Publish Normal", "Disabled");
-        }
+      } else { // Not SUBSCRIBED
+        stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
+                     "NormalEstimation is not subscribed");
       }
-      else {
-        stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR,
-                     (boost::format("NormalEstimation not running for %f sec")
-                      % normal_estimation_vital_checker_->deadSec()).str());
-      }
-      
+      previous_checked_connection_status_for_normal_ != connection_status_;
     }
     else {
       stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
@@ -800,41 +811,50 @@ namespace jsk_pcl_ros
   void OrganizedMultiPlaneSegmentation::updateDiagnosticPlaneSegmentation(
     diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
-    bool alivep = plane_segmentation_vital_checker_->isAlive();
-    if (alivep) {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
-                   "PlaneSegmentation running");
-      jsk_topic_tools::addDiagnosticInformation(
-        "Time to segment planes", plane_segmentation_time_acc_, stat);
-      if (ransac_refine_coefficients_) {
-        jsk_topic_tools::addDiagnosticInformation(
-          "Time to refine by RANSAC", ransac_refinement_time_acc_, stat);
+    if (connection_status_ == jsk_topic_tools::SUBSCRIBED) {
+      if (previous_checked_connection_status_for_plane_ != connection_status_) {
+        // Poke when start subscribing.
+        plane_segmentation_vital_checker_->poke();
       }
-      stat.add("Minimum Inliers", min_size_);
-      stat.add("Angular Threshold (rad)", angular_threshold_);
-      stat.add("Angular Threshold (deg)", angular_threshold_ / M_PI * 180.0);
-      stat.add("Distance Threshold", distance_threshold_);
-      stat.add("Max Curvature", max_curvature_);
-      if (ransac_refine_coefficients_) {
-        stat.add("Use RANSAC refinement", "True");
-        stat.add("RANSAC refinement distance threshold",
-                 ransac_refine_outlier_distance_threshold_);
+      bool alivep = plane_segmentation_vital_checker_->isAlive();
+      if (alivep) {
+        stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
+                     "PlaneSegmentation running");
+        jsk_topic_tools::addDiagnosticInformation(
+                                                  "Time to segment planes", plane_segmentation_time_acc_, stat);
+        if (ransac_refine_coefficients_) {
+          jsk_topic_tools::addDiagnosticInformation(
+                                                    "Time to refine by RANSAC", ransac_refinement_time_acc_, stat);
+        }
+        stat.add("Minimum Inliers", min_size_);
+        stat.add("Angular Threshold (rad)", angular_threshold_);
+        stat.add("Angular Threshold (deg)", angular_threshold_ / M_PI * 180.0);
+        stat.add("Distance Threshold", distance_threshold_);
+        stat.add("Max Curvature", max_curvature_);
+        if (ransac_refine_coefficients_) {
+          stat.add("Use RANSAC refinement", "True");
+          stat.add("RANSAC refinement distance threshold",
+                   ransac_refine_outlier_distance_threshold_);
+        }
+        else {
+          stat.add("Use RANSAC refinement", "False");
+        }
+
+        stat.add("Number of original segmented planes (Avg.)",
+                 original_plane_num_counter_.mean());
+        stat.add("Number of connected segmented planes (Avg.)",
+                 connected_plane_num_counter_.mean());
       }
       else {
-        stat.add("Use RANSAC refinement", "False");
+        stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR,
+                     (boost::format("PlaneSegmentation not running for %f sec")
+                      % plane_segmentation_vital_checker_->deadSec()).str());
       }
-      
-      stat.add("Number of original segmented planes (Avg.)", 
-               original_plane_num_counter_.mean());
-      stat.add("Number of connected segmented planes (Avg.)", 
-               connected_plane_num_counter_.mean());
+    } else { // Not SUBSCRIBED
+      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
+                   "PlaneSegmentation is not subscribed");
     }
-    else {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR,
-                   (boost::format("PlaneSegmentation not running for %f sec")
-                    % plane_segmentation_vital_checker_->deadSec()).str());
-    }
-    
+    previous_checked_connection_status_for_plane_ = connection_status_;
   }
 
   void OrganizedMultiPlaneSegmentation::updateDiagnostics(

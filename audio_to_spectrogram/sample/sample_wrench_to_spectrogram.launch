@@ -1,0 +1,19 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <!-- play rosbag -->
+  <arg name="filename" default="$(find audio_to_spectrogram)/sample/data/wrench_sensing_drill_vibration.bag" />
+  <param name="use_sim_time" value="true" />
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(arg filename) --clock --loop"/>
+
+  <include file="$(find audio_to_spectrogram)/launch/wrench_to_spectrogram.launch" >
+    <arg name="data_sampling_rate" value="650" />
+    <arg name="wrench_topic" value="/bl_force_torque_sensor_driver/output/wrench" />
+    <arg name="high_cut_freq" value="325" />
+    <arg name="gui" value="$(arg gui)" />
+  </include>
+
+</launch>

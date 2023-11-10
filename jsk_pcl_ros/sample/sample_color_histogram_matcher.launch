@@ -2,6 +2,7 @@
   <arg name="gui" default="true" />
 
   <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_convenience_store.xml" />
+  <arg name="MANAGER" value="camera_nodelet_manager" />
 
   <node name="color_histogram_publisher"
         pkg="jsk_pcl_ros" type="color_histogram_publisher.py"
@@ -25,7 +26,8 @@
 
   <node name="color_histogram_matcher"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/ColorHistogramMatcher"
+        args="load jsk_pcl/ColorHistogramMatcher $(arg MANAGER)"
+        respawn="true"
         output="screen">
     <remap from="~input" to="/remote/openni_camera/point_cloud/cloud_registered/remote" />
     <remap from="~input_indices" to="/instance_cluster_point_indices_decomposer/cluster_indices" />

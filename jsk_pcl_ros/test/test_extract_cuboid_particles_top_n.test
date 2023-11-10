@@ -15,6 +15,8 @@
       timeout_1: 30
       topic_2: /extract_cuboid_particles_top_n/output/pose_array
       timeout_2: 30
+      check_after_kill_node: true
+      node_names: [extract_cuboid_particles_top_n,]
     </rosparam>
   </test>
 

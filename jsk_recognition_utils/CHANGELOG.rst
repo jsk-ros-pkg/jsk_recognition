@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.16 (2023-11-10)
+-------------------
 * [jsk_recognition_utils] add cython3 depend when ROS_PYTHON_VERSION==3 (`#2771 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2771>`_)
 * use python3-shapely for ROS_PHTHON_VERSION==3 (`#2756 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2756>`_)
 * use catkin_install_python to install python scripts under node_scripts/ scripts/ (`#2743 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2743>`_)

@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.16 (2023-11-10)
+-------------------
 * add noetic build test (`#2756 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2756>`_)
 * [jsk_pcl_ros] to avoid invalid access, use getGridCoordinates+getCenroidIndexAt function instead of getCentroidIndex. (`#2748 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2748>`_)
 * add relay new baxter_realsense_l515.bag (`#2749 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2749>`_)

@@ -2,8 +2,8 @@
 Changelog for package audio_to_spectrogram
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.16 (2023-11-10)
+-------------------
 * [audio_to_spectrogram, sound_classification] Add data_to_spectrogram (`#2767 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2767>`_)
 * [audio_to_spectrogram] Enable to change spectrum plot from rosparam (`#2760 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2760>`_)
 * Fix audio to spectrogram plot and add test (`#2764 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2764>`_)

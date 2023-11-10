@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.16 (2023-11-10)
+-------------------
 * [jsk_pcl_ros_utils] use nodelet logger and fix logging info (`#2774 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2774>`_)
 * Save point cloud data as pcd format through ROS service. (`#2773 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2773>`_)
 * add noetic build test (`#2756 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2756>`_)

@@ -2,8 +2,8 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.16 (2023-11-10)
+-------------------
 * Fixed typo of Software License Agreement. and/o2r to and/or (`#2727 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2727>`_)
 * use %f instead of %d (`#2708 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2708>`_)
 

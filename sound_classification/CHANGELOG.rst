@@ -2,8 +2,8 @@
 Changelog for package sound_classification
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.16 (2023-11-10)
+-------------------
 * [audio_to_spectrogram, sound_classification] Add data_to_spectrogram (`#2767 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2767>`_)
 * use catkin_install_python to install python scripts under node_scripts/ scripts/ (`#2743 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2743>`_)
 * [sound_classification] Update setup doc on READMEt( `#2732 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2732>`_)

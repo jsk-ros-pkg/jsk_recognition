@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.16 (2023-11-10)
+-------------------
 * [feature] VQA using Large-Scale Vision and Language model (`#2730 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2730>`_)
 
   * add ClassificationTask.action, VQATask.action, ClipResult.msg,  QuaryANdProbability.msg, QuestionAndAnswerText.msg, VQAResult.msg

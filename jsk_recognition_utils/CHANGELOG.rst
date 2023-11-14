@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.17 (2023-11-14)
+-------------------
 * https://github.com/jsk-ros-pkg/jsk_recognition/pull/2648 requires jsk_data package (`#2805 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2805>`_)
 
 * Contributors: Kei Okada

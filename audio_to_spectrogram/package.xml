@@ -1,6 +1,6 @@
 <package format="3">
   <name>audio_to_spectrogram</name>
-  <version>1.2.16</version>
+  <version>1.2.17</version>
   <description>Convert audio (audio_common_msgs/AudioData) to spectrogram (sensor_msgs/Image) </description>
 
   <maintainer email="yamaguchi@jsk.imi.i.u-tokyo.ac.jp">Naoya Yamaguchi</maintainer>

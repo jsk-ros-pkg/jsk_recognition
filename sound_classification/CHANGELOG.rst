@@ -2,6 +2,9 @@
 Changelog for package sound_classification
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.16 (2023-11-10)
 -------------------
 * [audio_to_spectrogram, sound_classification] Add data_to_spectrogram (`#2767 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2767>`_)

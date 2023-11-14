@@ -2,6 +2,12 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* https://github.com/jsk-ros-pkg/jsk_recognition/pull/2648 requires jsk_data package (`#2805 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2805>`_)
+
+* Contributors: Kei Okada
+
 1.2.16 (2023-11-10)
 -------------------
 * [jsk_recognition_utils] add cython3 depend when ROS_PYTHON_VERSION==3 (`#2771 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2771>`_)

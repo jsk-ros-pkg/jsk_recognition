@@ -2,6 +2,9 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.16 (2023-11-10)
 -------------------
 * add noetic build test (`#2756 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2756>`_)

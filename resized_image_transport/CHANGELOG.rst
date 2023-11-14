@@ -2,6 +2,9 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.16 (2023-11-10)
 -------------------
 * [jsk_perception][jsk_pcl_ros_utils][resized_image_transport] Call onInitPostProcess() (`#2719 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2719>`_)

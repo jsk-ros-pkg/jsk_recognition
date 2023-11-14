@@ -21,6 +21,7 @@
   <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>image_geometry</build_depend>
+  <build_depend>jsk_data</build_depend>
   <build_depend>jsk_recognition_msgs</build_depend>
   <build_depend>jsk_topic_tools</build_depend>
   <build_depend>pcl_msgs</build_depend>

@@ -104,6 +104,7 @@ public:
   int _original_height_size;
   double _template_width;       // width of template [m]
   double _template_height;      // height of template [m]
+  double _template_depth;      // depth of template [m]
   tf::Transform _relativepose;
   cv::Mat _affine_matrix;
   std::string _window_name;
@@ -122,6 +123,7 @@ public:
                     int original_height_size,
                     double template_width,
                     double template_height,
+                    double template_depth,
                     tf::Transform relativepose,
                     cv::Mat affine_matrix,
                     double reprojection_threshold,
@@ -135,6 +137,7 @@ public:
     _original_height_size = original_height_size;
     _template_width = template_width;
     _template_height = template_height;
+    _template_depth = template_depth;
     _relativepose = relativepose;
     _affine_matrix = affine_matrix;
     _window_name = window_name;
@@ -438,10 +441,10 @@ public:
                                tf::Vector3(0, _template_width, 0),
                                tf::Vector3(_template_height, _template_width,0),
                                tf::Vector3(_template_height, 0, 0),
-                               tf::Vector3(0, 0, -0.03),
-                               tf::Vector3(0, _template_width, -0.03),
-                               tf::Vector3(_template_height, _template_width, -0.03),
-                               tf::Vector3(_template_height, 0, -0.03)};
+                               tf::Vector3(0, 0, -1.0*_template_depth),
+                               tf::Vector3(0, _template_width, -1.0*_template_depth),
+                               tf::Vector3(_template_height, _template_width, -1.0*_template_depth),
+                               tf::Vector3(_template_height, 0, -1.0*_template_depth)};
 
       projected_top = std::vector<cv::Point2f>(8);
 
@@ -512,9 +515,9 @@ public:
     if ( err_success )
     {
       tf::Vector3 coords[4] = { tf::Vector3(0,0,0),
-                                tf::Vector3(0.05,0,0),
-                                tf::Vector3(0,0.05,0),
-                                tf::Vector3(0,0,0.05)};
+                                tf::Vector3(_template_height/2,0,0),
+                                tf::Vector3(0,_template_width/2,0),
+                                tf::Vector3(0,0,_template_depth/2)};
       std::vector<cv::Point2f> ps(4);
 
       for(int i=0; i<4; i++) {
@@ -591,7 +594,7 @@ namespace jsk_perception
                                     double template_width, double template_height,
                                     double th_step, double phi_step);
     virtual bool add_new_template(cv::Mat img, std::string typestr, tf::Transform relative_pose,
-                                  double template_width, double template_height,
+                                  double template_width, double template_height, double template_depth,
                                   double theta_step, double phi_step);
     virtual bool settemplate_cb (jsk_perception::SetTemplate::Request &req,
                                  jsk_perception::SetTemplate::Response &res);
@@ -682,7 +685,7 @@ namespace jsk_perception
     Matching_Template* tmplt =
       new Matching_Template (tmp_warp_template, "sample",
                              tmp_warp_template.size().width, tmp_warp_template.size().height,
-                             width, height,
+                             width, height, 0.05,
                              tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0)),
                              M,
                              mt->_reprojection_threshold,

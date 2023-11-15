@@ -6,8 +6,8 @@
 (ros::roseus "marker-publish")
 (ros::roseus-add-msgs "posedetection_msgs")
 
-(setq *map-id* "/map")
-(setq *solve-tf* t)
+(setq *map-id* (ros::get-param "~frame_id" "/map"))
+(setq *solve-tf* (ros::get-param "~solve_tf" t))
 (setq *object-width* (ros::get-param "~object_width" 0))
 (setq *object-height* (ros::get-param "~object_height" 0))
 (setq *relative-pose-str* (ros::get-param "~relative_pose" "0 0 0 0 0 0 1"))
@@ -17,7 +17,8 @@
 (setq *calc-kalman* t)
 (setq *detect-flag* t)
 (setq *tf-force* nil)
-(setq *target-obj* (make-cube 60 60 60))
+(setq *target-obj-code* (read-from-string (ros::get-param "~object_builder" "(make-cube 60 60 60)")))
+(setq *target-obj* (eval *target-obj-code*))
 (send *target-obj* :reset-coords)
 (setf (get *target-obj* :type) (ros::get-param "~target_type" nil))
 (setq *map-frame-objectdetection* (instance posedetection_msgs::ObjectDetection :init))
@@ -122,7 +123,7 @@
                                   (object-name *map-frame-objectdetection*)
                                   (text-name nil) (text-color nil) (obj-color nil))
   (let ((mf-obj-lst (send object-name :objects))
-        (tmp-tgtobj (make-cube 60 60 60))
+        (tmp-tgtobj (eval *target-obj-code*))
         (tp (get target-obj :type)))
     (when obj-color
       (send tmp-tgtobj :set-color obj-color))
@@ -164,7 +165,7 @@
 
 (defun catch-outlier (target-obj)
   (let ((mf-obj-lst (send *map-frame-objectdetection* :objects))
-        (tmp-tgtobj (make-cube 60 60 60))
+        (tmp-tgtobj (eval *target-obj-code*))
         (marker-life 700)
         (outlierflag nil)
         (tp (get target-obj :type)))

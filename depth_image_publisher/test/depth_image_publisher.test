@@ -1,0 +1,14 @@
+<launch>
+  <node name="depth_image_publisher" pkg="depth_image_publisher" type="depth_image_publisher"
+        args="$(find depth_image_publisher)/sample/sample_16uc1.png">
+    <param name="encoding" value="16UC1" />
+  </node>
+
+  <test name="depth_hztest" test-name="depth_hztest_test" pkg="rostest" type="hztest">
+    <param name="topic" value="depth_image_publisher/image_raw" />
+    <param name="hz" value="10.0" />
+    <param name="hzerror" value="1.0" />
+    <param name="test_duration" value="1.0" />
+  </test>
+
+</launch>

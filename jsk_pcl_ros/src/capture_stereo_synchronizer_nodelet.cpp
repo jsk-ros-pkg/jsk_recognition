@@ -117,13 +117,13 @@ namespace jsk_pcl_ros
                         sub_disparity_);
     sync_->registerCallback(boost::bind(&CaptureStereoSynchronizer::republish,
                                         this,
-                                        _1,
-                                        _2,
-                                        _3,
-                                        _4,
-                                        _5,
-                                        _6,
-                                        _7));
+                                        boost::placeholders::_1,
+                                        boost::placeholders::_2,
+                                        boost::placeholders::_3,
+                                        boost::placeholders::_4,
+                                        boost::placeholders::_5,
+                                        boost::placeholders::_6,
+                                        boost::placeholders::_7));
   }
 
   void CaptureStereoSynchronizer::unsubscribe()

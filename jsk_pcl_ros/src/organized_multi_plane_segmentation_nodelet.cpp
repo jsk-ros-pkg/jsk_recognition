@@ -78,13 +78,13 @@ namespace jsk_pcl_ros
       boost::bind(
         &OrganizedMultiPlaneSegmentation::updateDiagnosticNormalEstimation,
         this,
-        _1));
+        boost::placeholders::_1));
     diagnostic_updater_->add(
       getName() + "::PlaneSegmentation",
       boost::bind(
         &OrganizedMultiPlaneSegmentation::updateDiagnosticPlaneSegmentation,
         this,
-        _1));
+        boost::placeholders::_1));
     double vital_rate;
     pnh_->param("vital_rate", vital_rate, 1.0);
     normal_estimation_vital_checker_.reset(
@@ -127,14 +127,14 @@ namespace jsk_pcl_ros
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
-        &OrganizedMultiPlaneSegmentation::configCallback, this, _1, _2);
+        &OrganizedMultiPlaneSegmentation::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     diagnostics_timer_ = pnh_->createTimer(
       ros::Duration(1.0),
       boost::bind(&OrganizedMultiPlaneSegmentation::updateDiagnostics,
                   this,
-                  _1));
+                  boost::placeholders::_1));
     onInitPostProcess();
   }
 

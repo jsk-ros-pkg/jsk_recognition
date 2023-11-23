@@ -51,7 +51,7 @@ namespace jsk_pcl_ros
     DiagnosticNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&HintedStickFinder::configCallback, this, _1, _2);
+      boost::bind (&HintedStickFinder::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     pnh_->param("use_normal", use_normal_, false);
     pnh_->param("not_synchronize", not_synchronize_, false);
@@ -91,7 +91,7 @@ namespace jsk_pcl_ros
       sync_ = boost::make_shared<message_filters::Synchronizer<ASyncPolicy> >(100);
       sync_->connectInput(sub_polygon_, sub_info_, sub_cloud_);
       sync_->registerCallback(boost::bind(&HintedStickFinder::detect, this,
-                                          _1, _2, _3));
+                                          boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
     }
     else {
       sub_no_sync_cloud_ = pnh_->subscribe(

@@ -107,12 +107,12 @@ namespace jsk_pcl_ros_utils
     if (use_async_) {
       async_ = boost::make_shared<message_filters::Synchronizer<ASyncPolicy> >(maximum_queue_size_);
       async_->connectInput(sub_xyz_, sub_normal_);
-      async_->registerCallback(boost::bind(&NormalConcatenater::concatenate, this, _1, _2));
+      async_->registerCallback(boost::bind(&NormalConcatenater::concatenate, this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(maximum_queue_size_);
       sync_->connectInput(sub_xyz_, sub_normal_);
-      sync_->registerCallback(boost::bind(&NormalConcatenater::concatenate, this, _1, _2));
+      sync_->registerCallback(boost::bind(&NormalConcatenater::concatenate, this, boost::placeholders::_1, boost::placeholders::_2));
     }
   }
 

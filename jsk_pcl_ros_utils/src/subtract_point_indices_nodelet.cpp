@@ -68,14 +68,14 @@ namespace jsk_pcl_ros_utils
       async_->connectInput(sub_src1_, sub_src2_);
       async_->registerCallback(
         boost::bind(&SubtractPointIndices::subtract,
-                    this, _1, _2));
+                    this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
       sync_->connectInput(sub_src1_, sub_src2_);
       sync_->registerCallback(
         boost::bind(&SubtractPointIndices::subtract,
-                    this, _1, _2));
+                    this, boost::placeholders::_1, boost::placeholders::_2));
     }
   }
 

@@ -67,7 +67,7 @@ namespace jsk_pcl_ros
     sub_image_.subscribe(*pnh_, "input/image", 1);
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
     sync_->connectInput(sub_cloud_, sub_image_);
-    sync_->registerCallback(boost::bind(&AddColorFromImageToOrganized::addColor, this, _1, _2));
+    sync_->registerCallback(boost::bind(&AddColorFromImageToOrganized::addColor, this, boost::placeholders::_1, boost::placeholders::_2));
   }
 
   void AddColorFromImageToOrganized::unsubscribe()

@@ -114,7 +114,7 @@ namespace jsk_pcl_ros_utils
   {
     PCLNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
-    dynamic_reconfigure::Server<Config>::CallbackType f = boost::bind(&PointCloudToPCD::configCallback, this, _1, _2);
+    dynamic_reconfigure::Server<Config>::CallbackType f = boost::bind(&PointCloudToPCD::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     srv_save_pcd_server_ = pnh_->advertiseService("save_pcd", &PointCloudToPCD::savePCDCallback, this);
     tf_listener_ = jsk_recognition_utils::TfListenerSingleton::getInstance();
@@ -145,7 +145,7 @@ namespace jsk_pcl_ros_utils
     duration_ = config.duration;
     timer_.stop();
     if (duration_ != 0) {
-      timer_ = pnh_->createTimer(ros::Duration(duration_), boost::bind(&PointCloudToPCD::timerCallback, this, _1));
+      timer_ = pnh_->createTimer(ros::Duration(duration_), boost::bind(&PointCloudToPCD::timerCallback, this, boost::placeholders::_1));
     }
   }
 }

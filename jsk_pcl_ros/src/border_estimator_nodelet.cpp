@@ -50,7 +50,7 @@ namespace jsk_pcl_ros
     pnh_->param("model_type", model_type_, std::string("planar"));
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&BorderEstimator::configCallback, this, _1, _2);
+      boost::bind (&BorderEstimator::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     pub_border_ = advertise<PCLIndicesMsg>(*pnh_, "output_border_indices", 1);
@@ -82,7 +82,7 @@ namespace jsk_pcl_ros
       sub_camera_info_.subscribe(*pnh_, "input_camera_info", 1);
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
       sync_->connectInput(sub_point_, sub_camera_info_);
-      sync_->registerCallback(boost::bind(&BorderEstimator::estimate, this, _1, _2));
+      sync_->registerCallback(boost::bind(&BorderEstimator::estimate, this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else if (model_type_ == "laser") {
       sub_ = pnh_->subscribe("input", 1, &BorderEstimator::estimate, this);

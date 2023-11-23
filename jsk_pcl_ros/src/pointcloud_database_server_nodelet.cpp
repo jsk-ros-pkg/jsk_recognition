@@ -100,7 +100,7 @@ namespace jsk_pcl_ros
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind(
-        &PointcloudDatabaseServer::configCallback, this, _1, _2);
+        &PointcloudDatabaseServer::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     pnh_->getParam("duration", duration_);
   }
@@ -132,7 +132,7 @@ namespace jsk_pcl_ros
                                boost::bind(
                                            &PointcloudDatabaseServer::timerCallback,
                                            this,
-                                           _1));
+                                           boost::placeholders::_1));
   }
 }
 

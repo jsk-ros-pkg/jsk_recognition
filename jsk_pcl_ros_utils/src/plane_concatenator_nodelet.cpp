@@ -50,7 +50,7 @@ namespace jsk_pcl_ros_utils
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
-        &PlaneConcatenator::configCallback, this, _1, _2);
+        &PlaneConcatenator::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     
     pub_indices_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(
@@ -84,7 +84,7 @@ namespace jsk_pcl_ros_utils
     sync_->connectInput(sub_cloud_, sub_indices_,
                         sub_polygon_, sub_coefficients_);
     sync_->registerCallback(boost::bind(&PlaneConcatenator::concatenate, this,
-                                        _1, _2, _3, _4));
+                                        boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3, boost::placeholders::_4));
   }
 
   void PlaneConcatenator::unsubscribe()

@@ -44,7 +44,7 @@ namespace jsk_pcl_ros_utils
     rotate_velocity_ = 0.5;
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&SphericalPointCloudSimulator::configCallback, this, _1, _2);
+      boost::bind (&SphericalPointCloudSimulator::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     double rate;
@@ -53,7 +53,7 @@ namespace jsk_pcl_ros_utils
         ros::Duration(1 / rate), boost::bind(
           &SphericalPointCloudSimulator::timerCallback,
           this,
-          _1));
+          boost::placeholders::_1));
     }
     pub_ = advertise<sensor_msgs::PointCloud2>(
       *pnh_, "output", 1);

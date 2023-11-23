@@ -73,11 +73,13 @@ namespace jsk_pcl_ros{
         if(approximate_sync_){
             ap_sync_ = std::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
             ap_sync_ -> connectInput(sub_boxes_, sub_points_, sub_point_indices_);
-            ap_sync_ -> registerCallback(boost::bind(&ContainerOccupancyDetector::calculate, this, _1, _2, _3));
+            ap_sync_ -> registerCallback(boost::bind(&ContainerOccupancyDetector::calculate, this,
+                  boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
         }else{
             sync_ = std::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
             sync_->connectInput(sub_boxes_, sub_points_, sub_point_indices_);
-            sync_->registerCallback(boost::bind(&ContainerOccupancyDetector::calculate, this, _1, _2, _3));
+            sync_->registerCallback(boost::bind(&ContainerOccupancyDetector::calculate, this,
+                  boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
         }
     }
 

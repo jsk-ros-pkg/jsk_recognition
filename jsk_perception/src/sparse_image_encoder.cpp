@@ -110,8 +110,8 @@ public:
     _ln = ros::NodeHandle("~");
     _it.reset(new image_transport::ImageTransport(_nh));
     _subscriber_count = 0;
-    ros::SubscriberStatusCallback connect_cb    = boost::bind(&SparseImageEncoder::connectCb, this, _1);
-    ros::SubscriberStatusCallback disconnect_cb = boost::bind(&SparseImageEncoder::disconnectCb, this, _1);
+    ros::SubscriberStatusCallback connect_cb    = boost::bind(&SparseImageEncoder::connectCb, this, boost::placeholders::_1);
+    ros::SubscriberStatusCallback disconnect_cb = boost::bind(&SparseImageEncoder::disconnectCb, this, boost::placeholders::_1);
     _spr_img_pub = _nh.advertise<jsk_recognition_msgs::SparseImage>("sparse_image", 10, connect_cb, disconnect_cb);
     _spr_img_ptr = boost::make_shared<jsk_recognition_msgs::SparseImage>();
     _ln.param("rate", _rate, 3.0);

@@ -76,7 +76,7 @@ namespace jsk_pcl_ros
       sub_info_.subscribe(*pnh_, "input/camera_info", 1);
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
       sync_->connectInput(sub_image_, sub_info_);
-      sync_->registerCallback(boost::bind(&ROIClipper::clip, this, _1, _2));
+      sync_->registerCallback(boost::bind(&ROIClipper::clip, this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else {
       sub_image_no_sync_ = pnh_->subscribe(

@@ -102,7 +102,7 @@ namespace jsk_pcl_ros
 
     m_pointProximitySub = new message_filters::Subscriber<sensor_msgs::PointCloud2> (m_nh, "proximity_in", 5);
     m_tfPointProximitySub = new tf::MessageFilter<sensor_msgs::PointCloud2> (*m_pointProximitySub, m_tfListener, m_worldFrameId, 5);
-    m_tfPointProximitySub->registerCallback(boost::bind(&OctomapServerContact::insertProximityCallback, this, _1));
+    m_tfPointProximitySub->registerCallback(boost::bind(&OctomapServerContact::insertProximityCallback, this, boost::placeholders::_1));
 
     m_frontierPointCloudPub = m_nh.advertise<sensor_msgs::PointCloud2>("octomap_frontier_point_cloud_centers", 1, m_latchedTopics);
     m_fromarkerPub = m_nh.advertise<visualization_msgs::MarkerArray>("frontier_cells_vis_array", 1, m_latchedTopics);
@@ -110,7 +110,7 @@ namespace jsk_pcl_ros
     m_contactSensorSub.subscribe(m_nh, "contact_sensors_in", 2);
     m_tfContactSensorSub.reset(new tf::MessageFilter<jsk_recognition_msgs::ContactSensorArray> (
                                  m_contactSensorSub, m_tfListener, m_worldFrameId, 2));
-    m_tfContactSensorSub->registerCallback(boost::bind(&OctomapServerContact::insertContactSensorCallback, this, _1));
+    m_tfContactSensorSub->registerCallback(boost::bind(&OctomapServerContact::insertContactSensorCallback, this, boost::placeholders::_1));
 
     initContactSensor(privateNh);
   }

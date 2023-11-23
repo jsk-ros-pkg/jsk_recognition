@@ -132,11 +132,11 @@ void jsk_pcl_ros::DepthImageCreator::subscribe() {
       if (use_approximate) {
         sync_inputs_a_ = boost::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<sensor_msgs::CameraInfo, sensor_msgs::PointCloud2> > > (max_queue_size_);
         sync_inputs_a_->connectInput (sub_info_, sub_cloud_);
-        sync_inputs_a_->registerCallback (bind (&DepthImageCreator::callback_sync, this, _1, _2));
+        sync_inputs_a_->registerCallback (bind (&DepthImageCreator::callback_sync, this, boost::placeholders::_1, boost::placeholders::_2));
       } else {
         sync_inputs_e_ = boost::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ExactTime<sensor_msgs::CameraInfo, sensor_msgs::PointCloud2> > > (max_queue_size_);
         sync_inputs_e_->connectInput (sub_info_, sub_cloud_);
-        sync_inputs_e_->registerCallback (bind (&DepthImageCreator::callback_sync, this, _1, _2));
+        sync_inputs_e_->registerCallback (bind (&DepthImageCreator::callback_sync, this, boost::placeholders::_1, boost::placeholders::_2));
       }
     }
   } else {

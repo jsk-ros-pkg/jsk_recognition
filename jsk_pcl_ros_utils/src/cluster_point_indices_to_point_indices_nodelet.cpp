@@ -47,7 +47,7 @@ namespace jsk_pcl_ros_utils
     // dynamic_reconfigure
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind(&ClusterPointIndicesToPointIndices::configCallback, this, _1, _2);
+      boost::bind(&ClusterPointIndicesToPointIndices::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback(f);
 
     pub_ = advertise<PCLIndicesMsg>(*pnh_, "output", 1);

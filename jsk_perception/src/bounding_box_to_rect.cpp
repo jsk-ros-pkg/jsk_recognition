@@ -76,22 +76,22 @@ namespace jsk_perception
     if (approximate_sync_) {
       async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_); 
       async_->connectInput(sub_info_, sub_boxes_);
-      async_->registerCallback(boost::bind(&BoundingBoxToRect::inputCallback, this, _1, _2));
+      async_->registerCallback(boost::bind(&BoundingBoxToRect::inputCallback, this, boost::placeholders::_1, boost::placeholders::_2));
     } else {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
       sync_->connectInput(sub_info_, sub_boxes_);
-      sync_->registerCallback(boost::bind(&BoundingBoxToRect::inputCallback, this, _1, _2));
+      sync_->registerCallback(boost::bind(&BoundingBoxToRect::inputCallback, this, boost::placeholders::_1, boost::placeholders::_2));
     }
     // camera_info + bounding box
     sub_box_.subscribe(*pnh_, "input/box", 1);
     if (approximate_sync_) {
       async_box_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicyBox> >(queue_size_);
       async_box_->connectInput(sub_info_, sub_box_);
-      async_box_->registerCallback(boost::bind(&BoundingBoxToRect::inputBoxCallback, this, _1, _2));
+      async_box_->registerCallback(boost::bind(&BoundingBoxToRect::inputBoxCallback, this, boost::placeholders::_1, boost::placeholders::_2));
     } else {
       sync_box_ = boost::make_shared<message_filters::Synchronizer<SyncPolicyBox> >(queue_size_);
       sync_box_->connectInput(sub_info_, sub_box_);
-      sync_box_->registerCallback(boost::bind(&BoundingBoxToRect::inputBoxCallback, this, _1, _2));
+      sync_box_->registerCallback(boost::bind(&BoundingBoxToRect::inputBoxCallback, this, boost::placeholders::_1, boost::placeholders::_2));
     }
   }
 
@@ -125,7 +125,7 @@ namespace jsk_perception
                          *tf_listener_,
                          frame_id_,
                          tf_queue_size_));
-      tf_filter_->registerCallback(boost::bind(&BoundingBoxToRect::internalCallback, this, _1));
+      tf_filter_->registerCallback(boost::bind(&BoundingBoxToRect::internalCallback, this, boost::placeholders::_1));
     }
     jsk_recognition_msgs::BoundingBoxArrayWithCameraInfo internal_msg;
     internal_msg.header = boxes_msg->header;

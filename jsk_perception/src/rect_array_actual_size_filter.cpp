@@ -47,7 +47,7 @@ namespace jsk_perception
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
-        &RectArrayActualSizeFilter::configCallback, this, _1, _2);
+        &RectArrayActualSizeFilter::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     pub_ = advertise<jsk_recognition_msgs::RectArray>(
@@ -75,12 +75,12 @@ namespace jsk_perception
     if (approximate_sync_) {
       async_ = boost::make_shared<message_filters::Synchronizer<ApproxSyncPolicy> >(100);
       async_->connectInput(sub_rect_array_, sub_image_, sub_info_);
-      async_->registerCallback(boost::bind(&RectArrayActualSizeFilter::filter, this, _1, _2, _3));
+      async_->registerCallback(boost::bind(&RectArrayActualSizeFilter::filter, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
     }
     else {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
       sync_->connectInput(sub_rect_array_, sub_image_, sub_info_);
-      sync_->registerCallback(boost::bind(&RectArrayActualSizeFilter::filter, this, _1, _2, _3));
+      sync_->registerCallback(boost::bind(&RectArrayActualSizeFilter::filter, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
     }
   }
 

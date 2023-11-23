@@ -44,7 +44,7 @@ namespace jsk_pcl_ros_utils
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-        boost::bind (&DelayPointCloud::configCallback, this, _1, _2);
+        boost::bind (&DelayPointCloud::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     pnh_->param("delay_time", delay_time_, 0.1);
@@ -73,7 +73,7 @@ namespace jsk_pcl_ros_utils
     sub_.subscribe(*pnh_, "input", 1);
     time_sequencer_ = boost::make_shared<message_filters::TimeSequencer<sensor_msgs::PointCloud2> >(ros::Duration(delay_time_), ros::Duration(0.01), queue_size_);
     time_sequencer_->connectInput(sub_);
-    time_sequencer_->registerCallback(boost::bind(&DelayPointCloud::delay, this, _1));
+    time_sequencer_->registerCallback(boost::bind(&DelayPointCloud::delay, this, boost::placeholders::_1));
   }
   void DelayPointCloud::unsubscribe()
   {

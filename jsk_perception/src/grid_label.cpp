@@ -51,7 +51,7 @@ namespace jsk_perception
     
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&GridLabel::configCallback, this, _1, _2);
+      boost::bind (&GridLabel::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     
     pnh_->param("use_camera_info", use_camera_info_, false);

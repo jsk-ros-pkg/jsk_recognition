@@ -48,7 +48,7 @@ namespace jsk_pcl_ros
     NODELET_DEBUG_STREAM("num_of_threads: " << num_of_threads_);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&NormalEstimationOMP::configCallback, this, _1, _2);
+      boost::bind (&NormalEstimationOMP::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     pub_with_xyz_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_with_xyz", 1);

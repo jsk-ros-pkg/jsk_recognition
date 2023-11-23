@@ -73,7 +73,7 @@ namespace jsk_pcl_ros
     sub_target_.subscribe(*pnh_, "target", 1); 
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
     sync_->connectInput(sub_input_, sub_target_);
-    sync_->registerCallback(boost::bind(&MaskImageClusterFilter::concat, this, _1, _2));
+    sync_->registerCallback(boost::bind(&MaskImageClusterFilter::concat, this, boost::placeholders::_1, boost::placeholders::_2));
   }
   
   void MaskImageClusterFilter::unsubscribe()

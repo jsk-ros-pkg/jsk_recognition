@@ -342,7 +342,7 @@ namespace jsk_pcl_ros
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&ColorFilter::configCallback, this, _1, _2);
+      boost::bind (&ColorFilter::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     onInitPostProcess();
@@ -356,7 +356,7 @@ namespace jsk_pcl_ros
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(10);
       sub_indices_.subscribe(*pnh_, "indices", 1);
       sync_->connectInput(sub_input_, sub_indices_);
-      sync_->registerCallback(boost::bind(&ColorFilter::filter, this, _1, _2));
+      sync_->registerCallback(boost::bind(&ColorFilter::filter, this, boost::placeholders::_1, boost::placeholders::_2));
       //sub_input_ = pnh_->subscribe("input", 1, &RGBColorFilter::filter, this);
     }
     else {

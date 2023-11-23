@@ -46,7 +46,7 @@ namespace jsk_perception
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
-        &GrabCut::configCallback, this, _1, _2);
+        &GrabCut::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     pub_foreground_
       = advertise<sensor_msgs::Image>(*pnh_, "output/foreground", 1);
@@ -78,7 +78,7 @@ namespace jsk_perception
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
     sync_->connectInput(sub_image_, sub_foreground_, sub_background_);
     sync_->registerCallback(boost::bind(&GrabCut::segment,
-                                        this, _1, _2, _3));
+                                        this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
   }
 
   void GrabCut::unsubscribe()

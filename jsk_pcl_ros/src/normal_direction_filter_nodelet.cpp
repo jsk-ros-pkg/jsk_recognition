@@ -60,7 +60,7 @@ namespace jsk_pcl_ros
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
-        &NormalDirectionFilter::configCallback, this, _1, _2);
+        &NormalDirectionFilter::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     pnh_->param("queue_size", queue_size_, 200);
     pub_ = advertise<PCLIndicesMsg>(*pnh_, "output", 1);
@@ -95,7 +95,7 @@ namespace jsk_pcl_ros
       sub_imu_.subscribe(*pnh_, "input_imu", 1);
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
       sync_->connectInput(sub_input_, sub_imu_);
-      sync_->registerCallback(boost::bind(&NormalDirectionFilter::filter, this, _1, _2));
+      sync_->registerCallback(boost::bind(&NormalDirectionFilter::filter, this, boost::placeholders::_1, boost::placeholders::_2));
     }
   }
 

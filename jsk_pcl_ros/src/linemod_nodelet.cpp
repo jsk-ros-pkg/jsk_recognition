@@ -87,7 +87,7 @@ namespace jsk_pcl_ros
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
       sync_->connectInput(sub_input_, sub_indices_);
       sync_->registerCallback(boost::bind(&LINEMODTrainer::store,
-                                          this, _1, _2));
+                                          this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else {
       sub_input_nonsync_ = pnh_->subscribe("input", 1,
@@ -589,7 +589,7 @@ namespace jsk_pcl_ros
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
-        &LINEMODDetector::configCallback, this, _1, _2);
+        &LINEMODDetector::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);

@@ -137,7 +137,7 @@ namespace jsk_pcl_ros
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (config_mutex_, *pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&LineSegmentDetector::configCallback, this, _1, _2);
+      boost::bind (&LineSegmentDetector::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     ////////////////////////////////////////////////////////
@@ -184,13 +184,13 @@ namespace jsk_pcl_ros
       async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(100);
       async_->connectInput(sub_input_, sub_indices_);
       async_->registerCallback(boost::bind(&LineSegmentDetector::segment,
-                                           this, _1, _2));
+                                           this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
       sync_->connectInput(sub_input_, sub_indices_);
       sync_->registerCallback(boost::bind(&LineSegmentDetector::segment,
-                                          this, _1, _2));
+                                          this, boost::placeholders::_1, boost::placeholders::_2));
     }
   }
 

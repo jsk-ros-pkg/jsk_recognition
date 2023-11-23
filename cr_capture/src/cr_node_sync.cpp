@@ -76,7 +76,7 @@ public:
   CRCaptureSyncNode () : nh_("~"), it_(nh_), sync_(30)
   {
     // Set up dynamic reconfiguration
-    ReconfigureServer::CallbackType f = boost::bind(&CRCaptureSyncNode::config_cb, this, _1, _2);
+    ReconfigureServer::CallbackType f = boost::bind(&CRCaptureSyncNode::config_cb, this, boost::placeholders::_1, boost::placeholders::_2);
     reconfigure_server_.setCallback(f);
 
     // parameter
@@ -175,7 +175,7 @@ public:
     sync_.connectInput(image_sub_left_, info_sub_left_, image_sub_right_, info_sub_right_,
 		       image_sub_confi_, image_sub_intent_, image_sub_depth_, info_sub_range_);
 
-    sync_.registerCallback(boost::bind(&CRCaptureSyncNode::imageCB, this, _1, _2, _3, _4, _5, _6, _7, _8));
+    sync_.registerCallback(boost::bind(&CRCaptureSyncNode::imageCB, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3, boost::placeholders::_4, boost::placeholders::_5, boost::placeholders::_6, boost::placeholders::_7, boost::placeholders::_8));
 
     // pull raw data service
     nh_.param("pull_raw_data", pull_raw_data, false);

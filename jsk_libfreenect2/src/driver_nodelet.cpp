@@ -37,7 +37,7 @@ namespace jsk_libfreenect2
     glfwInit();
     timer_ = getNodeHandle().createTimer(
       ros::Duration(5.0),
-      boost::bind(&Driver::run, this, _1), true);
+      boost::bind(&Driver::run, this, boost::placeholders::_1), true);
   }
   
   void Driver::run(const ros::TimerEvent&) {

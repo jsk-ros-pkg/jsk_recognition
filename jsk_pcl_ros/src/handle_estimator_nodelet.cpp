@@ -74,12 +74,12 @@ namespace jsk_pcl_ros
 
   void HandleEstimator::subscribe()
   {
-    sub_index_ = pnh_->subscribe<jsk_recognition_msgs::Int32Stamped>("selected_index", 1, boost::bind( &HandleEstimator::selectedIndexCallback, this, _1));
+    sub_index_ = pnh_->subscribe<jsk_recognition_msgs::Int32Stamped>("selected_index", 1, boost::bind( &HandleEstimator::selectedIndexCallback, this, boost::placeholders::_1));
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_box_.subscribe(*pnh_, "input_box", 1);
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
     sync_->connectInput(sub_input_, sub_box_);
-    sync_->registerCallback(boost::bind(&HandleEstimator::estimate, this, _1, _2));
+    sync_->registerCallback(boost::bind(&HandleEstimator::estimate, this, boost::placeholders::_1, boost::placeholders::_2));
   }
 
   void HandleEstimator::unsubscribe()

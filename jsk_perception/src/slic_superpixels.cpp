@@ -50,7 +50,7 @@ namespace jsk_perception
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
-        &SLICSuperPixels::configCallback, this, _1, _2);
+        &SLICSuperPixels::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     pnh_.param("publish_debug_images", debug_image_, false);

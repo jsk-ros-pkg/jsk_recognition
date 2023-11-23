@@ -72,7 +72,7 @@ namespace jsk_pcl_ros_utils
     sub_polygons_.subscribe(*pnh_, "input_polygons", 1);
     sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
     sync_->connectInput(sub_polygons_, sub_coefficients_);
-    sync_->registerCallback(boost::bind(&PolygonArrayTransformer::transform, this, _1, _2));
+    sync_->registerCallback(boost::bind(&PolygonArrayTransformer::transform, this, boost::placeholders::_1, boost::placeholders::_2));
   }
 
   void PolygonArrayTransformer::unsubscribe()

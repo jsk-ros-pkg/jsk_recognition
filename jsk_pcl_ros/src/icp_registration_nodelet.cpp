@@ -62,7 +62,7 @@ namespace jsk_pcl_ros
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind(
-        &ICPRegistration::configCallback, this, _1, _2);
+        &ICPRegistration::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     pnh_->param("use_normal", use_normal_, false);
     pnh_->param("align_box", align_box_, false);
@@ -137,14 +137,14 @@ namespace jsk_pcl_ros
         sync_->connectInput(sub_input_, sub_box_);
         sync_->registerCallback(boost::bind(
                                             &ICPRegistration::alignWithBox,
-                                            this, _1, _2));
+                                            this, boost::placeholders::_1, boost::placeholders::_2));
       }
       else if (use_offset_pose_) {
         sub_input_.subscribe(*pnh_, "input", 1);
         sub_offset_.subscribe(*pnh_, "input_offset", 1);
         sync_offset_ = boost::make_shared<message_filters::Synchronizer<OffsetSyncPolicy> >(100);
         sync_offset_->connectInput(sub_input_, sub_offset_);
-        sync_offset_->registerCallback(boost::bind(&ICPRegistration::alignWithOffset, this, _1, _2));
+        sync_offset_->registerCallback(boost::bind(&ICPRegistration::alignWithOffset, this, boost::placeholders::_1, boost::placeholders::_2));
       }
       else {
         sub_ = pnh_->subscribe("input", 1,
@@ -157,7 +157,7 @@ namespace jsk_pcl_ros
       sub_sync_reference_.subscribe(*pnh_, "reference", 1);
       sync_reference_ = boost::make_shared<message_filters::Synchronizer<ReferenceSyncPolicy> >(100);
       sync_reference_->connectInput(sub_sync_input_, sub_sync_reference_);
-      sync_reference_->registerCallback(boost::bind(&ICPRegistration::align, this, _1, _2));
+      sync_reference_->registerCallback(boost::bind(&ICPRegistration::align, this, boost::placeholders::_1, boost::placeholders::_2));
     }
   }
 

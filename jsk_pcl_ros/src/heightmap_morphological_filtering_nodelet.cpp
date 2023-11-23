@@ -47,7 +47,7 @@ namespace jsk_pcl_ros
                                                                          1, true);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&HeightmapMorphologicalFiltering::configCallback, this, _1, _2);
+      boost::bind (&HeightmapMorphologicalFiltering::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     pnh_->param("max_queue_size", max_queue_size_, 10);

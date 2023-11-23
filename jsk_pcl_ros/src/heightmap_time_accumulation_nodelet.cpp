@@ -50,7 +50,7 @@ namespace jsk_pcl_ros
       "output/config", 1, true);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&HeightmapTimeAccumulation::configCallback, this, _1, _2);
+      boost::bind (&HeightmapTimeAccumulation::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     sub_config_ = pnh_->subscribe(
       getHeightmapConfigTopic(pnh_->resolveName("input")), 1,
@@ -79,7 +79,7 @@ namespace jsk_pcl_ros
                        tf_queue_size));
     tf_filter_->registerCallback(
       boost::bind(
-        &HeightmapTimeAccumulation::accumulate, this, _1));
+        &HeightmapTimeAccumulation::accumulate, this, boost::placeholders::_1));
     srv_reset_ = pnh_->advertiseService("reset", &HeightmapTimeAccumulation::resetCallback, this);
     onInitPostProcess();
   }

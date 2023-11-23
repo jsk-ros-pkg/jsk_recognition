@@ -53,7 +53,7 @@ namespace jsk_pcl_ros
 
     srv_ = boost::make_shared<dynamic_reconfigure::Server<Config> >(*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind(&ColorHistogramFilter::configCallback, this, _1, _2);
+      boost::bind(&ColorHistogramFilter::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback(f);
     pub_histogram_ = advertise<jsk_recognition_msgs::ColorHistogramArray>(*pnh_, "output", 1);
     pub_indices_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output/indices", 1);
@@ -94,7 +94,7 @@ namespace jsk_pcl_ros
     sub_indices_.subscribe(*pnh_, "input/indices", 1);
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
     sync_->connectInput(sub_histogram_, sub_indices_);
-    sync_->registerCallback(boost::bind(&ColorHistogramFilter::feature, this, _1, _2));
+    sync_->registerCallback(boost::bind(&ColorHistogramFilter::feature, this, boost::placeholders::_1, boost::placeholders::_2));
   }
 
   void ColorHistogramFilter::unsubscribe()

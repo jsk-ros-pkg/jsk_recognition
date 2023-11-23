@@ -48,7 +48,7 @@ namespace jsk_pcl_ros
     ConnectionBasedNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&MultiPlaneSACSegmentation::configCallback, this, _1, _2);
+      boost::bind (&MultiPlaneSACSegmentation::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     pnh_->param("use_normal", use_normal_, false);
     pnh_->param("use_clusters", use_clusters_, false);
@@ -101,14 +101,14 @@ namespace jsk_pcl_ros
         sync_normal_imu_->registerCallback(
           boost::bind(
             &MultiPlaneSACSegmentation::segmentWithImu,
-            this, _1, _2, _3));
+            this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
       }
       else {
         sync_imu_ = boost::make_shared<message_filters::Synchronizer<SyncImuPolicy> >(100);
         sync_imu_->connectInput(sub_input_, sub_imu_);
         sync_imu_->registerCallback(boost::bind(
                                       &MultiPlaneSACSegmentation::segmentWithImu,
-                                      this, _1, _2));
+                                      this, boost::placeholders::_1, boost::placeholders::_2));
       }
     }
     else if (use_normal_) {
@@ -117,7 +117,7 @@ namespace jsk_pcl_ros
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
       sync_->connectInput(sub_input_, sub_normal_);
       sync_->registerCallback(boost::bind(&MultiPlaneSACSegmentation::segment,
-                                          this, _1, _2));
+                                          this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else if (use_clusters_) {
       NODELET_INFO("use clusters");
@@ -128,7 +128,7 @@ namespace jsk_pcl_ros
       sync_cluster_->connectInput(sub_input_, sub_clusters_);
       sync_cluster_->registerCallback(
         boost::bind(&MultiPlaneSACSegmentation::segmentWithClusters,
-                    this, _1, _2));
+                    this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else {
       sub_ = pnh_->subscribe("input", 1, &MultiPlaneSACSegmentation::segment, this);

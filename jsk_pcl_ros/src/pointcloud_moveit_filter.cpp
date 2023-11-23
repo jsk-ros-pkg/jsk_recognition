@@ -97,7 +97,7 @@ namespace jsk_pcl_ros
     tf_ = monitor_->getTFClient();
     shape_mask_.reset(new point_containment_filter::ShapeMask());
     shape_mask_->setTransformCallback(
-      boost::bind(&PointCloudMoveitFilter::getShapeTransform, this, _1, _2));
+      boost::bind(&PointCloudMoveitFilter::getShapeTransform, this, boost::placeholders::_1, boost::placeholders::_2));
     filtered_cloud_publisher_ = private_nh_.advertise<sensor_msgs::PointCloud2>(
       filtered_cloud_topic_, 10, false);
     return true;
@@ -159,13 +159,13 @@ namespace jsk_pcl_ros
         point_cloud_filter_->registerCallback(
           boost::bind(
             &PointCloudMoveitFilter::cloudMsgCallback<pcl::PointXYZRGB>,
-            this, _1));
+            this, boost::placeholders::_1));
       }
       else {
         point_cloud_filter_->registerCallback(
           boost::bind(
             &PointCloudMoveitFilter::cloudMsgCallback<pcl::PointXYZ>,
-            this, _1));
+            this, boost::placeholders::_1));
       }
       ROS_INFO("Listening to '%s' using message filter with target frame '%s'",
                point_cloud_topic_.c_str(),
@@ -177,12 +177,12 @@ namespace jsk_pcl_ros
         point_cloud_subscriber_->registerCallback(
           boost::bind(
             &PointCloudMoveitFilter::cloudMsgCallback<pcl::PointXYZRGB>,
-            this, _1));
+            this, boost::placeholders::_1));
       }
       else {
         point_cloud_subscriber_->registerCallback(
           boost::bind(&PointCloudMoveitFilter::cloudMsgCallback<pcl::PointXYZ>,
-                      this, _1));
+                      this, boost::placeholders::_1));
       }
       ROS_INFO("Listening to '%s'", point_cloud_topic_.c_str());
     }

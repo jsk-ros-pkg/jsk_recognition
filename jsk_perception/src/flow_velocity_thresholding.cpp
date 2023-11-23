@@ -49,7 +49,7 @@ namespace jsk_perception
     DiagnosticNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&FlowVelocityThresholding::configCallback, this, _1, _2);
+      boost::bind (&FlowVelocityThresholding::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     pnh_->param("approximate_sync", approximate_sync_, false);
     pnh_->param("queue_size", queue_size_, 100);
@@ -88,12 +88,12 @@ namespace jsk_perception
       if (approximate_sync_) {
         async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
         async_->connectInput(sub_flow_, sub_info_);
-        async_->registerCallback(boost::bind(&FlowVelocityThresholding::callback, this, _1, _2));
+        async_->registerCallback(boost::bind(&FlowVelocityThresholding::callback, this, boost::placeholders::_1, boost::placeholders::_2));
       }
       else {
         sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
         sync_->connectInput(sub_flow_, sub_info_);
-        sync_->registerCallback(boost::bind(&FlowVelocityThresholding::callback, this, _1, _2));
+        sync_->registerCallback(boost::bind(&FlowVelocityThresholding::callback, this, boost::placeholders::_1, boost::placeholders::_2));
       }
       names.push_back("~input/camera_info");
     }

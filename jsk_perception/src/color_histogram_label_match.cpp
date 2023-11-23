@@ -48,7 +48,7 @@ namespace jsk_perception
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
-        &ColorHistogramLabelMatch::configCallback, this, _1, _2);
+        &ColorHistogramLabelMatch::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     pnh_->param("use_mask", use_mask_, false);
     pub_debug_ = advertise<sensor_msgs::Image>(
@@ -84,14 +84,14 @@ namespace jsk_perception
       sync_->connectInput(sub_image_, sub_label_, sub_mask_);
       sync_->registerCallback(
         boost::bind(
-          &ColorHistogramLabelMatch::match, this, _1, _2, _3));
+          &ColorHistogramLabelMatch::match, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
     }
     else {
       sync_wo_mask_ = boost::make_shared<message_filters::Synchronizer<SyncPolicyWithoutMask> >(100);
       sync_wo_mask_->connectInput(sub_image_, sub_label_);
       sync_wo_mask_->registerCallback(
         boost::bind(
-          &ColorHistogramLabelMatch::match, this, _1, _2));
+          &ColorHistogramLabelMatch::match, this, boost::placeholders::_1, boost::placeholders::_2));
     }
     sub_histogram_ = pnh_->subscribe(
       "input/histogram", 1, &ColorHistogramLabelMatch::histogramCallback, this);

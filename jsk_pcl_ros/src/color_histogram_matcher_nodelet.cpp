@@ -53,7 +53,7 @@ namespace jsk_pcl_ros
     ConnectionBasedNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&ColorHistogramMatcher::configCallback, this, _1, _2);
+      boost::bind (&ColorHistogramMatcher::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     policy_ = USE_HUE_AND_SATURATION;
@@ -98,7 +98,7 @@ namespace jsk_pcl_ros
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
     sync_->connectInput(sub_input_, sub_indices_);
     sync_->registerCallback(boost::bind(&ColorHistogramMatcher::feature,
-                                        this, _1, _2));
+                                        this, boost::placeholders::_1, boost::placeholders::_2));
   }
 
   void ColorHistogramMatcher::unsubscribe()

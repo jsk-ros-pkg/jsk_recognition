@@ -81,7 +81,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&MultiPlaneExtraction::configCallback, this, _1, _2);
+      boost::bind (&MultiPlaneExtraction::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     onInitPostProcess();
   }
@@ -111,14 +111,14 @@ namespace jsk_pcl_ros
       sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
     } else {
       sub_polygons_.registerCallback(
-        boost::bind(&MultiPlaneExtraction::fillEmptyCoefficients, this, _1));
+        boost::bind(&MultiPlaneExtraction::fillEmptyCoefficients, this, boost::placeholders::_1));
     }
 
     if (use_indices_) {
       sub_indices_.subscribe(*pnh_, "indices", 1);
     } else {
       sub_polygons_.registerCallback(
-        boost::bind(&MultiPlaneExtraction::fillEmptyIndices, this, _1));
+        boost::bind(&MultiPlaneExtraction::fillEmptyIndices, this, boost::placeholders::_1));
     }
 
     if (use_async_) {
@@ -136,7 +136,7 @@ namespace jsk_pcl_ros
           async_->connectInput(sub_input_, null_indices_, null_coefficients_, sub_polygons_);
         }
       }
-      async_->registerCallback(boost::bind(&MultiPlaneExtraction::extract, this, _1, _2, _3, _4));
+      async_->registerCallback(boost::bind(&MultiPlaneExtraction::extract, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3, boost::placeholders::_4));
     } else {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(maximum_queue_size_);
       if (use_indices_) {
@@ -152,7 +152,7 @@ namespace jsk_pcl_ros
           sync_->connectInput(sub_input_, null_indices_, null_coefficients_, sub_polygons_);
         }
       }
-      sync_->registerCallback(boost::bind(&MultiPlaneExtraction::extract, this, _1, _2, _3, _4));
+      sync_->registerCallback(boost::bind(&MultiPlaneExtraction::extract, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3, boost::placeholders::_4));
     }
   }
 

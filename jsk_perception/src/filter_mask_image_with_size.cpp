@@ -49,7 +49,7 @@ namespace jsk_perception
     pnh_->param("use_reference", use_reference_, false);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> >(*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind(&FilterMaskImageWithSize::configCallback, this, _1, _2);
+      boost::bind(&FilterMaskImageWithSize::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback(f);
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
     onInitPostProcess();
@@ -101,13 +101,13 @@ namespace jsk_perception
       {
         async_ = boost::make_shared<message_filters::Synchronizer<ApproxSyncPolicy> >(queue_size_);
         async_->connectInput(sub_input_, sub_reference_);
-        async_->registerCallback(boost::bind(&FilterMaskImageWithSize::filter, this, _1, _2));
+        async_->registerCallback(boost::bind(&FilterMaskImageWithSize::filter, this, boost::placeholders::_1, boost::placeholders::_2));
       }
       else
       {
         sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
         sync_->connectInput(sub_input_, sub_reference_);
-        sync_->registerCallback(boost::bind(&FilterMaskImageWithSize::filter, this, _1, _2));
+        sync_->registerCallback(boost::bind(&FilterMaskImageWithSize::filter, this, boost::placeholders::_1, boost::placeholders::_2));
       }
       names.push_back("~input/reference");
     }

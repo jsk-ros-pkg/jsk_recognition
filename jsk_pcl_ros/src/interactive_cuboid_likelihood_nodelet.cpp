@@ -68,20 +68,20 @@ namespace jsk_pcl_ros
     particle_.pitch = initial_rot[1];
     particle_.yaw = initial_rot[2];
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&InteractiveCuboidLikelihood::configCallback, this, _1, _2);
+      boost::bind (&InteractiveCuboidLikelihood::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     sub_ = pnh_->subscribe("input", 1, &InteractiveCuboidLikelihood::likelihood, this);
     // Cuboid
     server_.reset(new interactive_markers::InteractiveMarkerServer(getName()));
     visualization_msgs::InteractiveMarker int_marker = particleToInteractiveMarker(particle_);
-    server_->insert(int_marker, boost::bind(&InteractiveCuboidLikelihood::processFeedback, this, _1));
+    server_->insert(int_marker, boost::bind(&InteractiveCuboidLikelihood::processFeedback, this, boost::placeholders::_1));
     server_->applyChanges();
 
     // SupportPlane
     plane_server_.reset(new interactive_markers::InteractiveMarkerServer(getName() + "_plane"));
     plane_pose_ = Eigen::Affine3f::Identity();
     visualization_msgs::InteractiveMarker plane_int_marker = planeInteractiveMarker();
-    plane_server_->insert(plane_int_marker, boost::bind(&InteractiveCuboidLikelihood::processPlaneFeedback, this, _1));
+    plane_server_->insert(plane_int_marker, boost::bind(&InteractiveCuboidLikelihood::processPlaneFeedback, this, boost::placeholders::_1));
     plane_server_->applyChanges();
     onInitPostProcess();
   }
@@ -157,7 +157,7 @@ namespace jsk_pcl_ros
     particle_.dz = config_.dz;
     if (server_) {
       visualization_msgs::InteractiveMarker int_marker = particleToInteractiveMarker(particle_);
-      server_->insert(int_marker, boost::bind(&InteractiveCuboidLikelihood::processFeedback, this, _1));
+      server_->insert(int_marker, boost::bind(&InteractiveCuboidLikelihood::processFeedback, this, boost::placeholders::_1));
       server_->applyChanges();
     }
   }

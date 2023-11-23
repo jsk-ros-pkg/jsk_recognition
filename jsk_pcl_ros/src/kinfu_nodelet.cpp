@@ -94,7 +94,7 @@ namespace jsk_pcl_ros
     pnh_->param("volume_size", volume_size_, pcl::device::kinfuLS::VOLUME_SIZE);
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> >(*pnh_);
-    dynamic_reconfigure::Server<Config>::CallbackType f = boost::bind(&Kinfu::configCallback, this, _1, _2);
+    dynamic_reconfigure::Server<Config>::CallbackType f = boost::bind(&Kinfu::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback(f);
 
     tf_listener_.reset(new tf::TransformListener());
@@ -182,13 +182,13 @@ namespace jsk_pcl_ros
       sub_color_.subscribe(*pnh_, "input/color", 1);
       sync_with_color_.reset(new message_filters::Synchronizer<SyncPolicyWithColor>(queue_size));
       sync_with_color_->connectInput(sub_camera_info_, sub_depth_, sub_color_);
-      sync_with_color_->registerCallback(boost::bind(&Kinfu::update, this, _1, _2, _3));
+      sync_with_color_->registerCallback(boost::bind(&Kinfu::update, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
     }
     else
     {
       sync_.reset(new message_filters::Synchronizer<SyncPolicy>(queue_size));
       sync_->connectInput(sub_camera_info_, sub_depth_);
-      sync_->registerCallback(boost::bind(&Kinfu::update, this, _1, _2));
+      sync_->registerCallback(boost::bind(&Kinfu::update, this, boost::placeholders::_1, boost::placeholders::_2));
     }
   }
 

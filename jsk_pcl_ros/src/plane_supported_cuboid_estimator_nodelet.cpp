@@ -54,7 +54,7 @@ namespace jsk_pcl_ros
     tf_ = TfListenerSingleton::getInstance();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&PlaneSupportedCuboidEstimator::configCallback, this, _1, _2);
+      boost::bind (&PlaneSupportedCuboidEstimator::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     pnh_->param("sensor_frame", sensor_frame_, std::string("odom"));
     pub_result_ = pnh_->advertise<jsk_recognition_msgs::BoundingBoxArray>("output/result", 1);
@@ -76,7 +76,7 @@ namespace jsk_pcl_ros
     sub_coefficients_.subscribe(*pnh_, "input/coefficients", 10);
     sync_polygon_ = boost::make_shared<message_filters::Synchronizer<PolygonSyncPolicy> >(100);
     sync_polygon_->connectInput(sub_polygon_, sub_coefficients_);
-    sync_polygon_->registerCallback(boost::bind(&PlaneSupportedCuboidEstimator::polygonCallback, this, _1, _2));
+    sync_polygon_->registerCallback(boost::bind(&PlaneSupportedCuboidEstimator::polygonCallback, this, boost::placeholders::_1, boost::placeholders::_2));
     sub_cloud_ = pnh_->subscribe("input", 1, &PlaneSupportedCuboidEstimator::cloudCallback, this);
     sub_fast_cloud_ = pnh_->subscribe("fast_input", 1, &PlaneSupportedCuboidEstimator::fastCloudCallback,
                                       this);
@@ -192,8 +192,8 @@ namespace jsk_pcl_ros
       NODELET_INFO("initTracker");
       pcl::PointCloud<pcl::tracking::ParticleCuboid>::Ptr particles = initParticles();
       tracker_.reset(new pcl::tracking::ROSCollaborativeParticleFilterTracker<pcl::PointXYZ, pcl::tracking::ParticleCuboid>);
-      tracker_->setCustomSampleFunc(boost::bind(&PlaneSupportedCuboidEstimator::sample, this, _1));
-      tracker_->setLikelihoodFunc(boost::bind(&PlaneSupportedCuboidEstimator::likelihood, this, _1, _2));
+      tracker_->setCustomSampleFunc(boost::bind(&PlaneSupportedCuboidEstimator::sample, this, boost::placeholders::_1));
+      tracker_->setLikelihoodFunc(boost::bind(&PlaneSupportedCuboidEstimator::likelihood, this, boost::placeholders::_1, boost::placeholders::_2));
       tracker_->setParticles(particles);
       tracker_->setParticleNum(particle_num_);
     }
@@ -313,8 +313,8 @@ namespace jsk_pcl_ros
 
       ParticleCloud::Ptr particles = initParticles();
       tracker_.reset(new pcl::tracking::ROSCollaborativeParticleFilterTracker<pcl::PointXYZ, pcl::tracking::ParticleCuboid>);
-      tracker_->setCustomSampleFunc(boost::bind(&PlaneSupportedCuboidEstimator::sample, this, _1));
-      tracker_->setLikelihoodFunc(boost::bind(&PlaneSupportedCuboidEstimator::likelihood, this, _1, _2));
+      tracker_->setCustomSampleFunc(boost::bind(&PlaneSupportedCuboidEstimator::sample, this, boost::placeholders::_1));
+      tracker_->setLikelihoodFunc(boost::bind(&PlaneSupportedCuboidEstimator::likelihood, this, boost::placeholders::_1, boost::placeholders::_2));
       tracker_->setParticles(particles);
       tracker_->setParticleNum(particle_num_);
       support_plane_updated_ = false;

@@ -54,7 +54,7 @@ namespace jsk_pcl_ros
     DiagnosticNodelet::onInit();
     srv_ = boost::make_shared<dynamic_reconfigure::Server<Config> >(*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind(&ColorHistogram::configCallback, this, _1, _2);
+      boost::bind(&ColorHistogram::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback(f);
     pub_histogram_ = advertise<jsk_recognition_msgs::ColorHistogramArray>(*pnh_, "output", 1);
     onInitPostProcess();
@@ -94,7 +94,7 @@ namespace jsk_pcl_ros
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
     sync_->connectInput(sub_cloud_, sub_indices_);
     sync_->registerCallback(boost::bind(&ColorHistogram::feature,
-                                        this, _1, _2));
+                                        this, boost::placeholders::_1, boost::placeholders::_2));
   }
 
   void ColorHistogram::unsubscribe()

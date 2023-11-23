@@ -67,7 +67,7 @@ namespace jsk_pcl_ros_utils
     sync_->connectInput(sub_polygon_, sub_coefficients_);
     sync_->registerCallback(boost::bind(
                               &PolygonArrayWrapper::wrap,
-                              this, _1, _2));
+                              this, boost::placeholders::_1, boost::placeholders::_2));
   }
 
   void PolygonArrayWrapper::unsubscribe()

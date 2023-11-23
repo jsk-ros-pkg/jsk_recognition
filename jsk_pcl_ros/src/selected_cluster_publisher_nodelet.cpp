@@ -66,7 +66,7 @@ namespace jsk_pcl_ros
     sub_indices_.subscribe(*pnh_, "indices", 1);
     sub_index_.subscribe(*pnh_, "selected_index", 1);
     sync_->connectInput(sub_input_, sub_indices_, sub_index_);
-    sync_->registerCallback(boost::bind(&SelectedClusterPublisher::extract, this, _1, _2, _3));
+    sync_->registerCallback(boost::bind(&SelectedClusterPublisher::extract, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
   }
 
   void SelectedClusterPublisher::unsubscribe()

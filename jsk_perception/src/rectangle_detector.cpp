@@ -193,11 +193,11 @@ public:
         image_sub = new message_filters::Subscriber<sensor_msgs::Image>(nh_, "image", 1);
         line_sub = new message_filters::Subscriber<jsk_recognition_msgs::LineArray>(nh_, "lines", 1);
         sync = new TimeSynchronizer<sensor_msgs::Image, jsk_recognition_msgs::LineArray>(*image_sub, *line_sub, 10);
-        sync->registerCallback(boost::bind(&RectangleDetector::callback, this, _1, _2));
+        sync->registerCallback(boost::bind(&RectangleDetector::callback, this, boost::placeholders::_1, boost::placeholders::_2));
         image_pub_ = nh_.advertise<sensor_msgs::Image>("rectangle/image", 1);
 
         dynamic_reconfigure::Server<jsk_perception::RectangleDetectorConfig>::CallbackType f =
-            boost::bind(&RectangleDetector::reconfigureCallback, this, _1, _2);
+            boost::bind(&RectangleDetector::reconfigureCallback, this, boost::placeholders::_1, boost::placeholders::_2);
         srv.setCallback(f);
     }
 };

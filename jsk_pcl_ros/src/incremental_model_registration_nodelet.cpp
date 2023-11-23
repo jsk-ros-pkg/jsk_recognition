@@ -110,7 +110,7 @@ namespace jsk_pcl_ros
     sync_->connectInput(sub_cloud_, sub_indices_, sub_pose_);
     sync_->registerCallback(boost::bind(
                               &IncrementalModelRegistration::newsampleCallback,
-                              this, _1, _2, _3));
+                              this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
     onInitPostProcess();
   }
 

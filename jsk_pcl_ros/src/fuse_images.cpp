@@ -109,7 +109,7 @@ namespace jsk_pcl_ros
     }
 
     // Bogus null filter
-    filters_[0]->registerCallback(bind(&FuseDepthImages::input_callback, this, _1));
+    filters_[0]->registerCallback(bind(&FuseDepthImages::input_callback, this, boost::placeholders::_1));
 
     if (input_topics.size() == 2)
     {
@@ -202,11 +202,11 @@ namespace jsk_pcl_ros
 
     if (approximate_sync_)
     {
-      async_->registerCallback(boost::bind(&FuseDepthImages::inputCb, this, _1, _2, _3, _4, _5, _6, _7, _8));
+      async_->registerCallback(boost::bind(&FuseDepthImages::inputCb, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3, boost::placeholders::_4, boost::placeholders::_5, boost::placeholders::_6, boost::placeholders::_7, boost::placeholders::_8));
     }
     else
     {
-      sync_->registerCallback(boost::bind(&FuseDepthImages::inputCb, this, _1, _2, _3, _4, _5, _6, _7, _8));
+      sync_->registerCallback(boost::bind(&FuseDepthImages::inputCb, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3, boost::placeholders::_4, boost::placeholders::_5, boost::placeholders::_6, boost::placeholders::_7, boost::placeholders::_8));
     }
   }
 

@@ -63,7 +63,7 @@ namespace jsk_pcl_ros
     
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> >(*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind(&ParticleFilterTracking::config_callback, this, _1, _2);
+      boost::bind(&ParticleFilterTracking::config_callback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback(f);
 
     int particle_num;
@@ -204,7 +204,7 @@ namespace jsk_pcl_ros
       change_sync_->registerCallback(
         boost::bind(
           &ParticleFilterTracking::cloud_change_cb,
-          this, _1, _2));
+          this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else {
       sub_ = pnh_->subscribe("input", 1, &ParticleFilterTracking::cloud_cb,this);
@@ -217,7 +217,7 @@ namespace jsk_pcl_ros
       sync_->registerCallback(
         boost::bind(
           &ParticleFilterTracking::renew_model_with_box_topic_cb,
-          this, _1, _2));
+          this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else {
       sub_update_model_ = pnh_->subscribe(

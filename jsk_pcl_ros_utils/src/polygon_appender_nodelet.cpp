@@ -48,7 +48,8 @@ namespace jsk_pcl_ros_utils
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy2> >(100);
     sync_->connectInput(sub_polygon0_, sub_coefficients0_,
                         sub_polygon1_, sub_coefficients1_);
-    sync_->registerCallback(boost::bind(&PolygonAppender::callback2, this, _1, _2, _3, _4));
+    sync_->registerCallback(boost::bind(&PolygonAppender::callback2, this,
+        boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3, boost::placeholders::_4));
     onInitPostProcess();
   }
 

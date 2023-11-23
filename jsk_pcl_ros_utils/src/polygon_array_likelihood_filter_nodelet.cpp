@@ -44,7 +44,7 @@ namespace jsk_pcl_ros_utils
 
     srv_ = boost::make_shared<dynamic_reconfigure::Server<Config> >(*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind(&PolygonArrayLikelihoodFilter::configCallback, this, _1, _2);
+      boost::bind(&PolygonArrayLikelihoodFilter::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback(f);
 
     pub_polygons_ = advertise<jsk_recognition_msgs::PolygonArray>(
@@ -79,7 +79,7 @@ namespace jsk_pcl_ros_utils
       sync_->connectInput(sub_polygons_, sub_coefficients_);
       sync_->registerCallback(boost::bind(
                                 &PolygonArrayLikelihoodFilter::filter,
-                                this, _1, _2));
+                                this, boost::placeholders::_1, boost::placeholders::_2));
     } else {
       sub_polygons_alone_ = pnh_->subscribe(
         "input_polygons", 1, &PolygonArrayLikelihoodFilter::filter, this);

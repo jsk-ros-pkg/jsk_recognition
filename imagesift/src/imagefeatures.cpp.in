@@ -117,7 +117,7 @@ public:
       _subMaskSync.subscribe(_it, "mask", 1);
       _sync.reset(new message_filters::Synchronizer<SyncPolicy>(
                     SyncPolicy(100), _subImageSync, _subMaskSync));
-      _sync->registerCallback(boost::bind(&SiftNode::imageCb, this, _1, _2));
+      _sync->registerCallback(boost::bind(&SiftNode::imageCb, this, boost::placeholders::_1, boost::placeholders::_2));
       _subInfo = _node.subscribe("camera_info", 1, &SiftNode::infoCb, this);
       _srvDetect = _node.advertiseService("Feature0DDetect", &SiftNode::detectCb, this);
     }

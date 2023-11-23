@@ -48,7 +48,7 @@ namespace jsk_pcl_ros
     ConnectionBasedNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&BilateralFilter::configCallback, this, _1, _2);
+      boost::bind (&BilateralFilter::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);

@@ -121,7 +121,7 @@ namespace jsk_pcl_ros_utils
       sync_->connectInput(sub_input_, sub_trigger_);
       sync_->registerCallback(boost::bind(
                                 &StaticPolygonArrayPublisher::triggerCallback,
-                                this, _1, _2));
+                                this, boost::placeholders::_1, boost::placeholders::_2));
     }
   }
 

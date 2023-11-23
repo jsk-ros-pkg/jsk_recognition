@@ -74,7 +74,7 @@ namespace jsk_pcl_ros_utils
                        target_frame_id_,
                        tf_queue_size_));
     tf_filter_->registerCallback(
-      boost::bind(&PolygonArrayAngleLikelihood::likelihood, this, _1));
+      boost::bind(&PolygonArrayAngleLikelihood::likelihood, this, boost::placeholders::_1));
   }
 
   void PolygonArrayAngleLikelihood::unsubscribe()

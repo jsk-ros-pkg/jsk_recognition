@@ -84,10 +84,10 @@ namespace jsk_pcl_ros_utils
       sub_indices_.subscribe(*pnh_, "input/indices", 1);
       sync_->connectInput(sub_polygons_, sub_indices_, sub_coefficients_);
     } else {
-      sub_polygons_.registerCallback(boost::bind(&PolygonFlipper::fillEmptyIndices, this, _1));
+      sub_polygons_.registerCallback(boost::bind(&PolygonFlipper::fillEmptyIndices, this, boost::placeholders::_1));
       sync_->connectInput(sub_polygons_, sub_indices_null_, sub_coefficients_);
     }
-    sync_->registerCallback(boost::bind(&PolygonFlipper::flip, this, _1, _2, _3));
+    sync_->registerCallback(boost::bind(&PolygonFlipper::flip, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
   }
 
   void PolygonFlipper::unsubscribe()

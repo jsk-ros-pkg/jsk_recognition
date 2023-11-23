@@ -392,7 +392,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&EuclideanClustering::configCallback, this, _1, _2);
+      boost::bind (&EuclideanClustering::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     
     ////////////////////////////////////////////////////////
@@ -429,11 +429,11 @@ namespace jsk_pcl_ros
       if (approximate_sync_) {
         async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
         async_->connectInput(sub_cluster_indices_, sub_point_cloud_);
-        async_->registerCallback(boost::bind(&EuclideanClustering::multi_extract, this, _1, _2));
+        async_->registerCallback(boost::bind(&EuclideanClustering::multi_extract, this, boost::placeholders::_1, boost::placeholders::_2));
       } else {
         sync_  = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
         sync_->connectInput(sub_cluster_indices_, sub_point_cloud_);
-        sync_->registerCallback(boost::bind(&EuclideanClustering::multi_extract, this, _1, _2));
+        sync_->registerCallback(boost::bind(&EuclideanClustering::multi_extract, this, boost::placeholders::_1, boost::placeholders::_2));
       }
     } else {
       sub_input_ = pnh_->subscribe("input", 1, &EuclideanClustering::extract, this);

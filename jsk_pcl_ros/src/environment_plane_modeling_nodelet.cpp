@@ -57,7 +57,7 @@ namespace jsk_pcl_ros
     
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&EnvironmentPlaneModeling::configCallback, this, _1, _2);
+      boost::bind (&EnvironmentPlaneModeling::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     pnh_->param("complete_footprint_region", complete_footprint_region_, false);
@@ -110,7 +110,7 @@ namespace jsk_pcl_ros
                         sub_coefficients_, sub_indices_);
     sync_->registerCallback(
       boost::bind(&EnvironmentPlaneModeling::inputCallback,
-                  this, _1, _2, _3, _4, _5));
+                  this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3, boost::placeholders::_4, boost::placeholders::_5));
 
     onInitPostProcess();
   }

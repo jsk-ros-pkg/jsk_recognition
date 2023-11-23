@@ -69,13 +69,13 @@ namespace jsk_pcl_ros_utils
       async_ = boost::make_shared<message_filters::Synchronizer<ASyncPolicy> >(1000);
       async_->connectInput(sub_image_, sub_point_, sub_camera_info_);
       async_->registerCallback(boost::bind(&DepthImageError::calcError,
-                                          this, _1, _2, _3));
+                                          this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
     }
     else {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(1000);
       sync_->connectInput(sub_image_, sub_point_, sub_camera_info_);
       sync_->registerCallback(boost::bind(&DepthImageError::calcError,
-                                          this, _1, _2, _3));
+                                          this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
     }
   }
 

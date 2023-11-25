@@ -1,0 +1,43 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_realsense_tabletop_object_detector.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_realsense_tabletop_object_detector"
+        name="test_realsense_tabletop_object_detector"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /multi_plane_estimate/output_refined
+      timeout_0: 30
+      topic_1: /multi_plane_estimate/output_refined_polygon
+      timeout_1: 30
+      topic_2: /multi_plane_estimate/output_refined_coefficients
+      timeout_2: 30
+      topic_3: /plane_extraction/output
+      timeout_3: 30
+      topic_4: /euclidean_clustering/output
+      timeout_4: 30
+      topic_5: /euclidean_clustering/output_throttle
+      timeout_5: 30
+      topic_6: /outlier_removal/output
+      timeout_6: 30
+      topic_7: /segmentation_decomposer/boxes
+      timeout_7: 30
+      topic_8: /segmentation_decomposer/centroid_pose_array
+      timeout_8: 30
+      topic_9: /segmentation_decomposer/cluster_indices
+      timeout_9: 30
+      topic_10: /segmentation_decomposer/debug_output
+      timeout_10: 30
+      topic_11: /segmentation_decomposer/label
+      timeout_11: 30
+      topic_12: /segmentation_decomposer/mask
+      timeout_12: 30
+      topic_13: /segmentation_decomposer/negative_indices
+      timeout_13: 30
+    </rosparam>
+  </test>
+
+</launch>

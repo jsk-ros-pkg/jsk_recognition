@@ -74,6 +74,7 @@ class GPT4VClientNode(object):
 
     def _image_cb(self, msg: Image):
         image = ros_numpy.numpify(msg)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         self.default_img = image
 
     def _ac_cb(self, goal: VQATaskGoal):
@@ -87,6 +88,7 @@ class GPT4VClientNode(object):
 
         if len(goal.image.data) > 0:
             image = ros_numpy.numpify(goal.image)
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         elif len(goal.compressed_image.data) > 0:
             rospy.logerr(f"Compressed image is not supported.")
             self.ac.set_aborted(result)

@@ -11,12 +11,20 @@ catkin build gpt4v_vqa
 ## Usage
 
 ```bash
-roslaunch gpt4v_vqa vqa.launch api_key:=<YOUR_API_KEY>
+roslaunch gpt4v_vqa vqa.launch api_key:=<YOUR_API_KEY> VQA_INPUT_IMAGE:=<IMAGE TOPIC>
+```
+
+And from other terminal
+
+```bash
+$ rosrun gpt4v_vqa vqa_interpreter.py
 ```
 
 ## Nodes
 
 ### gpt4v_vqa
+
+This node is a ROS wrapper for GPT4V model. Its behavior is similar to [VQA node](../jsk_perception/node_scripts/vqa_node.py). But there is a difference that this node does not support continuous inference. This node use API only when action server is called.
 
 #### Subscribed Topics
 

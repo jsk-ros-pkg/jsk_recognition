@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+    <arg name="openai_api_key" default="$(OPTENV OPENAI_API_KEY)" />
+    <arg name="VQA_INPUT_IMAGE" default="vqa_image" />
+
+    <node name="vqa" pkg="gpt4v_vqa" type="gpt4v_vqa_node.py" output="screen">
+        <remap from="~image" to="$(arg VQA_INPUT_IMAGE)" />
+        <rosparam subst_value="true">
+            api_key: $(arg openai_api_key)
+        </rosparam>
+    </node>
+</launch>

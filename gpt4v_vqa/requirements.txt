@@ -1,0 +1,4 @@
+requests
+openai
+opencv-python
+cvbridge3

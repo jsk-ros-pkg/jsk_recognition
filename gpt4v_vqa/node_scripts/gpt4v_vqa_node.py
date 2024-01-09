@@ -10,11 +10,15 @@ import requests
 import ros_numpy
 import rospy
 from dynamic_reconfigure.server import Server
+from jsk_recognition_msgs.msg import (
+    QuestionAndAnswerText,
+    VQATaskAction,
+    VQATaskGoal,
+    VQATaskResult,
+)
 from sensor_msgs.msg import Image
 
 from gpt4v_vqa.cfg import GPT4VConfig
-from jsk_recognition_msgs.msg import (QuestionAndAnswerText, VQATaskAction,
-                                      VQATaskGoal, VQATaskResult)
 
 
 class GPT4VClientNode(object):
@@ -81,9 +85,9 @@ class GPT4VClientNode(object):
         rospy.loginfo("Received goal")
         result = VQATaskResult()
 
-        if goal.image is not None:
+        if len(goal.image.data) > 0:
             image = ros_numpy.numpify(goal.image)
-        elif goal.compressed_image is not None:
+        elif len(goal.compressed_image.data) > 0:
             rospy.logerr(f"Compressed image is not supported.")
             self.ac.set_aborted(result)
             return

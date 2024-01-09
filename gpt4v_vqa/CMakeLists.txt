@@ -6,6 +6,7 @@ find_package(catkin REQUIRED COMPONENTS catkin_virtualenv dynamic_reconfigure)
 catkin_generate_virtualenv(
     PYTHON_INTERPRETER python3.8
     USE_SYSTEM_PACKAGES FALSE
+    ISOLATE_REQUIREMENTS TRUE 
     CHECK_VENV FALSE
 )
 
@@ -18,4 +19,5 @@ catkin_package()
 catkin_install_python(
   PROGRAMS
     node_scripts/gpt4v_vqa_node.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)

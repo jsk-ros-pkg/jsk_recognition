@@ -1,4 +1,4 @@
 requests
 openai
 opencv-python
-cvbridge3
+rosnumpy

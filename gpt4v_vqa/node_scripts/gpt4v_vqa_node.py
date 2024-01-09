@@ -67,7 +67,7 @@ class GPT4VClientNode(object):
             scale = min(self.max_height / height, self.max_width / width)
             image = cv2.resize(
                 image,
-                (int(width * scale), int(height * scale), num_channel),
+                (int(width * scale), int(height * scale)),
                 interpolation=cv2.INTER_AREA,
             )
         return image
@@ -108,10 +108,10 @@ class GPT4VClientNode(object):
                 rospy.logerr(f"No choices in response: {response}")
                 continue
             answer = response["choices"][0]["message"]["content"]
-            result.result.results.append(
+            result.result.result.append(
                 QuestionAndAnswerText(question=question, answer=answer)
             )
-        if len(result.result.results) == 0:
+        if len(result.result.result) == 0:
             rospy.logerr("No answers found")
             self.ac.set_aborted(result)
             return

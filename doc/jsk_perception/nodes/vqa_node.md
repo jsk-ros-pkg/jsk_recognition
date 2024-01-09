@@ -40,14 +40,13 @@ make
 
   VQA question and answer to visualize
   
-## Action topic
-* `~inference_server/goal` (`jsk_recognition_msgs/VQATaskActionGoal`) 
+## Action
+* `~inference_server` (`jsk_recognition_msgs/VQATaskAction`) 
   
-  VQA request with custom questions and image
-  
-* `~inference_server/result` (`jsk_recognition_msgs/VQATaskActionResult`)
-  
-  VQA result of `~inference_server/goal`
+  VQA request action server with custom multiple questions (and an image).
+  If image is not specified in the goal, latest image message for `~image` subscriber is used.
+  There is no feedback from this server.
+  Please see [message definition](https://github.com/jsk-ros-pkg/jsk_recognition/blob/master/jsk_recognition_msgs/action/VQATask.action) for defailed interface.
 
 ## Parameters
 * `~host` (String, default: `localhost`)

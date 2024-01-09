@@ -7,18 +7,14 @@ import actionlib
 import cv2
 import numpy as np
 import requests
+import ros_numpy
 import rospy
-from cv_bridge import CvBridge
 from dynamic_reconfigure.server import Server
 from sensor_msgs.msg import Image
 
 from gpt4v_vqa.cfg import GPT4VConfig
-from jsk_recognition_msgs.msg import (
-    QuestionAndAnswerText,
-    VQATaskAction,
-    VQATaskGoal,
-    VQATaskResult,
-)
+from jsk_recognition_msgs.msg import (QuestionAndAnswerText, VQATaskAction,
+                                      VQATaskGoal, VQATaskResult)
 
 
 class GPT4VClientNode(object):
@@ -73,7 +69,7 @@ class GPT4VClientNode(object):
         return image
 
     def _image_cb(self, msg: Image):
-        image = CvBridge().imgmsg_to_cv2(msg)
+        image = ros_numpy.numpify(msg)
         self.default_img = image
 
     def _ac_cb(self, goal: VQATaskGoal):
@@ -86,9 +82,11 @@ class GPT4VClientNode(object):
         result = VQATaskResult()
 
         if goal.image is not None:
-            image = CvBridge().imgmsg_to_cv2(goal.image)
+            image = ros_numpy.numpify(goal.image)
         elif goal.compressed_image is not None:
-            image = CvBridge().compressed_imgmsg_to_cv2(goal.compressed_image)
+            rospy.logerr(f"Compressed image is not supported.")
+            self.ac.set_aborted(result)
+            return
         else:
             if self.default_img is not None:
                 image = self.default_img

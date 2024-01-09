@@ -10,15 +10,14 @@ import requests
 import ros_numpy
 import rospy
 from dynamic_reconfigure.server import Server
-from jsk_recognition_msgs.msg import (
-    QuestionAndAnswerText,
-    VQATaskAction,
-    VQATaskGoal,
-    VQATaskResult,
-)
+from jsk_recognition_msgs.msg import (QuestionAndAnswerText, VQATaskAction,
+                                      VQATaskGoal, VQATaskResult)
 from sensor_msgs.msg import Image
 
 from gpt4v_vqa.cfg import GPT4VConfig
+
+COST_PER_TOKEN_FOR_INPUT = 0.01 / 1000
+COST_PER_TOKEN_FOR_OUTPUT = 0.03 / 1000
 
 
 class GPT4VClientNode(object):
@@ -113,6 +112,10 @@ class GPT4VClientNode(object):
             result.result.result.append(
                 QuestionAndAnswerText(question=question, answer=answer)
             )
+            input_tokens = response["usage"]["prompt_tokens"]
+            output_tokens = response["usage"]["completion_tokens"]
+            rospy.loginfo(f"Used tokens for this completion is {input_tokens} for input and {output_tokens} for output.")
+            rospy.loginfo(f"Which costs ${input_tokens * COST_PER_TOKEN_FOR_INPUT} USD for input and ${output_tokens * COST_PER_TOKEN_FOR_OUTPUT} USD for output.")
         if len(result.result.result) == 0:
             rospy.logerr("No answers found")
             self.ac.set_aborted(result)

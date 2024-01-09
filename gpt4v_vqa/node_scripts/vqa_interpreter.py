@@ -2,7 +2,7 @@
 
 import actionlib
 import rospy
-from jsk_recognition.msg import VQATaskAction, VQATaskGoal
+from jsk_recognition_msgs.msg import VQATaskAction, VQATaskGoal
 
 if __name__ == "__main__":
     rospy.init_node("vqa_interpreter")

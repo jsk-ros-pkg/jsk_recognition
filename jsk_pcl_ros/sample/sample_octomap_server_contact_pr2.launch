@@ -1,8 +1,10 @@
 <launch>
-  <param name="robot_description" command="$(find xacro)/xacro.py '$(find pr2_description)/robots/pr2.urdf.xacro'"/>
+  <arg name="use_gui" default="true" doc="argument to launch rviz" />
+
+  <param name="robot_description" command="$(find xacro)/xacro '$(find pr2_description)/robots/pr2.urdf.xacro'"/>
 
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
-    <param name="use_gui" value="true"/>
+    <param name="use_gui" value="$(arg use_gui)"/>
   </node>
 
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
@@ -62,6 +64,6 @@
   <node pkg="jsk_pcl_ros" type="test_contact_sensor.py" name="test_contact_sensor"
         output="screen" />
 
-  <node pkg="rviz" type="rviz" name="rviz"
+  <node pkg="rviz" type="rviz" name="rviz" if="$(arg use_gui)"
         args="-d  $(find jsk_pcl_ros)/config/octomap_server_contact_pr2.rviz" />
 </launch>

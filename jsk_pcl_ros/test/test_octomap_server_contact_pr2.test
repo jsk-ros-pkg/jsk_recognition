@@ -1,0 +1,23 @@
+<launch>
+  <include file="$(find jsk_pcl_ros)/sample/sample_octomap_server_contact_pr2.launch" >
+    <arg name="use_gui" value="false" />
+  </include>
+
+  <test test-name="test_octomap_server_contact_pr2"
+        name="test_octomap_server_contact_pr2"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /occupied_cells_vis_array
+      timeout_0: 30
+      topic_1: /free_cells_vis_array
+      timeout_1: 30
+      topic_2: /unknown_cells_vis_array
+      timeout_2: 30
+      topic_3: /octomap_full
+      timeout_3: 30
+      topic_4: /octomap_binary
+      timeout_4: 30
+    </rosparam>
+  </test>
+</launch>

@@ -50,6 +50,7 @@
   <exec_depend>image_transport</exec_depend>
   <exec_depend>image_view2</exec_depend>
   <exec_depend>interactive_markers</exec_depend>
+  <exec_depend>joint_state_publisher</exec_depend>
   <exec_depend>jsk_data</exec_depend>
   <exec_depend>jsk_footstep_msgs</exec_depend>
   <exec_depend>jsk_interactive_marker</exec_depend>
@@ -73,12 +74,15 @@
   <exec_depend>pcl_conversions</exec_depend>
   <exec_depend>pcl_msgs</exec_depend>
   <exec_depend>pcl_ros</exec_depend>
+  <exec_depend>pr2_description</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-sklearn</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-sklearn</exec_depend>
   <exec_depend>resized_image_transport</exec_depend>
   <exec_depend>robot_self_filter</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>rosboost_cfg</exec_depend>
   <exec_depend>roscpp_tutorials</exec_depend>
+  <exec_depend>roseus</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>std_srvs</exec_depend>
@@ -89,6 +93,7 @@
   <exec_depend>tf_conversions</exec_depend>
   <exec_depend>topic_tools</exec_depend>
   <exec_depend>visualization_msgs</exec_depend>
+  <exec_depend>xacro</exec_depend>
   <exec_depend>yaml-cpp</exec_depend>
 
   <test_depend>compressed_depth_image_transport</test_depend>

@@ -18,7 +18,7 @@ cycler==0.11.0
 Cython==0.29.33
 datasets==2.11.0
 dill==0.3.6
-dnspython==2.1.0
+dnspython==2.6.1
 einops==0.6.0
 Flask==2.2.3
 fonttools==4.39.3

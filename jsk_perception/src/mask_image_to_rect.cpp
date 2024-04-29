@@ -48,7 +48,7 @@ namespace jsk_perception
     DiagnosticNodelet::onInit();
     srv_ = boost::make_shared<dynamic_reconfigure::Server<Config> >(*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind(&MaskImageToRect::configCallback, this, _1, _2);
+      boost::bind(&MaskImageToRect::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback(f);
 
     pub_ = advertise<jsk_recognition_msgs::RectArray>(*pnh_, "output", 1);

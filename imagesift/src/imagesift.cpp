@@ -92,7 +92,7 @@ namespace imagesift
             _subMask.subscribe(*nh_, "mask", 1);
             _sync = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
             _sync->connectInput(_subImageWithMask, _subMask);
-            _sync->registerCallback(boost::bind(&SiftNode::imageCb, this, _1, _2));
+            _sync->registerCallback(boost::bind(&SiftNode::imageCb, this, boost::placeholders::_1, boost::placeholders::_2));
         }
         _subInfo = nh_->subscribe("camera_info", 1, &SiftNode::infoCb, this);
     }

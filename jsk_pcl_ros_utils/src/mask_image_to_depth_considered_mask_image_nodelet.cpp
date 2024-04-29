@@ -49,7 +49,7 @@ namespace jsk_pcl_ros_utils
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
-        &MaskImageToDepthConsideredMaskImage::configCallback, this, _1, _2);
+        &MaskImageToDepthConsideredMaskImage::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     sub_ = pnh_->subscribe("input/maskregion", 1, &MaskImageToDepthConsideredMaskImage::mask_region_callback, this);
     region_width_ = 0;
@@ -133,13 +133,13 @@ namespace jsk_pcl_ros_utils
     if (approximate_sync_) {
       async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
       async_->connectInput(sub_input_, sub_image_);
-      async_->registerCallback(boost::bind(&MaskImageToDepthConsideredMaskImage::extractmask, this, _1, _2));
+      async_->registerCallback(boost::bind(&MaskImageToDepthConsideredMaskImage::extractmask, this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
       sync_->connectInput(sub_input_, sub_image_);
       sync_->registerCallback(boost::bind(&MaskImageToDepthConsideredMaskImage::extractmask,
-                                          this, _1, _2));
+                                          this, boost::placeholders::_1, boost::placeholders::_2));
     }
   }
   

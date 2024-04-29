@@ -84,7 +84,7 @@ namespace jsk_perception
     sticher_initialized_ = false;
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&DualFisheyeToPanorama::configCallback, this, _1, _2);
+      boost::bind (&DualFisheyeToPanorama::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     msg_panorama_info_.projection_model = "equirectangular";

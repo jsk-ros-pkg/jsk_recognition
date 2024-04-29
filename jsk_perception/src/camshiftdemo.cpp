@@ -115,7 +115,7 @@ public:
     config_.vmin = vmin_;
     config_.vmax = vmax_;
     config_.smin = smin_;
-    ReconfigureServer::CallbackType f = boost::bind(&CamShiftDemo::configCb, this, _1, _2);
+    ReconfigureServer::CallbackType f = boost::bind(&CamShiftDemo::configCb, this, boost::placeholders::_1, boost::placeholders::_2);
     reconfigure_server_.setCallback(f);
 
 

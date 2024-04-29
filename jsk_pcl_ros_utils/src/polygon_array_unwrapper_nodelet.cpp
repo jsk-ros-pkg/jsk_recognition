@@ -49,7 +49,7 @@ namespace jsk_pcl_ros_utils
         "output_coefficients", 1);
     srv_ = boost::make_shared<dynamic_reconfigure::Server<Config> >(*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind(&PolygonArrayUnwrapper::configCallback, this, _1, _2);
+      boost::bind(&PolygonArrayUnwrapper::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback(f);
     onInitPostProcess();
   }
@@ -73,7 +73,7 @@ namespace jsk_pcl_ros_utils
     sync_->connectInput(sub_polygon_, sub_coefficients_);
     sync_->registerCallback(boost::bind(
                               &PolygonArrayUnwrapper::unwrap,
-                              this, _1, _2));
+                              this, boost::placeholders::_1, boost::placeholders::_2));
   }
 
   void PolygonArrayUnwrapper::unsubscribe()

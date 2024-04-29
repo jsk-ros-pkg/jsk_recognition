@@ -174,7 +174,7 @@ namespace jsk_pcl_ros
     DiagnosticNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&OctreeVoxelGrid::configCallback, this, _1, _2);
+      boost::bind (&OctreeVoxelGrid::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);

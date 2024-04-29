@@ -70,11 +70,11 @@ namespace jsk_pcl_ros_utils
     if (approximate_sync_) {
       async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(100);
       async_->connectInput(sub_cloud_, sub_pose_);
-      async_->registerCallback(boost::bind(&PointCloudRelativeFromPoseStamped::transform, this, _1, _2));
+      async_->registerCallback(boost::bind(&PointCloudRelativeFromPoseStamped::transform, this, boost::placeholders::_1, boost::placeholders::_2));
     } else {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
       sync_->connectInput(sub_cloud_, sub_pose_);
-      sync_->registerCallback(boost::bind(&PointCloudRelativeFromPoseStamped::transform, this, _1, _2));
+      sync_->registerCallback(boost::bind(&PointCloudRelativeFromPoseStamped::transform, this, boost::placeholders::_1, boost::placeholders::_2));
     }
   }
   

@@ -52,7 +52,7 @@ namespace jsk_pcl_ros
 
     srv_ = boost::make_shared<dynamic_reconfigure::Server<Config> >(*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind(&ColorHistogramClassifier::configCallback, this, _1, _2);
+      boost::bind(&ColorHistogramClassifier::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback(f);
     pub_class_ = advertise<jsk_recognition_msgs::ClassificationResult>(*pnh_, "output", 1);
     onInitPostProcess();

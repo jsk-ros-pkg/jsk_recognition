@@ -47,7 +47,7 @@ namespace jsk_pcl_ros
     DiagnosticNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&PPFRegistration::configCallback, this, _1, _2);
+      boost::bind (&PPFRegistration::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     pub_points_array_ = advertise<jsk_recognition_msgs::PointsArray>(*pnh_, "output/points_array", 1);
@@ -82,13 +82,13 @@ namespace jsk_pcl_ros
       {
         array_async_ = boost::make_shared<message_filters::Synchronizer<ArrayApproximateSyncPolicy> >(queue_size_);
         array_async_->connectInput(sub_input_, sub_reference_array_);
-        array_async_->registerCallback(boost::bind(&PPFRegistration::ArrayRegistration, this, _1, _2));
+        array_async_->registerCallback(boost::bind(&PPFRegistration::ArrayRegistration, this, boost::placeholders::_1, boost::placeholders::_2));
       }
       else
       {
         array_sync_ = boost::make_shared<message_filters::Synchronizer<ArraySyncPolicy> >(queue_size_);
         array_sync_->connectInput(sub_input_, sub_reference_array_);
-        array_sync_->registerCallback(boost::bind(&PPFRegistration::ArrayRegistration, this, _1, _2));
+        array_sync_->registerCallback(boost::bind(&PPFRegistration::ArrayRegistration, this, boost::placeholders::_1, boost::placeholders::_2));
       }
     }
     else
@@ -97,13 +97,13 @@ namespace jsk_pcl_ros
       {
         cloud_async_ = boost::make_shared<message_filters::Synchronizer<CloudApproximateSyncPolicy> >(queue_size_);
         cloud_async_->connectInput(sub_input_, sub_reference_cloud_);
-        cloud_async_->registerCallback(boost::bind(&PPFRegistration::CloudRegistration, this, _1, _2));
+        cloud_async_->registerCallback(boost::bind(&PPFRegistration::CloudRegistration, this, boost::placeholders::_1, boost::placeholders::_2));
       }
       else
       {
         cloud_sync_ = boost::make_shared<message_filters::Synchronizer<CloudSyncPolicy> >(queue_size_);
         cloud_sync_->connectInput(sub_input_, sub_reference_cloud_);
-        cloud_sync_->registerCallback(boost::bind(&PPFRegistration::CloudRegistration, this, _1, _2));
+        cloud_sync_->registerCallback(boost::bind(&PPFRegistration::CloudRegistration, this, boost::placeholders::_1, boost::placeholders::_2));
       }
     }
   }

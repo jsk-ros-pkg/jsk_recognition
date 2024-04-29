@@ -76,12 +76,12 @@ namespace jsk_perception
     if (approximate_sync_) {
       async_ = boost::make_shared<message_filters::Synchronizer<ApproxSyncPolicy> >(queue_size_);
       async_->connectInput(sub_src1_, sub_src2_);
-      async_->registerCallback(boost::bind(&SubtractMaskImage::subtract, this, _1, _2));
+      async_->registerCallback(boost::bind(&SubtractMaskImage::subtract, this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
       sync_->connectInput(sub_src1_, sub_src2_);
-      sync_->registerCallback(boost::bind(&SubtractMaskImage::subtract, this, _1, _2));
+      sync_->registerCallback(boost::bind(&SubtractMaskImage::subtract, this, boost::placeholders::_1, boost::placeholders::_2));
     }
   }
 

@@ -58,7 +58,7 @@ namespace jsk_perception
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
-        &TabletopColorDifferenceLikelihood::configCallback, this, _1, _2);
+        &TabletopColorDifferenceLikelihood::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     tf_listener_ = jsk_recognition_utils::TfListenerSingleton::getInstance();
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
@@ -103,7 +103,7 @@ namespace jsk_perception
                                                                  *tf_listener_,
                                                                  msg->header.frame_id,
                                                                  tf_queue_size_));
-      tf_filter_->registerCallback(boost::bind(&TabletopColorDifferenceLikelihood::imageCallback, this, _1));
+      tf_filter_->registerCallback(boost::bind(&TabletopColorDifferenceLikelihood::imageCallback, this, boost::placeholders::_1));
     }
   }
 

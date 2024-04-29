@@ -46,7 +46,7 @@ namespace jsk_pcl_ros
     DiagnosticNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&ExtractCuboidParticlesTopN::configCallback, this, _1, _2);
+      boost::bind (&ExtractCuboidParticlesTopN::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     pub_ = advertise<pcl_msgs::PointIndices>(*pnh_, "output", 1);
     pub_pose_array_ = advertise<jsk_recognition_msgs::WeightedPoseArray>(*pnh_, "output/pose_array", 1);

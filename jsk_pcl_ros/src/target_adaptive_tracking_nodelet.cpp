@@ -41,7 +41,7 @@ namespace jsk_pcl_ros
 
       srv_ = boost::make_shared<dynamic_reconfigure::Server<Config> >(*pnh_);
       dynamic_reconfigure::Server<Config>::CallbackType f =
-       boost::bind(&TargetAdaptiveTracking::configCallback, this, _1, _2);
+       boost::bind(&TargetAdaptiveTracking::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
       srv_->setCallback(f);
 
       this->pub_cloud_ = advertise<sensor_msgs::PointCloud2>(
@@ -92,7 +92,7 @@ namespace jsk_pcl_ros
          sub_obj_cloud_, sub_bkgd_cloud_, sub_obj_pose_);
       this->obj_sync_->registerCallback(
          boost::bind(&TargetAdaptiveTracking::objInitCallback,
-                     this, _1, _2, _3));
+                     this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
       this->sub_cloud_.subscribe(*pnh_, "input_cloud", 1);
       this->sub_pose_.subscribe(*pnh_, "input_pose", 1);
       this->sync_ = boost::make_shared<message_filters::Synchronizer<
@@ -100,7 +100,7 @@ namespace jsk_pcl_ros
       this->sync_->connectInput(sub_cloud_, sub_pose_);
       this->sync_->registerCallback(
          boost::bind(&TargetAdaptiveTracking::callback,
-                     this, _1, _2));
+                     this, boost::placeholders::_1, boost::placeholders::_2));
    }
 
    void TargetAdaptiveTracking::unsubscribe()

@@ -51,7 +51,7 @@ namespace jsk_pcl_ros
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
-        &RegionGrowingMultiplePlaneSegmentation::configCallback, this, _1, _2);
+        &RegionGrowingMultiplePlaneSegmentation::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     pub_polygons_ = advertise<jsk_recognition_msgs::PolygonArray>(
@@ -91,7 +91,7 @@ namespace jsk_pcl_ros
     sync_->connectInput(sub_input_, sub_normal_);
     sync_->registerCallback(
       boost::bind(&RegionGrowingMultiplePlaneSegmentation::segment, this,
-                  _1, _2));
+                  boost::placeholders::_1, boost::placeholders::_2));
   }
 
   void RegionGrowingMultiplePlaneSegmentation::unsubscribe()

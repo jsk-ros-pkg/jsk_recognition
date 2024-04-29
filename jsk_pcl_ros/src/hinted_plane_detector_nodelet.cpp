@@ -54,7 +54,7 @@ namespace jsk_pcl_ros {
     DiagnosticNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&HintedPlaneDetector::configCallback, this, _1, _2);
+      boost::bind (&HintedPlaneDetector::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     
     pub_hint_polygon_ = advertise<geometry_msgs::PolygonStamped>(
@@ -103,13 +103,13 @@ namespace jsk_pcl_ros {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
       sync_->connectInput(sub_cloud_, sub_hint_cloud_);
       sync_->registerCallback(
-          boost::bind(&HintedPlaneDetector::detect, this, _1, _2));
+          boost::bind(&HintedPlaneDetector::detect, this, boost::placeholders::_1, boost::placeholders::_2));
     } else {
       sub_hint_cloud_single_ = pnh_->subscribe<sensor_msgs::PointCloud2>(
           "input/hint/cloud", 1, &HintedPlaneDetector::setHintCloud, this);
       sub_cloud_single_ = pnh_->subscribe<sensor_msgs::PointCloud2>(
           "input", 1,
-          boost::bind(&HintedPlaneDetector::detect, this, _1,
+          boost::bind(&HintedPlaneDetector::detect, this, boost::placeholders::_1,
                       boost::ref(hint_cloud_)));
     }
   }

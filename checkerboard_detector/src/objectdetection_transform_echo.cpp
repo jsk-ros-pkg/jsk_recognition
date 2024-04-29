@@ -142,7 +142,7 @@ int main(int argc, char** argv)
   message_filters::Synchronizer<SyncPolicy> sync(
     SyncPolicy(1000),
     detection1_sub, detection2_sub);
-  sync.registerCallback(boost::bind(&callback, _1, _2));
+  sync.registerCallback(boost::bind(&callback, boost::placeholders::_1, boost::placeholders::_2));
   ros::spin();
   return 0;
 }

@@ -86,7 +86,7 @@ namespace jsk_perception
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&ColorHistogram::configCallback, this, _1, _2);
+      boost::bind (&ColorHistogram::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
   }
 
@@ -102,7 +102,7 @@ namespace jsk_perception
         = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(10);
       sync_->connectInput(image_sub_, rectangle_sub_);
       sync_->registerCallback(boost::bind(
-                                &ColorHistogram::extract, this, _1, _2));
+                                &ColorHistogram::extract, this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else {
       it_.reset(new image_transport::ImageTransport(nh_));
@@ -115,7 +115,7 @@ namespace jsk_perception
       mask_sync_->connectInput(image_sub_, image_mask_sub_);
       mask_sync_->registerCallback(
         boost::bind(
-          &ColorHistogram::extractMask, this, _1, _2));
+          &ColorHistogram::extractMask, this, boost::placeholders::_1, boost::placeholders::_2));
     }
     jsk_topic_tools::warnNoRemap(names);
   }

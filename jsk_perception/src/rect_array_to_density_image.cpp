@@ -70,12 +70,12 @@ namespace jsk_perception
     if (approximate_sync_) {
       async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
       async_->connectInput(sub_image_, sub_rects_);
-      async_->registerCallback(boost::bind(&RectArrayToDensityImage::convert, this, _1, _2));
+      async_->registerCallback(boost::bind(&RectArrayToDensityImage::convert, this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
       sync_->connectInput(sub_image_, sub_rects_);
-      sync_->registerCallback(boost::bind(&RectArrayToDensityImage::convert, this, _1, _2));
+      sync_->registerCallback(boost::bind(&RectArrayToDensityImage::convert, this, boost::placeholders::_1, boost::placeholders::_2));
     }
     ros::V_string names = boost::assign::list_of("~input/image")("~input/rect_array");
     jsk_topic_tools::warnNoRemap(names);

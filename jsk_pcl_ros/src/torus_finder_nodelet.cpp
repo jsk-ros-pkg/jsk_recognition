@@ -67,7 +67,7 @@ namespace jsk_pcl_ros
     pnh_->param("use_normal", use_normal_, false);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&TorusFinder::configCallback, this, _1, _2);
+      boost::bind (&TorusFinder::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     pub_torus_ = advertise<jsk_recognition_msgs::Torus>(*pnh_, "output", 1);

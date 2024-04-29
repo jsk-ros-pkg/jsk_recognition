@@ -78,13 +78,13 @@ namespace jsk_pcl_ros
       async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(100);
       async_->connectInput(sub_indices_, sub_cloud_);
       async_->registerCallback(
-        boost::bind(&ExtractIndices::convert, this, _1, _2));
+        boost::bind(&ExtractIndices::convert, this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
       sync_->connectInput(sub_indices_, sub_cloud_);
       sync_->registerCallback(
-        boost::bind(&ExtractIndices::convert, this, _1, _2));
+        boost::bind(&ExtractIndices::convert, this, boost::placeholders::_1, boost::placeholders::_2));
     }
   }
 

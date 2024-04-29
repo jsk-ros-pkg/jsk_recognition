@@ -49,7 +49,7 @@ namespace jsk_pcl_ros
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&FeatureRegistration::configCallback, this, _1, _2);
+      boost::bind (&FeatureRegistration::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     
@@ -60,7 +60,7 @@ namespace jsk_pcl_ros
     reference_sync_->connectInput(
       sub_input_reference_, sub_input_reference_feature_);
     reference_sync_->registerCallback(boost::bind(&FeatureRegistration::referenceCallback,
-                                                  this, _1, _2));
+                                                  this, boost::placeholders::_1, boost::placeholders::_2));
     pub_pose_ = advertise<geometry_msgs::PoseStamped>(*pnh_, "output", 1);
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output/cloud", 1);
     onInitPostProcess();
@@ -86,7 +86,7 @@ namespace jsk_pcl_ros
     sync_->connectInput(
       sub_input_, sub_input_feature_);
     sync_->registerCallback(boost::bind(&FeatureRegistration::estimate,
-                                        this, _1, _2));
+                                        this, boost::placeholders::_1, boost::placeholders::_2));
   }
 
   void FeatureRegistration::unsubscribe()

@@ -51,7 +51,7 @@ namespace jsk_perception
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
-        &SnakeSegmentation::configCallback, this, _1, _2);
+        &SnakeSegmentation::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     pub_debug_ = advertise<sensor_msgs::Image>(*pnh_, "debug", 1);

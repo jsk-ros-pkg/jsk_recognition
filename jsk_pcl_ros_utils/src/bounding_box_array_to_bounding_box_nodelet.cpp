@@ -48,7 +48,7 @@ namespace jsk_pcl_ros_utils
     // dynamic_reconfigure
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind(&BoundingBoxArrayToBoundingBox::configCallback, this, _1, _2);
+      boost::bind(&BoundingBoxArrayToBoundingBox::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback(f);
 
     pub_ = advertise<jsk_recognition_msgs::BoundingBox>(*pnh_, "output", 1);

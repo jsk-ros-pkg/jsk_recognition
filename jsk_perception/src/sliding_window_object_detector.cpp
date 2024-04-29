@@ -21,7 +21,7 @@ namespace jsk_perception
          jsk_perception::SlidingWindowObjectDetectorConfig> >(*pnh_);
       dynamic_reconfigure::Server<
          jsk_perception::SlidingWindowObjectDetectorConfig>::CallbackType f =
-         boost::bind(&SlidingWindowObjectDetector::configCallback, this, _1, _2);
+         boost::bind(&SlidingWindowObjectDetector::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
       this->srv_->setCallback(f);
       
       pnh_->getParam("run_type", this->run_type_);

@@ -57,7 +57,7 @@ namespace jsk_pcl_ros_utils
       getName() + "::PlaneRejector",
       boost::bind(
         &PlaneRejector::updateDiagnosticsPlaneRejector,
-        this, _1));
+        this, boost::placeholders::_1));
     if (!pnh_->getParam("processing_frame_id", processing_frame_id_)) {
       NODELET_FATAL("You need to specify ~processing_frame_id");
       return;
@@ -82,7 +82,7 @@ namespace jsk_pcl_ros_utils
     
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&PlaneRejector::configCallback, this, _1, _2);
+      boost::bind (&PlaneRejector::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     
     polygons_pub_ = advertise<jsk_recognition_msgs::PolygonArray>(
@@ -98,7 +98,7 @@ namespace jsk_pcl_ros_utils
       ros::Duration(1.0),
       boost::bind(&PlaneRejector::updateDiagnostics,
                   this,
-                  _1));
+                  boost::placeholders::_1));
     onInitPostProcess();
   }
 
@@ -122,14 +122,14 @@ namespace jsk_pcl_ros_utils
       sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
       sub_inliers_.subscribe(*pnh_, "input_inliers", 1);
       sync_inlier_->connectInput(sub_polygons_, sub_coefficients_, sub_inliers_);
-      sync_inlier_->registerCallback(boost::bind(&PlaneRejector::reject, this, _1, _2, _3));
+      sync_inlier_->registerCallback(boost::bind(&PlaneRejector::reject, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
     }
     else {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
       sub_polygons_.subscribe(*pnh_, "input_polygons", 1);
       sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
       sync_->connectInput(sub_polygons_, sub_coefficients_);
-      sync_->registerCallback(boost::bind(&PlaneRejector::reject, this, _1, _2));
+      sync_->registerCallback(boost::bind(&PlaneRejector::reject, this, boost::placeholders::_1, boost::placeholders::_2));
     }
   }
 

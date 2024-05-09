@@ -33,6 +33,7 @@
   <build_depend>octomap_server</build_depend>
   <build_depend>pcl_msgs</build_depend>
   <build_depend>pcl_ros</build_depend>
+  <build_depend>ros_environment</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>tf_conversions</build_depend>
   <build_depend>yaml-cpp</build_depend>

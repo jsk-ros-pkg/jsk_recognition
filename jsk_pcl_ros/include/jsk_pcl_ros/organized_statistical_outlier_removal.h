@@ -63,7 +63,6 @@ namespace jsk_pcl_ros
     typedef message_filters::sync_policies::ApproximateTime<
     sensor_msgs::PointCloud2,
     jsk_recognition_msgs::ClusterPointIndices > ApproximateSyncPolicy;
-    typedef pcl::PointXYZRGB PointT;
     OrganizedStatisticalOutlierRemoval();
   protected:
     ////////////////////////////////////////////////////////
@@ -77,18 +76,16 @@ namespace jsk_pcl_ros
 
     virtual void configCallback (Config &config, uint32_t level);
 
-    virtual void filter(
-            const pcl::PointCloud<PointT>::Ptr cloud,
-            pcl::PointCloud<PointT>::Ptr cloud_filtered,
-            bool keep_organized);
-    virtual void filterCloud(const sensor_msgs::PointCloud2::ConstPtr& msg);
-    virtual void filterCloudWithClusterPointIndices(
+    void filter(const pcl::PCLPointCloud2::Ptr pcl_cloud,
+                pcl::PointIndices::Ptr pcl_indices_filtered,
+                bool keep_organized);
+    void filterCloud(const sensor_msgs::PointCloud2::ConstPtr& msg);
+    void filterCloudWithClusterPointIndices(
             const sensor_msgs::PointCloud2::ConstPtr& msg,
             const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& cpi_msg);
 
 
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
+    void updateDiagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat);
 
     ////////////////////////////////////////////////////////
     // ROS variables

@@ -37,6 +37,7 @@
 #include <jsk_topic_tools/diagnostic_utils.h>
 #include <pcl/pcl_base.h>
 #include <pcl/filters/statistical_outlier_removal.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <jsk_recognition_utils/pcl_util.h>
 
 namespace jsk_pcl_ros
@@ -115,19 +116,22 @@ namespace jsk_pcl_ros
   }
 
   void OrganizedStatisticalOutlierRemoval::filter(
-          pcl::PointCloud<PointT>::Ptr cloud,
-          pcl::PointCloud<PointT>::Ptr cloud_filtered,
+          const pcl::PCLPointCloud2::Ptr pcl_cloud,
+          pcl::PointIndices::Ptr pcl_indices_filtered,
           bool keep_organized)
   {
 #if PCL_VERSION_COMPARE (<, 1, 9, 0)
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::fromPCLPointCloud2(*pcl_cloud, *cloud);
     if (keep_organized) {
       // Initialize the spatial locator
-      pcl::search::Search<PointT>::Ptr tree;
-      tree.reset (new pcl::search::OrganizedNeighbor<PointT> ());
+      pcl::search::Search<pcl::PointXYZ>::Ptr tree;
+      tree.reset (new pcl::search::OrganizedNeighbor<pcl::PointXYZ> ());
       tree->setInputCloud (cloud);
 
       // Allocate enough space to hold the results
-      std::vector<int> indices (cloud->size ());
+      std::vector<int> indices (cloud->size());
+      std::vector<int> indices_filtered;
       std::vector<int> nn_indices (mean_k_);
       std::vector<float> nn_dists (mean_k_);
       std::vector<float> distances (indices.size ());
@@ -172,60 +176,42 @@ namespace jsk_pcl_ros
 
       double distance_threshold = mean + std_mul_ * stddev; // a distance that is bigger than this signals an outlier
 
-      pcl::PCLPointCloud2::Ptr pcl_cloud (new pcl::PCLPointCloud2);
-      pcl::PCLPointCloud2::Ptr pcl_cloud_filtered (new pcl::PCLPointCloud2);
-      pcl::toPCLPointCloud2(*cloud, *pcl_cloud);
-      pcl_cloud_filtered->is_bigendian = pcl_cloud->is_bigendian;
-      pcl_cloud_filtered->fields = pcl_cloud->fields;
-      pcl_cloud_filtered->point_step = pcl_cloud->point_step;
-      pcl_cloud_filtered->data.resize (pcl_cloud->data.size ());
-      pcl_cloud_filtered->width = pcl_cloud->width;
-      pcl_cloud_filtered->height = pcl_cloud->height;
-      pcl_cloud_filtered->row_step = pcl_cloud_filtered->point_step *  pcl_cloud_filtered->width;
-
       // Build a new cloud by neglecting outliers
-      int nr_p = 0;
       for (int cp = 0; cp < static_cast<int> (indices.size ()); ++cp)
       {
         bool remove_point = false;
         if (negative_)
+        {
           remove_point = (distances[cp] <= distance_threshold);
+        }
         else
+        {
           remove_point = (distances[cp] > distance_threshold);
-        if (remove_point)
-        {
-          /* Set the current point to NaN. */
-          *(reinterpret_cast<float*>(&pcl_cloud_filtered->data[nr_p * pcl_cloud_filtered->point_step])+0) = std::numeric_limits<float>::quiet_NaN();
-          *(reinterpret_cast<float*>(&pcl_cloud_filtered->data[nr_p * pcl_cloud_filtered->point_step])+1) = std::numeric_limits<float>::quiet_NaN();
-          *(reinterpret_cast<float*>(&pcl_cloud_filtered->data[nr_p * pcl_cloud_filtered->point_step])+2) = std::numeric_limits<float>::quiet_NaN();
         }
-        else
+        if (!remove_point)
         {
-          memcpy (&pcl_cloud_filtered->data[nr_p * pcl_cloud_filtered->point_step],
-                  &pcl_cloud->data[indices[cp] * pcl_cloud_filtered->point_step],
-                  pcl_cloud_filtered->point_step);
+          indices_filtered.push_back(indices[cp]);
         }
-        nr_p++;
       }
-      pcl::fromPCLPointCloud2(*pcl_cloud_filtered, *cloud_filtered);
+      pcl_indices_filtered->indices = indices_filtered;
     }
     else
     {
-      pcl::StatisticalOutlierRemoval<PointT> sor;
-      sor.setInputCloud(cloud);
-      sor.setMeanK (mean_k_);
-      sor.setStddevMulThresh (std_mul_);
-      sor.setNegative (negative_);
-      sor.filter (*cloud_filtered);
+      pcl::StatisticalOutlierRemoval<pcl::PCLPointCloud2> sor;
+      sor.setInputCloud(pcl_cloud);
+      sor.setMeanK(mean_k_);
+      sor.setStddevMulThresh(std_mul_);
+      sor.setNegative(negative_);
+      sor.filter(pcl_indices_filtered->indices);
     }
 #else
-    pcl::StatisticalOutlierRemoval<PointT> sor;
-    sor.setInputCloud(cloud);
-    sor.setMeanK (mean_k_);
-    sor.setStddevMulThresh (std_mul_);
-    sor.setNegative (negative_);
+    pcl::StatisticalOutlierRemoval<pcl::PCLPointCloud2> sor;
+    sor.setInputCloud(pcl_cloud);
+    sor.setMeanK(mean_k_);
+    sor.setStddevMulThresh(std_mul_);
+    sor.setNegative(negative_);
     sor.setKeepOrganized (keep_organized);
-    sor.filter (*cloud_filtered);
+    sor.filter(pcl_indices_filtered->indices);
 #endif
   }
 
@@ -239,14 +225,21 @@ namespace jsk_pcl_ros
       NODELET_ERROR("keep_organized parameter is true, but input pointcloud is not organized.");
     }
     bool keep_organized = keep_organized_ && !msg->is_dense;
-    pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
-    pcl::PointCloud<PointT>::Ptr cloud_filtered (new pcl::PointCloud<PointT>);
-    pcl::fromROSMsg(*msg, *cloud);
+    pcl::PCLPointCloud2::Ptr pcl_cloud (new pcl::PCLPointCloud2);
+    pcl_conversions::toPCL(*msg, *pcl_cloud);
 
     // filter
-    OrganizedStatisticalOutlierRemoval::filter(cloud, cloud_filtered, keep_organized);
-
-    pcl::toROSMsg(*cloud_filtered, output);
+    pcl::PointIndices::Ptr pcl_indices_filtered (new pcl::PointIndices());
+    pcl_indices_filtered->indices.resize(pcl_cloud->data.size());
+    OrganizedStatisticalOutlierRemoval::filter(pcl_cloud, pcl_indices_filtered, keep_organized);
+    pcl::PCLPointCloud2::Ptr pcl_cloud_filtered (new pcl::PCLPointCloud2);
+    pcl::ExtractIndices<pcl::PCLPointCloud2> ex;
+    ex.setInputCloud(pcl_cloud);
+    ex.setKeepOrganized(keep_organized);
+    ex.setNegative(false);
+    ex.setIndices(pcl_indices_filtered);
+    ex.filter(*pcl_cloud_filtered);
+    pcl_conversions::fromPCL(*pcl_cloud_filtered, output);
 #if PCL_VERSION_COMPARE (<, 1, 9, 0)
     if (keep_organized) {
       // Copy the common fields
@@ -277,45 +270,34 @@ namespace jsk_pcl_ros
       NODELET_ERROR("keep_organized parameter is true, but input pointcloud is not organized.");
     }
     bool keep_organized = keep_organized_ && !msg->is_dense;
-    pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
-    pcl::PointCloud<PointT>::Ptr cloud_filtered (new pcl::PointCloud<PointT>);
-    pcl::fromROSMsg(*msg, *cloud);
-    cloud_filtered->points.resize(cloud->points.size());
-    PointT nan_point;
-    nan_point.x = nan_point.y = nan_point.z = std::numeric_limits<float>::quiet_NaN();
-    std::fill(cloud_filtered->points.begin(), cloud_filtered->points.end(), nan_point);
+    pcl::PCLPointCloud2::Ptr pcl_cloud (new pcl::PCLPointCloud2);
+    pcl::PCLPointCloud2::Ptr pcl_cloud_filtered (new pcl::PCLPointCloud2);
+    pcl_conversions::toPCL(*msg, *pcl_cloud);
+    // fill nan in pcl_cloud_filtered
+    pcl_cloud_filtered->data.resize(pcl_cloud->data.size());
+    std::fill(pcl_cloud_filtered->data.begin(), pcl_cloud_filtered->data.end(), 0);
 
-    pcl::ExtractIndices<PointT> ex;
-    ex.setInputCloud(cloud);
+    pcl::ExtractIndices<pcl::PCLPointCloud2> ex;
+    ex.setInputCloud(pcl_cloud);
     ex.setKeepOrganized(keep_organized);
     ex.setNegative(false);
 
     for (size_t i = 0; i < cpi_msg->cluster_indices.size(); i++)
     {
-      pcl::IndicesPtr indices;
-      pcl::PointCloud<PointT>::Ptr cluster_cloud(new pcl::PointCloud<PointT>);
-      pcl::PointCloud<PointT>::Ptr cluster_cloud_filtered(new pcl::PointCloud<PointT>);
-      indices.reset (new std::vector<int> (cpi_msg->cluster_indices[i].indices));
-      ex.setIndices(indices);
-      ex.filter(*cluster_cloud);
-      OrganizedStatisticalOutlierRemoval::filter(cluster_cloud, cluster_cloud_filtered, keep_organized);
-      for (size_t j = 0; j < indices->size(); j++)
-      {
-        int ind = (*indices)[j];
-        if (!std::isnan(cluster_cloud_filtered->points[ind].x) &&
-            !std::isnan(cluster_cloud_filtered->points[ind].y) &&
-            !std::isnan(cluster_cloud_filtered->points[ind].z))
-        {
-          cloud_filtered->points[ind].x = cluster_cloud_filtered->points[ind].x;
-          cloud_filtered->points[ind].y = cluster_cloud_filtered->points[ind].y;
-          cloud_filtered->points[ind].z = cluster_cloud_filtered->points[ind].z;
-          cloud_filtered->points[ind].rgb = cluster_cloud_filtered->points[ind].rgb;
-        }
-      }
-
+      pcl::PCLPointCloud2::Ptr pcl_cluster_cloud (new pcl::PCLPointCloud2);
+      pcl::PCLPointCloud2::Ptr pcl_cluster_cloud_filtered (new pcl::PCLPointCloud2);
+      pcl::PointIndices::Ptr pcl_cluster_indices (new pcl::PointIndices());
+      pcl::PointIndices::Ptr pcl_cluster_indices_filtered (new pcl::PointIndices());
+      pcl_conversions::toPCL(cpi_msg->cluster_indices[i], *pcl_cluster_indices);
+      ex.setIndices(pcl_cluster_indices);
+      ex.filter(*pcl_cluster_cloud);
+      pcl_cluster_indices_filtered->indices.resize(pcl_cluster_cloud->data.size());
+      OrganizedStatisticalOutlierRemoval::filter(pcl_cluster_cloud, pcl_cluster_indices_filtered, keep_organized);
+      ex.setIndices(pcl_cluster_indices_filtered);
+      ex.filter(*pcl_cluster_cloud_filtered);
+      pcl::PCLPointCloud2::concatenate(*pcl_cloud_filtered, *pcl_cluster_cloud_filtered);
     }
-
-    pcl::toROSMsg(*cloud_filtered, output);
+    pcl_conversions::fromPCL(*pcl_cloud_filtered, output);
 #if PCL_VERSION_COMPARE (<, 1, 9, 0)
     if (keep_organized) {
       // Copy the common fields

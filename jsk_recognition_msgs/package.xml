@@ -12,6 +12,7 @@
   <maintainer email="ueda@jsk.t.u-tokyo.ac.jp">Ryohei Ueda</maintainer>
   <license>BSD</license>
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>ros_environment</build_depend>
   <build_depend>pcl_msgs</build_depend>
   <run_depend>pcl_msgs</run_depend>
   <build_depend>std_msgs</build_depend>

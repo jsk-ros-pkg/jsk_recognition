@@ -111,12 +111,12 @@ namespace jsk_pcl_ros
     boost::mutex mutex_;
 
     void addToDebugPointCloud
-    (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,
+    (const pcl::PointCloud<pcl::PointXYZ>::Ptr segmented_cloud,
      size_t i,
      pcl::PointCloud<pcl::PointXYZRGB>& debug_output);
     
     virtual bool computeCenterAndBoundingBox
-    (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,
+    (const pcl::PointCloud<pcl::PointXYZ>::Ptr segmented_cloud,
      const std_msgs::Header header,
      const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
      const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients,
@@ -125,8 +125,8 @@ namespace jsk_pcl_ros
      bool& publish_tf);
 
     virtual bool transformPointCloudToAlignWithPlane(
-      const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,
-      pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud_transformed,
+      const pcl::PointCloud<pcl::PointXYZ>::Ptr segmented_cloud,
+      pcl::PointCloud<pcl::PointXYZ>::Ptr segmented_cloud_transformed,
       const Eigen::Vector4f center,
       const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
       const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients,

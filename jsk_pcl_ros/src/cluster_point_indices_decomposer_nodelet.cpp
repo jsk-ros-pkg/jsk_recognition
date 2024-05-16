@@ -35,7 +35,7 @@
 
 #include "jsk_pcl_ros/cluster_point_indices_decomposer.h"
 #include <cv_bridge/cv_bridge.h>
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/common/centroid.h>
 #include <pcl/common/common.h>
@@ -120,7 +120,7 @@ namespace jsk_pcl_ros
     // dynamic_reconfigure
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> >(*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind(&ClusterPointIndicesDecomposer::configCallback, this, _1, _2);
+      boost::bind(&ClusterPointIndicesDecomposer::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback(f);
 
     negative_indices_pub_ = advertise<pcl_msgs::PointIndices>(*pnh_, "negative_indices", 1);
@@ -153,24 +153,24 @@ namespace jsk_pcl_ros
       if (use_async_) {
         async_align_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncAlignPolicy> >(queue_size_);
         async_align_->connectInput(sub_input_, sub_target_, sub_polygons_, sub_coefficients_);
-        async_align_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2, _3, _4));
+        async_align_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3, boost::placeholders::_4));
       }
       else {
         sync_align_ = boost::make_shared<message_filters::Synchronizer<SyncAlignPolicy> >(queue_size_);
         sync_align_->connectInput(sub_input_, sub_target_, sub_polygons_, sub_coefficients_);
-        sync_align_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2, _3, _4));
+        sync_align_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3, boost::placeholders::_4));
       }
     }
     else {
       if (use_async_) {
         async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
         async_->connectInput(sub_input_, sub_target_);
-        async_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2));
+        async_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, boost::placeholders::_1, boost::placeholders::_2));
       }
       else {
         sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
         sync_->connectInput(sub_input_, sub_target_);
-        sync_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2));
+        sync_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, boost::placeholders::_1, boost::placeholders::_2));
       }
     }
   }
@@ -575,7 +575,7 @@ namespace jsk_pcl_ros
     double xwidth = maxpt[0] - minpt[0];
     double ywidth = maxpt[1] - minpt[1];
     double zwidth = maxpt[2] - minpt[2];
-    if (!pcl_isfinite(xwidth) || !pcl_isfinite(ywidth) || !pcl_isfinite(zwidth))
+    if (!std::isfinite(xwidth) || !std::isfinite(ywidth) || !std::isfinite(zwidth))
     {
       // all points in cloud are nan or its size is 0
       xwidth = ywidth = zwidth = 0;

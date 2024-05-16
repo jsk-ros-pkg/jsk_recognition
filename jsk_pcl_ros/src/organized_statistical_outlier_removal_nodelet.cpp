@@ -55,7 +55,7 @@ namespace jsk_pcl_ros
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
-        &OrganizedStatisticalOutlierRemoval::configCallback, this, _1, _2);
+        &OrganizedStatisticalOutlierRemoval::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     onInitPostProcess();
   }
@@ -113,9 +113,9 @@ namespace jsk_pcl_ros
       // Go over all the points and calculate the mean or smallest distance
       for (size_t cp = 0; cp < indices.size (); ++cp)
       {
-        if (!pcl_isfinite (cloud->points[indices[cp]].x) ||
-            !pcl_isfinite (cloud->points[indices[cp]].y) ||
-            !pcl_isfinite (cloud->points[indices[cp]].z))
+        if (!std::isfinite (cloud->points[indices[cp]].x) ||
+            !std::isfinite (cloud->points[indices[cp]].y) ||
+            !std::isfinite (cloud->points[indices[cp]].z))
         {
           distances[cp] = 0;
           continue;
@@ -237,5 +237,5 @@ namespace jsk_pcl_ros
   }
 }
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::OrganizedStatisticalOutlierRemoval, nodelet::Nodelet);

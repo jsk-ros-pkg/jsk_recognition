@@ -53,7 +53,7 @@ namespace jsk_pcl_ros_utils
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&ColorizeDistanceFromPlane::configCallback, this, _1, _2);
+      boost::bind (&ColorizeDistanceFromPlane::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     onInitPostProcess();
   }
@@ -82,7 +82,7 @@ namespace jsk_pcl_ros_utils
     sync_->connectInput(sub_input_, sub_coefficients_, sub_polygons_);
     sync_->registerCallback(boost::bind(
                               &ColorizeDistanceFromPlane::colorize,
-                              this, _1, _2, _3));
+                              this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
   }
 
   void ColorizeDistanceFromPlane::unsubscribe()
@@ -204,6 +204,6 @@ namespace jsk_pcl_ros_utils
   
 }
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros_utils::ColorizeDistanceFromPlane,
                         nodelet::Nodelet);

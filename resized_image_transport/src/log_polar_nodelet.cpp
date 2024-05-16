@@ -14,7 +14,7 @@ namespace resized_image_transport
   void LogPolar::initReconfigure(){
     reconfigure_server_ = boost::make_shared <dynamic_reconfigure::Server<LogPolarConfig> > (*pnh_);
     ReconfigureServer::CallbackType f
-      = boost::bind(&LogPolar::config_cb, this, _1, _2);
+      = boost::bind(&LogPolar::config_cb, this, boost::placeholders::_1, boost::placeholders::_2);
     reconfigure_server_->setCallback(f);
   }
 
@@ -98,6 +98,6 @@ namespace resized_image_transport
   }
 }
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 typedef resized_image_transport::LogPolar LogPolar;
 PLUGINLIB_EXPORT_CLASS(LogPolar, nodelet::Nodelet);

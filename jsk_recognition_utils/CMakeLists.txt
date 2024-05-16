@@ -12,7 +12,9 @@ endif(CCACHE_FOUND)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  diagnostic_updater
   dynamic_reconfigure
+  jsk_data
   jsk_recognition_msgs
   pcl_ros
   pcl_msgs
@@ -52,13 +54,13 @@ generate_dynamic_reconfigure_options(
 catkin_package(
  INCLUDE_DIRS include
  LIBRARIES jsk_recognition_utils
- CATKIN_DEPENDS jsk_recognition_msgs pcl_ros visualization_msgs message_runtime
+ CATKIN_DEPENDS eigen_conversions jsk_recognition_msgs pcl_ros tf_conversions visualization_msgs message_runtime
 )
 
 # Cythonize pyx files
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(UseCython)
-add_subdirectory(python/${PROJECT_NAME})
+# add_subdirectory(python/${PROJECT_NAME})
 
 find_package(OpenCV REQUIRED core imgproc)
 find_package(PCL REQUIRED)

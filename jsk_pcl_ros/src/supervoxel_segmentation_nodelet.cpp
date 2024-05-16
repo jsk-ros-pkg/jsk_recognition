@@ -44,7 +44,7 @@ namespace jsk_pcl_ros
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
-        &SupervoxelSegmentation::configCallback, this, _1, _2);
+        &SupervoxelSegmentation::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     pub_indices_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(
       *pnh_, "output/indices", 1);
@@ -122,5 +122,5 @@ namespace jsk_pcl_ros
 }
 
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::SupervoxelSegmentation, nodelet::Nodelet);

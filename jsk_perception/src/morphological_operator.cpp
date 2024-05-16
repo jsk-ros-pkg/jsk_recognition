@@ -50,7 +50,7 @@ namespace jsk_perception
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
-        &MorphologicalImageOperatorNodelet::configCallback, this, _1, _2);
+        &MorphologicalImageOperatorNodelet::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
@@ -115,7 +115,7 @@ namespace jsk_perception
   }
 }
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS (jsk_perception::Dilate, nodelet::Nodelet);
 PLUGINLIB_EXPORT_CLASS (jsk_perception::Erode, nodelet::Nodelet);
 PLUGINLIB_EXPORT_CLASS (jsk_perception::Opening, nodelet::Nodelet);

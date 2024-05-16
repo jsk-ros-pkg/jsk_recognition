@@ -51,7 +51,7 @@ namespace jsk_pcl_ros
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
-        &RegionGrowingMultiplePlaneSegmentation::configCallback, this, _1, _2);
+        &RegionGrowingMultiplePlaneSegmentation::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     pub_polygons_ = advertise<jsk_recognition_msgs::PolygonArray>(
@@ -91,7 +91,7 @@ namespace jsk_pcl_ros
     sync_->connectInput(sub_input_, sub_normal_);
     sync_->registerCallback(
       boost::bind(&RegionGrowingMultiplePlaneSegmentation::segment, this,
-                  _1, _2));
+                  boost::placeholders::_1, boost::placeholders::_2));
   }
 
   void RegionGrowingMultiplePlaneSegmentation::unsubscribe()
@@ -268,5 +268,5 @@ namespace jsk_pcl_ros
   boost::mutex RegionGrowingMultiplePlaneSegmentation::global_custom_condigion_function_mutex;
 }
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::RegionGrowingMultiplePlaneSegmentation, nodelet::Nodelet);

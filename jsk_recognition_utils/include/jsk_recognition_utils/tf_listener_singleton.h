@@ -51,7 +51,7 @@ namespace jsk_recognition_utils
     static boost::mutex mutex_;
   private:
     TfListenerSingleton(TfListenerSingleton const&){};
-    TfListenerSingleton& operator=(TfListenerSingleton const&){};
+    TfListenerSingleton& operator=(TfListenerSingleton const& tfls){};
   };
 
   // tf Utility

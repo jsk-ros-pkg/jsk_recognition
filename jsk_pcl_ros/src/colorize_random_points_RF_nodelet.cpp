@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 #include "jsk_pcl_ros/colorize_random_points_RF.h"
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include <pcl/common/centroid.h>
 
 namespace jsk_pcl_ros

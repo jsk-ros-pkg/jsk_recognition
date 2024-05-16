@@ -49,7 +49,7 @@ namespace jsk_perception
     DiagnosticNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&KMeans::configCallback, this, _1, _2);
+      boost::bind (&KMeans::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
@@ -118,5 +118,5 @@ namespace jsk_perception
 
 }
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS (jsk_perception::KMeans, nodelet::Nodelet);

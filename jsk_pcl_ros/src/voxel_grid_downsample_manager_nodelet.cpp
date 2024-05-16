@@ -33,7 +33,7 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/voxel_grid_downsample_manager.h"
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include <pcl/point_types.h>
 #include <pcl/filters/passthrough.h>
 #include <pcl/filters/voxel_grid.h>

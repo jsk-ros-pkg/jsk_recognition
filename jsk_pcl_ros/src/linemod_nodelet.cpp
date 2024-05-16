@@ -87,7 +87,7 @@ namespace jsk_pcl_ros
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
       sync_->connectInput(sub_input_, sub_indices_);
       sync_->registerCallback(boost::bind(&LINEMODTrainer::store,
-                                          this, _1, _2));
+                                          this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else {
       sub_input_nonsync_ = pnh_->subscribe("input", 1,
@@ -589,7 +589,7 @@ namespace jsk_pcl_ros
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
-        &LINEMODDetector::configCallback, this, _1, _2);
+        &LINEMODDetector::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
@@ -664,9 +664,9 @@ namespace jsk_pcl_ros
     for (size_t row_index = start_y; row_index < end_y; ++row_index) {
       for (size_t col_index = start_x; col_index < end_x; ++col_index) {
         const pcl::PointXYZRGBA & point = (*cloud) (col_index, row_index);
-        if (pcl_isfinite (point.x) &&
-            pcl_isfinite (point.y) &&
-            pcl_isfinite (point.z)) {
+        if (std::isfinite (point.x) &&
+            std::isfinite (point.y) &&
+            std::isfinite (point.z)) {
           center = center + point.getVector3fMap();
           ++counter;
         }
@@ -763,6 +763,6 @@ namespace jsk_pcl_ros
   }
 }
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::LINEMODTrainer, nodelet::Nodelet);
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::LINEMODDetector, nodelet::Nodelet);

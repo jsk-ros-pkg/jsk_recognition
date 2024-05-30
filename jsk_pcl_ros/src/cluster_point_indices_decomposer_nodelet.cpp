@@ -341,8 +341,8 @@ namespace jsk_pcl_ros
   }
 
   bool ClusterPointIndicesDecomposer::transformPointCloudToAlignWithPlane(
-    const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud_transformed,
+    const pcl::PointCloud<pcl::PointXYZ>::Ptr segmented_cloud,
+    pcl::PointCloud<pcl::PointXYZ>::Ptr segmented_cloud_transformed,
     const Eigen::Vector4f center,
     const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
     const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients,
@@ -386,9 +386,9 @@ namespace jsk_pcl_ros
         Eigen::Matrix3f m = Eigen::Matrix3f::Identity() * rot;
         if (use_pca_) {
           // first project points to the plane
-          pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud
-            (new pcl::PointCloud<pcl::PointXYZRGB>);
-          pcl::ProjectInliers<pcl::PointXYZRGB> proj;
+          pcl::PointCloud<pcl::PointXYZ>::Ptr projected_cloud
+            (new pcl::PointCloud<pcl::PointXYZ>);
+          pcl::ProjectInliers<pcl::PointXYZ> proj;
           proj.setModelType (pcl::SACMODEL_PLANE);
           pcl::ModelCoefficients::Ptr
             plane_coefficients (new pcl::ModelCoefficients);
@@ -398,7 +398,7 @@ namespace jsk_pcl_ros
           proj.setInputCloud(segmented_cloud);
           proj.filter(*projected_cloud);
           if (projected_cloud->points.size() >= 3) {
-            pcl::PCA<pcl::PointXYZRGB> pca;
+            pcl::PCA<pcl::PointXYZ> pca;
             pca.setInputCloud(projected_cloud);
             Eigen::Matrix3f eigen = pca.getEigenVectors();
             m.col(0) = eigen.col(0);
@@ -433,7 +433,7 @@ namespace jsk_pcl_ros
   }
 
   bool ClusterPointIndicesDecomposer::computeCenterAndBoundingBox
-  (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,
+  (const pcl::PointCloud<pcl::PointXYZ>::Ptr segmented_cloud,
    const std_msgs::Header header,
    const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
    const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients,
@@ -450,8 +450,8 @@ namespace jsk_pcl_ros
 
     bool is_center_valid = false;
     Eigen::Vector4f center;
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr
-      segmented_cloud_transformed (new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr
+      segmented_cloud_transformed (new pcl::PointCloud<pcl::PointXYZ>);
     segmented_cloud_transformed->is_dense = segmented_cloud->is_dense;
     // align boxes if possible
     Eigen::Matrix4f m4 = Eigen::Matrix4f::Identity();
@@ -489,7 +489,7 @@ namespace jsk_pcl_ros
         is_center_valid = pcl::compute3DCentroid(*segmented_cloud, center) != 0;
 
         // compute planes from target frame
-        pcl::PointXYZRGB min_pt, max_pt;
+        pcl::PointXYZ min_pt, max_pt;
         pcl::getMinMax3D(*segmented_cloud, min_pt, max_pt);
         //
         pcl_msgs::ModelCoefficients coef_by_frame;
@@ -570,7 +570,7 @@ namespace jsk_pcl_ros
       
     // create a bounding box
     Eigen::Vector4f minpt, maxpt;
-    pcl::getMinMax3D<pcl::PointXYZRGB>(*segmented_cloud_transformed, minpt, maxpt);
+    pcl::getMinMax3D<pcl::PointXYZ>(*segmented_cloud_transformed, minpt, maxpt);
 
     double xwidth = maxpt[0] - minpt[0];
     double ywidth = maxpt[1] - minpt[1];
@@ -619,7 +619,7 @@ namespace jsk_pcl_ros
   }
 
   void ClusterPointIndicesDecomposer::addToDebugPointCloud
-  (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,
+  (const pcl::PointCloud<pcl::PointXYZ>::Ptr segmented_cloud,
    size_t i,
    pcl::PointCloud<pcl::PointXYZRGB>& debug_output)
   {
@@ -672,11 +672,9 @@ namespace jsk_pcl_ros
       allocatePublishers(indices_input->cluster_indices.size());
     }
     publishNegativeIndices(input, indices_input);
-    pcl::ExtractIndices<pcl::PointXYZRGB> extract;
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::ExtractIndices<pcl::PointXYZ> extract;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*input, *cloud);
-    pcl::fromROSMsg(*input, *cloud_xyz);
     cluster_counter_.add(indices_input->cluster_indices.size());
     
     std::vector<pcl::IndicesPtr> converted_indices;
@@ -702,7 +700,7 @@ namespace jsk_pcl_ros
     }
 
     std::vector<size_t> argsort;
-    sortIndicesOrder(cloud_xyz, converted_indices, &argsort);
+    sortIndicesOrder(cloud, converted_indices, &argsort);
     extract.setInputCloud(cloud);
 
     // point cloud from camera not laser
@@ -719,7 +717,7 @@ namespace jsk_pcl_ros
     out_cluster_indices.header = input->header;
     for (size_t i = 0; i < argsort.size(); i++)
     {
-      pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+      pcl::PointCloud<pcl::PointXYZ>::Ptr segmented_cloud (new pcl::PointCloud<pcl::PointXYZ>);
       segmented_cloud->is_dense = cloud->is_dense;
       
       pcl_msgs::PointIndices out_indices_msg;

@@ -49,8 +49,20 @@ generate_dynamic_reconfigure_options(
   cfg/PolygonArrayToPolygon.cfg
 )
 
+find_package(OpenCV REQUIRED core imgproc)
+find_package(PCL REQUIRED)
+find_package(PkgConfig)
+pkg_check_modules(yaml_cpp yaml-cpp REQUIRED)
+IF(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
+## indigo yaml-cpp : 0.5.0 /  hydro yaml-cpp : 0.3.0
+  add_definitions("-DUSE_OLD_YAML")
+ENDIF()
+
 catkin_package(
- INCLUDE_DIRS include
+ INCLUDE_DIRS
+   include
+   ${OpenCV_INCLUDE_DIRS}
+   ${PCL_INCLUDE_DIRS}
  LIBRARIES jsk_recognition_utils
  CATKIN_DEPENDS jsk_recognition_msgs pcl_ros visualization_msgs message_runtime
 )
@@ -60,14 +72,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(UseCython)
 add_subdirectory(python/${PROJECT_NAME})
 
-find_package(OpenCV REQUIRED core imgproc)
-find_package(PCL REQUIRED)
-find_package(PkgConfig)
-pkg_check_modules(yaml_cpp yaml-cpp REQUIRED)
-IF(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
-## indigo yaml-cpp : 0.5.0 /  hydro yaml-cpp : 0.3.0
-  add_definitions("-DUSE_OLD_YAML")
-ENDIF()
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
 endif()

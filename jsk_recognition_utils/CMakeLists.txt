@@ -50,7 +50,7 @@ generate_dynamic_reconfigure_options(
 )
 
 catkin_package(
- INCLUDE_DIRS include
+ INCLUDE_DIRS include ${catkin_INCLUDE_DIRS}
  LIBRARIES jsk_recognition_utils
  CATKIN_DEPENDS jsk_recognition_msgs pcl_ros visualization_msgs message_runtime
 )

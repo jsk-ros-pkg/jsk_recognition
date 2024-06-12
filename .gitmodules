@@ -8,3 +8,6 @@
 [submodule "jsk_perception/node_scripts/deep_sort/deep_sort"]
 	path = jsk_perception/node_scripts/deep_sort/deep_sort
 	url = https://github.com/nwojke/deep_sort.git
+[submodule "jsk_perception/node_scripts/dr_spaam_libs/dr_spaam"]
+	path = jsk_perception/node_scripts/dr_spaam_libs/dr_spaam
+	url = https://github.com/VisualComputingInstitute/2D_lidar_person_detection

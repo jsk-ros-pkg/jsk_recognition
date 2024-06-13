@@ -66,6 +66,7 @@ namespace jsk_pcl_ros {
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
+    virtual void setHintCloud(const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual void detect(
       const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
       const sensor_msgs::PointCloud2::ConstPtr& hint_cloud_msg);
@@ -124,10 +125,14 @@ namespace jsk_pcl_ros {
     ros::Publisher pub_euclidean_filtered_indices_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
+    ros::Subscriber sub_cloud_single_;
+    ros::Subscriber sub_hint_cloud_single_;
+    sensor_msgs::PointCloud2::ConstPtr hint_cloud_;
 
     ////////////////////////////////////////////////////////
     // parameters
     ////////////////////////////////////////////////////////
+    bool synchronize_;
     double hint_outlier_threashold_;
     int hint_max_iteration_;
     int hint_min_size_;

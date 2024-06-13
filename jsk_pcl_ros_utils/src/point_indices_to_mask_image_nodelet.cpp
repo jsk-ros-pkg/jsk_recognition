@@ -75,13 +75,13 @@ namespace jsk_pcl_ros_utils
       if (approximate_sync_) {
         async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
         async_->connectInput(sub_input_, sub_image_);
-        async_->registerCallback(boost::bind(&PointIndicesToMaskImage::mask, this, _1, _2));
+        async_->registerCallback(boost::bind(&PointIndicesToMaskImage::mask, this, boost::placeholders::_1, boost::placeholders::_2));
       }
       else {
         sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
         sync_->connectInput(sub_input_, sub_image_);
         sync_->registerCallback(boost::bind(&PointIndicesToMaskImage::mask,
-                                            this, _1, _2));
+                                            this, boost::placeholders::_1, boost::placeholders::_2));
       }
     }
   }

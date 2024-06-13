@@ -47,7 +47,7 @@ namespace jsk_pcl_ros_utils
     // dynamic_reconfigure
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&ClusterPointIndicesLabelFilter::configCallback, this, _1, _2);
+      boost::bind (&ClusterPointIndicesLabelFilter::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     pub_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output", 1);
@@ -68,13 +68,13 @@ namespace jsk_pcl_ros_utils
       async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
       async_->connectInput(sub_indices_, sub_labels_);
       async_->registerCallback(boost::bind(&ClusterPointIndicesLabelFilter::filter,
-                                           this, _1, _2));
+                                           this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
       sync_->connectInput(sub_indices_, sub_labels_);
       sync_->registerCallback(boost::bind(&ClusterPointIndicesLabelFilter::filter,
-                                          this, _1, _2));
+                                          this, boost::placeholders::_1, boost::placeholders::_2));
     }
   }
 

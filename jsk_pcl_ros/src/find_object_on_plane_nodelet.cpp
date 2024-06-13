@@ -67,7 +67,7 @@ namespace jsk_pcl_ros
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
     sync_->connectInput(sub_image_, sub_info_, sub_coefficients_);
     sync_->registerCallback(boost::bind(&FindObjectOnPlane::find,
-                                        this, _1, _2, _3));
+                                        this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
   }
 
   void FindObjectOnPlane::unsubscribe()

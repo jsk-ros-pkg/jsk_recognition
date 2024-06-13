@@ -85,12 +85,12 @@ namespace jsk_perception
     if (approximate_sync_) {
       async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_), (max_interval_duration_);
       async_->connectInput(sub_image_, sub_mask_);
-      async_->registerCallback(boost::bind(&ApplyMaskImage::apply, this, _1, _2));
+      async_->registerCallback(boost::bind(&ApplyMaskImage::apply, this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
       sync_->connectInput(sub_image_, sub_mask_);
-      sync_->registerCallback(boost::bind(&ApplyMaskImage::apply, this, _1, _2));
+      sync_->registerCallback(boost::bind(&ApplyMaskImage::apply, this, boost::placeholders::_1, boost::placeholders::_2));
     }
     ros::V_string names = boost::assign::list_of("~input")("~input/mask");
     jsk_topic_tools::warnNoRemap(names);

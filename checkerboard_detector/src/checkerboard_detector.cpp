@@ -136,7 +136,7 @@ public:
 
         srv = boost::make_shared <dynamic_reconfigure::Server<Config> > (_node);
         typename dynamic_reconfigure::Server<Config>::CallbackType f =
-            boost::bind (&CheckerboardDetector::configCallback, this, _1, _2);
+            boost::bind (&CheckerboardDetector::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
         srv->setCallback (f);
 
         while(1) {

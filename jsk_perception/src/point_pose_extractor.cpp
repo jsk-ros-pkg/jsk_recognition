@@ -340,7 +340,7 @@ namespace jsk_perception
     DiagnosticNodelet::onInit();
     dynamic_reconfigure::Server<Config> server;
     dynamic_reconfigure::Server<Config>::CallbackType f;
-    f = boost::bind(&PointPoseExtractor::dyn_conf_callback, this, _1, _2);
+    f = boost::bind(&PointPoseExtractor::dyn_conf_callback, this, boost::placeholders::_1, boost::placeholders::_2);
     server.setCallback(f);
 
     it = new image_transport::ImageTransport(*pnh_);

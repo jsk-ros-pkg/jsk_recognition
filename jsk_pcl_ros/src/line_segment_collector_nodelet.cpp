@@ -128,7 +128,7 @@ namespace jsk_pcl_ros
     DiagnosticNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&LineSegmentCollector::configCallback, this, _1, _2);
+      boost::bind (&LineSegmentCollector::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     std::string rotate_type_str;
@@ -188,7 +188,7 @@ namespace jsk_pcl_ros
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
     sync_->connectInput(sub_input_, sub_indices_, sub_coefficients_);
     sync_->registerCallback(boost::bind(&LineSegmentCollector::collect,
-                                        this, _1, _2, _3));
+                                        this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
     sub_trigger_ = pnh_->subscribe("trigger", 1,
                                    &LineSegmentCollector::triggerCallback, this);
   }

@@ -141,7 +141,7 @@ public:
         nh_.getParam("pan_ratio", pan_ratio_);
         nh_.getParam("tilt_ratio", tilt_ratio_);
 
-        ReconfigureServer::CallbackType f = boost::bind(&OrbitPanTilt::config_cb, this, _1, _2);
+        ReconfigureServer::CallbackType f = boost::bind(&OrbitPanTilt::config_cb, this, boost::placeholders::_1, boost::placeholders::_2);
         reconfigure_server_.setCallback(f);
 
         ros::Publisher joint_state_pub = nh_.advertise<sensor_msgs::JointState> ("joint_states", 1);

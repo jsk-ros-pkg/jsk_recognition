@@ -89,7 +89,7 @@ namespace jsk_pcl_ros
     sub_point_.subscribe(*pnh_, "point", 1); 
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
     sync_->connectInput(sub_cloud_, sub_point_);
-    sync_->registerCallback(boost::bind(&HintedHandleEstimator::estimate, this, _1, _2));
+    sync_->registerCallback(boost::bind(&HintedHandleEstimator::estimate, this, boost::placeholders::_1, boost::placeholders::_2));
   }
   
   void HintedHandleEstimator::unsubscribe()

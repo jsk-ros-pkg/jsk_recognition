@@ -54,7 +54,7 @@ void PointcloudScreenpoint::onInit()
 
   dyn_srv_ = boost::make_shared< dynamic_reconfigure::Server< Config > >(*pnh_);
   dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind(&PointcloudScreenpoint::configCallback, this, _1, _2);
+      boost::bind(&PointcloudScreenpoint::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
   dyn_srv_->setCallback(f);
 
   srv_ = pnh_->advertiseService(
@@ -101,25 +101,25 @@ void PointcloudScreenpoint::subscribe()
         mf::Synchronizer<PolygonApproxSyncPolicy> >(queue_size_);
       async_rect_->connectInput(points_sub_, rect_sub_);
       async_rect_->registerCallback(
-          boost::bind(&PointcloudScreenpoint::sync_rect_cb, this, _1, _2));
+          boost::bind(&PointcloudScreenpoint::sync_rect_cb, this, boost::placeholders::_1, boost::placeholders::_2));
 
       async_poly_ = boost::make_shared<
         mf::Synchronizer<PolygonApproxSyncPolicy> >(queue_size_);
       async_poly_->connectInput(points_sub_, rect_sub_);
       async_poly_->registerCallback(
-          boost::bind(&PointcloudScreenpoint::sync_poly_cb, this, _1, _2));
+          boost::bind(&PointcloudScreenpoint::sync_poly_cb, this, boost::placeholders::_1, boost::placeholders::_2));
 
       async_point_ = boost::make_shared<
         mf::Synchronizer<PointApproxSyncPolicy> >(queue_size_);
       async_point_->connectInput(points_sub_, point_sub_);
       async_point_->registerCallback(
-          boost::bind(&PointcloudScreenpoint::sync_point_cb, this, _1, _2));
+          boost::bind(&PointcloudScreenpoint::sync_point_cb, this, boost::placeholders::_1, boost::placeholders::_2));
 
       async_point_array_ = boost::make_shared<
         mf::Synchronizer<PointCloudApproxSyncPolicy> >(queue_size_);
       async_point_array_->connectInput(points_sub_, point_array_sub_);
       async_point_array_->registerCallback(
-          boost::bind(&PointcloudScreenpoint::sync_point_array_cb, this, _1, _2));
+          boost::bind(&PointcloudScreenpoint::sync_point_array_cb, this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else
     {
@@ -127,39 +127,39 @@ void PointcloudScreenpoint::subscribe()
         mf::Synchronizer<PolygonExactSyncPolicy> >(queue_size_);
       sync_rect_->connectInput(points_sub_, rect_sub_);
       sync_rect_->registerCallback(
-          boost::bind(&PointcloudScreenpoint::sync_rect_cb, this, _1, _2));
+          boost::bind(&PointcloudScreenpoint::sync_rect_cb, this, boost::placeholders::_1, boost::placeholders::_2));
 
       sync_poly_ = boost::make_shared<
         mf::Synchronizer<PolygonExactSyncPolicy> >(queue_size_);
       sync_poly_->connectInput(points_sub_, rect_sub_);
       sync_poly_->registerCallback(
-          boost::bind(&PointcloudScreenpoint::sync_poly_cb, this, _1, _2));
+          boost::bind(&PointcloudScreenpoint::sync_poly_cb, this, boost::placeholders::_1, boost::placeholders::_2));
 
       sync_point_ = boost::make_shared<
         mf::Synchronizer<PointExactSyncPolicy> >(queue_size_);
       sync_point_->connectInput(points_sub_, point_sub_);
       sync_point_->registerCallback(
-          boost::bind(&PointcloudScreenpoint::sync_point_cb, this, _1, _2));
+          boost::bind(&PointcloudScreenpoint::sync_point_cb, this, boost::placeholders::_1, boost::placeholders::_2));
 
       sync_point_array_ = boost::make_shared<
         mf::Synchronizer<PointCloudExactSyncPolicy> >(queue_size_);
       sync_point_array_->connectInput(points_sub_, point_array_sub_);
       sync_point_array_->registerCallback(
-          boost::bind(&PointcloudScreenpoint::sync_point_array_cb, this, _1, _2));
+          boost::bind(&PointcloudScreenpoint::sync_point_array_cb, this, boost::placeholders::_1, boost::placeholders::_2));
     }
   }
   else
   {
     points_sub_.registerCallback(
-        boost::bind(&PointcloudScreenpoint::points_cb, this, _1));
+        boost::bind(&PointcloudScreenpoint::points_cb, this, boost::placeholders::_1));
     rect_sub_.registerCallback(
-        boost::bind(&PointcloudScreenpoint::rect_cb, this, _1));
+        boost::bind(&PointcloudScreenpoint::rect_cb, this, boost::placeholders::_1));
     poly_sub_.registerCallback(
-        boost::bind(&PointcloudScreenpoint::poly_cb, this, _1));
+        boost::bind(&PointcloudScreenpoint::poly_cb, this, boost::placeholders::_1));
     point_sub_.registerCallback(
-        boost::bind(&PointcloudScreenpoint::point_cb, this, _1));
+        boost::bind(&PointcloudScreenpoint::point_cb, this, boost::placeholders::_1));
     point_array_sub_.registerCallback(
-        boost::bind(&PointcloudScreenpoint::point_array_cb, this, _1));
+        boost::bind(&PointcloudScreenpoint::point_array_cb, this, boost::placeholders::_1));
   }
 }
 
@@ -217,7 +217,7 @@ bool PointcloudScreenpoint::screenpoint_cb (
   bool need_unsubscribe = false;
   if (!points_sub_.getSubscriber()) {
     points_sub_.registerCallback(
-        boost::bind(&PointcloudScreenpoint::points_cb, this, _1));
+        boost::bind(&PointcloudScreenpoint::points_cb, this, boost::placeholders::_1));
     need_unsubscribe = true;
   }
 

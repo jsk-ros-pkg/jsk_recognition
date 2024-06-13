@@ -94,7 +94,7 @@ namespace jsk_pcl_ros
       = boost::make_shared<message_filters::Synchronizer<SyncPolygonPolicy> >(100);
     sync_polygon_->connectInput(sub_polygons_, sub_coefficients_);
     sync_polygon_->registerCallback(
-      boost::bind(&SnapIt::polygonCallback, this, _1, _2));
+      boost::bind(&SnapIt::polygonCallback, this, boost::placeholders::_1, boost::placeholders::_2));
     polygon_align_sub_ = pnh_->subscribe("input/plane_align", 1,
                                          &SnapIt::polygonAlignCallback, this);
     convex_align_sub_ = pnh_->subscribe("input/convex_align", 1,

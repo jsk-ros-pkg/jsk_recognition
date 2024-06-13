@@ -101,7 +101,7 @@ public:
     _debug_pub = _it.advertise("debug_image", 1);
     // _subImage = _it.subscribe("image", 1, &MatcherNode::image_cb, this);
     
-    sync.registerCallback( boost::bind (&MatcherNode::image_cb , this, _1, _2) );
+    sync.registerCallback( boost::bind (&MatcherNode::image_cb , this, boost::placeholders::_1, boost::placeholders::_2) );
 
     
     ros::NodeHandle local_nh("~");
@@ -442,7 +442,7 @@ int main(int argc, char **argv){
 
   dynamic_reconfigure::Server<jsk_perception::ColorHistogramSlidingMatcherConfig> server;
   dynamic_reconfigure::Server<jsk_perception::ColorHistogramSlidingMatcherConfig>::CallbackType f;
-  f = boost::bind(&MatcherNode::dyn_conf_callback, &matcher, _1, _2);
+  f = boost::bind(&MatcherNode::dyn_conf_callback, &matcher, boost::placeholders::_1, boost::placeholders::_2);
   server.setCallback(f);  
   ros::spin();
   return 0;

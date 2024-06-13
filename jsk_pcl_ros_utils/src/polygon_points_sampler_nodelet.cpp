@@ -44,7 +44,7 @@ namespace jsk_pcl_ros_utils
     DiagnosticNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&PolygonPointsSampler::configCallback, this, _1, _2);
+      boost::bind (&PolygonPointsSampler::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
@@ -70,7 +70,7 @@ namespace jsk_pcl_ros_utils
     sub_coefficients_.subscribe(*pnh_, "input/coefficients", 1);
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
     sync_->connectInput(sub_polygons_, sub_coefficients_);
-    sync_->registerCallback(boost::bind(&PolygonPointsSampler::sample, this, _1, _2));
+    sync_->registerCallback(boost::bind(&PolygonPointsSampler::sample, this, boost::placeholders::_1, boost::placeholders::_2));
   }
 
   void PolygonPointsSampler::unsubscribe()

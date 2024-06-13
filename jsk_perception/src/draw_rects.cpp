@@ -53,7 +53,7 @@ namespace jsk_perception
 
     srv_ = boost::make_shared<dynamic_reconfigure::Server<Config> >(*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind(&DrawRects::configCallback, this, _1, _2);
+      boost::bind(&DrawRects::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback(f);
 
     pub_image_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
@@ -81,7 +81,7 @@ namespace jsk_perception
     if (use_classification_result_)
       sub_class_.subscribe(*pnh_, "input/class", 1);
     else
-      sub_rects_.registerCallback(boost::bind(&DrawRects::fillEmptyClasses, this, _1));
+      sub_rects_.registerCallback(boost::bind(&DrawRects::fillEmptyClasses, this, boost::placeholders::_1));
 
     if (use_async_)
     {
@@ -90,14 +90,14 @@ namespace jsk_perception
         async_->connectInput(sub_image_, sub_rects_, sub_class_);
       else
         async_->connectInput(sub_image_, sub_rects_, null_class_);
-      async_->registerCallback(boost::bind(&DrawRects::onMessage, this, _1, _2, _3));
+      async_->registerCallback(boost::bind(&DrawRects::onMessage, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
     } else {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
       if (use_classification_result_)
         sync_->connectInput(sub_image_, sub_rects_, sub_class_);
       else
         sync_->connectInput(sub_image_, sub_rects_, null_class_);
-      sync_->registerCallback(boost::bind(&DrawRects::onMessage, this, _1, _2, _3));
+      sync_->registerCallback(boost::bind(&DrawRects::onMessage, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
     }
   }
 

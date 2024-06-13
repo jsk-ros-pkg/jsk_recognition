@@ -67,7 +67,7 @@ namespace jsk_pcl_ros_utils
                          *tf_listener_,
                          target_frame_id_,
                          tf_queue_size_));
-      tf_filter_->registerCallback(boost::bind(&TfTransformBoundingBox::transform, this, _1));
+      tf_filter_->registerCallback(boost::bind(&TfTransformBoundingBox::transform, this, boost::placeholders::_1));
     }
   }
 

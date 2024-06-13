@@ -46,7 +46,7 @@ namespace jsk_pcl_ros
     DiagnosticNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&GeometricConsistencyGrouping::configCallback, this, _1, _2);
+      boost::bind (&GeometricConsistencyGrouping::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     pub_output_ = advertise<geometry_msgs::PoseStamped>(*pnh_, "output", 1);
     pub_output_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output/cloud", 1);
@@ -57,7 +57,7 @@ namespace jsk_pcl_ros
     reference_sync_->connectInput(sub_reference_cloud_, sub_reference_feature_);
     reference_sync_->registerCallback(
       boost::bind(&GeometricConsistencyGrouping::referenceCallback,
-                  this, _1, _2));
+                  this, boost::placeholders::_1, boost::placeholders::_2));
     onInitPostProcess();
   }
 
@@ -80,7 +80,7 @@ namespace jsk_pcl_ros
     sub_feature_.subscribe(*pnh_, "input/feature", 1);
     sync_->connectInput(sub_input_, sub_feature_);
     sync_->registerCallback(boost::bind(&GeometricConsistencyGrouping::recognize,
-                                        this, _1, _2));
+                                        this, boost::placeholders::_1, boost::placeholders::_2));
   }
 
   void GeometricConsistencyGrouping::unsubscribe()

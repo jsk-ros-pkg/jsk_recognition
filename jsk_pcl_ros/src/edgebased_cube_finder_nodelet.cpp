@@ -381,7 +381,7 @@ namespace jsk_pcl_ros
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&EdgebasedCubeFinder::configCallback, this, _1, _2);
+      boost::bind (&EdgebasedCubeFinder::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     
@@ -424,7 +424,7 @@ namespace jsk_pcl_ros
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
     sync_->connectInput(sub_input_, sub_edges_);
     sync_->registerCallback(boost::bind(
-                              &EdgebasedCubeFinder::estimate, this, _1, _2));
+                              &EdgebasedCubeFinder::estimate, this, boost::placeholders::_1, boost::placeholders::_2));
   }
 
   void EdgebasedCubeFinder::unsubscribe()

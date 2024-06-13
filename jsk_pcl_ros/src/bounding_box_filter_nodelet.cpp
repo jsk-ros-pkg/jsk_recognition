@@ -47,7 +47,7 @@ namespace jsk_pcl_ros
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
-        &BoundingBoxFilter::configCallback, this, _1, _2);
+        &BoundingBoxFilter::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     ////////////////////////////////////////////////////////
@@ -82,9 +82,9 @@ namespace jsk_pcl_ros
       sub_indices_.subscribe(*pnh_, "input_indices", 1);
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
       sync_->connectInput(sub_box_, sub_indices_);
-      sync_->registerCallback(boost::bind(&BoundingBoxFilter::filterWithIndices, this, _1, _2));
+      sync_->registerCallback(boost::bind(&BoundingBoxFilter::filterWithIndices, this, boost::placeholders::_1, boost::placeholders::_2));
     } else {
-      sub_box_.registerCallback(boost::bind(&BoundingBoxFilter::filter, this, _1));
+      sub_box_.registerCallback(boost::bind(&BoundingBoxFilter::filter, this, boost::placeholders::_1));
     }
   }
 

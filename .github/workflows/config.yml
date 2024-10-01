@@ -4,6 +4,9 @@ on:
       - master
   pull_request:
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
 jobs:
   ros:
     runs-on: ubuntu-latest

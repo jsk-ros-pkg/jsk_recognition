@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 2.8.3)
 project(jsk_recognition_msgs)
 find_package(catkin REQUIRED
   std_msgs sensor_msgs geometry_msgs message_generation pcl_msgs jsk_footstep_msgs)
-if(NOT $ENV{ROS_DISTRO} STREQUAL "indigo") # on noetic it needs catkin_install_python to support Python3 and it does not work on indigo for some reason...
-  catkin_python_setup()
-endif()
 add_message_files(
   FILES
   Accuracy.msg

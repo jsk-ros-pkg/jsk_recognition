@@ -60,7 +60,7 @@ namespace jsk_pcl_ros_utils
 
   void PointCloudToPCD::savePCD()
   {
-    pcl::PCLPointCloud2::ConstPtr cloud;
+    boost::shared_ptr<const pcl::PCLPointCloud2> cloud;
     cloud = ros::topic::waitForMessage<pcl::PCLPointCloud2>("input", *pnh_);
     if ((cloud->width * cloud->height) == 0)
     {

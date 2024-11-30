@@ -5,7 +5,7 @@ click==8.1.3
 conda==4.9.2
 conda-build==3.21.4
 decorator==4.4.2
-dnspython==2.1.0
+dnspython==2.6.1
 Flask==2.2.3
 ftfy==6.1.1
 importlib-metadata==6.1.0

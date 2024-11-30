@@ -9,19 +9,10 @@ import numpy as np
 import rospy
 import shapely.geometry
 from jsk_recognition_utils.cfg import PolygonArrayToBoxArrayConfig
+from jsk_recognition_utils.geometry import rotation_matrix_from_axis
 from jsk_topic_tools import ConnectionBasedTransport
 from tf.transformations import quaternion_from_matrix as matrix2quaternion
 from tf.transformations import unit_vector as normalize_vector
-
-
-def outer_product_matrix(v):
-    return np.array([[0, -v[2], v[1]],
-                     [v[2], 0, -v[0]],
-                     [-v[1], v[0], 0]])
-
-
-def cross_product(a, b):
-    return np.dot(outer_product_matrix(a), b)
 
 
 # minimum_rotated_rectangle is available since 1.6.0 (melodic)
@@ -65,24 +56,6 @@ if LooseVersion(shapely.__version__) < LooseVersion('1.6.0'):
         transf_rect, inv_matrix = min(_transformed_rects(), key=lambda r : r[0].area)
         return affine_transform(transf_rect, inv_matrix)
     shapely.geometry.Polygon.minimum_rotated_rectangle = minimum_rotated_rectangle
-
-def rotation_matrix_from_axis(
-        first_axis=(1, 0, 0), second_axis=(0, 1, 0), axes='xy'):
-    if axes not in ['xy', 'yx', 'xz', 'zx', 'yz', 'zy']:
-        raise ValueError("Valid axes are 'xy', 'yx', 'xz', 'zx', 'yz', 'zy'.")
-    e1 = normalize_vector(first_axis)
-    e2 = normalize_vector(second_axis - np.dot(second_axis, e1) * e1)
-    if axes in ['xy', 'zx', 'yz']:
-        third_axis = cross_product(e1, e2)
-    else:
-        third_axis = cross_product(e2, e1)
-    e3 = normalize_vector(
-        third_axis - np.dot(third_axis, e1) * e1 - np.dot(third_axis, e2) * e2)
-    first_index = ord(axes[0]) - ord('x')
-    second_index = ord(axes[1]) - ord('x')
-    third_index = ((first_index + 1) ^ (second_index + 1)) - 1
-    indices = [first_index, second_index, third_index]
-    return np.vstack([e1, e2, e3])[np.argsort(indices)].T
 
 
 def angle_between_vectors(v1, v2, normalize=True,

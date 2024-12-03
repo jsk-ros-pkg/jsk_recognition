@@ -28,7 +28,10 @@ Organized version of statistical outlier removal.
 ## Parameter
 * `~use_cluster_point_indices` (Boolean, default: `False`)
 
-  use cluster point indices or not
+  use cluster point indices or not.
+  this option is designed to use after clustering (i.e. euclidean clustering),
+  because we can consider the distribution of each cluster with cluster point indices
+  information.
 
 * `~keep_organized` (Boolean, default: `True`)
 

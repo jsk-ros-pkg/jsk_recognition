@@ -266,7 +266,7 @@ namespace jsk_pcl_ros
     vital_checker_->poke();
     sensor_msgs::PointCloud2 output;
 
-    if (keep_organized_&& msg->is_dense) {
+    if (keep_organized_ && msg->is_dense) {
       NODELET_ERROR("keep_organized parameter is true, but input pointcloud is not organized.");
     }
     bool keep_organized = keep_organized_ && !msg->is_dense;

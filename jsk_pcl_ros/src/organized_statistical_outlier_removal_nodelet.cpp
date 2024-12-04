@@ -273,9 +273,19 @@ namespace jsk_pcl_ros
     pcl::PCLPointCloud2::Ptr pcl_cloud (new pcl::PCLPointCloud2);
     pcl::PCLPointCloud2::Ptr pcl_cloud_filtered (new pcl::PCLPointCloud2);
     pcl_conversions::toPCL(*msg, *pcl_cloud);
-    // fill nan in pcl_cloud_filtered
-    pcl_cloud_filtered->data.resize(pcl_cloud->data.size());
-    std::fill(pcl_cloud_filtered->data.begin(), pcl_cloud_filtered->data.end(), 0);
+
+    // fill data
+    pcl_cloud_filtered->fields = pcl_cloud->fields;
+    pcl_cloud_filtered->is_bigendian = pcl_cloud->is_bigendian;
+    pcl_cloud_filtered->point_step = pcl_cloud->point_step;
+    pcl_cloud_filtered->is_dense = !keep_organized;
+    if (keep_organized)
+    {
+      // fill nan in pcl_cloud_filtered
+      pcl_cloud_filtered->data.resize(pcl_cloud->data.size());
+      std::fill(pcl_cloud_filtered->data.begin(), pcl_cloud_filtered->data.end(), 0);
+    }
+
 
     pcl::ExtractIndices<pcl::PCLPointCloud2> ex;
     ex.setInputCloud(pcl_cloud);

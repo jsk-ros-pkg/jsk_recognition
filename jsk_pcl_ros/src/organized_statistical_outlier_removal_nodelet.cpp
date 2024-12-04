@@ -246,7 +246,7 @@ namespace jsk_pcl_ros
       output.is_bigendian = msg->is_bigendian;
       output.fields = msg->fields;
       output.point_step = msg->point_step;
-      output.data.resize (msg->data.size ());
+      output.data.resize(msg->data.size());
       output.width = msg->width;
       output.height = msg->height;
     }
@@ -272,41 +272,34 @@ namespace jsk_pcl_ros
     bool keep_organized = keep_organized_ && !msg->is_dense;
     pcl::PCLPointCloud2::Ptr pcl_cloud (new pcl::PCLPointCloud2);
     pcl::PCLPointCloud2::Ptr pcl_cloud_filtered (new pcl::PCLPointCloud2);
+    pcl::PointIndices::Ptr pcl_indices_filtered (new pcl::PointIndices());
     pcl_conversions::toPCL(*msg, *pcl_cloud);
 
-    // fill data
-    pcl_cloud_filtered->fields = pcl_cloud->fields;
-    pcl_cloud_filtered->is_bigendian = pcl_cloud->is_bigendian;
-    pcl_cloud_filtered->point_step = pcl_cloud->point_step;
-    pcl_cloud_filtered->is_dense = !keep_organized;
-    if (keep_organized)
+    for (size_t i = 0; i < cpi_msg->cluster_indices.size(); i++)
     {
-      // fill nan in pcl_cloud_filtered
-      pcl_cloud_filtered->data.resize(pcl_cloud->data.size());
-      std::fill(pcl_cloud_filtered->data.begin(), pcl_cloud_filtered->data.end(), 0);
+      pcl::PCLPointCloud2::Ptr pcl_cluster_cloud (new pcl::PCLPointCloud2);
+      pcl::PointIndices::Ptr pcl_cluster_indices (new pcl::PointIndices());
+      pcl::PointIndices::Ptr pcl_cluster_indices_filtered (new pcl::PointIndices());
+      pcl_conversions::toPCL(cpi_msg->cluster_indices[i], *pcl_cluster_indices);
+      pcl::ExtractIndices<pcl::PCLPointCloud2> cluster_ex;
+      cluster_ex.setInputCloud(pcl_cloud);
+      cluster_ex.setKeepOrganized(!msg->is_dense);
+      cluster_ex.setNegative(false);
+      cluster_ex.setIndices(pcl_cluster_indices);
+      cluster_ex.filter(*pcl_cluster_cloud);
+      pcl_cluster_indices_filtered->indices.resize(pcl_cluster_cloud->data.size());
+      OrganizedStatisticalOutlierRemoval::filter(pcl_cluster_cloud, pcl_cluster_indices_filtered, keep_organized);
+      pcl_indices_filtered->indices.insert(pcl_indices_filtered->indices.end(),
+                                           pcl_cluster_indices_filtered->indices.begin(),
+                                           pcl_cluster_indices_filtered->indices.end());
     }
-
 
     pcl::ExtractIndices<pcl::PCLPointCloud2> ex;
     ex.setInputCloud(pcl_cloud);
     ex.setKeepOrganized(keep_organized);
     ex.setNegative(false);
-
-    for (size_t i = 0; i < cpi_msg->cluster_indices.size(); i++)
-    {
-      pcl::PCLPointCloud2::Ptr pcl_cluster_cloud (new pcl::PCLPointCloud2);
-      pcl::PCLPointCloud2::Ptr pcl_cluster_cloud_filtered (new pcl::PCLPointCloud2);
-      pcl::PointIndices::Ptr pcl_cluster_indices (new pcl::PointIndices());
-      pcl::PointIndices::Ptr pcl_cluster_indices_filtered (new pcl::PointIndices());
-      pcl_conversions::toPCL(cpi_msg->cluster_indices[i], *pcl_cluster_indices);
-      ex.setIndices(pcl_cluster_indices);
-      ex.filter(*pcl_cluster_cloud);
-      pcl_cluster_indices_filtered->indices.resize(pcl_cluster_cloud->data.size());
-      OrganizedStatisticalOutlierRemoval::filter(pcl_cluster_cloud, pcl_cluster_indices_filtered, keep_organized);
-      ex.setIndices(pcl_cluster_indices_filtered);
-      ex.filter(*pcl_cluster_cloud_filtered);
-      pcl::PCLPointCloud2::concatenate(*pcl_cloud_filtered, *pcl_cluster_cloud_filtered);
-    }
+    ex.setIndices(pcl_indices_filtered);
+    ex.filter(*pcl_cloud_filtered);
     pcl_conversions::fromPCL(*pcl_cloud_filtered, output);
 #if PCL_VERSION_COMPARE (<, 1, 9, 0)
     if (keep_organized) {
@@ -314,7 +307,7 @@ namespace jsk_pcl_ros
       output.is_bigendian = msg->is_bigendian;
       output.fields = msg->fields;
       output.point_step = msg->point_step;
-      output.data.resize (msg->data.size ());
+      output.data.resize(msg->data.size());
       output.width = msg->width;
       output.height = msg->height;
     }

@@ -249,10 +249,10 @@ namespace jsk_pcl_ros
       output.data.resize (msg->data.size ());
       output.width = msg->width;
       output.height = msg->height;
-      output.row_step = msg->point_step * msg->width;
     }
 #endif
     output.header = msg->header;
+    output.row_step = output.point_step * output.width;
     output.is_dense = !keep_organized;
     pub_.publish(output);
     diagnostic_updater_->update();
@@ -317,10 +317,10 @@ namespace jsk_pcl_ros
       output.data.resize (msg->data.size ());
       output.width = msg->width;
       output.height = msg->height;
-      output.row_step = output.point_step * output.width;
     }
 #endif
     output.header = msg->header;
+    output.row_step = output.point_step * output.width;
     output.is_dense = !keep_organized;
     pub_.publish(output);
     diagnostic_updater_->update();

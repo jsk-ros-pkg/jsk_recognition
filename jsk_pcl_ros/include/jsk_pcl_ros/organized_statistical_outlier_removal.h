@@ -77,8 +77,7 @@ namespace jsk_pcl_ros
     virtual void configCallback (Config &config, uint32_t level);
 
     void filter(const pcl::PCLPointCloud2::Ptr pcl_cloud,
-                pcl::PointIndices::Ptr pcl_indices_filtered,
-                bool keep_organized);
+                pcl::PointIndices::Ptr pcl_indices_filtered);
     void filterCloud(const sensor_msgs::PointCloud2::ConstPtr& msg);
     void filterCloudWithClusterPointIndices(
             const sensor_msgs::PointCloud2::ConstPtr& msg,

@@ -117,9 +117,9 @@ namespace jsk_pcl_ros
 
   void OrganizedStatisticalOutlierRemoval::filter(
           const pcl::PCLPointCloud2::Ptr pcl_cloud,
-          pcl::PointIndices::Ptr pcl_indices_filtered,
-          bool keep_organized)
+          pcl::PointIndices::Ptr pcl_indices_filtered)
   {
+    bool keep_organized = !pcl_cloud->is_dense;
 #if PCL_VERSION_COMPARE (<, 1, 9, 0)
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromPCLPointCloud2(*pcl_cloud, *cloud);
@@ -231,7 +231,7 @@ namespace jsk_pcl_ros
     // filter
     pcl::PointIndices::Ptr pcl_indices_filtered (new pcl::PointIndices());
     pcl_indices_filtered->indices.resize(pcl_cloud->data.size());
-    OrganizedStatisticalOutlierRemoval::filter(pcl_cloud, pcl_indices_filtered, !msg->is_dense);
+    OrganizedStatisticalOutlierRemoval::filter(pcl_cloud, pcl_indices_filtered);
     pcl::PCLPointCloud2::Ptr pcl_cloud_filtered (new pcl::PCLPointCloud2);
     pcl::ExtractIndices<pcl::PCLPointCloud2> ex;
     ex.setInputCloud(pcl_cloud);
@@ -288,7 +288,7 @@ namespace jsk_pcl_ros
       cluster_ex.setIndices(pcl_cluster_indices);
       cluster_ex.filter(*pcl_cluster_cloud);
       pcl_cluster_indices_filtered->indices.resize(pcl_cluster_cloud->data.size());
-      OrganizedStatisticalOutlierRemoval::filter(pcl_cluster_cloud, pcl_cluster_indices_filtered, !msg->is_dense);
+      OrganizedStatisticalOutlierRemoval::filter(pcl_cluster_cloud, pcl_cluster_indices_filtered);
       pcl_indices_filtered->indices.insert(pcl_indices_filtered->indices.end(),
                                            pcl_cluster_indices_filtered->indices.begin(),
                                            pcl_cluster_indices_filtered->indices.end());

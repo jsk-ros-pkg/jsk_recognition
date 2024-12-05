@@ -42,6 +42,10 @@
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <jsk_topic_tools/counter.h>
 #include <dynamic_reconfigure/server.h>
+
+#include "sensor_msgs/PointCloud2.h"
+#include "jsk_recognition_msgs/ClusterPointIndices.h"
+
 #include "jsk_pcl_ros/OrganizedStatisticalOutlierRemovalConfig.h"
 
 namespace jsk_pcl_ros
@@ -63,13 +67,13 @@ namespace jsk_pcl_ros
 
     virtual void configCallback (Config &config, uint32_t level);
 
-    virtual void filter(const sensor_msgs::PointCloud2::ConstPtr& msg);
-    virtual void filterCloud(const pcl::PCLPointCloud2::Ptr pcl_cloud,
-                             pcl::PointIndices::Ptr pcl_indices_filtered,
-                             bool keep_organized);
+    void filter(const pcl::PCLPointCloud2::Ptr pcl_cloud,
+                pcl::PointIndices::Ptr pcl_indices_filtered);
+    std::vector<int> getFilteredIndices(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
+    void filterCloud(const sensor_msgs::PointCloud2::ConstPtr& msg);
 
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
+
+    void updateDiagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat);
 
     ////////////////////////////////////////////////////////
     // ROS variables

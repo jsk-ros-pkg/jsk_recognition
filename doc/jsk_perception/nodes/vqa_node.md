@@ -74,9 +74,11 @@ make
 In the remote GPU machine,
 ```shell
 cd jsk_recognition/jsk_perception/docker
-./run_jsk_vil_api --port (Your vacant port) --ofa_task caption --ofa_model_scale huge
+./run_jsk_vil_api ofa --port (Your vacant port) --ofa_task caption --ofa_model_scale huge
 ```
 
+
+You should set a model argument. It should be `ofa` or `clip`.
 
 `--ofa_task` should be `caption` or `vqa`. Empirically, the output results are more natural for VQA tasks with the Caption model than with the VQA model in OFA. 
 

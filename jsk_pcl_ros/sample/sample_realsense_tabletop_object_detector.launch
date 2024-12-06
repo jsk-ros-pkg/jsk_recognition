@@ -1,0 +1,38 @@
+<launch>
+  <arg name="gui" default="true" />
+
+  <arg name="camera_ns" default="camera" />
+  <arg name="manager" default="realsense_nodelet_manager" />
+  <arg name="launch_manager" default="true" />
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_baxter_realsense_l515.xml">
+    <arg name="launch_manager" value="$(arg launch_manager)" />
+    <arg name="manager" value="$(arg manager)" />
+  </include>
+
+  <include file="$(find jsk_pcl_ros)/sample/tabletop_object_detector.launch">
+    <arg name="input" value="/$(arg camera_ns)/depth_registered/points" />
+    <arg name="manager" value="$(arg manager)" />
+    <arg name="sensor_frame" value="/$(arg camera_ns)_color_optical_frame" />
+    <arg name="launch_manager" value="false" />
+    <arg name="launch_tracking" default="false" />
+    <arg name="launch_openni" default="false" />
+    <arg name="launch_rviz" default="false" />
+    <arg name="resize" value="true" />
+    <arg name="resize_step" value="2" />
+    <arg name="outlier_removal" value="true" />
+    <arg name="approximate_sync" value="true" />
+    <arg name="plane_min_size" value="10000" />
+    <arg name="object_min_height" value="0.01" />
+    <arg name="object_max_height" value="1000.0" />
+    <arg name="align_boxes" value="true" />
+    <arg name="align_boxes_with_plane" value="false" />
+    <arg name="target_frame_id" value="base" />
+    <arg name="use_pca" value="true" />
+    <arg name="sort_by" value="cloud_size" />
+  </include>
+
+  <node name="$(anon rviz)" pkg="rviz" type="rviz" if="$(arg gui)"
+        args="-d $(find jsk_pcl_ros)/sample/rviz/realsense_tabletop_object_detector.rviz" />
+
+</launch>

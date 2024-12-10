@@ -8,7 +8,9 @@ import cv_bridge
 import jsk_recognition_utils
 from jsk_topic_tools import ConnectionBasedTransport
 import message_filters
+import numpy as np
 import rospy
+from sensor_msgs.msg import CompressedImage
 from sensor_msgs.msg import Image
 import itertools, pkg_resources
 from distutils.version import StrictVersion
@@ -66,6 +68,7 @@ class TileImages(ConnectionBasedTransport):
             rospy.logerr('hydro message_filters does not support approximate sync. Force to set ~approximate_sync=false')
             self.approximate_sync = False
         self.pub_img = self.advertise('~output', Image, queue_size=1)
+        self.pub_compressed_img = self.advertise('~output/compressed', CompressedImage, queue_size=1)
 
     def subscribe(self):
         self.sub_img_list = []
@@ -87,14 +90,17 @@ class TileImages(ConnectionBasedTransport):
                 sync = message_filters.TimeSynchronizer(
                     self.sub_img_list, queue_size=queue_size)
                 sync.registerCallback(self._apply)
+
     def unsubscribe(self):
         for sub in self.sub_img_list:
             sub.sub.unregister()
+
     def timer_callback(self, event):
         with self.lock:
             imgs = [self.input_imgs[topic] for topic in self.input_topics
                     if topic in self.input_imgs]
             self._append_images(imgs)
+
     def simple_callback(self, target_topic):
         def callback(msg):
             with self.lock:
@@ -105,6 +111,7 @@ class TileImages(ConnectionBasedTransport):
                     draw_text_box(img, rospy.resolve_name(target_topic),
                                   font_scale=self.font_scale)
         return callback
+
     def _append_images(self, imgs):
         if not imgs:
             return
@@ -126,6 +133,14 @@ class TileImages(ConnectionBasedTransport):
         bridge = cv_bridge.CvBridge()
         imgmsg = bridge.cv2_to_imgmsg(out_bgr, encoding='bgr8')
         self.pub_img.publish(imgmsg)
+
+        compressed_msg = CompressedImage()
+        compressed_msg.header = imgmsg.header
+        compressed_msg.format = imgmsg.encoding + '; jpeg compressed bgr8'
+        compressed_msg.data = np.array(
+            cv2.imencode('.jpg', out_bgr)[1]).tostring()
+        self.pub_compressed_img.publish(compressed_msg)
+
     def _apply(self, *msgs):
         bridge = cv_bridge.CvBridge()
         imgs = []

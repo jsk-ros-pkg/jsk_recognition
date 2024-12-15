@@ -1,0 +1,8 @@
+sensor_msgs/Image image
+sensor_msgs/CompressedImage compressed_image
+string[] queries
+---
+jsk_recognition_msgs/DetectionResult result
+bool done
+---
+string status

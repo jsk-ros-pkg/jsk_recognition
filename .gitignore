@@ -3,3 +3,10 @@
 .*~
 \#*
 .\#*
+
+.clang-format
+.clang-tidy
+.isort.cfg
+.pylintrc
+.ruff.toml
+.style.yapf

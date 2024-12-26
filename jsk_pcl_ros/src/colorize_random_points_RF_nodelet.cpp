@@ -34,6 +34,7 @@
 #include "jsk_pcl_ros/colorize_random_points_RF.h"
 #include <pluginlib/class_list_macros.h>
 #include <pcl/common/centroid.h>
+#include <pcl/octree/octree_search.h>
 
 namespace jsk_pcl_ros
 {

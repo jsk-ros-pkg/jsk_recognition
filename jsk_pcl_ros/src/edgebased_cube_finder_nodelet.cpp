@@ -756,7 +756,11 @@ namespace jsk_pcl_ros
            *points_on_edges = *points_on_edges + *points_on_edge;
            cubes.push_back(cube);
          }
+#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 12 )
+         pub_debug_filtered_cloud_.publish(*points_on_edges);
+#else
          pub_debug_filtered_cloud_.publish(points_on_edges);
+#endif
        }
      }
 

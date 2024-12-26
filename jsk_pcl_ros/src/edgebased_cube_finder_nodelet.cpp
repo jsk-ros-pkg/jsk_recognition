@@ -115,7 +115,12 @@ namespace jsk_pcl_ros
     jsk_recognition_utils::ConvexPolygon::Ptr convex (new jsk_recognition_utils::ConvexPolygon(vertices));
     return convex;
   }
-  
+
+    // pcl removed the method by 1.13, no harm in defining it ourselves to use below
+#if __cplusplus >= 201103L
+#define pcl_isfinite(x) std::isfinite(x)
+#endif
+
   double CubeHypothesis::evaluatePointOnPlanes(
     const pcl::PointCloud<pcl::PointXYZRGB>& cloud,
     jsk_recognition_utils::ConvexPolygon& polygon_a,

@@ -159,8 +159,14 @@ jobs:
       DEBIAN_FRONTEND : noninteractive
 
     steps:
+      - name: Install git on container
+        run: |
+          apt update && apt install -y -q -qq git
+
       - name: Chcekout Source
         uses: actions/checkout@v3.0.2
+        with:
+          submodules: recursive
 
       - name: Setup ROS-O deb repository
         run: |
@@ -180,6 +186,23 @@ jobs:
           pip3 install catkin-tools
           # setup build tools
           apt install -qq -y cmake build-essential catkin ros-one-rosbash
+
+      - name: Download unreleased files
+        run: |
+          source /opt/ros/one/setup.bash
+          set -x
+          apt install -qq -y git wget
+          mkdir -p ~/ws/src	  
+          cd ~/ws/src
+          # rosinstall_generator libsiftfast --rosdistro noetic
+          git clone https://github.com/tork-a/jsk_3rdparty-release.git -b release/noetic/libsiftfast/2.1.28-1
+          wget https://github.com/jsk-ros-pkg/jsk_3rdparty/commit/cafbff6dd2bd7869eb4f989bedd0a322a7c35d50.diff -O 1.patch
+          wget https://github.com/jsk-ros-pkg/jsk_3rdparty/commit/c8eb21e211d1a8f803cd55549a5b2bdc87e6ff9f.diff -O 2.patch
+          patch -d jsk_3rdparty-release -p3 < 1.patch
+          patch -d jsk_3rdparty-release -p3 < 2.patch
+          # rosinstall_generator jsk_topic_tools --rosdistro noetic
+          git clone https://github.com/tork-a/jsk_common-release.git -b release/noetic/jsk_topic_tools/2.2.15-4
+        shell: bash
 
       - name: Setup Workspace
         run: |

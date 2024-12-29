@@ -184,7 +184,11 @@ namespace jsk_pcl_ros
       }
       pcl::ExtractIndices<T> extract;
       extract.setInputCloud (pcl_input_cloud.makeShared());
+#if  ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 12 )
+      extract.setIndices (std::make_shared <std::vector<int> > (ex_indices));
+#else
       extract.setIndices (boost::make_shared <std::vector<int> > (ex_indices));
+#endif
       extract.setNegative (false);
       extract.filter (output);
 

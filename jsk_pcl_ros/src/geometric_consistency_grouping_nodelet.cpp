@@ -110,6 +110,11 @@ namespace jsk_pcl_ros
     pcl::fromROSMsg(*model_feature_msg, *reference_feature_);
   }
 
+    // pcl removed the method by 1.13, no harm in defining it ourselves to use below
+#if __cplusplus >= 201103L
+#define pcl_isfinite(x) std::isfinite(x)
+#endif
+
   void GeometricConsistencyGrouping::recognize(
     const sensor_msgs::PointCloud2::ConstPtr& scene_cloud_msg,
     const sensor_msgs::PointCloud2::ConstPtr& scene_feature_msg)

@@ -5,7 +5,6 @@ find_package(catkin REQUIRED
   catkin_virtualenv
   message_generation
   std_msgs
-  roslaunch
   )
 if (${catkin_virtualenv_VERSION} VERSION_LESS "0.3.0")
   message(STATUS "sound_classification requires catkin_virtualenv >= 0.3.0")

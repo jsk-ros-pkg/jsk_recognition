@@ -66,7 +66,7 @@ namespace jsk_pcl_ros
     int tf_queue_size;
     pnh_->param("tf_queue_size", tf_queue_size, 10);
     prev_from_center_to_fixed_ = Eigen::Affine3f::Identity();
-    tf_ = TfListenerSingleton::getInstance();
+    tf_.reset(new jsk_recognition_utils::TfListener());
     pub_output_ = pnh_->advertise<sensor_msgs::Image>("output", 1, true);
     sub_previous_pointcloud_ = pnh_->subscribe<sensor_msgs::PointCloud2>(
       "input/prev_pointcloud", 5, 

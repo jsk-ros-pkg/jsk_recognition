@@ -35,9 +35,9 @@ make
 
   Array of detected bounding box regions
 
-* `~result` (`jsk_recognition_msgs/DetectionResult`)
+* `~class` (`jsk_recognition_msgs/ClassificationResult`)
 
-  Detection result
+  Class of detected objects
 
 * `~result/image` (`sensor_msgs/Image`)
 

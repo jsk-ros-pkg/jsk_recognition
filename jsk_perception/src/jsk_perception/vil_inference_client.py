@@ -16,7 +16,6 @@ from jsk_recognition_msgs.msg import (ClassificationResult,
                                       ClassificationTaskAction,
                                       ClassificationTaskFeedback,
                                       ClassificationTaskResult,
-                                      DetectionResult,
                                       DetectionTaskAction,
                                       DetectionTaskFeedback,
                                       DetectionTaskResult,
@@ -51,8 +50,9 @@ class DockerInferenceClientBase(object):
                                           callback=self.topic_cb,
                                           queue_size=1,
                                           buff_size=2**26)
-        self.result_topic_type = result_topic
-        self.result_pub = rospy.Publisher("~result", result_topic, queue_size=1)
+        if not result_topic is None:
+            self.result_topic_type = result_topic
+            self.result_pub = rospy.Publisher("~result", result_topic, queue_size=1)
         self.image_pub = rospy.Publisher("~result/image", Image, queue_size=1)
         self.vis_pub = rospy.Publisher("~visualize", String, queue_size=1)
         self.action_server = actionlib.SimpleActionServer("~inference_server",
@@ -207,30 +207,34 @@ class DINOClientNode(DockerInferenceClientBase):
         DockerInferenceClientBase.__init__(self,
                                            DetectionTaskAction,
                                            ClassificationConfig,
-                                           DetectionResult,
+                                           None,
                                            DetectionTaskFeedback,
                                            DetectionTaskResult,
                                            "detection")
-        self.pub_class = rospy.Publisher('~class', ClassificationResult, queue_size=1)
-        self.pub_rects = rospy.Publisher('~rects', RectArray, queue_size=1)
-        self.pub_image = rospy.Publisher('~output/image', Image, queue_size=1)
+        self.class_pub = rospy.Publisher('~class', ClassificationResult, queue_size=1)
+        self.rects_pub = rospy.Publisher('~rects', RectArray, queue_size=1)
+        self.output_image_pub = rospy.Publisher('~output/image', Image, queue_size=1)
 
     def topic_cb(self, data):
         if not self.config: rospy.logwarn("No queries"); return
         if not self.config.queries: rospy.logwarn("No queries"); return
         queries = self.config.queries.split(";")
         try:
-            msg = self.inference(data, queries)
+            cls_msg, rects_msg, output_img_msg = self.inference(data, queries)
         except Exception: return
         # publish debug image
         self.image_pub.publish(data)
         # publish detection result
-        msg.header = data.header
-        self.result_pub.publish(msg)
+        cls_msg.header = data.header
+        rects_msg.header = data.header
+        output_img_msg.header = data.header
+        self.class_pub.publish(cls_msg)
+        self.rects_pub.publish(rects_msg)
+        self.output_image_pub.publish(output_img_msg)
         # publish probabilities result as string
         vis_msg = ""
-        for i, label in enumerate(msg.classification.label_names):
-            vis_msg += "{}: {:.2f}% ".format(label, msg.classification.probabilities[i]*100)
+        for i, label in enumerate(cls_msg.label_names):
+            vis_msg += "{}: {:.2f}% ".format(label, cls_msg.probabilities[i]*100)
         self.vis_pub.publish(vis_msg)
 
     def create_queries(self, goal):
@@ -257,9 +261,8 @@ class DINOClientNode(DockerInferenceClientBase):
         classification_msg.probabilities = scores   # sum(probabilities) is 1
         classification_msg.classifier = 'dino'
         classification_msg.target_names = queries
-        self.pub_class.publish(classification_msg)
 
-        rect_msg = RectArray(header=img_msg.header)
+        rects_msg = RectArray(header=img_msg.header)
         vis_img = self.ros_img_to_cv(img_msg, encoding="rgb8")
         cmap = matplotlib.cm.get_cmap('hsv')
         n = max(len(boxes) - 1, 10)
@@ -283,17 +286,42 @@ class DINOClientNode(DockerInferenceClientBase):
             rect = Rect(
                 x=x_min, y=y_min,
                 width=x_max - x_min, height=y_max - y_min)
-            rect_msg.rects.append(rect)
+            rects_msg.rects.append(rect)
 
-        self.pub_rects.publish(rect_msg)
-        vis_msg = self._bridge.cv2_to_imgmsg(vis_img, 'rgb8')
-        vis_msg.header = img_msg.header
-        self.pub_image.publish(vis_msg)
+        output_img_msg = self._bridge.cv2_to_imgmsg(vis_img, 'rgb8')
+        output_img_msg.header = img_msg.header
 
-        msg = self.result_topic_type()
-        msg.classification = classification_msg
-        msg.rects = rect_msg
-        return msg
+        return classification_msg, rects_msg, output_img_msg
+
+    def action_cb(self, goal):
+        success = True
+        result = self.action_result()
+        feedback = self.action_feedback()
+        if goal.image.data and (not goal.compressed_image.data):
+            image = goal.image
+            # result.result.image = image
+        elif (not goal.image.data) and goal.compressed_image.data:
+            image = goal.compressed_image
+            # result.result.compressed_image = image
+        elif goal.image.data and goal.image.compressed_image.data:
+            rospy.logerr("Both image and compressed image can not be added simultaneously")
+            return
+        else:
+            rospy.loginfo("No images in goal message, so using subscribed image topic instead")
+            image = self.default_img
+        queries = self.create_queries(goal)
+        try:
+            classes_result, rects_result, _ = self.inference(image, queries)
+            result.classes = classes_result
+            result.rects = rects_result
+        except Exception as e:
+            rospy.logerr(str(e))
+            feedback.status = str(e)
+            success = False
+        finally:
+            self.action_server.publish_feedback(feedback)
+            result.done = success
+            self.action_server.set_succeeded(result)
 
 class OFAClientNode(DockerInferenceClientBase):
     def __init__(self):

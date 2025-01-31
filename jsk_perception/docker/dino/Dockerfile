@@ -13,12 +13,11 @@ ENV TORCH_CUDA_ARCH_LIST=8.0+PTX
 RUN git clone https://github.com/IDEA-Research/GroundingDINO.git
 RUN echo 'export CUDA_HOME=/usr/local/cuda' >> ~/.bashrc
 RUN echo 'export TORCH_CUDA_ARCH_LIST=8.0+PTX' >> ~/.bashrc
-RUN pip install --upgrade pip
-RUN pip install flask opencv-python \
-    && pip install "numpy>=1.20"
 RUN cd GroundingDINO \
     && pip install -r requirements.txt \
     && pip install -e .
+RUN pip install flask opencv-python \
+    && pip install "numpy>=1.20,<2"
 RUN mkdir -p GroundingDINO/weights \
     && cd GroundingDINO/weights \
     && wget -q https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth

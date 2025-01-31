@@ -1,6 +1,4 @@
-# FROM pytorch/pytorch:1.7.1-cuda11.0-cudnn8-devel
-FROM pytorch/pytorch:1.9.1-cuda11.1-cudnn8-devel
-# FROm pytorch/pytorch:1.13.1-cuda11.6-cudnn8-devel
+FROM pytorch/pytorch:1.13.1-cuda11.6-cudnn8-devel
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt -o Acquire::AllowInsecureRepositories=true update \
     && apt-get install -y \
@@ -10,11 +8,12 @@ RUN apt -o Acquire::AllowInsecureRepositories=true update \
     wget \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-ENV CUDA_HOME /usr/local/cuda
-ENV TORCH_CUDA_ARCH_LIST 8.0+PTX
+ENV CUDA_HOME=/usr/local/cuda
+ENV TORCH_CUDA_ARCH_LIST=8.0+PTX
 RUN git clone https://github.com/IDEA-Research/GroundingDINO.git
 RUN echo 'export CUDA_HOME=/usr/local/cuda' >> ~/.bashrc
-RUN echo 'TORCH_CUDA_ARCH_LIST=8.0+PTX' >> ~/.bashrc
+RUN echo 'export TORCH_CUDA_ARCH_LIST=8.0+PTX' >> ~/.bashrc
+RUN pip install --upgrade pip
 RUN pip install flask opencv-python \
     && pip install "numpy>=1.20"
 RUN cd GroundingDINO \

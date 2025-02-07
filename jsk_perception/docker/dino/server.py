@@ -1,3 +1,4 @@
+import os
 from groundingdino.util.inference import load_model, load_image, predict, annotate
 import groundingdino.datasets.transforms as T
 from torchvision.ops import box_convert
@@ -19,10 +20,12 @@ def apply_half(t):
     return t
 
 class Inference:
-    def __init__(self, gpu_id=None):
-        self.gpu_id = gpu_id
+    def __init__(self, model_name):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.model = load_model("groundingdino/config/GroundingDINO_SwinT_OGC.py", "weights/groundingdino_swint_ogc.pth")
+        if model_name == "swin-t":
+            self.model = load_model("groundingdino/config/GroundingDINO_SwinT_OGC.py", "weights/groundingdino_swint_ogc.pth")
+        elif model_name == "swin-b":
+            self.model = load_model("groundingdino/config/GroundingDINO_SwinB_cfg.py", "weights/groundingdino_swinb_cogcoor.pth")
         self.BOX_TRESHOLD = 0.35
         self.TEXT_TRESHOLD = 0.25
 
@@ -77,7 +80,8 @@ class Inference:
 # run
 if __name__ == "__main__":
     app = Flask(__name__)
-    infer = Inference()
+    dino_model_name = os.environ["DINO_MODEL_NAME"]
+    infer = Inference(dino_model_name)
 
     @app.route("/detection", methods=['POST'])
     def detection_request():

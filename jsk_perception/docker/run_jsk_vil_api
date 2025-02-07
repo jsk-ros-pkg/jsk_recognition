@@ -13,6 +13,7 @@ CONTAINERS = {"ofa": "jsk-ofa-server",
               "clip": "jsk-clip-server",
               "dino": "jsk-dino-server"}
 OFA_MODEL_SCALES = ["base", "large", "huge"]
+DINO_MODEL_NAMES = ["swin-t", "swin-b"]
 
 parser = argparse.ArgumentParser(description="JSK Vision and Language API runner")
 parser.add_argument("model", choices=CONTAINERS.keys(),
@@ -22,6 +23,8 @@ parser.add_argument("--ofa_task", default="caption",
                     help="Tasks to be loaded in OFA. OFA loads all tasks by default and requires large amount of GPU RAM")
 parser.add_argument("--ofa_model_scale", default="huge", choices=OFA_MODEL_SCALES,
                     help="Scale of parameters to be read in OFA. Use huge by default")
+parser.add_argument("--dino_model_name", default="swin-t", choices=DINO_MODEL_NAMES,
+                    help="Model name of DINO. Use swin-t by default")
 
 args, unknown = parser.parse_known_args()
 
@@ -42,6 +45,9 @@ if __name__ == "__main__":
         ofa_option = ["-e", "OFA_TASK={}".format(args.ofa_task),
                       "-e", "OFA_MODEL_SCALE={}".format(args.ofa_model_scale)]
         cmd += ofa_option
+    elif args.model == "dino":
+        dino_option = ["-e", "DINO_MODEL_NAME={}".format(args.dino_model_name)]
+        cmd += dino_option
 
     # Execute
     print("Run {} container on port {}".format(docker_image, args.port))

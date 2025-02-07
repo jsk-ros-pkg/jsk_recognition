@@ -20,6 +20,7 @@ RUN pip install flask opencv-python \
     && pip install "numpy>=1.20,<2"
 RUN mkdir -p GroundingDINO/weights \
     && cd GroundingDINO/weights \
-    && wget -q https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth
+    && wget -q https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth \
+    && wget -q https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha2/groundingdino_swinb_cogcoor.pth
 COPY server.py /workspace/GroundingDINO
 ENTRYPOINT cd /workspace/GroundingDINO && python server.py

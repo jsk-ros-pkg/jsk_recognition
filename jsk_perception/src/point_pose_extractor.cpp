@@ -48,12 +48,14 @@ namespace jsk_perception
     std::string _pose_str;
     double template_width;
     double template_height;
+    double template_depth;
     std::string template_filename;
     std::string window_name;
 
     pnh_->param("child_frame_id", _child_frame_id, std::string("matching"));
     pnh_->param("object_width",  template_width,  0.06);
     pnh_->param("object_height", template_height, 0.0739);
+    pnh_->param("object_depth", template_depth, 0.05);
     pnh_->param("relative_pose", _pose_str, std::string("0 0 0 0 0 0 1"));
     std::string default_template_file_name;
     try {
@@ -111,7 +113,7 @@ namespace jsk_perception
 
     // add the image to template list
     add_new_template(template_img, window_name, transform,
-                     template_width, template_height, _th_step, _phi_step);
+                     template_width, template_height, template_depth, _th_step, _phi_step);
 
   } // initialize
 
@@ -200,7 +202,7 @@ namespace jsk_perception
   }
 
   bool PointPoseExtractor::add_new_template(cv::Mat img, std::string typestr, tf::Transform relative_pose,
-                                            double template_width, double template_height,
+                                            double template_width, double template_height, double template_depth=0.05,
                                             double theta_step=5.0, double phi_step=5.0)
   {
     std::vector<cv::Mat> imgs;
@@ -219,7 +221,7 @@ namespace jsk_perception
       Matching_Template * tmplt = 
         new Matching_Template(imgs.at(i), type,
                               img.size().width, img.size().height,
-                              template_width, template_height,
+                              template_width, template_height, template_depth,
                               relative_pose, Mvec.at(i),
                               _reprojection_threshold,
                               _distanceratio_threshold,

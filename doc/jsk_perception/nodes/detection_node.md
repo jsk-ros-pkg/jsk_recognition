@@ -2,7 +2,7 @@
 
 ![](images/dino.png)
 
-The ROS node for Open-Vocabulary Object Detection with GroundingDINO.
+The ROS node for Open-Vocabulary Object Detection with [GroundingDINO](https://github.com/IDEA-Research/GroundingDINO).
 
 ## System Configuration
 ![](images/large_scale_vil_system.png)
@@ -74,8 +74,9 @@ make
 In the remote GPU machine,
 ```shell
 cd jsk_recognition/jsk_perception/docker
-./run_jsk_vil_api dino --port (Your vacant port)
+./run_jsk_vil_api dino --port (Your vacant port) --dino_model_name swin-t
 ```
+You can choose `dino_model_name` from `swin-t` and `swin-b`. For more information about models, please refer to [here](https://github.com/IDEA-Research/GroundingDINO/tree/main?tab=readme-ov-file#luggage-checkpoints).
 
 In the ROS machine,
 ```shell

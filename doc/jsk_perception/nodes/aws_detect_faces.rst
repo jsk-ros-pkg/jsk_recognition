@@ -61,6 +61,11 @@ Publishing Topic
 
   Visualization image of detected faces.
 
+* ``~image`` (``sensor_msgs/Image``)
+
+  Passthourgh input image. This message contains face detected image
+  when ``~always_publish`` is false.
+
 
 Parameters
 ----------
@@ -101,6 +106,10 @@ Parameters
 * ``~always_subscribe`` (Bool, Default: ``True``)
 
   Set true to process even if not one subscribing.
+
+* ``~always_publish`` (Bool, Default: ``True``)
+
+  Set false to publish only when face is detected.
 
 Example
 -------

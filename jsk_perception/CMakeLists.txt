@@ -260,6 +260,7 @@ jsk_add_nodelet(src/overlay_image_color_on_mono.cpp "jsk_perception/OverlayImage
 jsk_add_nodelet(src/grid_label.cpp "jsk_perception/GridLabel" "grid_label")
 jsk_add_nodelet(src/color_histogram_label_match.cpp "jsk_perception/ColorHistogramLabelMatch" "color_histogram_label_match")
 jsk_add_nodelet(src/apply_mask_image.cpp "jsk_perception/ApplyMaskImage" "apply_mask_image")
+jsk_add_nodelet(src/invert_mask_image.cpp "jsk_perception/InvertMaskImage" "invert_mask_image")
 jsk_add_nodelet(src/unapply_mask_image.cpp "jsk_perception/UnapplyMaskImage" "unapply_mask_image")
 jsk_add_nodelet(src/single_channel_histogram.cpp "jsk_perception/SingleChannelHistogram" "single_channel_histogram")
 jsk_add_nodelet(src/blob_detector.cpp "jsk_perception/BlobDetector" "blob_detector")

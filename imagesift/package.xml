@@ -1,6 +1,6 @@
 <package format="3">
   <name>imagesift</name>
-  <version>1.2.15</version>
+  <version>1.2.17</version>
   <description>
     For every image, computes its sift features and send a new message with the image, its intrinsic parameters, and the features.
     Parameters include:
@@ -19,6 +19,7 @@
   <buildtool_depend condition="$ROS_PYTHON_VERSION == 3">python3-setuptools</buildtool_depend>
 
   <build_depend>roscpp</build_depend>
+  <build_depend>ros_environment</build_depend>
   <build_depend>cmake_modules</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>posedetection_msgs</build_depend>

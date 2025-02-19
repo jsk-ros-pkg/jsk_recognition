@@ -1,12 +1,24 @@
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Changelog for package jsk_recognition
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Changelog for package sound_classification
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 1.2.17 (2023-11-14)
 -------------------
 
 1.2.16 (2023-11-10)
 -------------------
+* [audio_to_spectrogram, sound_classification] Add data_to_spectrogram (`#2767 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2767>`_)
+* use catkin_install_python to install python scripts under node_scripts/ scripts/ (`#2743 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2743>`_)
+* [sound_classification] Update setup doc on READMEt( `#2732 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2732>`_)
+* [sound_classification] Enable to pass all arguments of audio_to_spectrogram.launch from upper launches (`#2731 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2731>`_)
+* [sound_classification] Fix pactl option to list up input devices (`#2715 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2715>`_)
+* [sound_classification] set default as python2 in sound_classification (`#2698 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2698>`_)
+* chmod -x sound_classification scripts for catkin_virtualenv (`#2659 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2659>`_)
+* Add sound classification (`#2635 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2635>`_)
+
+  * copy from https://github.com/708yamaguchi/sound_classification
+
+* Contributors: Iori Yanokura, Kei Okada, Naoto Tsukamoto, Naoya Yamaguchi, Shingo Kitagawa, Shun Hasegawa
 
 1.2.15 (2020-10-10)
 -------------------
@@ -22,6 +34,9 @@ Changelog for package jsk_recognition
 
 1.2.11 (2020-10-01)
 -------------------
+* add sample program to convert audio message  to spectrogram
+* [WIP] Add program to classify sound
+* Contributors: Naoya Yamaguchi
 
 1.2.10 (2019-03-27)
 -------------------
@@ -50,11 +65,11 @@ Changelog for package jsk_recognition
 1.2.2 (2017-07-23)
 ------------------
 
-1.2.1 (2017-07-15)
-------------------
+1.2.1 (2017-07-15 20:44)
+------------------------
 
-1.2.0 (2017-07-15)
-------------------
+1.2.0 (2017-07-15 09:14)
+------------------------
 
 1.1.3 (2017-07-07)
 ------------------
@@ -65,11 +80,11 @@ Changelog for package jsk_recognition
 1.1.1 (2017-03-04)
 ------------------
 
-1.1.0 (2017-02-09)
-------------------
+1.1.0 (2017-02-09 22:50)
+------------------------
 
-1.0.4 (2017-02-09)
-------------------
+1.0.4 (2017-02-09 22:48)
+------------------------
 
 1.0.3 (2017-02-08)
 ------------------
@@ -86,11 +101,11 @@ Changelog for package jsk_recognition
 0.3.29 (2016-10-30)
 -------------------
 
-0.3.28 (2016-10-29)
--------------------
+0.3.28 (2016-10-29 16:34)
+-------------------------
 
-0.3.27 (2016-10-29)
--------------------
+0.3.27 (2016-10-29 00:14)
+-------------------------
 
 0.3.26 (2016-10-27)
 -------------------
@@ -131,11 +146,11 @@ Changelog for package jsk_recognition
 0.3.14 (2016-02-04)
 -------------------
 
-0.3.13 (2015-12-19)
--------------------
+0.3.13 (2015-12-19 17:35)
+-------------------------
 
-0.3.12 (2015-12-19)
--------------------
+0.3.12 (2015-12-19 14:44)
+-------------------------
 
 0.3.11 (2015-12-18)
 -------------------
@@ -167,20 +182,14 @@ Changelog for package jsk_recognition
 0.3.2 (2015-09-05)
 ------------------
 
-0.3.1 (2015-09-04)
-------------------
+0.3.1 (2015-09-04 17:12)
+------------------------
 
-0.3.0 (2015-09-04)
-------------------
-* [jsk_recognition_utils] Introduce new package jsk_recognition_utils
-  in order to use utility libraries defined in jsk_pcl_ros in jsk_perception
-* Contributors: Ryohei Ueda
+0.3.0 (2015-09-04 12:37)
+------------------------
 
-0.2.18 (2015-09-04)
--------------------
-* [jsk_recognition_utils] Introduce new package jsk_recognition_utils
-  in order to use utility libraries defined in jsk_pcl_ros in jsk_perception
-* Contributors: Ryohei Ueda
+0.2.18 (2015-09-04 01:07)
+-------------------------
 
 0.2.17 (2015-08-21)
 -------------------
@@ -208,12 +217,6 @@ Changelog for package jsk_recognition
 
 0.2.9 (2015-03-29)
 ------------------
-* 0.2.8
-* Update Changelog
-* Contributors: Ryohei Ueda
-
-0.2.8 (2015-03-29)
-------------------
 
 0.2.7 (2015-03-26)
 ------------------
@@ -233,20 +236,14 @@ Changelog for package jsk_recognition
 0.2.2 (2015-01-30)
 ------------------
 
-0.2.1 (2015-01-30)
-------------------
+0.2.0 (2015-01-29 12:20)
+------------------------
 
-0.2.0 (2015-01-29)
-------------------
-
-0.1.34 (2015-01-29)
--------------------
+0.1.34 (2015-01-29 11:53)
+-------------------------
 
 0.1.33 (2015-01-24)
 -------------------
-* [jsk_recognition] Add jsk_recognition_msgs to jsk_recognition meta
-  package's dependency
-* Contributors: Ryohei Ueda
 
 0.1.32 (2015-01-12)
 -------------------
@@ -254,11 +251,11 @@ Changelog for package jsk_recognition
 0.1.31 (2015-01-08)
 -------------------
 
-0.1.30 (2014-12-24)
--------------------
+0.1.30 (2014-12-24 16:45)
+-------------------------
 
-0.1.29 (2014-12-24)
--------------------
+0.1.29 (2014-12-24 12:43)
+-------------------------
 
 0.1.28 (2014-12-17)
 -------------------
@@ -297,6 +294,9 @@ Changelog for package jsk_recognition
 -------------------
 
 0.1.16 (2014-09-04)
+-------------------
+
+0.1.15 (2014-08-26)
 -------------------
 
 0.1.14 (2014-08-01)
@@ -340,4 +340,3 @@ Changelog for package jsk_recognition
 
 0.1.1 (2014-04-10)
 ------------------
-* Initial commit

@@ -64,6 +64,11 @@ namespace jsk_pcl_ros_utils
     sub_.shutdown();
   }
 
+// pcl removed the method by 1.13, no harm in defining it ourselves to use below
+#if __cplusplus >= 201103L
+#define pcl_isfinite(x) std::isfinite(x)
+#endif
+
   void NormalFlipToFrame::flip(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
     vital_checker_->poke();

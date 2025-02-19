@@ -60,7 +60,9 @@ make
 ## Dynamic Reconfigure Parameters
 * `~queries` (string, default: `human;kettle;cup;glass`) 
 
-  Default categories used for subscribing image topic.
+  Default categories used for subscribing image topic. 
+
+  You can send multiple queries with separating semicolon.
 
 ### Run inference container on another host or another terminal
 In the remote GPU machine,

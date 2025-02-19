@@ -592,6 +592,12 @@ namespace jsk_pcl_ros
     pcl::PointCloud<PointT>::Ptr& output_cloud,
     Eigen::Affine3d& output_transform)
   {
+#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 12 )
+    pcl::GeneralizedIterativeClosestPoint<PointT, PointT> icp;
+    icp.setRotationEpsilon(rotation_epsilon_);
+    icp.setCorrespondenceRandomness(correspondence_randomness_);
+    icp.setMaximumOptimizerIterations(maximum_optimizer_iterations_);
+#else
     pcl::IterativeClosestPoint<PointT, PointT> icp;
     if (use_normal_) {
       pcl::IterativeClosestPointWithNormals<PointT, PointT> icp_with_normal;
@@ -606,6 +612,7 @@ namespace jsk_pcl_ros
       gicp.setMaximumOptimizerIterations(maximum_optimizer_iterations_);
       icp = gicp;
     }
+#endif
     if (correspondence_algorithm_ == 1) { // Projective
       if (!camera_info_msg_) {
         NODELET_ERROR("no camera info is available yet");
@@ -636,10 +643,17 @@ namespace jsk_pcl_ros
     icp.setInputTarget(cloud);
 
     if (transform_3dof_) {
+#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 12 )
+      pcl::registration::WarpPointRigid3D<PointT, PointT>::Ptr warp_func
+        (new pcl::registration::WarpPointRigid3D<PointT, PointT>);
+      pcl::registration::TransformationEstimationLM<PointT, PointT>::Ptr te
+        (new pcl::registration::TransformationEstimationLM<PointT, PointT>);
+#else
       boost::shared_ptr<pcl::registration::WarpPointRigid3D<PointT, PointT> > warp_func
         (new pcl::registration::WarpPointRigid3D<PointT, PointT>);
       boost::shared_ptr<pcl::registration::TransformationEstimationLM<PointT, PointT> > te
         (new pcl::registration::TransformationEstimationLM<PointT, PointT>);
+#endif
       te->setWarpFunction(warp_func);
       icp.setTransformationEstimation(te);
     }

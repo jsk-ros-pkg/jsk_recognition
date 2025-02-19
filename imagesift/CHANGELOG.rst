@@ -2,6 +2,25 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.17 (2023-11-14)
+-------------------
+
+1.2.16 (2023-11-10)
+-------------------
+* add noetic build test (`#2756 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2756>`_)
+
+  * imagesift/test/test_imagesift.test: retry 3
+
+* Fixed typo of Software License Agreement. and/o2r to and/or (`#2727 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2727>`_)
+* Add reset sync policy in destructor and add a test (`#2681 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2681>`_)
+
+  * [imagesift] Add test for sync policy in destructor.
+  * [imagesift] Reset sync policy in destructor.
+
+* add doc about ~image_transport and examples (`#2558 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2558>`_)
+
+* Contributors: Aoi Nakane, Iori Yanokura, Kei Okada, Naoto Tsukamoto, Shingo Kitagawa, Yoshiki Obinata, Iory Yanokura
+
 1.2.15 (2020-10-10)
 -------------------
 

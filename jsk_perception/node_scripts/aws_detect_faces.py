@@ -89,6 +89,9 @@ class DetectFaces(ConnectionBasedTransport):
 
         self.bridge = cv_bridge.CvBridge()
 
+        self.always_publish = rospy.get_param('~always_publish', True)
+        rospy.loginfo("Publish even if face is not found : {}".format(self.always_publish))
+
         self.use_window = rospy.get_param('~use_window', False)
         rospy.loginfo("Launch image window : {}".format(self.use_window))
 
@@ -103,6 +106,8 @@ class DetectFaces(ConnectionBasedTransport):
         self.attributes_pub = self.advertise('~attributes', ClassificationResult, queue_size=1)
         self.landmarks_pub = self.advertise('~landmarks', PeoplePoseArray, queue_size=1)
         self.image_pub = self.advertise('~output', Image, queue_size=1)
+        self.image_comp_pub = self.advertise('~output/compressed', CompressedImage, queue_size=1)
+        self.orig_image_pub = self.advertise('~image/compressed', CompressedImage, queue_size=1)
         #
         # To process latest message, we need to set buff_size must be large enough.
         # we need to set buff_size larger than message size to use latest message for callback
@@ -111,7 +116,7 @@ class DetectFaces(ConnectionBasedTransport):
         #
         # c.f. https://answers.ros.org/question/220502/image-subscriber-lag-despite-queue-1/
         #
-        self.buff_size = rospy.get_param('~buff_size', 640 * 480 // 5 * 10)
+        self.buff_size = rospy.get_param('~buff_size', 640 * 480 * 3 // 5 * 10)
         rospy.loginfo("rospy.Subscriber buffer size : {}".format(self.buff_size))
 
     def subscribe(self):
@@ -157,7 +162,7 @@ class DetectFaces(ConnectionBasedTransport):
         return config
 
     def process_attributes(self, text, img, bbox):
-        rospy.loginfo("    {}".format(text))
+        rospy.logdebug("    {}".format(text))
         if self.use_window:
             cv2.putText(img, text,
                         (bbox.x + bbox.height // 2 + 8, bbox.y - bbox.width // 2 + self.offset), cv2.FONT_HERSHEY_PLAIN,
@@ -167,7 +172,8 @@ class DetectFaces(ConnectionBasedTransport):
     @property
     def visualize(self):
         return self.use_window \
-            or self.image_pub.get_num_connections() > 0
+            or self.image_pub.get_num_connections() > 0 \
+            or self.image_comp_pub.get_num_connections() > 0
 
     def image_callback(self, image):
         start_time = rospy.Time.now()
@@ -207,7 +213,7 @@ class DetectFaces(ConnectionBasedTransport):
         landmarks_msgs.poses = []
 
         # See https://docs.aws.amazon.com/rekognition/latest/dg/API_DetectFaces.html for detail
-        rospy.loginfo("Found {} faces".format(len(faces['FaceDetails'])))
+        rospy.logdebug("Found {} faces".format(len(faces['FaceDetails'])))
         for face in faces['FaceDetails']:
 
             # Bounding box of the face
@@ -355,9 +361,25 @@ class DetectFaces(ConnectionBasedTransport):
             cv2.imshow(image._connection_header['topic'], img_gray)
             cv2.waitKey(1)
 
+        # is always_publish is False, and face is not detected , do not publish any results
+        if not self.always_publish and len(faces['FaceDetails']) <= 0:
+            # debug info
+            rospy.loginfo("processing time {}".format((rospy.Time.now() - start_time).to_sec()))
+            return
+
         if self.image_pub.get_num_connections() > 0:
             self.image_pub.publish(self.bridge.cv2_to_imgmsg(
                 img_gray, encoding='bgr8'))
+
+        if self.image_comp_pub.get_num_connections() > 0:
+            msg = CompressedImage()
+            msg.header = image.header
+            msg.format = "jpeg"
+            msg.data = np.array(cv2.imencode('.jpg', img_gray)[1]).tostring()
+            self.image_comp_pub.publish(msg)
+
+        if self.orig_image_pub.get_num_connections() > 0:
+            self.orig_image_pub.publish(image)
 
         self.faces_pub.publish(face_msgs)
         self.poses_pub.publish(pose_msgs)
@@ -365,7 +387,9 @@ class DetectFaces(ConnectionBasedTransport):
         self.landmarks_pub.publish(landmarks_msgs)
 
         # debug info
-        rospy.loginfo("processing time {}".format((rospy.Time.now() - start_time).to_sec()))
+        rospy.logdebug("processing time {} on message taken at {} sec ago".format(
+            (rospy.Time.now() - start_time).to_sec(),
+            (rospy.Time.now() - image.header.stamp).to_sec()))
 
 
 if __name__ == '__main__':

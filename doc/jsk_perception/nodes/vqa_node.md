@@ -62,16 +62,23 @@ make
 * `~questions` (string, default: `what does this image describe?`) 
 
   Default questions used for subscribing image topic. 
-  
+
+  You can send multiple questions with separating semicolon like the below.
+  ```
+  What does this image describe?;What kinds of objects exists?
+  ```
+
 ## Sample
 
 ### Run inference container on another host or another terminal
 In the remote GPU machine,
 ```shell
 cd jsk_recognition/jsk_perception/docker
-./run_jsk_vil_api --port (Your vacant port) --ofa_task caption --ofa_model_scale huge
+./run_jsk_vil_api ofa --port (Your vacant port) --ofa_task caption --ofa_model_scale huge
 ```
 
+
+You should set a model argument. It should be `ofa` or `clip`.
 
 `--ofa_task` should be `caption` or `vqa`. Empirically, the output results are more natural for VQA tasks with the Caption model than with the VQA model in OFA. 
 

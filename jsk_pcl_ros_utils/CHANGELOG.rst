@@ -2,6 +2,26 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.17 (2023-11-14)
+-------------------
+
+1.2.16 (2023-11-10)
+-------------------
+* [jsk_pcl_ros_utils] use nodelet logger and fix logging info (`#2774 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2774>`_)
+* Save point cloud data as pcd format through ROS service. (`#2773 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2773>`_)
+* add noetic build test (`#2756 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2756>`_)
+* Add size check in ClusterPointIndicesLabelFilter (`#2740 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2740>`_)
+* Force plane coefficient to direct origin in plane concatinator (`#2658 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2658>`_)
+* Fixed typo of Software License Agreement. and/o2r to and/or (`#2727 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2727>`_)
+* [jsk_perception][jsk_pcl_ros_utils][resized_image_transport] Call onInitPostProcess() (`#2719 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2719>`_)
+* Add reset sync policy in destructor and add a test (`#2681 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2681>`_)
+* work around permission issue / integrate all yaml to one (`#2677 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2677>`_)
+* [jsk_perception][jsk_pcl_ros_utils][jsk_pcl_ros] Fix download links (`#2632 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2632>`_)
+* add node that convert 3D coordinate to 2D coordinate (`#2549 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2549>`_)
+* Add cluster point indices label filter (`#2468 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2468>`_)
+
+* Contributors: Aoi Nakane, Guilherme Affonso, Iori Yanokura, Kei Okada, Koki Shinjo, Miyabi Tanemoto, Naoto Tsukamoto, Shingo Kitagawa, Tatsuro Sakaguchi, Yukina Iwata, Yoshiki Obinata
+
 1.2.15 (2020-10-10)
 -------------------
 

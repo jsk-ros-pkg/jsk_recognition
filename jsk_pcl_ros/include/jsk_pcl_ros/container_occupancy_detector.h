@@ -107,10 +107,17 @@ namespace jsk_pcl_ros{
                   tf2_ros::TransformListener* tf_listener_;
                   sensor_msgs::PointCloud2::Ptr transformed_points_msg_ =
                         boost::shared_ptr<sensor_msgs::PointCloud2>(new sensor_msgs::PointCloud2);
+#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 12 )
+                  pcl::PCLPointCloud2Ptr pcl_pc2_ptr_ =
+                        std::shared_ptr<pcl::PCLPointCloud2>(new pcl::PCLPointCloud2);
+                  pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_xyz_ptr_ =
+                        std::shared_ptr<pcl::PointCloud<pcl::PointXYZ>>(new pcl::PointCloud<pcl::PointXYZ>);
+#else
                   pcl::PCLPointCloud2Ptr pcl_pc2_ptr_ =
                         boost::shared_ptr<pcl::PCLPointCloud2>(new pcl::PCLPointCloud2);
                   pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_xyz_ptr_ =
                         boost::shared_ptr<pcl::PointCloud<pcl::PointXYZ>>(new pcl::PointCloud<pcl::PointXYZ>);
+#endif
 
                   ////////////////////////////////////////////////////////
                   // Diagnostics Variables

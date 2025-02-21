@@ -50,8 +50,8 @@ namespace jsk_recognition_utils
     static tf::TransformListener* instance_;
     static boost::mutex mutex_;
   private:
-    TfListenerSingleton(TfListenerSingleton const&){};
-    TfListenerSingleton& operator=(TfListenerSingleton const&){};
+    TfListenerSingleton(TfListenerSingleton const&) = delete;
+    TfListenerSingleton& operator=(TfListenerSingleton const&) = delete;
   };
 
   // tf Utility

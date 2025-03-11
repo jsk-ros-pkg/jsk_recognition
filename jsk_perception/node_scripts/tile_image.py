@@ -144,8 +144,8 @@ class TileImages(ConnectionBasedTransport):
             self.pub_compressed_img.publish(compressed_msg)
 
     def _apply(self, *msgs):
-        if self.pub_img.get_num_connections() == 0 and
-           self.pub_compressed_img.get_num_connections() == 0:
+        if (self.pub_img.get_num_connections() == 0
+                and self.pub_compressed_img.get_num_connections() == 0):
             return
 
         bridge = cv_bridge.CvBridge()

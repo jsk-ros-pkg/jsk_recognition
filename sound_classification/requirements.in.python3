@@ -1,3 +1,4 @@
 chainer # For Python 2.x, chainer 5.x.x is needed, 7.0.0 will not work on Python2
-numpy<2.0
+numpy<1.18
+Cython==0.29.14
 cv_bridge

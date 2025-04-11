@@ -29,7 +29,7 @@ catkin_package(
   )
 
 if("$ENV{ROS_DISTRO}" STREQUAL "indigo" OR "$ENV{ROS_DISTRO}" STREQUAL "kinetic" OR
-    "$ENV{ROS_DISTRO}" STREQUAL "melodic" OR "$ENV{ROS_DISTRO}" STREQUAL "noetic")
+    "$ENV{ROS_DISTRO}" STREQUAL "melodic")
 catkin_generate_virtualenv(
   PYTHON_INTERPRETER python2
   INPUT_REQUIREMENTS requirements.in
@@ -38,8 +38,8 @@ else()
 execute_process(COMMAND cmake -E remove ${PROJECT_SOURCE_DIR}/requirements.txt)
 catkin_generate_virtualenv(
   PYTHON_INTERPRETER python3
-  INPUT_REQUIREMENTS requirements.in.obase
-  )
+  INPUT_REQUIREMENTS requirements.in.python3
+)
 endif()
 
 file(GLOB SCRIPTS_FILES scripts/*.py)

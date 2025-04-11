@@ -26,20 +26,42 @@ generate_messages(
 catkin_package(
   CATKIN_DEPENDS
   message_runtime
-  )
+)
+
+if(CATKIN_BUILD_BINARY_PACKAGE)
+  # This condition is true when it is compiled for generating deb package.
+  # In addition to the default arguments, "--no-binary numpy,protobuf" is added,
+  # for preventing pip from downloading pre-compiled binaries which can be incompatible with
+  # the target architecture.
+  set(EXTRA_PIP_ARGS "-qq" "--retries 10" "--timeout 30" "--no-binary" "numpy,protobuf")
+else()
+  # Default arguments.
+  # See https://github.com/locusrobotics/catkin_virtualenv/blob/master/catkin_virtualenv/cmake/catkin_generate_virtualenv.cmake#L46
+  set(EXTRA_PIP_ARGS "-qq" "--retries 10" "--timeout 30")
+endif()
 
 if("$ENV{ROS_DISTRO}" STREQUAL "indigo" OR "$ENV{ROS_DISTRO}" STREQUAL "kinetic" OR
     "$ENV{ROS_DISTRO}" STREQUAL "melodic")
-catkin_generate_virtualenv(
-  PYTHON_INTERPRETER python2
-  INPUT_REQUIREMENTS requirements.in
+  catkin_generate_virtualenv(
+    PYTHON_INTERPRETER python2
+    INPUT_REQUIREMENTS requirements.in.python2
+    EXTRA_PIP_ARGS ${EXTRA_PIP_ARGS}
+  )
+elseif("$ENV{ROS_DISTRO}" STREQUAL "noetic")
+  execute_process(COMMAND cmake -E remove ${PROJECT_SOURCE_DIR}/requirements.txt)
+  catkin_generate_virtualenv(
+    PYTHON_INTERPRETER python3
+    INPUT_REQUIREMENTS requirements.in.python3.8
+    EXTRA_PIP_ARGS ${EXTRA_PIP_ARGS}
   )
 else()
-execute_process(COMMAND cmake -E remove ${PROJECT_SOURCE_DIR}/requirements.txt)
-catkin_generate_virtualenv(
-  PYTHON_INTERPRETER python3
-  INPUT_REQUIREMENTS requirements.in.python3
-)
+  # ROS-O
+  execute_process(COMMAND cmake -E remove ${PROJECT_SOURCE_DIR}/requirements.txt)
+  catkin_generate_virtualenv(
+    PYTHON_INTERPRETER python3
+    INPUT_REQUIREMENTS requirements.in.python3.12
+    EXTRA_PIP_ARGS ${EXTRA_PIP_ARGS}
+  )
 endif()
 
 file(GLOB SCRIPTS_FILES scripts/*.py)

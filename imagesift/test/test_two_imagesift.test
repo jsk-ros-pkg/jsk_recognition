@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <node name="static_virtual_camera"
+        pkg="jsk_recognition_utils" type="static_virtual_camera.py" />
+
+  <node name="nodelet_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager" />
+  <node name="imagesift1"
+        pkg="nodelet" type="nodelet"
+        args="load imagesift/ImageSift nodelet_manager"
+        respawn="true" >
+    <remap from="image" to="static_virtual_camera/image_color" />
+    <remap from="camera_info" to="static_virtual_camera/camera_info" />
+    <remap from="Feature0D" to="/imagesift1/Feature0D" />
+    <remap from="Feature0DDetect" to="/imagesift1/Feature0DDetect" />
+    <remap from="ImageFeature0D" to="/imagesift1/ImageFeature0D" />
+    <param name="image_transport" value="raw" />
+  </node>
+  <node name="imagesift2"
+        pkg="nodelet" type="nodelet"
+        args="load imagesift/ImageSift nodelet_manager"
+        respawn="true" >
+    <remap from="image" to="static_virtual_camera/image_color" />
+    <remap from="camera_info" to="static_virtual_camera/camera_info" />
+    <remap from="Feature0D" to="/imagesift2/Feature0D" />
+    <remap from="Feature0DDetect" to="/imagesift2/Feature0DDetect" />
+    <remap from="ImageFeature0D" to="/imagesift2/ImageFeature0D" />
+    <param name="image_transport" value="raw" />
+  </node>
+
+  <test test-name="test_imagesift"
+        name="test_imagesift"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /imagesift1/ImageFeature0D
+      timeout_0: 10
+      topic_1: /imagesift2/ImageFeature0D
+      timeout_1: 10
+      check_after_kill_node: true
+      node_names: [imagesift1, imagesift2]
+    </rosparam>
+  </test>
+
+</launch>

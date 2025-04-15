@@ -72,6 +72,8 @@ namespace imagesift
     }
 
     SiftNode::~SiftNode() {
+        boost::lock_guard<boost::mutex> g(_g_siftfast_mutex);
+        DestroyAllResources();
         // message_filters::Synchronizer needs to be called reset
         // before message_filters::Subscriber is freed.
         // Calling reset fixes the following error on shutdown of the nodelet:
@@ -125,6 +127,7 @@ namespace imagesift
     bool SiftNode::detect(posedetection_msgs::Feature0D& features, const sensor_msgs::Image& imagemsg,
                           const sensor_msgs::Image::ConstPtr& mask_ptr)
     {
+        boost::lock_guard<boost::mutex> g(_g_siftfast_mutex);
         boost::mutex::scoped_lock lock(_mutex);
         Image imagesift = NULL;
         cv::Rect region;

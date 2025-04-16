@@ -42,6 +42,7 @@
 #include <pcl/features/gfpfh.h>
 #include <pcl/features/pfh.h>
 #include <pcl/features/cvfh.h>
+#include <pcl/features/pfh_tools.h> // for computePairFeatures
 #include <pcl/features/normal_3d_omp.h>
 #include <pcl/tracking/tracking.h>
 #include <pcl/common/common.h>

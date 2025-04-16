@@ -646,6 +646,11 @@ namespace jsk_pcl_ros
     linemod_in.close();
   }
 
+    // pcl removed the method by 1.13, no harm in defining it ourselves to use below
+#if __cplusplus >= 201103L
+#define pcl_isfinite(x) std::isfinite(x)
+#endif
+
   void LINEMODDetector::computeCenterOfTemplate(
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud,
     const pcl::SparseQuantizedMultiModTemplate& linemod_template,

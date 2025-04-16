@@ -50,7 +50,7 @@ class TileImages(ConnectionBasedTransport):
             sys.exit(1)
         self._shape = rospy.get_param('~shape', None)
         if self._shape:
-            if not (isinstance(self._shape, collections.Sequence) and
+            if not (isinstance(self._shape, collections.abc.Sequence) and
                     len(self._shape) == 2):
                 rospy.logerr('~shape must be a list of 2 float values.')
                 sys.exit(1)

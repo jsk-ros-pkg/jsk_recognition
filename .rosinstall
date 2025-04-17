@@ -1,0 +1,1 @@
+- git: {local-name: catkin_virtualenv , uri: 'git@github.gitai.tech:GITAI/catkin_virtualenv.git', version: master}

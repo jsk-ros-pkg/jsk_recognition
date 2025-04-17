@@ -29,7 +29,7 @@ catkin_package(
   )
 
 if("$ENV{ROS_DISTRO}" STREQUAL "indigo" OR "$ENV{ROS_DISTRO}" STREQUAL "kinetic" OR
-    "$ENV{ROS_DISTRO}" STREQUAL "melodic" OR "$ENV{ROS_DISTRO}" STREQUAL "noetic")
+    "$ENV{ROS_DISTRO}" STREQUAL "melodic")
 catkin_generate_virtualenv(
   PYTHON_INTERPRETER python2
   INPUT_REQUIREMENTS requirements.in

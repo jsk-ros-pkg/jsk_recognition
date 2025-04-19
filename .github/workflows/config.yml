@@ -152,6 +152,7 @@ jobs:
         DEB_DISTRO: [22.04, 24.04]
         ARCH: [x64]
         ROS_ONE_VARIANT: [techfak]
+        BUILD_PKGS: ['jsk_recognition_msgs audio_to_spectrogram sound_classification', 'checkerboard_detector imagesift jsk_perception jsk_recognition_utils resized_image_transport', 'jsk_pcl_ros_utils jsk_pcl_ros']
 
     runs-on: ${{ matrix.ARCH == 'x64' && format('ubuntu-{0}', matrix.DEB_DISTRO) || (matrix.ARCH == 'arm64' && format('ubuntu-{0}-arm', matrix.DEB_DISTRO) || format('ubuntu-{0}', matrix.DEB_DISTRO)) }}
 
@@ -230,6 +231,6 @@ jobs:
           source /opt/ros/one/setup.bash
           set -x
           cd ~/ws/
-          catkin build --no-status -sv ${{ matrix.CATKIN_OPTIONS }} --cmake-args -DCATKIN_ENABLE_TESTING=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ${{ matrix.CMAKE_OPTIONS }}
+          catkin build ${{ matrix.BUILD_PKGS }} --no-status -sv ${{ matrix.CATKIN_OPTIONS }} --cmake-args -DCATKIN_ENABLE_TESTING=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ${{ matrix.CMAKE_OPTIONS }}
         shell: bash
 

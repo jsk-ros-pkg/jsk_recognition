@@ -232,6 +232,16 @@ jobs:
           pip freeze --local | cut -d= -f1 | xargs -n1 pip show | grep -E '^(Name|Location|Version)' || echo "OK"
         shell: bash
 
+      - name: Clean Disk space
+        run: |
+          set -x
+          df -h
+          ls -al /opt/
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc || true
+          sudo apt clean
+          df -h
+        shell: bash
+
       - name: Compile Packages
         run: |
           source /opt/ros/one/setup.bash

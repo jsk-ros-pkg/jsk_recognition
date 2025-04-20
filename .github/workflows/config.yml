@@ -226,6 +226,12 @@ jobs:
           sed 's/apt-get install/apt-get -y install/;/install ros-one/s/^/#/;/pip3 install/s/^/#/' rosdep-install.sh | bash -xe
         shell: bash
 
+      - name: Check local installed python
+        run: |
+          set -x
+          pip freeze --local | cut -d= -f1 | xargs -n1 pip show | grep -E '^(Name|Location|Version)' || echo "OK"
+        shell: bash
+
       - name: Compile Packages
         run: |
           source /opt/ros/one/setup.bash

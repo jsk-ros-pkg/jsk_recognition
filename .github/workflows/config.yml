@@ -237,6 +237,6 @@ jobs:
           source /opt/ros/one/setup.bash
           set -x
           cd ~/ws/
-          catkin build ${{ matrix.BUILD_PKGS }} --no-status -sv ${{ matrix.CATKIN_OPTIONS }} --cmake-args -DCATKIN_ENABLE_TESTING=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ${{ matrix.CMAKE_OPTIONS }}
+          catkin build ${{ matrix.BUILD_PKGS }} ${{ matrix.DEB_DISTRO == '22.04' && '-j4' || '' }} --no-status -sv ${{ matrix.CATKIN_OPTIONS }} --cmake-args -DCATKIN_ENABLE_TESTING=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ${{ matrix.CMAKE_OPTIONS }}
         shell: bash
 

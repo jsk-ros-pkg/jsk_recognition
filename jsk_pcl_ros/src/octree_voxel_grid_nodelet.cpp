@@ -124,7 +124,6 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     if (resolution_ == 0.0) {
       pub_cloud_.publish(input_msg);
-      
     }
     else {
       if (jsk_recognition_utils::hasField("rgb", *input_msg) &&
@@ -140,6 +139,9 @@ namespace jsk_pcl_ros
                jsk_recognition_utils::hasField("normal_y", *input_msg) &&
                jsk_recognition_utils::hasField("normal_z", *input_msg)) {
         generateVoxelCloudImpl<pcl::PointNormal>(input_msg);
+      }
+      else if (jsk_recognition_utils::hasField("intensity", *input_msg)) {
+        generateVoxelCloudImpl<pcl::PointXYZI>(input_msg);
       }
       else {
         generateVoxelCloudImpl<pcl::PointXYZ>(input_msg);

@@ -519,4 +519,8 @@
       Calculate container occupancy rate
     </description>
   </class>
+  <class name="jsk_pcl/UniformSampling"
+         type="jsk_pcl_ros::UniformSampling"
+         base_class_type="nodelet::Nodelet">
+  </class>
 </library>

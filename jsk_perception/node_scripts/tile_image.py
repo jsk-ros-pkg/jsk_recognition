@@ -2,6 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import collections
+try:  # for python3.10+
+    from collections.abc import Sequence as collections_Sequence
+except ImportError:
+    from collections import Sequence as collections_Sequence
 import sys
 import cv2
 import cv_bridge
@@ -50,7 +54,7 @@ class TileImages(ConnectionBasedTransport):
             sys.exit(1)
         self._shape = rospy.get_param('~shape', None)
         if self._shape:
-            if not (isinstance(self._shape, collections.Sequence) and
+            if not (isinstance(self._shape, collections_Sequence) and
                     len(self._shape) == 2):
                 rospy.logerr('~shape must be a list of 2 float values.')
                 sys.exit(1)

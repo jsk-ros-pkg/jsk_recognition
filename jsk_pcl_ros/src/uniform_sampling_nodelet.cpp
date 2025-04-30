@@ -80,10 +80,10 @@ namespace jsk_pcl_ros
     pcl::PointCloud<pcl::PointXYZ>::Ptr
       cloud (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*msg, *cloud);
-#if ( PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION >= 8)
+#if ( PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION >= 9)
     pcl::UniformSampling<pcl::PointXYZ> uniform_sampling(true);
 #else
-    pcl::UniformSampling<pcl::PointXYZ> uniform_sampling();
+    pcl::UniformSampling<pcl::PointXYZ> uniform_sampling;
 #endif
     uniform_sampling.setInputCloud(cloud);
     uniform_sampling.setRadiusSearch(search_radius_);

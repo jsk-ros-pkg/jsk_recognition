@@ -5,10 +5,10 @@ find_package(catkin REQUIRED COMPONENTS cv_bridge dynamic_reconfigure camera_inf
 
 find_package(OpenCV REQUIRED COMPONENTS core)
 message(STATUS "opencv version ${OpenCV_VERSION}")
-if(OpenCV_VERSION VERSION_LESS "4.0.0")
-  find_package(OpenCV 3 REQUIRED COMPONENTS core imgcodecs videoio)
+if(OpenCV_VERSION VERSION_LESS "3.0.0")
+  find_package(OpenCV REQUIRED COMPONENTS core highgui)
 else()
-  find_package(OpenCV 4 REQUIRED COMPONENTS core imgcodecs videoio)
+  find_package(OpenCV REQUIRED COMPONENTS core imgcodecs videoio)
 endif()
 
 # generate the dynamic_reconfigure config file

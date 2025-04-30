@@ -10,6 +10,20 @@
   <arg name="launch_rviz" default="true" />
   <arg name="publish_tf" default="true" />
 
+  <arg name="resize" default="false" />
+  <arg name="resize_step" default="2" />
+  <arg name="outlier_removal" default="false" />
+  <arg name="approximate_sync" default="false" />
+  <arg name="queue_size" default="300" />
+  <arg name="plane_min_size" default="2000" />
+  <arg name="object_min_height" default="0.03" />
+  <arg name="object_max_height" default="0.5" />
+  <arg name="align_boxes" default="true" />
+  <arg name="align_boxes_with_plane" default="true" />
+  <arg name="target_frame_id" default="base_link" />
+  <arg name="use_pca" default="false" />
+  <arg name="sort_by" default="input_indices" />
+
   <machine name="localhost" address="localhost" />
 
   <!-- openni driver -->
@@ -33,14 +47,30 @@
         machine="$(arg machine)">
     <remap from="~input" to="$(arg input)" />
   </node>
+
+  <node name="resize_points_publisher"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ResizePointsPublisher $(arg manager)"
+        output="screen" if="$(arg resize)"
+        machine="$(arg machine)" >
+    <remap from="~input" to="input_relay/output" />
+    <rosparam subst_value="true">
+      step_x: $(arg resize_step)
+      step_y: $(arg resize_step)
+    </rosparam>
+  </node>
+
+
   <node name="multi_plane_estimate" pkg="nodelet" type="nodelet"
         args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg manager)"
         output="screen"
         machine="$(arg machine)">
-    <remap from="~input" to="input_relay/output" />
-    <rosparam>
+    <remap from="~input" to="resize_points_publisher/output" if="$(arg resize)" />
+    <remap from="~input" to="input_relay/output" unless="$(arg resize)" />
+    <rosparam subst_value="true">
       max_curvature: 0.01
       estimate_normal: true
+      min_size: $(arg plane_min_size)
     </rosparam>
   </node>
   <node name="polygon_magnifier" pkg="nodelet" type="nodelet"
@@ -53,14 +83,19 @@
         args="load jsk_pcl/MultiPlaneExtraction $(arg manager)"
         output="screen"
         machine="$(arg machine)">
-    <remap from="~input" to="input_relay/output" />
+    <remap from="~input" to="resize_points_publisher/output" if="$(arg resize)" />
+    <remap from="~input" to="input_relay/output" unless="$(arg resize)" />
     <remap from="~indices" to="multi_plane_estimate/output_refined" />
     <remap from="~input_polygons" to="multi_plane_estimate/output_refined_polygon" />
     <remap from="~input_coefficients" to="multi_plane_estimate/output_refined_coefficients" />
     <rosparam subst_value="true">
+      use_indices: true
       use_sensor_frame: true
       sensor_frame: $(arg sensor_frame)
-      min_height: 0.03
+      min_height: $(arg object_min_height)
+      max_height: $(arg object_max_height)
+      use_async: $(arg approximate_sync)
+      max_queue_size: $(arg queue_size)
     </rosparam>
   </node>
   <node name="euclidean_clustering" pkg="nodelet" type="nodelet"
@@ -80,20 +115,43 @@
     <remap from="~input" to="euclidean_clustering/output" />
     <remap from="~output" to="euclidean_clustering/output_throttle" />
   </node>
+
+  <node name="outlier_removal" pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/OrganizedStatisticalOutlierRemoval $(arg manager)"
+        output="screen" if="$(arg outlier_removal)"
+        machine="$(arg machine)">
+    <remap from="~input" to="plane_extraction/output" />
+    <remap from="~input/cluster_indices" to="euclidean_clustering/output_throttle" />
+    <rosparam>
+      mean_k: 30
+      stddev: 0.4
+      keep_organized: true
+      use_cluster_point_indices: true
+      approximate_sync: $(arg approximate_sync)
+      queue_size: $(arg queue_size)
+    </rosparam>
+  </node>
+
   <node name="segmentation_decomposer" pkg="nodelet" type="nodelet"
         args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg manager)"
         output="screen"
         machine="$(arg machine)">
-    <remap from="~input" to="plane_extraction/output" />
+    <remap from="~input" to="outlier_removal/output" if="$(arg outlier_removal)" />
+    <remap from="~input" to="plane_extraction/output" unless="$(arg outlier_removal)" />
     <remap from="~target" to="euclidean_clustering/output_throttle" />
     <remap from="~align_planes" to="multi_plane_estimate/output_refined_polygon" />
     <remap from="~align_planes_coefficients"
            to="multi_plane_estimate/output_refined_coefficients" />
     <rosparam subst_value="true">
-      align_boxes: true
-      use_pca: true
+      align_boxes: $(arg align_boxes)
+      align_boxes_with_plane: $(arg align_boxes_with_plane)
+      target_frame_id: $(arg target_frame_id)
+      use_pca: $(arg use_pca)
+      sort_by: $(arg sort_by)
       publish_clouds: false
       publish_tf: $(arg publish_tf)
+      approximate_sync: $(arg approximate_sync)
+      queue_size: $(arg queue_size)
     </rosparam>
   </node>
 
@@ -146,7 +204,8 @@
           args="load jsk_pcl/OctreeVoxelGrid $(arg manager)"
           output="screen" clear_params="true"
           machine="$(arg machine)">
-      <remap from="~input" to="input_relay/output" />
+      <remap from="~input" to="resize_points_publisher/output" if="$(arg resize)" />
+      <remap from="~input" to="input_relay/output" unless="$(arg resize)" />
       <param name="resolution" value="0.01" />
       <rosparam>
         point_type: xyzrgb

@@ -52,6 +52,9 @@ namespace jsk_pcl_ros
   {
     DiagnosticNodelet::onInit();
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+    pnh_->param("use_cluster_point_indices", use_cpi_, false);
+    pnh_->param("approximate_sync", use_async_, false);
+    pnh_->param("queue_size", queue_size_, 100);
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
@@ -63,12 +66,44 @@ namespace jsk_pcl_ros
 
   void OrganizedStatisticalOutlierRemoval::subscribe()
   {
-    sub_ = pnh_->subscribe("input", 1, &OrganizedStatisticalOutlierRemoval::filterCloud, this);
+    if (use_cpi_)
+    {
+      sub_cloud_.subscribe(*pnh_, "input", 1);
+      sub_cpi_.subscribe(*pnh_, "input/cluster_indices", 1);
+      if (use_async_)
+      {
+        async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
+        async_->connectInput(sub_cloud_, sub_cpi_);
+        async_->registerCallback(
+          boost::bind(
+            &OrganizedStatisticalOutlierRemoval::filterCloudWithClusterPointIndices, this, _1, _2));
+      }
+      else
+      {
+        sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
+        sync_->connectInput(sub_cloud_, sub_cpi_);
+        sync_->registerCallback(
+          boost::bind(
+            &OrganizedStatisticalOutlierRemoval::filterCloudWithClusterPointIndices, this, _1, _2));
+      }
+    }
+    else
+    {
+      sub_ = pnh_->subscribe("input", 1, &OrganizedStatisticalOutlierRemoval::filterCloud, this);
+    }
   }
 
   void OrganizedStatisticalOutlierRemoval::unsubscribe()
   {
-    sub_.shutdown();
+    if (use_cpi_)
+    {
+      sub_cloud_.unsubscribe();
+      sub_cpi_.unsubscribe();
+    }
+    else
+    {
+      sub_.shutdown();
+    }
   }
 
   void OrganizedStatisticalOutlierRemoval::configCallback(Config &config, uint32_t level)
@@ -92,6 +127,31 @@ namespace jsk_pcl_ros
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromPCLPointCloud2(*pcl_cloud, *cloud);
     pcl_indices_filtered->indices = OrganizedStatisticalOutlierRemoval::getFilteredIndices(cloud);
+  }
+
+  void OrganizedStatisticalOutlierRemoval::filter(
+          const pcl::PCLPointCloud2::Ptr pcl_cloud,
+          const pcl::PointIndices::Ptr pcl_indices,
+          pcl::PointIndices::Ptr pcl_indices_filtered)
+  {
+    pcl::PCLPointCloud2::Ptr pcl_cloud_ex (new pcl::PCLPointCloud2);
+    pcl::ExtractIndices<pcl::PCLPointCloud2> ex;
+    ex.setInputCloud(pcl_cloud);
+    ex.setKeepOrganized(false);
+    ex.setNegative(false);
+    ex.setIndices(pcl_indices);
+    ex.filter(*pcl_cloud_ex);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_ex(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::fromPCLPointCloud2(*pcl_cloud_ex, *cloud_ex);
+
+    const std::vector<int> indices_ex_filtered = OrganizedStatisticalOutlierRemoval::getFilteredIndices(cloud_ex);
+    std::vector<int> indices_filtered;
+    indices_filtered.resize(indices_ex_filtered.size());
+    for (size_t i = 0; i < indices_ex_filtered.size(); i++)
+    {
+      indices_filtered[i] = pcl_indices->indices[indices_ex_filtered[i]];
+    }
+    pcl_indices_filtered->indices = indices_filtered;
   }
 
   std::vector<int> OrganizedStatisticalOutlierRemoval::getFilteredIndices(
@@ -197,6 +257,61 @@ namespace jsk_pcl_ros
     pcl::PointIndices::Ptr pcl_indices_filtered (new pcl::PointIndices());
     OrganizedStatisticalOutlierRemoval::filter(pcl_cloud, pcl_indices_filtered);
     pcl::PCLPointCloud2::Ptr pcl_cloud_filtered (new pcl::PCLPointCloud2);
+    pcl::ExtractIndices<pcl::PCLPointCloud2> ex;
+    ex.setInputCloud(pcl_cloud);
+    ex.setKeepOrganized(keep_organized);
+    ex.setNegative(false);
+    ex.setIndices(pcl_indices_filtered);
+    ex.filter(*pcl_cloud_filtered);
+    pcl_conversions::fromPCL(*pcl_cloud_filtered, output);
+#if PCL_VERSION_COMPARE (<, 1, 9, 0)
+    if (keep_organized) {
+      // Copy the common fields
+      output.is_bigendian = msg->is_bigendian;
+      output.fields = msg->fields;
+      output.point_step = msg->point_step;
+      output.data.resize(msg->data.size());
+      output.width = msg->width;
+      output.height = msg->height;
+    }
+#endif
+    output.header = msg->header;
+    output.row_step = output.point_step * output.width;
+    output.is_dense = !keep_organized;
+    pub_.publish(output);
+    diagnostic_updater_->update();
+  }
+
+  void OrganizedStatisticalOutlierRemoval::filterCloudWithClusterPointIndices(
+          const sensor_msgs::PointCloud2::ConstPtr& msg,
+          const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& cpi_msg)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
+    sensor_msgs::PointCloud2 output;
+
+    if (keep_organized_ && msg->is_dense) {
+      NODELET_ERROR("keep_organized parameter is true, but input pointcloud is not organized.");
+    }
+    bool keep_organized = keep_organized_ && !msg->is_dense;
+    pcl::PCLPointCloud2::Ptr pcl_cloud (new pcl::PCLPointCloud2);
+    pcl::PCLPointCloud2::Ptr pcl_cloud_filtered (new pcl::PCLPointCloud2);
+    pcl::PointIndices::Ptr pcl_indices_filtered (new pcl::PointIndices());
+    pcl_conversions::toPCL(*msg, *pcl_cloud);
+
+    for (size_t i = 0; i < cpi_msg->cluster_indices.size(); i++)
+    {
+      pcl::PointIndices::Ptr pcl_cluster_indices (new pcl::PointIndices());
+      pcl_conversions::toPCL(cpi_msg->cluster_indices[i], *pcl_cluster_indices);
+
+      pcl::PointIndices::Ptr pcl_cluster_indices_filtered (new pcl::PointIndices());
+      OrganizedStatisticalOutlierRemoval::filter(pcl_cloud,
+                                                 pcl_cluster_indices,
+                                                 pcl_cluster_indices_filtered);
+      pcl_indices_filtered->indices.insert(pcl_indices_filtered->indices.end(),
+                                           pcl_cluster_indices_filtered->indices.begin(),
+                                           pcl_cluster_indices_filtered->indices.end());
+    }
     pcl::ExtractIndices<pcl::PCLPointCloud2> ex;
     ex.setInputCloud(pcl_cloud);
     ex.setKeepOrganized(keep_organized);

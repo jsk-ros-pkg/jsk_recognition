@@ -41,6 +41,7 @@
 #include <jsk_recognition_utils/tf_listener_singleton.h>
 
 #include <sensor_msgs/PointCloud2.h>
+#include <std_srvs/Empty.h>
 #include <dynamic_reconfigure/server.h>
 #include <jsk_pcl_ros_utils/PointCloudToPCDConfig.h>
 
@@ -55,6 +56,8 @@ namespace jsk_pcl_ros_utils
     virtual void onInit();
     virtual void timerCallback (const ros::TimerEvent& event);
     virtual void configCallback(Config &config, uint32_t level);
+    void savePCD();
+    bool savePCDCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
     boost::mutex mutex_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     ros::Timer timer_;
@@ -66,6 +69,7 @@ namespace jsk_pcl_ros_utils
     bool compressed_;
     std::string fixed_frame_;
     tf::TransformListener* tf_listener_;
+    ros::ServiceServer srv_save_pcd_server_;
   private:
   };
 }

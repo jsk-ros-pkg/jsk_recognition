@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 2.8.3)
 project(jsk_recognition_msgs)
 find_package(catkin REQUIRED
   std_msgs sensor_msgs geometry_msgs message_generation pcl_msgs jsk_footstep_msgs)
-if(NOT $ENV{ROS_DISTRO} STREQUAL "indigo") # on noetic it needs catkin_install_python to support Python3 and it does not work on indigo for some reason...
-  catkin_python_setup()
-endif()
 add_message_files(
   FILES
   Accuracy.msg
@@ -15,6 +12,7 @@ add_message_files(
   Circle2DArray.msg
   Circle2D.msg
   ClassificationResult.msg
+  ClipResult.msg
   ClusterPointIndices.msg
   ColorHistogramArray.msg
   ColorHistogram.msg
@@ -46,6 +44,8 @@ add_message_files(
   PointsArray.msg
   PolygonArray.msg
   PosedCameraInfo.msg
+  QueryAndProbability.msg
+  QuestionAndAnswerText.msg
   RectArray.msg
   Rect.msg
   RotatedRect.msg
@@ -68,6 +68,7 @@ add_message_files(
   TrackingStatus.msg
   BoolStamped.msg
   VectorArray.msg
+  VQAResult.msg
   WeightedPoseArray.msg
   ContactSensor.msg
   ContactSensorArray.msg
@@ -110,9 +111,14 @@ add_service_files(FILES
   WhiteBalance.srv
   )
 
+add_action_files(FILES
+  VQATask.action
+  ClassificationTask.action
+  )
+
 generate_messages(
   DEPENDENCIES
-  std_msgs sensor_msgs geometry_msgs pcl_msgs jsk_footstep_msgs
+  std_msgs sensor_msgs geometry_msgs pcl_msgs jsk_footstep_msgs actionlib_msgs
 )
 catkin_package(
   CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs pcl_msgs jsk_footstep_msgs

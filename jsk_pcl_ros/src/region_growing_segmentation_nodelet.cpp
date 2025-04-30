@@ -89,7 +89,11 @@ namespace jsk_pcl_ros
   void RegionGrowingSegmentation::segment(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 12 )
+    pcl::search::Search<pcl::PointNormal>::Ptr tree(new pcl::search::KdTree<pcl::PointNormal>());
+#else
     pcl::search::Search<pcl::PointNormal>::Ptr tree = boost::shared_ptr<pcl::search::Search<pcl::PointNormal> > (new pcl::search::KdTree<pcl::PointNormal>);
+#endif
     pcl::PointCloud<pcl::PointNormal> cloud;
     pcl::fromROSMsg(*msg, cloud);
     

@@ -8,7 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_python_setup()
 
 generate_dynamic_reconfigure_options(
-  cfg/AudioAmplitudePlot.cfg
+  cfg/DataAmplitudePlot.cfg
 )
 
 catkin_package()
@@ -17,7 +17,7 @@ install(DIRECTORY launch sample test
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   USE_SOURCE_PERMISSIONS
 )
-if(NOT $ENV{ROS_DISTRO} STREQUAL "indigo") # on noetic it needs catkin_install_python to support Python3 and it does not work on indigo for some reason...
+if($ENV{ROS_DISTRO} STREQUAL "indigo") # on noetic it needs catkin_install_python to support Python3 and it does not work on indigo for some reason...
   install(DIRECTORY scripts
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
     USE_SOURCE_PERMISSIONS
@@ -41,4 +41,10 @@ if(CATKIN_ENABLE_TESTING)
   find_package(catkin REQUIRED COMPONENTS rostest roslaunch)
   add_rostest(test/audio_to_spectrogram.test)
   roslaunch_add_file_check(launch/audio_to_spectrogram.launch)
+  if(NOT $ENV{ROS_DISTRO} STRLESS "kinetic")
+    # Under kinetic, eval cannot be used in launch files
+    # http://wiki.ros.org/roslaunch/XML#substitution_args
+    add_rostest(test/wrench_to_spectrogram.test)
+    roslaunch_add_file_check(launch/wrench_to_spectrogram.launch)
+  endif()
 endif()

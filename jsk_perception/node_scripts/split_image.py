@@ -47,5 +47,6 @@ class SplitImage(ConnectionBasedTransport):
 
 if __name__ == '__main__':
     rospy.init_node('split_image')
+    rospy.logwarn("split_image.py would be deprecated. Please use NODELET version of split_image")
     SplitImage()
     rospy.spin()

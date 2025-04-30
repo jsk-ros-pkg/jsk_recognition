@@ -2,6 +2,33 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.17 (2023-11-14)
+-------------------
+* https://github.com/jsk-ros-pkg/jsk_recognition/pull/2648 requires jsk_data package (`#2805 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2805>`_)
+
+* Contributors: Kei Okada
+
+1.2.16 (2023-11-10)
+-------------------
+* [jsk_recognition_utils] add cython3 depend when ROS_PYTHON_VERSION==3 (`#2771 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2771>`_)
+* use python3-shapely for ROS_PHTHON_VERSION==3 (`#2756 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2756>`_)
+* use catkin_install_python to install python scripts under node_scripts/ scripts/ (`#2743 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2743>`_)
+* Fixed typo of Software License Agreement. and/o2r to and/or (`#2727 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2727>`_)
+* [jsk_perception/mask_image_to_rect] Add rect_type option to publish rects containing each contour of mask image (`#2728 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2728>`_)
+* [jsk_recognition_utils] Add jsk_topic_tools header file to check jsk_topic_tools' version (`#2721 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2721>`_)
+* [jsk_perception/image_publisher.py] Support bgr16, rgb16, bgra16 and rgba16 encodings and compressedDepth for 32FC1 depth image (`#2714 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2714>`_)
+* Add CRAFT character detection node and OCR node. (`#2650 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2650>`_)
+* work around permission issue / integrate all yaml to one (`#2677 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2677>`_)
+* [jsk_recognition_utils] Add polygon_array_to_box_array node (`#2647 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2647>`_)
+* Add modified version of draw rects for non ascii characters (`#2648 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2648>`_)
+* [jsk_recognition_utils] Enable publishing coefficients array (`#2646 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2646>`_)
+* Replace color.pyx with color.py for better compatibility (`#2633 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2633>`_)
+* Using pcl::Vertices instead of std::vector since type of point indices changes between PCL versions. (`#2627 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2627>`_)
+* support ~image_transport for static_virtual_camera (`#2569 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2569>`_)
+* [jsk_recognition_utils] use try to import chainer depend modules (`#2565 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2565>`_)
+
+* Contributors: Aoi Nakane, Baltashov Ilia, Iori Yanokura, Kei Okada, Kentaro Wada, Naoto Tsukamoto, Naoya Yamaguchi, Shingo Kitagawa, Yoshiki Obinata
+
 1.2.15 (2020-10-10)
 -------------------
 

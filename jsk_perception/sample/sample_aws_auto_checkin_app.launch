@@ -2,6 +2,7 @@
   <arg name="gui" default="true" doc="set true to show windows displaying face detection and face search"/>
   <arg name="use_usb_cam" default="false" doc="set true to use USB camera image as input"/>
   <arg name="use_aws_face_detection" default="false" doc="set true to use aws face detection API"/>
+  <arg name="always_publish" default="true" doc="set false not to publish result when face is not detected" />
 
   <node name="usb_cam" pkg="usb_cam" type="usb_cam_node"
         if="$(arg use_usb_cam)" >
@@ -23,6 +24,7 @@
       <rosparam subst_value="true">
         use_window: $(arg gui)
         aws_credentials_path: /tmp/aws.json
+        always_publish: $(arg always_publish)
         attributes: ALL
       </rosparam>
     </node>
@@ -45,8 +47,9 @@
       use_window: $(arg gui)
       env_path: /tmp/env.json
       aws_credentials_path: /tmp/aws.json
-      approximate_sync: false
-      queue_size: 100
+      always_publish: $(arg always_publish)
+      approximate_sync: true
+      queue_size: 1
       image_transport: compressed
     </rosparam>
   </node>
@@ -63,7 +66,9 @@
         font_path: $(find jsk_recognition_utils)/font_data/NotoSansJP-Regular.otf
         use_classification_result: true
         label_size: 16
-        queue_size: 100
+        approximate_sync: true
+        queue_size: 30
+        image_transport: compressed
       </rosparam>
     </node>
   </group>
@@ -71,6 +76,7 @@
   <group if="$(arg gui)" >
     <node name="image_view00"
           pkg="image_view" type="image_view">
+      <param name="image_transport" value="compressed" />
       <remap from="image" to="aws_auto_checkin_app/draw_rects/output" />
     </node>
   </group>

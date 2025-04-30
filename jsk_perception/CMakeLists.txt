@@ -151,6 +151,8 @@ generate_dynamic_reconfigure_options(
   cfg/VirtualCameraMono.cfg
   cfg/AWSDetectFaces.cfg
   cfg/RemoveBlurredFrames.cfg
+  cfg/VQA.cfg
+  cfg/Classification.cfg
   cfg/VideoToScene.cfg
 )
 
@@ -258,6 +260,7 @@ jsk_add_nodelet(src/overlay_image_color_on_mono.cpp "jsk_perception/OverlayImage
 jsk_add_nodelet(src/grid_label.cpp "jsk_perception/GridLabel" "grid_label")
 jsk_add_nodelet(src/color_histogram_label_match.cpp "jsk_perception/ColorHistogramLabelMatch" "color_histogram_label_match")
 jsk_add_nodelet(src/apply_mask_image.cpp "jsk_perception/ApplyMaskImage" "apply_mask_image")
+jsk_add_nodelet(src/invert_mask_image.cpp "jsk_perception/InvertMaskImage" "invert_mask_image")
 jsk_add_nodelet(src/unapply_mask_image.cpp "jsk_perception/UnapplyMaskImage" "unapply_mask_image")
 jsk_add_nodelet(src/single_channel_histogram.cpp "jsk_perception/SingleChannelHistogram" "single_channel_histogram")
 jsk_add_nodelet(src/blob_detector.cpp "jsk_perception/BlobDetector" "blob_detector")
@@ -292,6 +295,7 @@ jsk_add_nodelet(src/gaussian_blur.cpp "jsk_perception/GaussianBlur" "gaussian_bl
 jsk_add_nodelet(src/kmeans.cpp "jsk_perception/KMeans" "kmeans")
 jsk_add_nodelet(src/draw_rects.cpp "jsk_perception/DrawRects" "draw_rects")
 jsk_add_nodelet(src/remove_blurred_frames.cpp "jsk_perception/RemoveBlurredFrames" "remove_blurred_frames")
+jsk_add_nodelet(src/split_image.cpp "jsk_perception/SplitImage" "split_image")
 if("${OpenCV_VERSION}" VERSION_GREATER "2.9.9")  # >= 3.0.0
   jsk_add_nodelet(src/video_to_scene.cpp "jsk_perception/VideoToScene" "video_to_scene")
   jsk_add_nodelet(src/bing.cpp "jsk_perception/Bing" "bing")
@@ -554,6 +558,7 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/people_pose_estimation_2d.test)
     jsk_add_rostest(test/human_mesh_recovery.test)
     jsk_add_rostest(test/point_pose_extractor.test)
+    jsk_add_rostest(test/point_pose_extractor_group_ns.test)
     jsk_add_rostest(test/pointit.test)
     jsk_add_rostest(test/polygon_array_color_histogram.test)
     jsk_add_rostest(test/polygon_array_color_likelihood.test)

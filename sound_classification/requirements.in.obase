@@ -1,0 +1,3 @@
+chainer # For Python 2.x, chainer 5.x.x is needed, 7.0.0 will not work on Python2
+numpy<2.0
+cv_bridge

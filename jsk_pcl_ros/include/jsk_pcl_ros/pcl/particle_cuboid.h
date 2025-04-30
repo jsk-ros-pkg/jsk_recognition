@@ -302,15 +302,26 @@ namespace pcl
       }
       
       inline jsk_pcl_ros::Cube::Ptr toCube() const
-    {
-      Eigen::Affine3f pose = toEigenMatrix();
-      Eigen::Vector3f dimensions(dx, dy, dz);
-      jsk_pcl_ros::Cube::Ptr cube(new jsk_pcl_ros::Cube(Eigen::Vector3f(pose.translation()),
-                                                        Eigen::Quaternionf(pose.rotation()),
-                                                        dimensions));
-      return cube;
-    }
+      {
+        Eigen::Affine3f pose = toEigenMatrix();
+        Eigen::Vector3f dimensions(dx, dy, dz);
+        jsk_pcl_ros::Cube::Ptr cube(new jsk_pcl_ros::Cube(Eigen::Vector3f(pose.translation()),
+                                                          Eigen::Quaternionf(pose.rotation()),
+                                                          dimensions));
+        return cube;
+      }
 
+      // As of https://github.com/PointCloudLibrary/pcl/pull/5538,
+      // trackers must implements averaging method
+      template <class InputIterator>
+        static ParticleCuboid weightedAverage(InputIterator first, InputIterator last)
+      {
+        ParticleCuboid wa;
+        for (auto cuboid = first; cuboid != last; ++cuboid) {
+          wa = wa + *(cuboid) * cuboid->weight;
+        }
+        return wa;
+      }
 
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     };

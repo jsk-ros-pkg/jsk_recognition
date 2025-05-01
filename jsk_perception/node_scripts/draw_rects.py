@@ -148,19 +148,29 @@ class DrawRects(ConnectionBasedTransport):
                           color=color.tolist(),
                           thickness=self.rect_boldness,
                           lineType=cv2.LINE_AA)
-            if self.use_classification_result and osp.exists(self.font_path):
+            if self.use_classification_result:
                 text = class_msg.label_names[i]
                 if self.show_proba and len(class_msg.label_proba) > i:
                     text += ' ({0:.2f})'.format(class_msg.label_proba[i])
                 pos_x = int(rect.x * self.resolution_factor)
                 pos_y = int(rect.y * self.resolution_factor)
                 pos = (pos_x, pos_y)
-                img = put_text_to_image(
-                    img, text, pos, self.font_path,
-                    self.label_size,
-                    color=(255, 255, 255),
-                    background_color=tuple(color),
-                    offset_x=self.rect_boldness / 2.0)
+                if osp.exists(self.font_path):
+                    img = put_text_to_image(
+                        img, text, pos, self.font_path,
+                        self.label_size,
+                        color=(255, 255, 255),
+                        background_color=tuple(color),
+                        offset_x=self.rect_boldness / 2.0)
+                else:
+                    pt1=(int(pos_x), int(pos_y - 16))
+                    pt2=(int(pos_x + rect.width * self.resolution_factor)-10, int(pos_y))
+                    cv2.rectangle(img, pt1, pt2,
+                                  color.tolist(), -1)
+                    cv2.putText(img, text, (pos_x, pos_y - 4),
+                                cv2.FONT_HERSHEY_PLAIN,
+                                fontScale=1, color=(255, 255, 255),
+                                thickness=1, lineType=cv2.LINE_AA)
         if self.transport_hint == 'compressed':
             viz_msg = sensor_msgs.msg.CompressedImage()
             viz_msg.format = "jpeg"

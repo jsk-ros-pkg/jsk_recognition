@@ -2,6 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import collections
+try:  # for python3.10+
+    from collections.abc import Sequence as collections_Sequence
+except ImportError:
+    from collections import Sequence as collections_Sequence
 import sys
 import cv2
 import cv_bridge
@@ -50,7 +54,7 @@ class TileImages(ConnectionBasedTransport):
             sys.exit(1)
         self._shape = rospy.get_param('~shape', None)
         if self._shape:
-            if not (isinstance(self._shape, collections.abc.Sequence) and
+            if not (isinstance(self._shape, collections_Sequence) and
                     len(self._shape) == 2):
                 rospy.logerr('~shape must be a list of 2 float values.')
                 sys.exit(1)
@@ -130,18 +134,24 @@ class TileImages(ConnectionBasedTransport):
                 out_bgr = jsk_recognition_utils.get_tile_image(
                     imgs, tile_shape=shape_xy)
                 self.cache_img = out_bgr
-        bridge = cv_bridge.CvBridge()
-        imgmsg = bridge.cv2_to_imgmsg(out_bgr, encoding='bgr8')
-        self.pub_img.publish(imgmsg)
+        if self.pub_img.get_num_connections() > 0:
+            bridge = cv_bridge.CvBridge()
+            imgmsg = bridge.cv2_to_imgmsg(out_bgr, encoding='bgr8')
+            self.pub_img.publish(imgmsg)
 
-        compressed_msg = CompressedImage()
-        compressed_msg.header = imgmsg.header
-        compressed_msg.format = imgmsg.encoding + '; jpeg compressed bgr8'
-        compressed_msg.data = np.array(
-            cv2.imencode('.jpg', out_bgr)[1]).tostring()
-        self.pub_compressed_img.publish(compressed_msg)
+        if self.pub_compressed_img.get_num_connections() > 0:
+            compressed_msg = CompressedImage()
+            compressed_msg.header = imgmsg.header
+            compressed_msg.format = imgmsg.encoding + '; jpeg compressed bgr8'
+            compressed_msg.data = np.array(
+                cv2.imencode('.jpg', out_bgr)[1]).tostring()
+            self.pub_compressed_img.publish(compressed_msg)
 
     def _apply(self, *msgs):
+        if (self.pub_img.get_num_connections() == 0
+                and self.pub_compressed_img.get_num_connections() == 0):
+            return
+
         bridge = cv_bridge.CvBridge()
         imgs = []
         for msg, topic in zip(msgs, self.input_topics):

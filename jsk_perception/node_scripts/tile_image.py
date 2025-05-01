@@ -134,15 +134,19 @@ class TileImages(ConnectionBasedTransport):
                 out_bgr = jsk_recognition_utils.get_tile_image(
                     imgs, tile_shape=shape_xy)
                 self.cache_img = out_bgr
+
+        encoding = 'bgr8'
+        stamp = rospy.Time.now()
         if self.pub_img.get_num_connections() > 0:
             bridge = cv_bridge.CvBridge()
-            imgmsg = bridge.cv2_to_imgmsg(out_bgr, encoding='bgr8')
+            imgmsg = bridge.cv2_to_imgmsg(out_bgr, encoding=encoding)
+            imgmsg.header.stamp = stamp
             self.pub_img.publish(imgmsg)
 
         if self.pub_compressed_img.get_num_connections() > 0:
             compressed_msg = CompressedImage()
-            compressed_msg.header = imgmsg.header
-            compressed_msg.format = imgmsg.encoding + '; jpeg compressed bgr8'
+            compressed_msg.header.stamp = stamp
+            compressed_msg.format = encoding + '; jpeg compressed ' + encoding
             compressed_msg.data = np.array(
                 cv2.imencode('.jpg', out_bgr)[1]).tostring()
             self.pub_compressed_img.publish(compressed_msg)

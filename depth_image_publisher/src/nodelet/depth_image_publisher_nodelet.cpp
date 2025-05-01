@@ -40,6 +40,8 @@
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <camera_info_manager/camera_info_manager.h>
+#include <opencv2/core/version.hpp>
+#include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <dynamic_reconfigure/server.h>
 #include <boost/assign.hpp>
@@ -96,7 +98,11 @@ class DepthImagePublisherNodelet : public nodelet::Nodelet
     {
       if ( cap_.isOpened() ) {
         if ( ! cap_.read(image_) ) {
+#if CV_MAJOR_VERSION >= 3
           cap_.set(cv::CAP_PROP_POS_FRAMES, 0);
+#else
+          cap_.set(CV_CAP_PROP_POS_FRAMES, 0);
+#endif
         }
       }
       if (flip_image_)
@@ -156,7 +162,11 @@ public:
         }
         CV_Assert(cap_.isOpened());
         cap_.read(image_);
+#if CV_MAJOR_VERSION >= 3
         cap_.set(cv::CAP_PROP_POS_FRAMES, 0);
+#else
+        cap_.set(CV_CAP_PROP_POS_FRAMES, 0);
+#endif
       }
       CV_Assert(!image_.empty());
     }
@@ -197,7 +207,7 @@ public:
 
     srv.reset(new ReconfigureServer(getPrivateNodeHandle()));
     ReconfigureServer::CallbackType f =
-      boost::bind(&DepthImagePublisherNodelet::reconfigureCallback, this, boost::placeholders::_1, boost::placeholders::_2);
+      boost::bind(&DepthImagePublisherNodelet::reconfigureCallback, this, _1, _2);
     srv->setCallback(f);
   }
 };

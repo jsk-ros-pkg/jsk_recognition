@@ -6,7 +6,9 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   cv_bridge
   catkin_virtualenv
-)
+  )
+
+find_package(Wget REQUIRED)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/weights)
 set(MODEL_FILE ${CMAKE_CURRENT_SOURCE_DIR}/weights/RealESRGAN_x4plus.pth)

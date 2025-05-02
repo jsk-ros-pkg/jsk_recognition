@@ -246,10 +246,17 @@ namespace jsk_pcl_ros
 
         // compute the distance between two boundaries.
         // if they are near enough, we can regard these two map should connect
+#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 12 )
+        pcl::PointIndices::Ptr a_indices
+          = std::make_shared<pcl::PointIndices>(boundary_indices[i]);
+        pcl::PointIndices::Ptr b_indices
+          = std::make_shared<pcl::PointIndices>(boundary_indices[j]);
+#else
         pcl::PointIndices::Ptr a_indices
           = boost::make_shared<pcl::PointIndices>(boundary_indices[i]);
         pcl::PointIndices::Ptr b_indices
           = boost::make_shared<pcl::PointIndices>(boundary_indices[j]);
+#endif
         pcl::PointCloud<PointT> a_cloud, b_cloud;
         extract.setIndices(a_indices);
         extract.filter(a_cloud);
@@ -364,10 +371,17 @@ namespace jsk_pcl_ros
       pcl::ModelCoefficients pcl_new_coefficients;
       pcl_new_coefficients.values = new_coefficients;
       // estimate concave hull
+#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 12 )
+      pcl::PointIndices::Ptr indices_ptr
+        = std::make_shared<pcl::PointIndices>(one_boundaries);
+      pcl::ModelCoefficients::Ptr coefficients_ptr
+        = std::make_shared<pcl::ModelCoefficients>(pcl_new_coefficients);
+#else
       pcl::PointIndices::Ptr indices_ptr
         = boost::make_shared<pcl::PointIndices>(one_boundaries);
       pcl::ModelCoefficients::Ptr coefficients_ptr
         = boost::make_shared<pcl::ModelCoefficients>(pcl_new_coefficients);
+#endif
       jsk_recognition_utils::ConvexPolygon::Ptr convex
         = jsk_recognition_utils::convexFromCoefficientsAndInliers<PointT>(
           input, indices_ptr, coefficients_ptr);
@@ -478,7 +492,11 @@ namespace jsk_pcl_ros
     for (size_t i = 0; i < boundary_indices.size(); i++) {
       pcl::PointCloud<PointT> boundary_cloud;
       pcl::PointIndices boundary_one_indices = boundary_indices[i];
+#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 12 )
+      pcl::PointIndices::Ptr indices_ptr = std::make_shared<pcl::PointIndices>(boundary_indices[i]);
+#else
       pcl::PointIndices::Ptr indices_ptr = boost::make_shared<pcl::PointIndices>(boundary_indices[i]);
+#endif
       extract.setIndices(indices_ptr);
       extract.filter(boundary_cloud);
       boundaries.push_back(boundary_cloud);
@@ -510,8 +528,13 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     jsk_recognition_utils::Vertices centroids;
     for (size_t i = 0; i < inliers.size(); i++) {
+#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 12 )
+      pcl::PointIndices::Ptr target_inliers
+        = std::make_shared<pcl::PointIndices>(inliers[i]);
+#else
       pcl::PointIndices::Ptr target_inliers
         = boost::make_shared<pcl::PointIndices>(inliers[i]);
+#endif
       pcl::PointCloud<PointT>::Ptr target_cloud (new pcl::PointCloud<PointT>);
       Eigen::Vector4f centroid;
       pcl::ExtractIndices<PointT> ex;
@@ -640,8 +663,13 @@ namespace jsk_pcl_ros
     jsk_topic_tools::ScopedTimer timer
       = ransac_refinement_time_acc_.scopedTimer();
     for (size_t i = 0; i < input_indices.size(); i++) {
+#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 12 )
+      pcl::PointIndices::Ptr input_indices_ptr
+        = std::make_shared<pcl::PointIndices>(input_indices[i]);
+#else
       pcl::PointIndices::Ptr input_indices_ptr
         = boost::make_shared<pcl::PointIndices>(input_indices[i]);
+#endif
       Eigen::Vector3f normal(input_coefficients[i].values[0],
                              input_coefficients[i].values[1],
                              input_coefficients[i].values[2]);

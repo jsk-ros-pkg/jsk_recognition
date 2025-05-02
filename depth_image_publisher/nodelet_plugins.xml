@@ -1,0 +1,7 @@
+<library path="lib/libdepth_image_publisher">
+
+  <class name="depth_image_publisher/depth_image_publisher" type="depth_image_publisher::DepthImagePublisherNodelet" base_class_type="nodelet::Nodelet">
+    <description>Nodelet to publish depth image</description>
+  </class>
+
+</library>

@@ -34,6 +34,7 @@
 #include "jsk_pcl_ros/colorize_random_points_RF.h"
 #include <pluginlib/class_list_macros.h>
 #include <pcl/common/centroid.h>
+#include <pcl/octree/octree_search.h>
 
 namespace jsk_pcl_ros
 {
@@ -86,7 +87,12 @@ namespace jsk_pcl_ros
   {
     sub_input_.shutdown();
   }
-  
+
+    // pcl removed the method by 1.13, no harm in defining it ourselves to use below
+#if __cplusplus >= 201103L
+#define pcl_isnan(x) std::isnan(x)
+#endif
+
   void ColorizeMapRandomForest::extract(const sensor_msgs::PointCloud2 pc)
   {
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB> ());

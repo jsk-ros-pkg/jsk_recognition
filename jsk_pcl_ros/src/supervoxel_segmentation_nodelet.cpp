@@ -72,8 +72,12 @@ namespace jsk_pcl_ros
       pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
       pcl::fromROSMsg(*cloud_msg, *cloud);
       pcl::SupervoxelClustering<PointT> super(voxel_resolution_,
-                                              seed_resolution_,
-                                              use_transform_);
+                                              seed_resolution_
+#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 12 )
+                                              );
+#else
+                                              , use_transform_);
+#endif
       super.setInputCloud(cloud);
       super.setColorImportance(color_importance_);
       super.setSpatialImportance(spatial_importance_);

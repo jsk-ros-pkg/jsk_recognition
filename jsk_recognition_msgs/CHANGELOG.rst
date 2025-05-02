@@ -2,6 +2,40 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.17 (2023-11-14)
+-------------------
+
+1.2.16 (2023-11-10)
+-------------------
+* [feature] VQA using Large-Scale Vision and Language model (`#2730 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2730>`_)
+
+  * add ClassificationTask.action, VQATask.action, ClipResult.msg,  QuaryANdProbability.msg, QuestionAndAnswerText.msg, VQAResult.msg
+
+* * add image_height and image_width in PanoramaInfo.msg `#2753 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2753>`_ from knorth55/panorama-info-image-shape
+* add noetic build test (`#2756 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2756>`_)
+* jsk_recognition_msgs : setup.py need src/jsk_recognition_msgs (`#2749 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2749>`_)
+
+  * with out this fix, master branch fails with
+    ```
+    error: package directory 'jsk_recognition_msgs' does not exist
+    error: package directory 'src/jsk_recognition_msgs' does not exist
+    ```
+    Not sure why CI passed
+
+* use catkin_install_python to install python scripts under node_scripts/ scripts/ (`#2743 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2743>`_)
+* image_publisher, enable to publish exif information (`#2640 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2640>`_)
+
+  * add ExifGPSInfo.msg, ExifTags.msg
+
+* Add hand pose estimation (`#2601 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2601>`_)
+
+  * add HandPose.msg, HandPoseArray.msg
+* [jsk_recognition_msgs] add PanoramaInfo.msg (`#2579 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2579>`_)
+
+  add PanoramaInfo on jsk_recognition_msgs until https://github.com/ros/common_msgs/pull/171 merged
+
+* Contributors: Iori Yanokura, Kei Okada, Koki Shinjo, Shingo Kitagawa, Wu Liqi, Yoshiki Obinata
+
 1.2.15 (2020-10-10)
 -------------------
 

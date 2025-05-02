@@ -7,7 +7,7 @@ on:
 jobs:
   ros:
     runs-on: ubuntu-latest
-    container: ubuntu:18.04
+    container: ubuntu:20.04
     continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
@@ -141,3 +141,112 @@ jobs:
           USE_JENKINS : ${{ matrix.USE_JENKINS }}
           DOCKER_IMAGE_JENKINS : ${{ matrix.DOCKER_IMAGE_JENKINS }}
           TIMEOUT_JENKINS : 180
+
+  # ROS-O setup for v4hn https://github.com/v4hn/ros-o-builder/blob/jammy-one/README.md#install-instructions
+  # ROS-O setup for techfak https://ros.packages.techfak.net/
+  # note that v4hn uses ROS_DISTRO=one and techfak uses ROS_DISTRO
+  ros-o:
+    strategy:
+      fail-fast: false
+      matrix:
+        DEB_DISTRO: [22.04, 24.04]
+        ARCH: [x64]
+        ROS_ONE_VARIANT: [techfak]
+        BUILD_PKGS: ['jsk_recognition_msgs audio_to_spectrogram sound_classification', 'checkerboard_detector imagesift jsk_perception jsk_recognition_utils resized_image_transport', 'jsk_pcl_ros_utils jsk_pcl_ros']
+
+    runs-on: ${{ matrix.ARCH == 'x64' && format('ubuntu-{0}', matrix.DEB_DISTRO) || (matrix.ARCH == 'arm64' && format('ubuntu-{0}-arm', matrix.DEB_DISTRO) || format('ubuntu-{0}', matrix.DEB_DISTRO)) }}
+
+    env:
+      DEBIAN_FRONTEND : noninteractive
+
+    steps:
+      - name: Chcekout Source
+        uses: actions/checkout@v3.0.2
+
+      - name: Setup ROS-O deb repository
+        run: |
+          set -x
+          sudo apt update && sudo apt install -qq -y ca-certificates git
+          if [[ "${{ matrix.DEB_DISTRO }}" == "22.04" ]]; then export CODE_NAME="jammy"; fi
+          if [[ "${{ matrix.DEB_DISTRO }}" == "24.04" ]]; then export CODE_NAME="noble"; fi
+          echo "deb [trusted=yes] https://ros.packages.techfak.net $CODE_NAME-testing main" | sudo tee /etc/apt/sources.list.d/ros-o-builder.list
+          ##
+          # https://github.com/v4hn/ros-deb-builder-action/blob/b7c0ed93fde3a86b5b1027bf8f7145cad6067c90/prepare.sh#L27-L28
+          # Canonical dropped the Debian ROS packages from 24.04 for political reasons. Wow.
+          if [[ "${{ matrix.ROS_ONE_VARIANT }}" == "v4hn" && "${{ matrix.DISTRO }}" == "ubuntu:24.04" ]]; then apt install -y software-properties-common retry && retry -d 50,10,30,300 -t 12 add-apt-repository -y ppa:v-launchpad-jochen-sprickerhof-de/ros; fi
+          ##
+          sudo apt update
+          if [[ "${{ matrix.ROS_ONE_VARIANT }}" == "v4hn" ]]; then
+              sudo apt install -qq -y python3-rosdep2
+          fi
+          if [[ "${{ matrix.ROS_ONE_VARIANT }}" == "techfak"  ]]; then
+              # Do not install python3-rosdep2, which is an outdated version of rosdep shipped via the Ubuntu repositories (instead of ROS)!
+              sudo apt install -qq -y python3-rosdep
+              sudo rosdep init
+          fi
+          if [[ "${{ matrix.ROS_ONE_VARIANT }}" == "v4hn" ]]; then
+              export ROSDEP_PACKAGE_MAPPING="yaml https://raw.githubusercontent.com/v4hn/ros-o-builder/jammy-one/repository/local.yaml debian"
+          fi
+          if [[ "${{ matrix.ROS_ONE_VARIANT }}" == "techfak"  ]]; then
+              export ROSDEP_PACKAGE_MAPPING="yaml https://ros.packages.techfak.net/ros-one.yaml ubuntu"
+          fi
+          echo $ROSDEP_PACKAGE_MAPPING | sudo tee /etc/ros/rosdep/sources.list.d/1-ros-o-builder.list
+          rosdep update
+        shell: bash
+
+      - name: Setup catkin-tools
+        run: |
+          set -x
+          # setup catkin tools
+          sudo apt install -qq -y python3-pip
+          if [[ "${{ matrix.ROS_ONE_VARIANT }}" == "v4hn" ]]; then
+              pip3 install catkin-tools==0.9.4
+              sudo apt install -qq -y catkin
+          fi
+          if [[ "${{ matrix.ROS_ONE_VARIANT }}" == "techfak" ]]; then
+              sudo apt install -qq -y ros-one-catkin python3-catkin-tools
+          fi
+          # setup build tools
+          sudo apt install -qq -y cmake build-essential ros-one-rosbash
+        shell: bash
+
+      - name: Setup Workspace
+        run: |
+          source /opt/ros/one/setup.bash
+          set -x
+          # setup workspace
+          mkdir -p ~/ws/src
+          cd ~/ws/src
+          ln -sf $GITHUB_WORKSPACE .
+          rosdep install -qq -r -y --from-path . --ignore-src || echo "OK"
+          # check all system packages are able to install, because ROS-O build deb files that needs all packages
+          PIP_BREAK_SYSTEM_PACKAGES=1 rosdep install -qq --simulate -y --from-path . --ignore-src -t exec -t buildtool_export -t buildtool -t build -t build_export | tee rosdep-install.sh
+          # catkin_tools is not available on v4hn/jammy
+          if [[ "${{ matrix.ROS_ONE_VARIANT }}" == "v4hn" ]]; then sed -i '/python3-catkin-tools/s/^/#/' rosdep-install.sh; fi
+          sed 's/apt-get install/apt-get -y install/;/install ros-one/s/^/#/;/pip3 install/s/^/#/' rosdep-install.sh | bash -xe
+        shell: bash
+
+      - name: Check local installed python
+        run: |
+          set -x
+          pip freeze --local | cut -d= -f1 | xargs -n1 pip show | grep -E '^(Name|Location|Version)' || echo "OK"
+        shell: bash
+
+      - name: Clean Disk space
+        run: |
+          set -x
+          df -h
+          ls -al /opt/
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc || true
+          sudo apt clean
+          df -h
+        shell: bash
+
+      - name: Compile Packages
+        run: |
+          source /opt/ros/one/setup.bash
+          set -x
+          cd ~/ws/
+          catkin build ${{ matrix.BUILD_PKGS }} ${{ matrix.DEB_DISTRO == '22.04' && '-j4' || '' }} --no-status -sv ${{ matrix.CATKIN_OPTIONS }} --cmake-args -DCATKIN_ENABLE_TESTING=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ${{ matrix.CMAKE_OPTIONS }}
+        shell: bash
+

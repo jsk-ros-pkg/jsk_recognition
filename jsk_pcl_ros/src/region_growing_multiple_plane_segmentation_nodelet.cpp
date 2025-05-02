@@ -204,7 +204,11 @@ namespace jsk_pcl_ros
       for (size_t i = 0; i < clusters->size(); i++) {
         pcl::PointIndices::Ptr plane_inliers(new pcl::PointIndices);
         pcl::ModelCoefficients::Ptr plane_coefficients(new pcl::ModelCoefficients);
+#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 12 )
+        pcl::PointIndices::Ptr cluster = std::make_shared<pcl::PointIndices>((*clusters)[i]);
+#else
         pcl::PointIndices::Ptr cluster = boost::make_shared<pcl::PointIndices>((*clusters)[i]);
+#endif
         ransacEstimation(cloud, cluster,
                          *plane_inliers, *plane_coefficients);
         if (plane_inliers->indices.size() > 0) {

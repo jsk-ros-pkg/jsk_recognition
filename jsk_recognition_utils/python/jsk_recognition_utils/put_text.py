@@ -40,7 +40,12 @@ def put_text_to_image(
         text = text.decode('utf-8')
     pil_font = ImageFont.truetype(font=font_path, size=font_size)
     dummy_draw = ImageDraw.Draw(Image.new("RGB", (0, 0)))
-    text_w, text_h = dummy_draw.textsize(text, font=pil_font)
+    if hasattr(dummy_draw, 'textsize'):
+        text_w, text_h = dummy_draw.textsize(text, font=pil_font)
+    else:  # Pillow>=10.0
+        text_bbox = dummy_draw.textbbox((0,0), text, font=pil_font)
+        text_w = text_bbox[2] - text_bbox[0]
+        text_h = text_bbox[3] - text_bbox[1]
     text_bottom_offset = int(0.1 * text_h)
     x, y = pos
     if loc == 'top':

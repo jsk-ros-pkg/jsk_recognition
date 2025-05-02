@@ -39,6 +39,7 @@
 #include <geometry_msgs/PointStamped.h>
 
 #include "jsk_recognition_utils/pcl_conversion_util.h"
+#include <pcl/search/kdtree.h>  // for KdTree
 
 namespace jsk_pcl_ros
 {
@@ -56,7 +57,9 @@ namespace jsk_pcl_ros
     pcl::MovingLeastSquares<pcl::PointXYZRGB, pcl::PointXYZRGB> smoother;
     smoother.setSearchRadius (search_radius_);
     if (gauss_param_set_) smoother.setSqrGaussParam (gauss_param_set_);
+#if PCL_VERSION_COMPARE (<, 1, 9, 0)  // https://github.com/PointCloudLibrary/pcl/blob/cc08f815a9a5f2a1d3f897fb2bc9d541635792c9/CHANGES.md?plain=1#L1633
     smoother.setPolynomialFit (use_polynomial_fit_);
+#endif
     smoother.setPolynomialOrder (polynomial_order_);
     smoother.setComputeNormals (calc_normal_);
 

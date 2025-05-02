@@ -97,24 +97,40 @@ namespace jsk_pcl_ros {
 
   void HintedPlaneDetector::subscribe()
   {
-    sub_cloud_.subscribe(*pnh_, "input", 1);
-    sub_hint_cloud_.subscribe(*pnh_, "input/hint/cloud", 1);
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-    sync_->connectInput(sub_cloud_, sub_hint_cloud_);
-    sync_->registerCallback(boost::bind(&HintedPlaneDetector::detect,
-                                        this, _1, _2));
+    if (synchronize_) {
+      sub_cloud_.subscribe(*pnh_, "input", 1);
+      sub_hint_cloud_.subscribe(*pnh_, "input/hint/cloud", 1);
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+      sync_->connectInput(sub_cloud_, sub_hint_cloud_);
+      sync_->registerCallback(
+          boost::bind(&HintedPlaneDetector::detect, this, _1, _2));
+    } else {
+      sub_hint_cloud_single_ = pnh_->subscribe<sensor_msgs::PointCloud2>(
+          "input/hint/cloud", 1, &HintedPlaneDetector::setHintCloud, this);
+      sub_cloud_single_ = pnh_->subscribe<sensor_msgs::PointCloud2>(
+          "input", 1,
+          boost::bind(&HintedPlaneDetector::detect, this, _1,
+                      boost::ref(hint_cloud_)));
+    }
   }
 
   void HintedPlaneDetector::unsubscribe()
   {
-    sub_cloud_.unsubscribe();
-    sub_hint_cloud_.unsubscribe();
+    if (synchronize_) {
+      sub_cloud_.unsubscribe();
+      sub_hint_cloud_.unsubscribe();
+    } else {
+      sub_cloud_single_.shutdown();
+      sub_hint_cloud_single_.shutdown();
+    }
   }
 
   void HintedPlaneDetector::configCallback(
     Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    const bool need_resubscribe = synchronize_ != config.synchronize;
+    synchronize_ = config.synchronize;
     hint_outlier_threashold_ = config.hint_outlier_threashold;
     hint_max_iteration_ = config.hint_max_iteration;
     hint_min_size_ = config.hint_min_size;
@@ -131,6 +147,18 @@ namespace jsk_pcl_ros {
     enable_normal_filtering_ = config.enable_normal_filtering;
     enable_distance_filtering_ = config.enable_distance_filtering;
     enable_density_filtering_ = config.enable_density_filtering;
+    if (need_resubscribe && isSubscribed()) {
+      unsubscribe();
+      subscribe();
+    }
+  }
+
+  void HintedPlaneDetector::setHintCloud(
+      const sensor_msgs::PointCloud2::ConstPtr &msg)
+
+  {
+    hint_cloud_ = msg;
+    NODELET_DEBUG("hint cloud is set");
   }
   
   void HintedPlaneDetector::detect(
@@ -139,6 +167,12 @@ namespace jsk_pcl_ros {
   {
     vital_checker_->poke();
     boost::mutex::scoped_lock lock(mutex_);
+    if (!hint_cloud_msg) {
+      NODELET_WARN_THROTTLE(
+          10.0,
+          "hint cloud is not received. Set hint cloud or enable 'synchronize'");
+      return;
+    }
     pcl::PointCloud<pcl::PointNormal>::Ptr
       input_cloud (new pcl::PointCloud<pcl::PointNormal>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr

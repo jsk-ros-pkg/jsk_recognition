@@ -207,7 +207,7 @@ public:
 
     srv.reset(new ReconfigureServer(getPrivateNodeHandle()));
     ReconfigureServer::CallbackType f =
-      boost::bind(&DepthImagePublisherNodelet::reconfigureCallback, this, _1, _2);
+      boost::bind(&DepthImagePublisherNodelet::reconfigureCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv->setCallback(f);
   }
 };

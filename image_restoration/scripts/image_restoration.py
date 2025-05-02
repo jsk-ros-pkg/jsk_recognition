@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
+
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="torchvision.transforms.functional_tensor")
+
 import rospy
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
+import rospkg
+
 import cv2
 import numpy as np
 import torch
 from basicsr.archs.rrdbnet_arch import RRDBNet
 from realesrgan import RealESRGANer
+
 import threading
 import queue
 import os
-import rospkg
 
 class ImageSuperRes:
     def __init__(self):

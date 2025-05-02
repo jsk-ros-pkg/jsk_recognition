@@ -49,7 +49,7 @@ void PointcloudScreenpoint::onInit()
   ConnectionBasedNodelet::onInit();
 
 
-  normals_tree_ = boost::make_shared< pcl::search::KdTree< pcl::PointXYZ > > ();
+  pcl::search::KdTree<pcl::PointXYZ>::Ptr normals_tree_(new pcl::search::KdTree<pcl::PointXYZ>);
   n3d_.setSearchMethod (normals_tree_);
 
   dyn_srv_ = boost::make_shared< dynamic_reconfigure::Server< Config > >(*pnh_);
@@ -257,8 +257,7 @@ bool PointcloudScreenpoint::screenpoint_cb (
   }
 
   // search normal
-  n3d_.setSearchSurface(
-      boost::make_shared<pcl::PointCloud<pcl::PointXYZ > > (latest_cloud_));
+  n3d_.setSearchSurface(latest_cloud_.makeShared());
 
   pcl::PointCloud<pcl::PointXYZ> cloud_;
   pcl::PointXYZ pt;
@@ -268,7 +267,7 @@ bool PointcloudScreenpoint::screenpoint_cb (
   cloud_.points.resize(0);
   cloud_.points.push_back(pt);
 
-  n3d_.setInputCloud (boost::make_shared<pcl::PointCloud<pcl::PointXYZ > > (cloud_));
+  n3d_.setInputCloud (cloud_.makeShared());
   pcl::PointCloud<pcl::Normal> cloud_normals;
   n3d_.compute (cloud_normals);
 

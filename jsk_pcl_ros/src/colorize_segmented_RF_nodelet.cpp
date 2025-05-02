@@ -72,6 +72,11 @@ namespace jsk_pcl_ros
     pass_offset2_ = tmp_pass2;
   }
 
+    // pcl removed the method by 1.13, no harm in defining it ourselves to use below
+#if __cplusplus >= 201103L
+#define pcl_isnan(x) std::isnan(x)
+#endif
+
   void ColorizeRandomForest::extract(const sensor_msgs::PointCloud2 pc)
   {
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB> ());

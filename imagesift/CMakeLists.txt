@@ -109,5 +109,6 @@ if(CATKIN_ENABLE_TESTING)
     # FIXME: jsk_tools/test_topic_published.py does not work on hydro travis/jenkins
     # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260
     add_rostest(test/test_imagesift.test)
+    add_rostest(test/test_two_imagesift.test)
   endif()
 endif()

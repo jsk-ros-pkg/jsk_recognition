@@ -140,7 +140,9 @@ namespace jsk_pcl_ros
         EuclideanClusterExtraction<pcl::PointXYZ> impl;
         if (filtered_cloud->points.size() > 0) {
           jsk_topic_tools::ScopedTimer timer = kdtree_acc_.scopedTimer();
-#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )
+#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 12 )
+          pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>());
+#elif ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )
           pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
           tree = boost::make_shared< pcl::search::KdTree<pcl::PointXYZ> > ();
 #else
@@ -332,7 +334,9 @@ namespace jsk_pcl_ros
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(req.input, *cloud);
 
-#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )
+#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 12 )
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ> ());
+#elif ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
     tree = boost::make_shared< pcl::search::KdTree<pcl::PointXYZ> > ();
 #else
@@ -361,12 +365,19 @@ namespace jsk_pcl_ros
     pcl_conversions::toPCL(req.input, *pcl_cloud);
     pcl::ExtractIndices<pcl::PCLPointCloud2> ex;
     ex.setInputCloud(pcl_cloud);
+#elif  ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 12 )
+    pcl::ExtractIndices<sensor_msgs::PointCloud2> ex;
+    ex.setInputCloud ( req.input.makeShared() );
 #else
     pcl::ExtractIndices<sensor_msgs::PointCloud2> ex;
     ex.setInputCloud ( boost::make_shared< sensor_msgs::PointCloud2 > (req.input) );
 #endif
     for ( size_t i = 0; i < cluster_indices.size(); i++ ) {
+#if  ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 12 )
+      ex.setIndices ( std::make_shared< pcl::PointIndices > (cluster_indices[i]) );
+#else
       ex.setIndices ( boost::make_shared< pcl::PointIndices > (cluster_indices[i]) );
+#endif
       ex.setNegative ( false );
 #if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 7 )
       pcl::PCLPointCloud2 output_cloud;

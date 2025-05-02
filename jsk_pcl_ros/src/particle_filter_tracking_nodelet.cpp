@@ -145,19 +145,16 @@ namespace jsk_pcl_ros
     }
     
 
-    boost::shared_ptr<DistanceCoherence<PointT> >
-      distance_coherence(new DistanceCoherence<PointT>);
+    DistanceCoherence<PointT>::Ptr distance_coherence(new DistanceCoherence<PointT>);
     coherence->addPointCoherence(distance_coherence);
 
     //add HSV coherence
     if (use_hsv) {
-        boost::shared_ptr<HSVColorCoherence<PointT> > hsv_color_coherence
-          = boost::shared_ptr<HSVColorCoherence<PointT> >(new HSVColorCoherence<PointT>());
+        HSVColorCoherence<PointT>::Ptr hsv_color_coherence(new HSVColorCoherence<PointT>());
         coherence->addPointCoherence(hsv_color_coherence);
     }
     
-     boost::shared_ptr<pcl::search::Octree<PointT> > search
-       (new pcl::search::Octree<PointT>(octree_resolution));
+    pcl::search::Octree<PointT>::Ptr search(new pcl::search::Octree<PointT>(octree_resolution));
     //boost::shared_ptr<pcl::search::KdTree<PointT> > search(new pcl::search::KdTree<PointT>());
     coherence->setSearchMethod(search);
     double max_distance;

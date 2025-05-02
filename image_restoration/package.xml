@@ -12,6 +12,7 @@
   <build_depend>cv_bridge</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>catkin_virtualenv</build_depend>
+  <build_depend>wget</build_depend>
 
   <build_export_depend>cv_bridge</build_export_depend>
   <build_export_depend>rospy</build_export_depend>

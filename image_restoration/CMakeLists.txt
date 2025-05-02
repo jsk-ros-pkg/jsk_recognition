@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.0.2)
-project(my_superres_node)
+cmake_minimum_required(VERSION 3.5)
+project(image_restoration)
 
 find_package(catkin REQUIRED COMPONENTS
   rospy

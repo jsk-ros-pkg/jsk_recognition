@@ -10,23 +10,18 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(Wget REQUIRED)
 
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/weights)
-set(MODEL_FILE ${CMAKE_CURRENT_SOURCE_DIR}/weights/RealESRGAN_x4plus.pth)
-
-if(NOT EXISTS ${MODEL_FILE})
-  message(STATUS "Downloading RealESRGAN_x4plus.pth...")
-  execute_process(
-    COMMAND wget https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/weights
-    RESULT_VARIABLE WGET_RESULT
+add_custom_command(
+  OUTPUT create_weights_dir
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_SOURCE_DIR}/weights"
   )
-  if(NOT "${WGET_RESULT}" STREQUAL "0")
-    message(FATAL_ERROR "Failed to download RealESRGAN_x4plus.pth")
-  endif()
-endif()
+
+add_custom_target(RealESRGAN_x4plus.pth ALL 
+  DEPENDS create_weights_dir
+  COMMAND ${WGET_EXECUTABLE} -q "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth" -O "${PROJECT_SOURCE_DIR}/weights/RealESRGAN_x4plus.pth"
+  )
 
 catkin_generate_virtualenv(
-  PYTHON_INTERPRETER 3
+  PYTHON_INTERPRETER python3
   INPUT_REQUIREMENTS requirements.txt
 )
 

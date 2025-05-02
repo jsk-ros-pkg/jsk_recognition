@@ -26,7 +26,7 @@ if(NOT EXISTS ${MODEL_FILE})
 endif()
 
 catkin_generate_virtualenv(
-  PYTHON_INTERPRETER 3
+  PYTHON_INTERPRETER python3
   INPUT_REQUIREMENTS requirements.txt
 )
 

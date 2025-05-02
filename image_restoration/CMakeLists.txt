@@ -27,7 +27,7 @@ endif()
 
 catkin_generate_virtualenv(
   PYTHON_INTERPRETER 3
-  REQUIREMENTS requirements.txt
+  INPUT_REQUIREMENTS requirements.txt
 )
 
 catkin_package()

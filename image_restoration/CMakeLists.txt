@@ -6,7 +6,9 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   cv_bridge
   catkin_virtualenv
-)
+  )
+
+find_package(Wget REQUIRED)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/weights)
 set(MODEL_FILE ${CMAKE_CURRENT_SOURCE_DIR}/weights/RealESRGAN_x4plus.pth)
@@ -24,8 +26,8 @@ if(NOT EXISTS ${MODEL_FILE})
 endif()
 
 catkin_generate_virtualenv(
-  PYTHON_VERSION 3
-  REQUIREMENTS requirements.txt
+  PYTHON_INTERPRETER 3
+  INPUT_REQUIREMENTS requirements.txt
 )
 
 catkin_package()
@@ -33,8 +35,4 @@ catkin_package()
 catkin_install_python(PROGRAMS
   scripts/image_restoration.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
-install(DIRECTORY launch
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )

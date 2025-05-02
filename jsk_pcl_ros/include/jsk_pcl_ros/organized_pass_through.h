@@ -70,6 +70,11 @@ namespace jsk_pcl_ros
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
 
+      // pcl removed the method by 1.13, no harm in defining it ourselves to use below
+#if __cplusplus >= 201103L
+#define pcl_isfinite(x) std::isfinite(x)
+#endif
+
     bool isPointNaN(const PointT& p) {
       return (!pcl_isfinite(p.x) || !pcl_isfinite(p.y) || !pcl_isfinite(p.z));
     }

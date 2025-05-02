@@ -378,6 +378,11 @@ namespace jsk_pcl_ros
     cv::rectangle(mask, roi_rect, white, CV_FILLED);
   }
 
+    // pcl removed the method by 1.13, no harm in defining it ourselves to use below
+#if __cplusplus >= 201103L
+#define pcl_isfinite(x) std::isfinite(x)
+#endif
+
   void AttentionClipper::clipPointcloud(
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {

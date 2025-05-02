@@ -2,13 +2,19 @@
 # -*- coding: utf-8 -*-
 
 import collections
+try:  # for python3.10+
+    from collections.abc import Sequence as collections_Sequence
+except ImportError:
+    from collections import Sequence as collections_Sequence
 import sys
 import cv2
 import cv_bridge
 import jsk_recognition_utils
 from jsk_topic_tools import ConnectionBasedTransport
 import message_filters
+import numpy as np
 import rospy
+from sensor_msgs.msg import CompressedImage
 from sensor_msgs.msg import Image
 import itertools, pkg_resources
 from distutils.version import StrictVersion
@@ -48,7 +54,7 @@ class TileImages(ConnectionBasedTransport):
             sys.exit(1)
         self._shape = rospy.get_param('~shape', None)
         if self._shape:
-            if not (isinstance(self._shape, collections.Sequence) and
+            if not (isinstance(self._shape, collections_Sequence) and
                     len(self._shape) == 2):
                 rospy.logerr('~shape must be a list of 2 float values.')
                 sys.exit(1)
@@ -66,6 +72,7 @@ class TileImages(ConnectionBasedTransport):
             rospy.logerr('hydro message_filters does not support approximate sync. Force to set ~approximate_sync=false')
             self.approximate_sync = False
         self.pub_img = self.advertise('~output', Image, queue_size=1)
+        self.pub_compressed_img = self.advertise('~output/compressed', CompressedImage, queue_size=1)
 
     def subscribe(self):
         self.sub_img_list = []
@@ -87,14 +94,17 @@ class TileImages(ConnectionBasedTransport):
                 sync = message_filters.TimeSynchronizer(
                     self.sub_img_list, queue_size=queue_size)
                 sync.registerCallback(self._apply)
+
     def unsubscribe(self):
         for sub in self.sub_img_list:
             sub.sub.unregister()
+
     def timer_callback(self, event):
         with self.lock:
             imgs = [self.input_imgs[topic] for topic in self.input_topics
                     if topic in self.input_imgs]
             self._append_images(imgs)
+
     def simple_callback(self, target_topic):
         def callback(msg):
             with self.lock:
@@ -105,6 +115,7 @@ class TileImages(ConnectionBasedTransport):
                     draw_text_box(img, rospy.resolve_name(target_topic),
                                   font_scale=self.font_scale)
         return callback
+
     def _append_images(self, imgs):
         if not imgs:
             return
@@ -123,10 +134,28 @@ class TileImages(ConnectionBasedTransport):
                 out_bgr = jsk_recognition_utils.get_tile_image(
                     imgs, tile_shape=shape_xy)
                 self.cache_img = out_bgr
-        bridge = cv_bridge.CvBridge()
-        imgmsg = bridge.cv2_to_imgmsg(out_bgr, encoding='bgr8')
-        self.pub_img.publish(imgmsg)
+
+        encoding = 'bgr8'
+        stamp = rospy.Time.now()
+        if self.pub_img.get_num_connections() > 0:
+            bridge = cv_bridge.CvBridge()
+            imgmsg = bridge.cv2_to_imgmsg(out_bgr, encoding=encoding)
+            imgmsg.header.stamp = stamp
+            self.pub_img.publish(imgmsg)
+
+        if self.pub_compressed_img.get_num_connections() > 0:
+            compressed_msg = CompressedImage()
+            compressed_msg.header.stamp = stamp
+            compressed_msg.format = encoding + '; jpeg compressed ' + encoding
+            compressed_msg.data = np.array(
+                cv2.imencode('.jpg', out_bgr)[1]).tostring()
+            self.pub_compressed_img.publish(compressed_msg)
+
     def _apply(self, *msgs):
+        if (self.pub_img.get_num_connections() == 0
+                and self.pub_compressed_img.get_num_connections() == 0):
+            return
+
         bridge = cv_bridge.CvBridge()
         imgs = []
         for msg, topic in zip(msgs, self.input_topics):

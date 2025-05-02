@@ -57,6 +57,9 @@
 
 namespace imagesift
 {
+  // libsiftfast has so many static global variables. It causes segmentation fault when more than 2 imagesift nodelets are loaded into the same nodelet manager. This global variable enable more than 2 threads to use libsiftfast's variables. This means, libsiftfast becomes slow when you load 2 imagesift nodelets.
+  static boost::mutex _g_siftfast_mutex;
+
   class SiftNode: public jsk_topic_tools::DiagnosticNodelet
   {
   public:

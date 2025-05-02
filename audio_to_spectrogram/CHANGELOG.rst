@@ -2,6 +2,19 @@
 Changelog for package audio_to_spectrogram
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.17 (2023-11-14)
+-------------------
+
+1.2.16 (2023-11-10)
+-------------------
+* [audio_to_spectrogram, sound_classification] Add data_to_spectrogram (`#2767 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2767>`_)
+* [audio_to_spectrogram] Enable to change spectrum plot from rosparam (`#2760 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2760>`_)
+* Fix audio to spectrogram plot and add test (`#2764 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2764>`_)
+* [audio_to_spectrogram] Add AudioAmplitudePlot node to visualize audio amplitude `#2657 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2657>`_ (`#2755 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2755>`_)
+* [audio_to_spectrogram] Enable publishing frequency vs amplitude plot (`#2654 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2654>`_)
+* use catkin_install_python to install python scripts under node_scripts/ scripts/ (`#2743 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2743>`_)
+* Contributors: Kei Okada, Naoto Tsukamoto, Shingo Kitagawa, Shun Hasegawa, Yoshiki Obinata, Iory Yanokura
+
 1.2.15 (2020-10-10)
 -------------------
 

@@ -49,6 +49,10 @@ Algorithm is:
 ## Parameters
 
 ### Parameters for detecting hint plane
+* `~synchronize` (Double, default: `True`)
+
+  Enable time synchronization of input topics
+
 * `~hint_outlier_threashold` (Double, default: `0.1`)
 
   Outlier threshold to detect hint plane using RANSAC

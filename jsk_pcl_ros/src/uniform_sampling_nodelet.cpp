@@ -80,7 +80,11 @@ namespace jsk_pcl_ros
     pcl::PointCloud<pcl::PointXYZ>::Ptr
       cloud (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*msg, *cloud);
+#if ( PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION >= 9)
+    pcl::UniformSampling<pcl::PointXYZ> uniform_sampling(true);
+#else
     pcl::UniformSampling<pcl::PointXYZ> uniform_sampling;
+#endif
     uniform_sampling.setInputCloud(cloud);
     uniform_sampling.setRadiusSearch(search_radius_);
 #if ( PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION == 7)
@@ -90,7 +94,15 @@ namespace jsk_pcl_ros
     pcl::PointCloud<pcl::PointXYZ> output;
     uniform_sampling.filter(output);
     pcl::PointIndicesPtr indices_ptr;
-    std::vector<int> &indices = *uniform_sampling.getIndices();
+    // this is all indices
+    std::vector<int> &all_indices = *uniform_sampling.getIndices();
+    pcl::PointIndices removed_indices;
+    uniform_sampling.getRemovedIndices(removed_indices);
+    std::sort(removed_indices.indices.begin(), removed_indices.indices.end());
+    std::vector<int> indices;
+    std::set_difference(all_indices.begin(), all_indices.end(),
+                        removed_indices.indices.begin(), removed_indices.indices.end(),
+                        std::inserter(indices, indices.begin()));
 #endif
     PCLIndicesMsg ros_indices;
 #if ( PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION == 7)

@@ -1,6 +1,6 @@
 <package format="3">
   <name>audio_to_spectrogram</name>
-  <version>1.2.15</version>
+  <version>1.2.17</version>
   <description>Convert audio (audio_common_msgs/AudioData) to spectrogram (sensor_msgs/Image) </description>
 
   <maintainer email="yamaguchi@jsk.imi.i.u-tokyo.ac.jp">Naoya Yamaguchi</maintainer>
@@ -10,6 +10,7 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>dynamic_reconfigure</build_depend>
+  <build_depend>ros_environment</build_depend>
 
   <exec_depend>audio_capture</exec_depend>
   <exec_depend>audio_common_msgs</exec_depend>

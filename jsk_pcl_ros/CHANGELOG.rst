@@ -2,6 +2,42 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.17 (2023-11-14)
+-------------------
+
+1.2.16 (2023-11-10)
+-------------------
+* add noetic build test (`#2756 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2756>`_)
+* [jsk_pcl_ros] to avoid invalid access, use getGridCoordinates+getCenroidIndexAt function instead of getCentroidIndex. (`#2748 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2748>`_)
+* add relay new baxter_realsense_l515.bag (`#2749 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2749>`_)
+* [jsk_pcl_ros] fix data link in `install_sample_data.py` (`#2733 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2733>`_)
+* Fix `#2737 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2737>`_ (`#2739 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2739>`_)
+* Fixed typo of Software License Agreement. and/o2r to and/or (`#2727 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2727>`_)
+* [feature] container occupancy detector nodelet (`#2696 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2696>`_)
+* [jsk_pcl_ros/organized_multi_plane_segmentation_nodelet] Poke when start subscribing (`#2710 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2710>`_)
+* Add reset sync policy in destructor and add a test (`#2681 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2681>`_)
+* [jsk_pcl_ros/octomap_server_contact_nodelet.cpp] fix memory leak of colors pointer (`#2661 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2661>`_)
+* use default value for param (`#2663 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2663>`_)
+* work around permission issue / integrate all yaml to one (`#2677 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2677>`_)
+* [jsk_perception][jsk_pcl_ros_utils][jsk_pcl_ros] Fix download links (`#2632 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2632>`_)
+* check more python3 compatibility (`#2614 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2614>`_)
+* [jsk_pcl_ros] ExtractIndices debug (`#2628 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2628>`_)
+* add missing build_depend dynamic_reconfigure in jsk_pcl_ros (`#2619 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2619>`_
+* [jsk_pcl_ros] Stop tf when segmented cloud size is zero using cluster point indices decomposer (`#2599 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2599>`_)
+* add organized statistical removal test (`#2602 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2602>`_)
+* [jsk_pcl_ros] fix bug of lookuptransform in heightmapconverter (`#2572 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2572>`_)
+* [jsk_pcl_ros] add z range option to heightmap converter (`#2564 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2564>`_)
+* [DepthImageCreator] print more rosparm info on startup (`#2543 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2543>`_)
+* add sample_plane_extraction.launch , plane_extraction.launch (`#2551 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2551>`_)
+* [jsk_pcl_ros] set larger min_size limit for organized multiplane segmentation (`#2571 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2571>`_)
+* [jsk_pcl_ros/line_segment_detector] LineList needs colors aligning with points (`#2562 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2562>`_)
+* [jsk_pcl_ros] support including tabletop_object_detector.launch file in any name space (`#2539 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2539>`_)
+* Update depth_image_creator.md (`#2557 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2557>`_)
+* [jsk_pcl_ros] remove wrong launch_manager in tabletop_object_detector.launch (`#2568 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2568>`_)
+* [jsk_pcl_ros] remove wrong launch_manager in tabletop_object_detector.launch (`#2546 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2546>`_)
+
+* Contributors: Aoi Nakane, Guilherme Affonso, Iori Yanokura, Kei Okada, Koki Shinjo, Miyabi Tanemoto, Naoki Hiraoka, Naoto Tsukamoto, Shingo Kitagawa, Shumpei Wakabayashi, Yutaro Matsuura, Yasuhiro Ishiguro, Yoshiki Obinata,
+
 1.2.15 (2020-10-10)
 -------------------
 

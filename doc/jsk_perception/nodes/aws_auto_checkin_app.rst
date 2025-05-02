@@ -49,6 +49,11 @@ Publishing Topic
 
   Detected face class labels and probabilities.
 
+* ``~image`` (``sensor_msgs/Image``)
+
+  Passthourgh input image. This message contains face detected image
+  when ``~always_publish`` is false.
+
 Parameters
 ----------
 
@@ -110,6 +115,9 @@ Parameters
       "aws_secret_access_key" : "********************"
   }
 
+* ``~always_publish`` (Bool, Default: ``True``)
+
+  Set false to publish only when face is detected.
 
 Sample
 ------

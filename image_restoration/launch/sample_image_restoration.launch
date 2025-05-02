@@ -1,0 +1,6 @@
+<launch>
+  <node pkg="image_restoration" type="image_restoration.py" name="image_restoration_node" output="screen">
+    <param name="input_topic" value="/camera/image_raw" />
+    <param name="output_topic" value="/camera/restoration_image" />
+  </node>
+</launch>

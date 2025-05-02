@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>image_restoration</name>
+  <version>0.0.0</version>
+  <description>The image_restoration package</description>
+
+  <maintainer email="tsubaki@jsk.t.u-toyko.ac.jp">Michitoshi Tsubaki</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>catkin_virtualenv</build_depend>
+
+  <build_export_depend>cv_bridge</build_export_depend>
+  <build_export_depend>rospy</build_export_depend>
+  <build_export_depend>sensor_msgs</build_export_depend>
+
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+
+  <test_depend>roslaunch</test_depend>
+  <test_depend>rostest</test_depend>
+
+  <export>
+    <pip_requirements>requirements.txt</pip_requirements>
+  </export>
+
+</package>

@@ -30,7 +30,6 @@ class ImageSuperRes:
         self.pub = rospy.Publisher(output_topic, Image, queue_size=1)
 
         self.queue = queue.Queue(maxsize=10)
-        self.lock = threading.Lock()
 
         rospack = rospkg.RosPack()
         model_path = os.path.join(rospack.get_path('image_restoration'), 'weights', 'RealESRGAN_x4plus.pth')

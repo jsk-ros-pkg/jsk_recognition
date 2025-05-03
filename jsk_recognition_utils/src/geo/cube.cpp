@@ -250,7 +250,7 @@ namespace jsk_recognition_utils
     vs.push_back(v1);
     vs.push_back(v2);
     vs.push_back(v3);
-    Polygon::Ptr(new Polygon(vs));
+    return Polygon::Ptr(new Polygon(vs));
   }
   
   std::vector<Polygon::Ptr> Cube::faces()

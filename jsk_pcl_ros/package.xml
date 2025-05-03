@@ -18,6 +18,7 @@
 
   <!-- <exec_depend>pcl</exec_depend> -->
   <build_depend>cv_bridge</build_depend>
+  <build_depend>diagnostic_updater</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>image_geometry</build_depend>
   <build_depend>image_transport</build_depend>

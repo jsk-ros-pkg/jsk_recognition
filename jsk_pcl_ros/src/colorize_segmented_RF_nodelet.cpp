@@ -33,7 +33,7 @@
  *********************************************************************/
 #include <jsk_topic_tools/log_utils.h>
 #include "jsk_pcl_ros/colorize_segmented_RF.h"
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 
 namespace jsk_pcl_ros
 {

@@ -89,7 +89,7 @@ namespace jsk_pcl_ros
     sub_point_.subscribe(*pnh_, "point", 1); 
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
     sync_->connectInput(sub_cloud_, sub_point_);
-    sync_->registerCallback(boost::bind(&HintedHandleEstimator::estimate, this, _1, _2));
+    sync_->registerCallback(boost::bind(&HintedHandleEstimator::estimate, this, boost::placeholders::_1, boost::placeholders::_2));
   }
   
   void HintedHandleEstimator::unsubscribe()
@@ -288,7 +288,7 @@ namespace jsk_pcl_ros
   }
 }
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::HintedHandleEstimator, nodelet::Nodelet);
 
 

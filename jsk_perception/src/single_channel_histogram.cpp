@@ -48,7 +48,7 @@ namespace jsk_perception
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
-        &SingleChannelHistogram::configCallback, this, _1, _2);
+        &SingleChannelHistogram::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     
     pub_ = advertise<jsk_recognition_msgs::ColorHistogram>(
@@ -78,7 +78,7 @@ namespace jsk_perception
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
       sync_->connectInput(sub_image_, sub_mask_);
       sync_->registerCallback(boost::bind(&SingleChannelHistogram::compute,
-                                          this, _1, _2));
+                                          this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else {
       sub_ = pnh_->subscribe("input", 1,
@@ -141,5 +141,5 @@ namespace jsk_perception
   }
 }
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS (jsk_perception::SingleChannelHistogram, nodelet::Nodelet);

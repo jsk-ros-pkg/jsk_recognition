@@ -71,12 +71,12 @@ namespace jsk_perception
     if (approximate_sync_) {
       async_ = boost::make_shared<message_filters::Synchronizer<ApproxSyncPolicy> >(queue_size_);
       async_->connectInput(sub_src1_, sub_src2_);
-      async_->registerCallback(boost::bind(&MultiplyMaskImage::multiply, this, _1, _2));
+      async_->registerCallback(boost::bind(&MultiplyMaskImage::multiply, this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
       sync_->connectInput(sub_src1_, sub_src2_);
-      sync_->registerCallback(boost::bind(&MultiplyMaskImage::multiply, this, _1, _2));
+      sync_->registerCallback(boost::bind(&MultiplyMaskImage::multiply, this, boost::placeholders::_1, boost::placeholders::_2));
     }
     ros::V_string names = boost::assign::list_of("~input/src1")("~input/src2");
     jsk_topic_tools::warnNoRemap(names);
@@ -107,5 +107,5 @@ namespace jsk_perception
 }
 
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS (jsk_perception::MultiplyMaskImage, nodelet::Nodelet);

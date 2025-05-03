@@ -52,7 +52,7 @@ namespace jsk_perception
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
-        &OverlayImageColorOnMono::configCallback, this, _1, _2);
+        &OverlayImageColorOnMono::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
     onInitPostProcess();
@@ -83,11 +83,11 @@ namespace jsk_perception
     if (approximate_sync_) {
       async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
       async_->connectInput(sub_color_, sub_mono_);
-      async_->registerCallback(boost::bind(&OverlayImageColorOnMono::overlay, this, _1, _2));
+      async_->registerCallback(boost::bind(&OverlayImageColorOnMono::overlay, this, boost::placeholders::_1, boost::placeholders::_2));
     } else {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
       sync_->connectInput(sub_color_, sub_mono_);
-      sync_->registerCallback(boost::bind(&OverlayImageColorOnMono::overlay, this, _1, _2));
+      sync_->registerCallback(boost::bind(&OverlayImageColorOnMono::overlay, this, boost::placeholders::_1, boost::placeholders::_2));
     }
     ros::V_string names = boost::assign::list_of("~input/color")("~input/mono");
     jsk_topic_tools::warnNoRemap(names);
@@ -137,5 +137,5 @@ namespace jsk_perception
 
 }  // namespace jsk_perception
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS (jsk_perception::OverlayImageColorOnMono, nodelet::Nodelet);

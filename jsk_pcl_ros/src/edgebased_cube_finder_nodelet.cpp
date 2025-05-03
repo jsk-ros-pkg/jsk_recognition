@@ -129,9 +129,9 @@ namespace jsk_pcl_ros
     std::vector<int> a_indices, b_indices;
     for (size_t i = 0; i < cloud.points.size(); i++) {
       pcl::PointXYZRGB pcl_point = cloud.points[i];
-      if (pcl_isfinite(pcl_point.x) &&
-          pcl_isfinite(pcl_point.y) &&
-          pcl_isfinite(pcl_point.z)) { // we don't care nan points
+      if (std::isfinite(pcl_point.x) &&
+          std::isfinite(pcl_point.y) &&
+          std::isfinite(pcl_point.z)) { // we don't care nan points
         Eigen::Vector3f eigen_point = pcl_point.getVector3fMap();
         if (polygon_a.distanceSmallerThan(eigen_point, outlier_threshold_)) {
           a_indices.push_back(i);
@@ -386,7 +386,7 @@ namespace jsk_pcl_ros
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&EdgebasedCubeFinder::configCallback, this, _1, _2);
+      boost::bind (&EdgebasedCubeFinder::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     
@@ -429,7 +429,7 @@ namespace jsk_pcl_ros
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
     sync_->connectInput(sub_input_, sub_edges_);
     sync_->registerCallback(boost::bind(
-                              &EdgebasedCubeFinder::estimate, this, _1, _2));
+                              &EdgebasedCubeFinder::estimate, this, boost::placeholders::_1, boost::placeholders::_2));
   }
 
   void EdgebasedCubeFinder::unsubscribe()
@@ -1237,6 +1237,6 @@ namespace jsk_pcl_ros
   }
 }
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::EdgebasedCubeFinder, nodelet::Nodelet);
 

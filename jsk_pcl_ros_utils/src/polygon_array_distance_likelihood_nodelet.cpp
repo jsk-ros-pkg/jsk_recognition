@@ -65,7 +65,7 @@ namespace jsk_pcl_ros_utils
                        target_frame_id_,
                        tf_queue_size_));
     tf_filter_->registerCallback(
-      boost::bind(&PolygonArrayDistanceLikelihood::likelihood, this, _1));
+      boost::bind(&PolygonArrayDistanceLikelihood::likelihood, this, boost::placeholders::_1));
   }
 
   void PolygonArrayDistanceLikelihood::unsubscribe()
@@ -128,6 +128,6 @@ namespace jsk_pcl_ros_utils
   }
 }
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros_utils::PolygonArrayDistanceLikelihood,
                         nodelet::Nodelet);

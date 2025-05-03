@@ -13,7 +13,7 @@ namespace jsk_perception
     pub_ = advertiseCamera(*pnh_, "image", 1);
 
     dynamic_reconfigure::Server<jsk_perception::VirtualCameraMonoConfig>::CallbackType f =
-      boost::bind(&VirtualCameraMono::configCb, this, _1, _2);
+      boost::bind(&VirtualCameraMono::configCb, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_ = boost::make_shared<dynamic_reconfigure::Server<jsk_perception::VirtualCameraMonoConfig> >(*pnh_);
     srv_->setCallback(f);
 

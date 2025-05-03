@@ -33,7 +33,7 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/keypoints_publisher.h"
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 
 #include <pcl_conversions/pcl_conversions.h>
 #include <message_filters/subscriber.h>

@@ -31,6 +31,7 @@ endif()
 
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
+  diagnostic_updater
   dynamic_reconfigure
   eigen_conversions
   # genmsg

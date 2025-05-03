@@ -73,7 +73,7 @@ public:
   CRCaptureNode () : nh_("~"), it_(nh_), sync_(5)
   {
     // Set up dynamic reconfiguration
-    ReconfigureServer::CallbackType f = boost::bind(&CRCaptureNode::config_cb, this, _1, _2);
+    ReconfigureServer::CallbackType f = boost::bind(&CRCaptureNode::config_cb, this, boost::placeholders::_1, boost::placeholders::_2);
     reconfigure_server_.setCallback(f);
 
     // parameter
@@ -171,7 +171,7 @@ public:
       info_sub_.subscribe(nh_, range_ns_ + "/camera_info", 1);
 
       sync_.connectInput(image_conf_sub_, image_intent_sub_, image_depth_sub_, info_sub_);
-      sync_.registerCallback(boost::bind(&CRCaptureNode::cameraallCB, this, _1, _2, _3, _4));
+      sync_.registerCallback(boost::bind(&CRCaptureNode::cameraallCB, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3, boost::placeholders::_4));
     } else {
       // not all subscribe
       camera_sub_depth_ = it_.subscribeCamera(range_ns_ + "/image", 1, &CRCaptureNode::camerarangeCB, this);

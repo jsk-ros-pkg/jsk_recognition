@@ -1,6 +1,8 @@
 <launch>
 
   <arg name="gui" default="true" />
+  <arg name="negative" default="false" />
+  <arg name="clip" default="true" />
   <arg name="launch_manager" default="true" />
 
   <arg name="MANAGER" default="sample_manager" />
@@ -35,8 +37,10 @@
         respawn="true" >
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <remap from="~input/mask" to="$(arg MASK_IMAGE)" />
-    <rosparam>
+    <rosparam subst_value="true">
       approximate_sync: true
+      negative: $(arg negative)
+      clip: $(arg clip)
     </rosparam>
   </node>
 

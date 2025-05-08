@@ -6,6 +6,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   cv_bridge
   catkin_virtualenv
+  jsk_data
   )
 
 find_package(Wget REQUIRED)
@@ -31,3 +32,5 @@ catkin_install_python(PROGRAMS
   scripts/image_restoration.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+
+add_custom_target(${PROJECT_NAME}_install_sample_data ALL COMMAND python$ENV{ROS_PYTHON_VERSION} ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)

@@ -10,7 +10,7 @@ def main():
         pkg_name=PKG,
         path='sample/data/sample_bag_for_image_restoration.bag',
         url='https://drive.google.com/file/d/10ainoVwn_jwGmmRsMvneglPwgGSrmlvD/view?usp=sharing',
-        md5='4f2b1ffe789dde17f8f1817df442e713',
+        md5='aa65107c303b5c7325074eb4d53c8d95',
         extract=False,
     )
 

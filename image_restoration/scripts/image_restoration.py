@@ -5,7 +5,7 @@ warnings.filterwarnings("ignore", category=UserWarning, module="torchvision.tran
 
 import rospy
 from sensor_msgs.msg import Image
-from cv_bridge import CvBridge
+from cv_bridge import CvBridge, CvBridgeError
 import rospkg
 
 import cv2
@@ -23,9 +23,7 @@ class ImageSuperRes:
         output_topic = rospy.get_param('~output_topic', '/camera/restoration_image')
 
         self.bridge = CvBridge()
-        self.sub = rospy.Subscriber(input_topic, Image, self.callback, queue_size=1)
         self.pub = rospy.Publisher(output_topic, Image, queue_size=1)
-
 
         rospack = rospkg.RosPack()
         model_path = os.path.join(rospack.get_path('image_restoration'), 'weights', 'RealESRGAN_x4plus.pth')
@@ -44,6 +42,8 @@ class ImageSuperRes:
         )
 
         self.upsampler.model.to(self.device)
+        self.sub = rospy.Subscriber(input_topic, Image, self.callback, queue_size=1)
+        
 
     def callback(self, msg):
         try:

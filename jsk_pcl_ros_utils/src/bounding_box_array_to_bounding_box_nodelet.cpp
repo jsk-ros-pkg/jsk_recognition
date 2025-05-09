@@ -81,7 +81,11 @@ namespace jsk_pcl_ros_utils
     bbox_msg.header = bbox_array_msg->header;
 
     int array_size = bbox_array_msg->boxes.size();
-    if (index_ < 0) {
+    if (array_size == 0)
+    {
+      NODELET_WARN_THROTTLE(10, "bbox array size is 0, skip publishing");
+      return;
+    } else if (index_ < 0) {
       return;
     } else if (index_ < array_size) {
       bbox_msg = bbox_array_msg->boxes[index_];

@@ -2,8 +2,8 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.18 (2025-05-10)
+-------------------
 * Set RULE_LAUNCH_COMPILE/LINK to ccache if CMAKE_VERSION < 3.4 (`#2738 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2738>`_)
 * Fix https://github.com/jsk-ros-pkg/jsk_recognition/issues/2860 (`#2866 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2866>`_ )
   * [imagesift] add test to load 2 imagesift node to the same nodelet manager

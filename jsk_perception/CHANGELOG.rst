@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.18 (2025-05-10)
+-------------------
 * Set RULE_LAUNCH_COMPILE/LINK to ccache if CMAKE_VERSION < 3.4 (`#2738 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2738>`_)
 * [jsk_perception/sample/apply_mask] Add clip and negative option for users (`#2707 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2707>`_)
 * fix tile image (`#2875 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2875>`_)

@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.18 (2025-05-10)
+-------------------
 * Fixup 6ac62fef5caba52cbfa71c093b242a1f0b5a1b88 (`#2853 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2853>`_)
   Drop unused catkin_python_setup().
   The call and setup.py are only required when defining python modules,

@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.18 (2025-05-10)
+-------------------
 * Set RULE_LAUNCH_COMPILE/LINK to ccache if CMAKE_VERSION < 3.4 (`#2738 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2738>`_)
 * support pointxyzi in octree_voxel_grid_nodelet (`#2656 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2656>`_)
 * fix uniform sampling nodelet (`#2874 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2874>`_)

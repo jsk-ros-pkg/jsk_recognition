@@ -2,8 +2,8 @@
 Changelog for package sound_classification
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.18 (2025-05-10)
+-------------------
 * fix for ROS-O (`#2861 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2861>`_)
 * add std_mgs build_depends, to fix obase-build (maybe and others)
   ```

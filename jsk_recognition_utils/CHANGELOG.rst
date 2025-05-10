@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.18 (2025-05-10)
+-------------------
 * Set RULE_LAUNCH_COMPILE/LINK to ccache if CMAKE_VERSION < 3.4 (`#2738 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2738>`_)
 * use cv2.putText if font is not found (`#2868 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2868>`_)
 * filter None image in jsk_recognition_utils/visualize.py (`#2856 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2856>`_)

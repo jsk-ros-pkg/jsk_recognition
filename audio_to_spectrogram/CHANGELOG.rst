@@ -2,6 +2,15 @@
 Changelog for package audio_to_spectrogram
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [audio_to_spectrogram] Fix when to use catkin_install_python (`#2859 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2859>`_)
+  Conditional branch introduced by https://github.com/jsk-ros-pkg/jsk_recognition/pull/2743 is wrong
+* Add missing ros_environment dependency to package.xml (`#2837 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2837>`_)
+    Any package that evaluates ROS_VERSION, ROS_DISTRO or ROS_PYTHON_VERSION
+    at build time should add ros_environment as a dependency.
+* Contributors: Jeremy Kolb, Shingo Kitagawa, Shun Hasegawa, Yoshiki Obinata, Yuki Furuta
+
 1.2.17 (2023-11-14)
 -------------------
 

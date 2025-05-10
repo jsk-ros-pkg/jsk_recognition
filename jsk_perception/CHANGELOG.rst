@@ -2,6 +2,18 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Set RULE_LAUNCH_COMPILE/LINK to ccache if CMAKE_VERSION < 3.4 (`#2738 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2738>`_)
+* [jsk_perception/sample/apply_mask] Add clip and negative option for users (`#2707 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2707>`_)
+* fix tile image (`#2875 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2875>`_)
+* collections.abc.Sequence does not work on python2 (`#2872 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2872>`_)
+* use cv2.putText if font is not found (`#2868 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2868>`_)
+* add use_mask param in solidity_rag_merge (`#2855 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2855>`_)
+* publish compressed tile image (`#2857 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2857>`_)
+* Add missing ros_environment dependency to package.xml (`#2837 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2837>`_)
+* Contributors: Jeremy Kolb, Shingo Kitagawa, Yoshiki Obinata, Yuki Furuta, Iori Yanokura
+
 1.2.17 (2023-11-14)
 -------------------
 

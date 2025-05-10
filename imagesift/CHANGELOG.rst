@@ -2,6 +2,15 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Set RULE_LAUNCH_COMPILE/LINK to ccache if CMAKE_VERSION < 3.4 (`#2738 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2738>`_)
+* Fix https://github.com/jsk-ros-pkg/jsk_recognition/issues/2860 (`#2866 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2866>`_ )
+  * [imagesift] add test to load 2 imagesift node to the same nodelet manager
+  * [imagesift] define static global mutex to make imagesift thread safe when more than 2 nodelets are loaded to the same nodelet manager
+* Add missing ros_environment dependency to package.xml (`#2837 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2837>`_)
+* Contributors: Jeremy Kolb, Yoshiki Obinata, Yuki Furuta
+
 1.2.17 (2023-11-14)
 -------------------
 

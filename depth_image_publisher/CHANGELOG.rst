@@ -1,52 +1,29 @@
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Changelog for package sound_classification
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Changelog for package depth_image_publisher
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
-* fix for ROS-O (`#2861 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2861>`_)
-* add std_mgs build_depends, to fix obase-build (maybe and others)
-  ```
-  2025-01-03T00:50:28.1527201Z -- BUILD_SHARED_LIBS is on
-  2025-01-03T00:50:28.2543412Z -- Using these message generators: gencpp;geneus;genlisp;gennodejs;genpy
-  2025-01-03T00:50:28.2568008Z -- Could NOT find std_msgs (missing: std_msgs_DIR)
-  2025-01-03T00:50:28.2569369Z -- Could not find the required component 'std_msgs'. The following CMake error indicates that you\
-  either need to install the package with the same name or change your environment so that it can be found.
-  2025-01-03T00:50:28.2584407Z CMake Error at /usr/share/catkin/cmake/catkinConfig.cmake:82 (find_package):
-  2025-01-03T00:50:28.2585511Z   Could not find a package configuration file provided by "std_msgs" with any
-  2025-01-03T00:50:28.2586306Z   of the following names:
-  2025-01-03T00:50:28.2586595Z
-  2025-01-03T00:50:28.2586761Z     std_msgsConfig.cmake
-  2025-01-03T00:50:28.2587107Z     std_msgs-config.cmake
-  2025-01-03T00:50:28.2587292Z
-  2025-01-03T00:50:28.2587515Z   Add the installation prefix of "std_msgs" to CMAKE_PREFIX_PATH or set
-  2025-01-03T00:50:28.2588032Z   "std_msgs_DIR" to a directory containing one of the above files.  If
-  2025-01-03T00:50:28.2588533Z   "std_msgs" provides a separate development package or SDK, be sure it has
-  2025-01-03T00:50:28.2588941Z   been installed.
-  2025-01-03T00:50:28.2589180Z Call Stack (most recent call first):
-  2025-01-03T00:50:28.2589472Z   CMakeLists.txt:4 (find_package)
-  2025-01-03T00:50:28.2589660Z
-  ```
-* [ros-o] sound_classification: use Python3 and requirements.in.obase (`#2853 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2853>`_)
-* Contributors: Kei Okada, Shingo Kitagawa, Yoshiki Obinata, Yuki Furuta
+1.2.18 (2025-05-10)
+-------------------
+* Merge branch 'master' into ccache-version
+* Merge branch 'master' into invert-mask
+* Merge pull request `#2762 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2762>`_ from knorth55/depth-image-publisher
+  add depth_image_publisher package
+* use CV_CAP_PROP_POS_FRAMES for CV_MAJOR_VERSION < 3, boost::placeholders::_1 -> _1 for back compatibility
+* depth_image_publisher:CMakeLists.txt: use find_package(OpenCV 2) for indigo
+* Revert "support opencv 2.4"
+  This reverts commit 51b35843472637c6fb6d73152d6ed2fa9d9b8fd5.
+* support opencv 2.4
+* add depth_image_publisher package
+* Contributors: Kei, Kei Okada, Shingo Kitagawa
+
+* add depth_image_publisher package (`#2762 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2762>`_ )
+* Contributors: Shingo Kitagawa, Kei Okada
 
 1.2.17 (2023-11-14)
 -------------------
 
 1.2.16 (2023-11-10)
 -------------------
-* [audio_to_spectrogram, sound_classification] Add data_to_spectrogram (`#2767 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2767>`_)
-* use catkin_install_python to install python scripts under node_scripts/ scripts/ (`#2743 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2743>`_)
-* [sound_classification] Update setup doc on READMEt( `#2732 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2732>`_)
-* [sound_classification] Enable to pass all arguments of audio_to_spectrogram.launch from upper launches (`#2731 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2731>`_)
-* [sound_classification] Fix pactl option to list up input devices (`#2715 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2715>`_)
-* [sound_classification] set default as python2 in sound_classification (`#2698 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2698>`_)
-* chmod -x sound_classification scripts for catkin_virtualenv (`#2659 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2659>`_)
-* Add sound classification (`#2635 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2635>`_)
-
-  * copy from https://github.com/708yamaguchi/sound_classification
-
-* Contributors: Iori Yanokura, Kei Okada, Naoto Tsukamoto, Naoya Yamaguchi, Shingo Kitagawa, Shun Hasegawa
 
 1.2.15 (2020-10-10)
 -------------------
@@ -62,9 +39,6 @@ Forthcoming
 
 1.2.11 (2020-10-01)
 -------------------
-* add sample program to convert audio message  to spectrogram
-* [WIP] Add program to classify sound
-* Contributors: Naoya Yamaguchi
 
 1.2.10 (2019-03-27)
 -------------------

@@ -2,6 +2,17 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Set RULE_LAUNCH_COMPILE/LINK to ccache if CMAKE_VERSION < 3.4 (`#2738 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2738>`_)
+* use cv2.putText if font is not found (`#2868 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2868>`_)
+* filter None image in jsk_recognition_utils/visualize.py (`#2856 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2856>`_)
+* CI: update ROS-O config rules (`#2870 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2870>`_)
+* Delete copy constructor of TfListenerSingleton (`#2862 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2862>`_)
+* Add missing ros_environment dependency to package.xml (`#2837 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2837>`_)
+* [jsk_recognition_utils] add OpenCV to catkin_depends (`#2823 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2823>`_)
+* Contributors: Jeremy Kolb, Kei, Shingo Kitagawa, Yoshiki Obinata, Yuki Furuta
+
 1.2.17 (2023-11-14)
 -------------------
 * https://github.com/jsk-ros-pkg/jsk_recognition/pull/2648 requires jsk_data package (`#2805 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2805>`_)

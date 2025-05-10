@@ -2,6 +2,22 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Set RULE_LAUNCH_COMPILE/LINK to ccache if CMAKE_VERSION < 3.4 (`#2738 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2738>`_)
+* support pointxyzi in octree_voxel_grid_nodelet (`#2656 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2656>`_)
+* fix uniform sampling nodelet (`#2874 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2874>`_)
+* add UniformSampling in nodelet xml (`#2873 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2873>`_)
+* [jsk_pcl/OrganizedStatisticalOutlierRemoval] support several pointcloud type (`#2846 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2846>`_)
+* [ROS-O] Add ParticleCuboid::weightedAverage method (`#2863 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2863>`_ )
+* [ros-o] boost::make_shared -> std::make_shared, use .makeShared() (`#2853 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2853>`_)
+* Add missing ros_environment dependency to package.xml (`#2837 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2837>`_)
+* Add option 'synchronize' to hinted_plane_detector_nodelet (`#2844 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2844>`_)
+* use xyz instead of xyzrgb in ClusterPointIndicesDecomposer (`#2839 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2839>`_)
+* [jsk_pcl_ros] Fix errors on test_octomap_server_contact_pr2.test (`#2821 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2821>`_)
+* add test_octomap_server_contact_pr2.test for xacro or xacro.py, see `#2817 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2817>`_
+* Contributors: Jeremy Kolb, Shingo Kitagawa, Shun Hasegawa, Yoshiki Obinata, Yuki Furuta
+
 1.2.17 (2023-11-14)
 -------------------
 

@@ -2,6 +2,14 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* do not publish when array_size is zero (`#2878 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2878>`_)
+* Set RULE_LAUNCH_COMPILE/LINK to ccache if CMAKE_VERSION < 3.4 (`#2738 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2738>`_)
+* fix build with PCL 1.13 (`#2853 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2853>`_)
+* Add missing ros_environment dependency to package.xml (`#2837 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2837>`_)
+* Contributors: Jeremy Kolb, Shingo Kitagawa, Yoshiki Obinata, Yuki Furuta, v4hn
+
 1.2.17 (2023-11-14)
 -------------------
 

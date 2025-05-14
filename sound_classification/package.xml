@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>sound_classification</name>
-  <version>1.2.18</version>
+  <version>1.2.19</version>
   <description>The sound_classification package</description>
   <maintainer email="708yamaguchi@gmail.com">Naoya Yamaguchi</maintainer>
   <license>BSD</license>

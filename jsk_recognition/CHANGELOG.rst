@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.19 (2025-05-14)
+-------------------
 * Merge pull request `#2879 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2879>`_ from jsk-ros-pkg/add_license
   add LICENSE
 * add LICENSE

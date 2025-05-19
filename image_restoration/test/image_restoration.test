@@ -1,0 +1,29 @@
+<launch>
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/kiva_pod_image_color.jpg
+      encoding: bgr8
+      publish_info: false
+    </rosparam>
+  </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
+  
+  <include file="$(find image_restoration)/launch/sample_image_restoration.launch">
+    <arg name="input_topic" default="image_publisher/output" />
+  </include>
+  
+  <test test-name="test_image_restoration"
+        name="test_image_restoration"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /camera/restoration_image
+      timeout_0: 100
+      check_after_kill_node: true
+      node_names: [image_restoration_node,]
+    </rosparam>
+  </test>
+
+</launch>

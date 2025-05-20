@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>gpt4v_vqa</name>
+  <version>1.2.17</version>
+  <description>The gpt4v_vqa package</description>
+
+  <author email="shinjo@jsk.imi.i.u-tokyo.ac.jp">Koki Shinjo</author>
+  <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
+
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>catkin_virtualenv</build_depend>
+  <build_depend>actionlib</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+  <build_depend>jsk_recognition_msgs</build_depend>
+
+  <exec_depend>catkin_virtualenv</exec_depend>
+  <exec_depend>actionlib</exec_depend>
+  <exec_depend>dynamic_reconfigure</exec_depend>
+  <exec_depend>jsk_recognition_msgs</exec_depend>
+
+  <export>
+    <pip_requirements>requirements.txt</pip_requirements>
+  </export>
+</package>

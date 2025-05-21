@@ -2,6 +2,14 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.19 (2025-05-14)
+-------------------
+* Merge pull request `#2879 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2879>`_ from jsk-ros-pkg/add_license
+  add LICENSE
+* add LICENSE
+* ad LICENSE
+* Contributors: Kei Okada
+
 1.2.18 (2025-05-10)
 -------------------
 * Fixup 6ac62fef5caba52cbfa71c093b242a1f0b5a1b88 (`#2853 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2853>`_)

@@ -2,6 +2,14 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.19 (2025-05-14)
+-------------------
+* Merge pull request `#2879 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2879>`_ from jsk-ros-pkg/add_license
+  add LICENSE
+* add LICENSE
+* ad LICENSE
+* Contributors: Kei Okada
+
 1.2.18 (2025-05-10)
 -------------------
 * Set RULE_LAUNCH_COMPILE/LINK to ccache if CMAKE_VERSION < 3.4 (`#2738 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2738>`_)

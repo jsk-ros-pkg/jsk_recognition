@@ -1,6 +1,6 @@
 <package>
   <name>depth_image_publisher</name>
-  <version>1.2.18</version>
+  <version>1.2.19</version>
   <description>
     <p>
       Contains a node publish an image stream from single image file

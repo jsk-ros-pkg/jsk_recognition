@@ -2,6 +2,14 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.19 (2025-05-14)
+-------------------
+* Merge pull request `#2879 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2879>`_ from jsk-ros-pkg/add_license
+  add LICENSE
+* add LICENSE
+* ad LICENSE
+* Contributors: Kei Okada
+
 1.2.18 (2025-05-10)
 -------------------
 * do not publish when array_size is zero (`#2878 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2878>`_)

@@ -2,6 +2,14 @@
 Changelog for package audio_to_spectrogram
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.19 (2025-05-14)
+-------------------
+* Merge pull request `#2879 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2879>`_ from jsk-ros-pkg/add_license
+  add LICENSE
+* add LICENSE
+* ad LICENSE
+* Contributors: Kei Okada
+
 1.2.18 (2025-05-10)
 -------------------
 * [audio_to_spectrogram] Fix when to use catkin_install_python (`#2859 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2859>`_)

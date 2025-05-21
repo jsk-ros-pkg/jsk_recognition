@@ -36,8 +36,8 @@
 	(setq attrstr (apply #'concatenate string attrstr))
 	(setq nodestr (apply #'concatenate string nodestr))
         (if nodes
-            (str+ "<" tagstr attrstr ">" nodestr "</" tagstr ">" newline)
-          (str+ "<" tagstr attrstr "/>" newline)))
+            (str+ "<" tagstr attrstr ">" newline nodestr "</" tagstr ">" newline)
+          (str+ " <" tagstr attrstr "/>" newline)))
        (t "")
        ))))
   )

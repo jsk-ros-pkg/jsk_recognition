@@ -24,7 +24,7 @@ python-etcd==0.4.5
 PyYAML==5.3.1
 regex==2023.3.23
 ruamel-yaml==0.15.87
-torch==1.7.1
+torch==2.7.0
 torchelastic==0.2.1
 torchvision==0.8.2
 Werkzeug==2.2.3

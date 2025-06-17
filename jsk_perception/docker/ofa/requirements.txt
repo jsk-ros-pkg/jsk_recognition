@@ -83,7 +83,7 @@ tensorboard-data-server==0.7.0
 tensorboard-plugin-wit==1.8.1
 tensorboardX==2.4.1
 timm==0.6.13
-torch==1.8.1
+torch==2.7.1
 torchelastic==0.2.2
 torchmetrics==0.11.4
 torchtext==0.9.1

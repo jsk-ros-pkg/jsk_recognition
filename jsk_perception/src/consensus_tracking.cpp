@@ -64,13 +64,13 @@ namespace jsk_perception
     {
       async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
       async_->connectInput(sub_image_to_init_, sub_polygon_to_init_);
-      async_->registerCallback(boost::bind(&ConsensusTracking::setInitialWindow, this, _1, _2));
+      async_->registerCallback(boost::bind(&ConsensusTracking::setInitialWindow, this, boost::placeholders::_1, boost::placeholders::_2));
     }
     else
     {
       sync_ = boost::make_shared<message_filters::Synchronizer<ExactSyncPolicy> >(queue_size_);
       sync_->connectInput(sub_image_to_init_, sub_polygon_to_init_);
-      sync_->registerCallback(boost::bind(&ConsensusTracking::setInitialWindow, this, _1, _2));
+      sync_->registerCallback(boost::bind(&ConsensusTracking::setInitialWindow, this, boost::placeholders::_1, boost::placeholders::_2));
     }
 
     onInitPostProcess();
@@ -172,5 +172,5 @@ namespace jsk_perception
   }
 }  // namespace jsk_perception
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS(jsk_perception::ConsensusTracking, nodelet::Nodelet);

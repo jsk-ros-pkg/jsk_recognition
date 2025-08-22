@@ -34,7 +34,7 @@
 
 
 #include "jsk_pcl_ros_utils/tf_transform_cloud.h"
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 
 #include <tf2_ros/buffer_client.h>
 #include <pcl/common/centroid.h>
@@ -105,7 +105,7 @@ namespace jsk_pcl_ros_utils
                                                                        *tf_listener_,
                                                                        target_frame_id_,
                                                                        tf_queue_size_));
-      tf_filter_->registerCallback(boost::bind(&TfTransformCloud::transform, this, _1));
+      tf_filter_->registerCallback(boost::bind(&TfTransformCloud::transform, this, boost::placeholders::_1));
     }
   }
 

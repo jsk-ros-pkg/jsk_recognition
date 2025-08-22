@@ -122,7 +122,7 @@ namespace jsk_pcl_ros
       sub_camera_info_.subscribe(*pnh_, "camera_info", 1);
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
       sync_->connectInput(sub_input_, sub_camera_info_);
-      sync_->registerCallback(boost::bind(&DepthCalibration::calibrate, this, _1, _2));
+      sync_->registerCallback(boost::bind(&DepthCalibration::calibrate, this, boost::placeholders::_1, boost::placeholders::_2));
   }
   
   void DepthCalibration::unsubscribe()
@@ -167,6 +167,6 @@ namespace jsk_pcl_ros
   }
 
 }
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::DepthCalibration,
                           nodelet::Nodelet);

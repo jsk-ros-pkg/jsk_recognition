@@ -67,7 +67,7 @@ namespace jsk_pcl_ros_utils
                          *tf_listener_,
                          target_frame_id_,
                          tf_queue_size_));
-      tf_filter_->registerCallback(boost::bind(&TfTransformBoundingBox::transform, this, _1));
+      tf_filter_->registerCallback(boost::bind(&TfTransformBoundingBox::transform, this, boost::placeholders::_1));
     }
   }
 
@@ -123,5 +123,5 @@ namespace jsk_pcl_ros_utils
   }
 
 }
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros_utils::TfTransformBoundingBox, nodelet::Nodelet);

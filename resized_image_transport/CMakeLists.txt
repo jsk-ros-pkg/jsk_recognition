@@ -12,6 +12,7 @@ if (${CMAKE_VERSION} VERSION_LESS 3.4)
 endif()
 
 find_package(catkin REQUIRED COMPONENTS cv_bridge sensor_msgs image_transport
+  diagnostic_updater
   std_srvs message_generation dynamic_reconfigure
   nodelet
   jsk_topic_tools)

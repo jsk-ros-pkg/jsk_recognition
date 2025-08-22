@@ -103,6 +103,7 @@ namespace jsk_recognition_utils
   {
     os << "[" << seg.origin_[0] << ", " << seg.origin_[1] << ", " << seg.origin_[2] << "] -- "
        << "[" << seg.to_[0] << ", " << seg.to_[1] << ", " << seg.to_[2] << "]";
+    return os;
   }
 
   void Segment::getEnd(Eigen::Vector3f& output) const

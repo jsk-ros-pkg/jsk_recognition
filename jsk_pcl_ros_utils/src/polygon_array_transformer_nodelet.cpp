@@ -36,7 +36,7 @@
 #include "jsk_pcl_ros_utils/polygon_array_transformer.h"
 #include <tf_conversions/tf_eigen.h>
 #include "jsk_recognition_utils/geo_util.h"
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 
 namespace jsk_pcl_ros_utils
 {
@@ -72,7 +72,7 @@ namespace jsk_pcl_ros_utils
     sub_polygons_.subscribe(*pnh_, "input_polygons", 1);
     sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
     sync_->connectInput(sub_polygons_, sub_coefficients_);
-    sync_->registerCallback(boost::bind(&PolygonArrayTransformer::transform, this, _1, _2));
+    sync_->registerCallback(boost::bind(&PolygonArrayTransformer::transform, this, boost::placeholders::_1, boost::placeholders::_2));
   }
 
   void PolygonArrayTransformer::unsubscribe()

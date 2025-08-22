@@ -75,7 +75,7 @@ namespace jsk_pcl_ros_utils
     DiagnosticNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&PlanarPointCloudSimulatorNodelet::configCallback, this, _1, _2);
+      boost::bind (&PlanarPointCloudSimulatorNodelet::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     pub_ = advertise<sensor_msgs::PointCloud2>(
@@ -118,6 +118,6 @@ namespace jsk_pcl_ros_utils
   
 }
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros_utils::PlanarPointCloudSimulatorNodelet,
                         nodelet::Nodelet);

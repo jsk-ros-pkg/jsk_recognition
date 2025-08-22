@@ -77,11 +77,11 @@ namespace jsk_pcl_ros
     // timer to publish cloud
     cloud_timer_ = pnh_->createTimer(
       ros::Duration(1.0 / cloud_rate),
-      boost::bind(&PointCloudLocalization::cloudTimerCallback, this, _1));
+      boost::bind(&PointCloudLocalization::cloudTimerCallback, this, boost::placeholders::_1));
     // timer to publish tf
     tf_timer_ = pnh_->createTimer(
       ros::Duration(1.0 / tf_rate),
-      boost::bind(&PointCloudLocalization::tfTimerCallback, this, _1));
+      boost::bind(&PointCloudLocalization::tfTimerCallback, this, boost::placeholders::_1));
 
     onInitPostProcess();
   }
@@ -330,5 +330,5 @@ namespace jsk_pcl_ros
   }
 }
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::PointCloudLocalization, nodelet::Nodelet);

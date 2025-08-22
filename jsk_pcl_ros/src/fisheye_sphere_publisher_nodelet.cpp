@@ -110,12 +110,12 @@ namespace jsk_pcl_ros
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&FisheyeSpherePublisher::configCallback, this, _1, _2);
+      boost::bind (&FisheyeSpherePublisher::configCallback, this, boost::placeholders::_1, boost::placeholders::_2);
     srv_->setCallback (f);
 
     onInitPostProcess();
   }
 }
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::FisheyeSpherePublisher, nodelet::Nodelet);

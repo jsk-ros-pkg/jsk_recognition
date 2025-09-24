@@ -36,7 +36,7 @@
     </node>
     <node pkg="nodelet"
           type="nodelet"
-          name="depth_registered_quater"
+          name="depth_registered_quarter"
           args="load jsk_pcl/ResizePointsPublisher $(arg camera_remote)_nodelet_manager">
       <remap from="~input" to="depth_registered/points" />
       <remap from="~output" to="~points" />
@@ -45,7 +45,7 @@
     </node>
     <node pkg="nodelet"
           type="nodelet"
-          name="depth_quater"
+          name="depth_quarter"
           args="load jsk_pcl/ResizePointsPublisher $(arg camera_remote)_nodelet_manager">
       <remap from="~input" to="depth/points" />
       <remap from="~output" to="~points" />
@@ -67,7 +67,7 @@
     </node>
     <node pkg="nodelet"
           type="nodelet"
-          name="rgb_quater"
+          name="rgb_quarter"
           args="load resized_image_transport/ImageResizer $(arg camera_remote)_nodelet_manager">
       <param name="resize_scale_x" value="0.25" />
       <param name="resize_scale_y" value="0.25" />

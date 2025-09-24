@@ -59,9 +59,23 @@ catkin_package(
 )
 
 # Cythonize pyx files
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-include(UseCython)
-add_subdirectory(python/${PROJECT_NAME})
+find_package( Cython )
+find_package( PythonLibs )
+if ( Cython_FOUND AND PythonLibs_FOUND )
+  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+  include(UseCython)
+  add_subdirectory(python/${PROJECT_NAME})
+else()
+  message(WARNING "Cythonize pyx files needs Cython(${Cython_FOUND}) and PythonLibs(${PythonLIbs_FOUND})")
+endif()
+
+# Compile jsk_recognition_utils::rangeImageToCvMat(pcl_conversion_util.cpp) only when PCL_VISUALIZATION_FOUND, for pcl compiled in embedded environement, where no visualization tool exists
+message(STATUS "PCL_VISUALIZATION_FOUND = ${PCL_VISUALIZATION_FOUND}")
+if(PCL_VISUALIZATION_FOUND)
+  add_definitions("-DPCL_VISUALIZATION_FOUND")
+else()
+  message(WARNING "PCL_VISUALIZATION is not found")
+endif()
 
 find_package(OpenCV REQUIRED core imgproc)
 find_package(PCL REQUIRED)
@@ -75,7 +89,7 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
 endif()
 include_directories(
-  include ${catkin_INCLUDE_DIRS}
+  include ${catkin_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS}
 )
 link_libraries(${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PCL_LIBRARIES} yaml-cpp)
 

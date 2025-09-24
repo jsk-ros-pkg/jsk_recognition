@@ -34,11 +34,14 @@
  *********************************************************************/
 
 #include "jsk_recognition_utils/pcl_conversion_util.h"
+#if PCL_VISUALIZATION_FOUND
 #include <pcl/visualization/common/float_image_utils.h>
+#endif
 
 namespace jsk_recognition_utils
 {
 
+#if PCL_VISUALIZATION_FOUND
   void rangeImageToCvMat(const pcl::RangeImage& range_image,
                          cv::Mat& image)
   {
@@ -67,6 +70,14 @@ namespace jsk_recognition_utils
     }
     return;
   }
+#else
+  void rangeImageToCvMat(const pcl::RangeImage& range_image,
+                         cv::Mat& image)
+  {
+    ROS_ERROR("%s neeed PCL_VISUALIZATION_FOUND", __PRETTY_FUNCTION__);
+    return;
+  }
+#endif
   
   void convertEigenAffine3(const Eigen::Affine3d& from,
                            Eigen::Affine3f& to)

@@ -57,7 +57,7 @@ packaging==23.0
 pandas==1.5.3
 pkginfo==1.7.0
 portalocker==2.7.0
-protobuf==3.19.6
+protobuf==4.25.8
 pyarrow==11.0.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8

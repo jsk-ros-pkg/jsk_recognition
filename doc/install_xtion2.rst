@@ -1,8 +1,8 @@
 Install Xtion2
 ==============
 
-- Homepage: https://www.asus.com/3D-Sensor/Xtion-2/
-- SDK Download: https://www.asus.com/3D-Sensor/Xtion-2/HelpDesk_Download/
+- Homepage: https://www.asus.com/supportonly/xtion%202/helpdesk_manual/
+- SDK Download: https://www.asus.com/supportonly/xtion%202/helpdesk_download/
 
 Spec
 ----
@@ -27,7 +27,7 @@ Install SDK && Try Sample
 
 .. code-block:: bash
 
-  # Download SDK.zip from https://www.asus.com/3D-Sensor/Xtion-2/HelpDesk_Download/
+  # Download SDK.zip from https://www.asus.com/supportonly/xtion%202/helpdesk_download/
   cd ~/Downloads
   tar xf ASUS-Linux-x64-OpenNI2.2.tar.gz
   cd ASUS-Linux-x64-OpenNI2.2/

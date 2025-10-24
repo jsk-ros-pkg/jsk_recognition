@@ -65,11 +65,145 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <map>
+#include <atomic>
+#include <functional>
 #include <dynamic_reconfigure/server.h>
 #include <jsk_perception/point_pose_extractorConfig.h>
 #include <jsk_perception/SetTemplate.h>
 
 namespace enc = sensor_msgs::image_encodings;
+
+// For OpenCV Qt backend
+class HighguiWrap {
+public:
+  HighguiWrap() : running_(false) {}
+  ~HighguiWrap() { stop(); }
+
+  void start() {
+    if (running_.exchange(true)) return;
+    th_ = std::thread([this] { loop(); });
+  }
+
+  void stop() {
+    if (!running_.exchange(false)) return;
+    cv_.notify_all();
+    if (th_.joinable()) th_.join();
+    std::lock_guard<std::mutex> lk(mu_);
+    for (auto &kv : windows_) cv::destroyWindow(kv.first);
+    windows_.clear();
+  }
+
+  void createWindow(const std::string& name, int flags) {
+    std::lock_guard<std::mutex> lk(mu_);
+    if (!windows_.count(name)) {
+      windows_[name].flags = flags;
+      windows_[name].need_create = true;
+    } else {
+      // Clear old image data when reusing existing window
+      windows_[name].last = cv::Mat();
+    }
+  }
+
+  void setMouseCallback(const std::string& name,
+                        cv::MouseCallback cb, void* userdata) {
+    std::lock_guard<std::mutex> lk(mu_);
+    if (!windows_.count(name)) {
+      windows_[name].flags = CV_WINDOW_AUTOSIZE;
+      windows_[name].need_create = true;
+    } else {
+      // Clear old image data when setting new callback
+      windows_[name].last = cv::Mat();
+    }
+    windows_[name].callback = cb;
+    windows_[name].userdata = userdata;
+    windows_[name].need_set_callback = true;
+  }
+
+  void show(const std::string& name, const cv::Mat& img) {
+    std::lock_guard<std::mutex> lk(mu_);
+    if (!windows_.count(name)) {
+      windows_[name].flags = CV_WINDOW_AUTOSIZE;
+      windows_[name].need_create = true;
+    }
+    img.copyTo(windows_[name].last);
+    cv_.notify_all();
+  }
+
+  int getWindowProperty(const std::string& name, int prop_id) {
+    std::lock_guard<std::mutex> lk(mu_);
+    if (windows_.count(name) && windows_[name].created) {
+      return windows_[name].flags;
+    }
+    return CV_WINDOW_AUTOSIZE;
+  }
+
+private:
+  struct WindowState {
+    cv::Mat last;
+    int flags = CV_WINDOW_AUTOSIZE;
+    bool need_create = false;
+    bool created = false;
+    bool need_set_callback = false;
+    cv::MouseCallback callback = nullptr;
+    void* userdata = nullptr;
+  };
+  std::atomic<bool> running_;
+  std::thread th_;
+  std::mutex mu_;
+  std::condition_variable cv_;
+  std::map<std::string, WindowState> windows_;
+
+  void loop() {
+    using namespace std::chrono_literals;
+    while (running_) {
+      std::unique_lock<std::mutex> lk(mu_);
+      cv_.wait_for(lk, 10ms);
+
+      // Process window creation and callbacks in GUI thread
+      for (auto &kv : windows_) {
+        if (kv.second.need_create && !kv.second.created) {
+          cv::namedWindow(kv.first, kv.second.flags);
+          kv.second.created = true;
+          kv.second.need_create = false;
+        }
+        if (kv.second.need_set_callback && kv.second.created) {
+          cv::setMouseCallback(kv.first, kv.second.callback, kv.second.userdata);
+          kv.second.need_set_callback = false;
+        }
+      }
+
+      auto copy = windows_;
+      lk.unlock();
+
+      // Display images
+      for (auto &kv : copy) {
+        if (kv.second.created && !kv.second.last.empty()) {
+          cv::imshow(kv.first, kv.second.last);
+        }
+      }
+      // Qt backend event processing
+      cv::waitKey(1);
+    }
+  }
+};
+
+// Qt/GTK detection function
+inline bool isOpenCVBuiltWithQt() {
+#if defined(HAVE_QT) || defined(HAVE_QT5)
+  return true;
+#else
+  // Runtime detection: use cv::getBuildInformation()
+  std::string build_info = cv::getBuildInformation();
+  return (build_info.find("QT:") != std::string::npos &&
+          build_info.find("QT:                      NO") == std::string::npos) ||
+         (build_info.find("QT 5:") != std::string::npos &&
+          build_info.find("QT 5:                    NO") == std::string::npos);
+#endif
+}
 
 void features2keypoint (posedetection_msgs::Feature0D features,
                         std::vector<cv::KeyPoint>& keypoints,
@@ -113,8 +247,10 @@ public:
   double _distanceratio_threshold;
   std::vector<cv::Point2d> _correspondances;
   cv::Mat _previous_stack_img;
+  HighguiWrap* _gui_wrap;  // Dedicated GUI thread (only used for Qt backend)
 
   Matching_Template(){
+    _gui_wrap = nullptr;
   }
   Matching_Template(cv::Mat img,
                     std::string matching_frame,
@@ -127,7 +263,8 @@ public:
                     double reprojection_threshold,
                     double distanceratio_threshold,
                     std::string window_name,
-                    bool autosize){
+                    bool autosize,
+                    HighguiWrap* gui_wrap = nullptr){
 
     _template_img = img.clone();
     _matching_frame = matching_frame;
@@ -142,7 +279,8 @@ public:
     _distanceratio_threshold = distanceratio_threshold;
     _template_keypoints.clear();
     _correspondances.clear();
-    //    cv::namedWindow(_window_name, autosize ? CV_WINDOW_AUTOSIZE : 0);
+    _gui_wrap = gui_wrap;
+    //    cv::namedWindow(_window_name, autosize ? cv::WINDOW_AUTOSIZE : 0);
   }
 
 
@@ -362,8 +500,13 @@ public:
     ROS_INFO("    inlier_sum:%d   min_lier:%d", inlier_sum, min_inlier((int)pt2.size(), 4, 0.10, 0.01));
     if ((cv::countNonZero( H ) == 0) || (inlier_sum < min_inlier((int)pt2.size(), 4, 0.10, 0.01))){
       ROS_INFO("    inlier_sum < min_lier return-from estimate-od");
-      if( _window_name != "" )
-        cv::imshow(_window_name, stack_img);
+      if( _window_name != "" ) {
+        if (_gui_wrap) {
+          _gui_wrap->show(_window_name, stack_img);
+        } else {
+          cv::imshow(_window_name, stack_img);
+        }
+      }
       return false;
     }
 
@@ -542,8 +685,13 @@ public:
       ROS_INFO("      %s < %f (threshold)", text.c_str(), err_thr );
     }
     // for debug window
-    if( _window_name != "" )
-      cv::imshow(_window_name, stack_img);
+    if( _window_name != "" ) {
+      if (_gui_wrap) {
+        _gui_wrap->show(_window_name, stack_img);
+      } else {
+        cv::imshow(_window_name, stack_img);
+      }
+    }
 
     return err_success;
   }
@@ -582,6 +730,7 @@ namespace jsk_perception
     bool _viewer;
     bool _publish_tf;
     std::string _child_frame_id;
+    std::unique_ptr<HighguiWrap> _gui_wrap;  // GUI thread for Qt backend
 
     virtual void initialize ();
     virtual cv::Mat make_homography(cv::Mat src, cv::Mat rvec, cv::Mat tvec,
@@ -679,6 +828,13 @@ namespace jsk_perception
     cv::Mat M = (cv::Mat_<double>(3,3) << 1,0,0, 0,1,0, 0,0,1);
     std::string window_name = "sample" + boost::lexical_cast<std::string>((int)ppe->_templates.size());
 
+    int window_flags = CV_WINDOW_AUTOSIZE;
+    if (ppe->_gui_wrap) {
+      window_flags = ppe->_gui_wrap->getWindowProperty(mt->_window_name, CV_WND_PROP_AUTOSIZE);
+    } else {
+      window_flags = cv::getWindowProperty(mt->_window_name, CV_WND_PROP_AUTOSIZE);
+    }
+
     Matching_Template* tmplt =
       new Matching_Template (tmp_warp_template, "sample",
                              tmp_warp_template.size().width, tmp_warp_template.size().height,
@@ -688,14 +844,27 @@ namespace jsk_perception
                              mt->_reprojection_threshold,
                              mt->_distanceratio_threshold,
                              ppe->_first_sample_change ? window_name : mt->_window_name,
-                             cv::getWindowProperty(mt->_window_name, CV_WND_PROP_AUTOSIZE));
+                             window_flags,
+                             ppe->_gui_wrap.get());
 
     mt->_correspondances.clear();
+
+    std::string target_window = ppe->_first_sample_change ? window_name : mt->_window_name;
+
+    // If reusing window name, clear the old template's window name to avoid conflict
+    if (!ppe->_first_sample_change) {
+      mt->_window_name = "";
+    }
+
     ppe->_templates.push_back(tmplt);
-    cv::namedWindow(ppe->_first_sample_change ? window_name : mt->_window_name,
-                    cv::getWindowProperty(mt->_window_name, CV_WND_PROP_AUTOSIZE));
-    cvSetMouseCallback (ppe->_first_sample_change ? window_name.c_str() : mt->_window_name.c_str(),
-                        &cvmousecb, ppe);
+
+    if (ppe->_gui_wrap) {
+      ppe->_gui_wrap->createWindow(target_window, window_flags);
+      ppe->_gui_wrap->setMouseCallback(target_window, &cvmousecb, ppe);
+    } else {
+      cv::namedWindow(target_window, window_flags);
+      cvSetMouseCallback(target_window.c_str(), &cvmousecb, ppe);
+    }
     ppe->_first_sample_change = true;
   }
   private:

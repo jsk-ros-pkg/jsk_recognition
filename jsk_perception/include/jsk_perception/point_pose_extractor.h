@@ -65,12 +65,6 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-#include <map>
-#include <atomic>
-#include <functional>
 #include <dynamic_reconfigure/server.h>
 #include <jsk_perception/point_pose_extractorConfig.h>
 #include <jsk_perception/SetTemplate.h>
@@ -78,6 +72,12 @@
 namespace enc = sensor_msgs::image_encodings;
 
 // For OpenCV Qt backend
+#if __cplusplus >= 201103L
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <map>
+#include <atomic>
 class HighguiWrap {
 public:
   HighguiWrap() : running_(false) {}
@@ -190,19 +190,51 @@ private:
     }
   }
 };
+#else // __cplusplus >= 201103L
+#define nullptr NULL
+class HighguiWrap {
+public:
+  HighguiWrap() : running_(false) {}
+  ~HighguiWrap() { stop(); }
+  void start() {
+    return;
+  }
+
+  void stop() {
+    return;
+  }
+
+  void createWindow(const std::string& name, int flags) {
+    return;
+  }
+
+  void setMouseCallback(const std::string& name,
+                        cv::MouseCallback cb, void* userdata) {
+    return;
+  }
+
+  void show(const std::string& name, const cv::Mat& img) {
+    return;
+  }
+
+  int getWindowProperty(const std::string& name, int prop_id) {
+    return 0;
+  }
+};
+#endif  // __cplusplus >= 201103L
 
 // Qt/GTK detection function
 inline bool isOpenCVBuiltWithQt() {
-#if defined(HAVE_QT) || defined(HAVE_QT5)
-  return true;
-#else
   // Runtime detection: use cv::getBuildInformation()
+  #if __cplusplus >= 201103L
   std::string build_info = cv::getBuildInformation();
   return (build_info.find("QT:") != std::string::npos &&
           build_info.find("QT:                      NO") == std::string::npos) ||
          (build_info.find("QT 5:") != std::string::npos &&
           build_info.find("QT 5:                    NO") == std::string::npos);
-#endif
+  #else
+  return false
+  #endif
 }
 
 void features2keypoint (posedetection_msgs::Feature0D features,
@@ -540,7 +572,7 @@ public:
     cv::Mat tvec(3, 1, CV_64FC1, fT3);
     cv::Mat zero_distortion_mat = cv::Mat::zeros(4, 1, CV_64FC1);
 
-    cv::solvePnP (corners3d_mat, corners2d_mat_trans, 
+    cv::solvePnP (corners3d_mat, corners2d_mat_trans,
                   pcam.intrinsicMatrix(),
                   zero_distortion_mat,//if unrectified: pcam.distortionCoeffs()
                   rvec, tvec);
@@ -662,7 +694,7 @@ public:
 
       for(int i=0; i<4; i++) {
         coords[i] = resulttf * coords[i];
-        cv::Point3f pt(coords[i].getX(), coords[i].getY(), coords[i].getZ());   
+        cv::Point3f pt(coords[i].getX(), coords[i].getY(), coords[i].getZ());
         ps[i] = pcam.project3dToPixel(pt);
         ps[i].y += _template_img.rows; // draw on camera image
       }
@@ -730,7 +762,11 @@ namespace jsk_perception
     bool _viewer;
     bool _publish_tf;
     std::string _child_frame_id;
+    #if __cplusplus >= 201103L
     std::unique_ptr<HighguiWrap> _gui_wrap;  // GUI thread for Qt backend
+    #else
+    *HighguiWrap _gui_wrap; // not used
+    #endif
 
     virtual void initialize ();
     virtual cv::Mat make_homography(cv::Mat src, cv::Mat rvec, cv::Mat tvec,

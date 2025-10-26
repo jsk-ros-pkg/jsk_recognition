@@ -354,6 +354,7 @@ namespace jsk_perception
     server.setCallback(f);
 
     // Initialize GUI wrap for Qt backend
+    #if __cplusplus >= 201103L
     if (isOpenCVBuiltWithQt()) {
       ROS_INFO("OpenCV built with Qt detected. Using dedicated GUI thread.");
       _gui_wrap = std::unique_ptr<HighguiWrap>(new HighguiWrap());
@@ -361,6 +362,7 @@ namespace jsk_perception
     } else {
       ROS_INFO("OpenCV built with GTK. Using standard GUI operations.");
     }
+    #endif
 
     it = new image_transport::ImageTransport(*pnh_);
     // Use nh_ instead of pnh_ for backward compatibility.

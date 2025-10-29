@@ -78,6 +78,7 @@ namespace enc = sensor_msgs::image_encodings;
 #include <condition_variable>
 #include <map>
 #include <atomic>
+#define GUI_WRAP_RAW(p) ((p).get())
 class HighguiWrap {
 public:
   HighguiWrap() : running_(false) {}
@@ -192,9 +193,10 @@ private:
 };
 #else // __cplusplus >= 201103L
 #define nullptr NULL
+#define GUI_WRAP_RAW(p) (p)
 class HighguiWrap {
 public:
-  HighguiWrap() : running_(false) {}
+  HighguiWrap() {}
   ~HighguiWrap() { stop(); }
   void start() {
     return;
@@ -220,6 +222,8 @@ public:
   int getWindowProperty(const std::string& name, int prop_id) {
     return 0;
   }
+private:
+  bool running_;
 };
 #endif  // __cplusplus >= 201103L
 
@@ -233,7 +237,7 @@ inline bool isOpenCVBuiltWithQt() {
          (build_info.find("QT 5:") != std::string::npos &&
           build_info.find("QT 5:                    NO") == std::string::npos);
   #else
-  return false
+  return false;
   #endif
 }
 
@@ -765,7 +769,7 @@ namespace jsk_perception
     #if __cplusplus >= 201103L
     std::unique_ptr<HighguiWrap> _gui_wrap;  // GUI thread for Qt backend
     #else
-    *HighguiWrap _gui_wrap; // not used
+    HighguiWrap* _gui_wrap; // not used
     #endif
 
     virtual void initialize ();
@@ -881,7 +885,7 @@ namespace jsk_perception
                              mt->_distanceratio_threshold,
                              ppe->_first_sample_change ? window_name : mt->_window_name,
                              window_flags,
-                             ppe->_gui_wrap.get());
+                             GUI_WRAP_RAW(ppe->_gui_wrap));
 
     mt->_correspondances.clear();
 

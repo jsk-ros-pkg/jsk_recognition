@@ -224,7 +224,7 @@ namespace jsk_perception
                               _reprojection_threshold,
                               _distanceratio_threshold,
                               (_viewer ? type : ""), _autosize,
-                              _gui_wrap.get());
+                              GUI_WRAP_RAW(_gui_wrap));
       _templates.push_back(tmplt);
       if( _viewer )
         {
@@ -362,6 +362,8 @@ namespace jsk_perception
     } else {
       ROS_INFO("OpenCV built with GTK. Using standard GUI operations.");
     }
+    #else
+    _gui_wrap = NULL;
     #endif
 
     it = new image_transport::ImageTransport(*pnh_);

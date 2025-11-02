@@ -53,6 +53,8 @@ class TileImages(ConnectionBasedTransport):
             rospy.logerr('need to specify input_topics')
             sys.exit(1)
         self._shape = rospy.get_param('~shape', None)
+        self._resize = rospy.get_param('~resize', False)
+        self._timer_rate = rospy.get_param('~timer_rate', 10.0)
         if self._shape:
             if not (isinstance(self._shape, collections_Sequence) and
                     len(self._shape) == 2):
@@ -79,7 +81,7 @@ class TileImages(ConnectionBasedTransport):
         if self.no_sync:
             self.input_imgs = {}
             self.sub_img_list = [rospy.Subscriber(topic, Image, self.simple_callback(topic), queue_size=1) for topic in self.input_topics]
-            rospy.Timer(rospy.Duration(0.1), self.timer_callback)
+            rospy.Timer(rospy.Duration(1.0 / self._timer_rate), self.timer_callback)
         else:
             queue_size = rospy.get_param('~queue_size', 10)
             slop = rospy.get_param('~slop', 1)
@@ -121,7 +123,20 @@ class TileImages(ConnectionBasedTransport):
             return
         # convert tile shape: (Y, X) -> (X, Y)
         # if None, shape is automatically decided to be square AMAP.
-        shape_xy = self._shape[::-1] if self._shape else None
+        if self._shape is None:
+            shape_xy = get_tile_shape(len(imgs))
+        else:
+            shape_xy = self._shape[::-1]
+        # resize to shrink output image
+        if self._resize:
+            resized_imgs = []
+            for img in imgs:
+                w, h = img.shape[:2][::-1]
+                resized_w = int(w / max(shape_xy))
+                resized_h = int(h / max(shape_xy))
+                resized_imgs.append(cv2.resize(img, (resized_w, resized_h)))
+            imgs = resized_imgs
+
         if self.cache_img is None:
             out_bgr = jsk_recognition_utils.get_tile_image(
                 imgs, tile_shape=shape_xy)
@@ -134,7 +149,6 @@ class TileImages(ConnectionBasedTransport):
                 out_bgr = jsk_recognition_utils.get_tile_image(
                     imgs, tile_shape=shape_xy)
                 self.cache_img = out_bgr
-
         encoding = 'bgr8'
         stamp = rospy.Time.now()
         if self.pub_img.get_num_connections() > 0:

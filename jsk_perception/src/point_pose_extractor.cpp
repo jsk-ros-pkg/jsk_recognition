@@ -216,19 +216,25 @@ namespace jsk_perception
         type += "_" + std::string(chr);
       }
 
-      Matching_Template * tmplt = 
+      Matching_Template * tmplt =
         new Matching_Template(imgs.at(i), type,
                               img.size().width, img.size().height,
                               template_width, template_height,
                               relative_pose, Mvec.at(i),
                               _reprojection_threshold,
                               _distanceratio_threshold,
-                              (_viewer ? type : ""), _autosize);
+                              (_viewer ? type : ""), _autosize,
+                              GUI_WRAP_RAW(_gui_wrap));
       _templates.push_back(tmplt);
       if( _viewer )
         {
-          cv::namedWindow(type, _autosize ? CV_WINDOW_AUTOSIZE : 0);
-          cvSetMouseCallback (type.c_str(), &cvmousecb, this);
+          if (_gui_wrap) {
+            _gui_wrap->createWindow(type, _autosize ? CV_WINDOW_AUTOSIZE : 0);
+            _gui_wrap->setMouseCallback(type, &cvmousecb, this);
+          } else {
+            cv::namedWindow(type, _autosize ? CV_WINDOW_AUTOSIZE : 0);
+            cvSetMouseCallback(type.c_str(), &cvmousecb, this);
+          }
         }
     }
     return true;
@@ -332,7 +338,11 @@ namespace jsk_perception
     // BOOST_FOREACH(Matching_Template* mt, _templates) {
     //   std::cerr << "templates_ -> " << mt << std::endl;
     // }
-    cv::waitKey( 10 );
+    // For GTK backend, we need to call cv::waitKey
+    // For Qt backend with GUI wrap, waitKey is called in the wrap thread
+    if (!_gui_wrap) {
+      cv::waitKey( 10 );
+    }
   }
 
   void PointPoseExtractor::onInit()
@@ -342,6 +352,19 @@ namespace jsk_perception
     dynamic_reconfigure::Server<Config>::CallbackType f;
     f = boost::bind(&PointPoseExtractor::dyn_conf_callback, this, _1, _2);
     server.setCallback(f);
+
+    // Initialize GUI wrap for Qt backend
+    #if __cplusplus >= 201103L
+    if (isOpenCVBuiltWithQt()) {
+      ROS_INFO("OpenCV built with Qt detected. Using dedicated GUI thread.");
+      _gui_wrap = std::unique_ptr<HighguiWrap>(new HighguiWrap());
+      _gui_wrap->start();
+    } else {
+      ROS_INFO("OpenCV built with GTK. Using standard GUI operations.");
+    }
+    #else
+    _gui_wrap = NULL;
+    #endif
 
     it = new image_transport::ImageTransport(*pnh_);
     // Use nh_ instead of pnh_ for backward compatibility.

@@ -1,8 +1,8 @@
-// -*- mode: c++ -*-
+// -*- Mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, JSK Lab
+ *  Copyright (c) 2015, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -13,7 +13,7 @@
  *     notice, this list of conditions and the following disclaimer.
  *   * Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
+ *     disclaimer in the documentation and/o2r other materials provided
  *     with the distribution.
  *   * Neither the name of the JSK Lab nor the names of its
  *     contributors may be used to endorse or promote products derived
@@ -33,35 +33,37 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-
-#ifndef JSK_RECOGNITION_UTILS_TF_LISTENER_SINGLETON_H_
-#define JSK_RECOGNITION_UTILS_TF_LISTENER_SINGLETON_H_
-
 #include <tf/transform_listener.h>
-#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/buffer_client.h>
 
 namespace jsk_recognition_utils
 {
-  class TfListenerSingleton
+  /**
+   * @brief
+   * Class to wrap tf and tf2 to provide
+   * same API.
+   */
+  class TfListener
   {
   public:
-    static tf::TransformListener* getInstance();
-    static void destroy();
+    typedef boost::shared_ptr<TfListener> Ptr;
+    TfListener(const bool use_tf2,
+               double check_frequenccy = 10.0,
+               ros::Duration timeout_padding = ros::Duration(2.0));
+    bool waitForTransform(const std::string& target_frame,
+                          const std::string& source_frame,
+                          const ros::Time& time,
+                          const ros::Duration& timeout) const;
+    void lookupTransform(const std::string& target_frame,
+                         const std::string& source_frame,
+                         const ros::Time& time,
+                         tf::StampedTransform& transform) const;
+    
   protected:
-    static tf::TransformListener* instance_;
-    static boost::mutex mutex_;
+    bool use_tf2_;
+    tf::TransformListener* tf_listener_;
+    boost::shared_ptr<tf2_ros::BufferClient> tf2_buffer_client_;
   private:
-    TfListenerSingleton(TfListenerSingleton const&) = delete;
-    TfListenerSingleton& operator=(TfListenerSingleton const&) = delete;
+    
   };
-
-  // tf Utility
-  tf::StampedTransform lookupTransformWithDuration(
-    tf::TransformListener* listener,
-    const std::string& to_frame,
-    const std::string& from_frame,
-    const ros::Time& stamp,
-    ros::Duration duration);
 }
-
-#endif

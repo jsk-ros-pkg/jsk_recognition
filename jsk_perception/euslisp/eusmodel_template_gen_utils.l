@@ -23,8 +23,16 @@
 	     (origin (send (car (rassoc #f(0 0) texco)) :pvertex aface))
 	     (vx (v- (send (car (rassoc #f(1 0) texco)) :pvertex aface) origin))
 	     (vy (v- (send (car (rassoc #f(0 1) texco)) :pvertex aface) origin))
-	     (width (norm vx)) (height (norm vy))
+	     (width (norm vx)) (height (norm vy)) obj_tmp depth
 	     (trans-rot (make-matrix 3 3)))
+        (cond ((derivedp obj faceset)
+               (setq obj_tmp obj))
+              ((derivedp obj cascaded-link)
+               (setq obj_tmp (apply #'convex-hull-3d (send-all (send obj :bodies) :vertices))))
+              (t
+               (warning-message 3 "unknown object class ~A~%" (send obj :super))
+               ))
+        (setq depth (norm (v- (cadr (car (send obj_tmp :faces-intersect-with-point-vector (cadr (send aface :centroid)) (v- (send aface :normal))))) (cadr (send aface :centroid)))))
         (setq vx (scale (/ 1.0 width) vx) vy (scale (/ 1.0 height) vy))
         (set-matrix-column trans-rot 0 vy) ;; ny
         (set-matrix-column trans-rot 1 vx) ;; nx
@@ -41,17 +49,15 @@
           (if (null (probe-file (send (pathname template) :directory-string)))
               (unix::mkdir (send (pathname template) :directory-string)))
 	  (unix::system (format nil "cp -f ~a ~a" imgfile template)))
-	(list template-include width height trans)
+	(list template-include width height trans depth)
 	))))
 
-(defun gen-detection-nodes (obj)
+(defun gen-detection-nodes (obj &key remap-args (publish-tf nil) (child-frame-id "matching"))
   (let (nodes)
     (setq nodes
 	  (mapcar
 	   #'(lambda(aface)
 	       (let* ((teximg (send aface :get :gl-textureimage))
-		      (imgpath (pathname (send teximg :name)))
-		      (imgname (str+ (send imgpath :name) "." (send imgpath :type)))
 		      (tmpl-info (get-template-info obj aface))
 		      trans quat)
 		 (when (and teximg tmpl-info)
@@ -59,19 +65,36 @@
 		   (setq quat (matrix2quaternion (send trans :rot)))
 		   (instance rosnode :init "jsk_perception" "point_pose_extractor"
 			     :name (format nil "point_pose_extractor_~a" (send obj :name))
+                             :remap_args remap-args
 			     :params
       (list
        (instance rosparam :init :name "window_name" :value (send obj :name))
        (instance rosparam :init :name "template_filename" :value (car tmpl-info))
        (instance rosparam :init :name "object_width" :value (* (elt tmpl-info 1) 0.001))
        (instance rosparam :init :name "object_height" :value (* (elt tmpl-info 2) 0.001))
+       (instance rosparam :init :name "object_depth" :value (* (elt tmpl-info 4) 0.001))
        (instance rosparam :init :name "relative_pose" :value (concatenate float-vector (scale 0.001 (send trans :pos)) (subseq quat 1) (subseq quat 0 1)))
-       (instance rosparam :init :name "viewer_window" :value "false"))
+       (instance rosparam :init :name "viewer_window" :value "false")
+       (instance rosparam :init :name "publish_tf" :value (if publish-tf "true" "false"))
+       (instance rosparam :init :name "child_frame_id" :value child-frame-id)
+       )
 			     ))))
 	   (send obj :faces)))
     (remove nil nodes)))
 
-(defun gen-all-launch (objects launch-file-name &key (ns nil))
+(defun gen-all-launch (objects launch-file-name &key (ns nil)
+                                                  (image-remap-args nil)
+                                                  (gen-image-feature nil)
+                                                  (image-topic "image")
+                                                  (image-topic-transport "raw")
+                                                  (image-feature-pkg "imagesift") (image-feature-type "imagesift")
+                                                  (gen-object-marker nil)
+                                                  (objectdetection-solve-tf nil)
+                                                  (objectdetection-remap-args nil)
+                                                  (object-builder "(make-cube 60 60 60)")
+                                                  (object-frame-id "/map")
+                                                  (publish-tf nil) (child-frame-id "matching")
+                                                  )
   ;; generate launchfile
   (with-open-file
    (launch-f launch-file-name :direction :output)
@@ -84,7 +107,26 @@
 		     (send obj :name)))
        (setq obj-include
              (format nil "$(find ~A)/template/_~x_~A.xml" *pkgname* (system::address obj) (send obj :name)))
-       (setq nodes (gen-detection-nodes obj))
+       (setq nodes (gen-detection-nodes obj :remap-args image-remap-args :publish-tf publish-tf :child-frame-id child-frame-id))
+       (if gen-image-feature
+           (push (instance rosnode :init image-feature-pkg image-feature-type
+                           :name (format nil "~A_~A" image-feature-type (send obj :name))
+                           :remap_args image-remap-args
+                           :params (list (instance rosparam :init :name "image_transport" :value image-topic-transport))
+                           ) nodes))
+       (when gen-object-marker
+         (let* ((aface (car (mapcan #'(lambda (aface) (if (send aface :get :gl-textureimage) (list aface))) (send obj :faces))))
+                (tmpl-info (get-template-info obj aface)))
+           (push (instance rosnode :init "jsk_perception" "kalman-filtered-objectdetection-marker.l"
+                           :name (format nil "objectdetection_marker_~A" (send obj :name))
+                           :remap_args objectdetection-remap-args
+                           :params (list (instance rosparam :init :name "object_builder" :value object-builder)
+                                         (instance rosparam :init :name "frame_id" :value object-frame-id)
+                                         (instance rosparam :init :name "solve_tf" :value (if objectdetection-solve-tf "true" "false"))
+                                         (instance rosparam :init :name "object_width" :value (* (elt tmpl-info 1) 0.001))
+                                         (instance rosparam :init :name "object_height" :value (* (elt tmpl-info 2) 0.001))
+                                         )
+                           ) nodes)))
        (send-all nodes :namespace ns)
        (setq xmllist (append (list "launch" nil)
 			     (send-all nodes :list)))

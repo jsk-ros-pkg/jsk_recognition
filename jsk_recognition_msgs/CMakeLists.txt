@@ -76,6 +76,9 @@ add_message_files(
   Segment.msg
   SegmentStamped.msg
   SegmentArray.msg
+  LabeledPose.msg
+  LabeledPoseArray.msg
+  LabeledPoseStamped.msg
   PeoplePose.msg
   PeoplePoseArray.msg
   HandPose.msg

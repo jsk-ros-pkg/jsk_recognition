@@ -42,6 +42,7 @@ namespace jsk_perception
     _client.shutdown();
     _pub.shutdown();
     _pub_agg.shutdown();
+    _pub_pixel.shutdown();
   }
 
   void PointPoseExtractor::initialize () {
@@ -319,6 +320,17 @@ namespace jsk_perception
         if ((int)vo6p.size() != 0) {
           pose_msg.pose = od.objects[0].pose;
           _pub_pose.publish(pose_msg);
+          // Publish pixel coordinate of the detected object
+          cv::Point3f pt3d(pose_msg.pose.position.x,
+                           pose_msg.pose.position.y,
+                           pose_msg.pose.position.z);
+          cv::Point2f pt2d = pcam.project3dToPixel(pt3d);
+          geometry_msgs::PointStamped pixel_msg;
+          pixel_msg.header = od.header;
+          pixel_msg.point.x = pt2d.x;
+          pixel_msg.point.y = pt2d.y;
+          pixel_msg.point.z = 0;  // z is not used for pixel coordinate
+          _pub_pixel.publish(pixel_msg);
         }
         // broadcast tf
         if ( this->_publish_tf ) {
@@ -374,6 +386,7 @@ namespace jsk_perception
     _pub = advertise<posedetection_msgs::ObjectDetection>(*nh_, "ObjectDetection", 10);
     _pub_agg = advertise<posedetection_msgs::ObjectDetection>(*nh_, "ObjectDetection_agg", 10);
     _pub_pose = advertise<geometry_msgs::PoseStamped>(*nh_, "object_pose", 10);
+    _pub_pixel = advertise<geometry_msgs::PointStamped>(*nh_, "object_pixel", 10);
     _debug_pub = it->advertise("debug_image", 1);
     _server = nh_->advertiseService("SetTemplate", &PointPoseExtractor::settemplate_cb, this);
     _initialized = false;

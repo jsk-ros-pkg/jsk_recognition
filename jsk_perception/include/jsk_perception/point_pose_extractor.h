@@ -51,6 +51,7 @@
 #include <posedetection_msgs/ImageFeature0D.h>
 #include <posedetection_msgs/ObjectDetection.h>
 #include <posedetection_msgs/Object6DPose.h>
+#include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Quaternion.h>
@@ -750,7 +751,7 @@ namespace jsk_perception
     ros::Subscriber _sub;
     ros::ServiceServer _server;
     ros::ServiceClient _client;
-    ros::Publisher _pub, _pub_agg, _pub_pose;
+    ros::Publisher _pub, _pub_agg, _pub_pose, _pub_pixel;
     tf::TransformBroadcaster _br;
     image_transport::Publisher _debug_pub;
     bool _first_sample_change;

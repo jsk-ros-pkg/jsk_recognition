@@ -1,0 +1,14 @@
+<launch>
+  <arg name="input_topic" default="/usb_cam/image_raw" />
+  <arg name="output_topic" default="/camera/restoration_image" />
+  
+  <node name="image_republish" pkg="image_transport" type="republish" args="compressed raw">
+    <remap from="in" to="$(arg input_topic)" />
+    <remap from="out" to="/restoration_debug_camera/image_raw" />
+  </node>
+  
+  <node pkg="image_restoration" type="image_restoration.py" name="image_restoration_node" output="screen">
+    <param name="input_topic" value="/restoration_debug_camera/image_raw" />
+    <param name="output_topic" value="$(arg output_topic)" />
+  </node>
+</launch>

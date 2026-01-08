@@ -18,6 +18,7 @@ add_message_files(
   ColorHistogram.msg
   DepthCalibrationParameter.msg
   DepthErrorResult.msg
+  DetectionResult.msg
   ExifTags.msg
   ExifGPSInfo.msg
   HeightmapConfig.msg
@@ -113,6 +114,7 @@ add_service_files(FILES
 
 add_action_files(FILES
   VQATask.action
+  DetectionTask.action
   ClassificationTask.action
   )
 

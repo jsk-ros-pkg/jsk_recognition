@@ -5,9 +5,11 @@
 # api directories
 OFAPROJECT = ofa
 CLIPPROJECT = clip
+DINOPROJECT = dino
 # image names
 OFAIMAGE = jsk-ofa-server
 CLIPIMAGE = jsk-clip-server
+DINOIMAGE = jsk-dino-server
 # commands
 BUILDIMAGE = docker build
 REMOVEIMAGE = docker rmi
@@ -23,7 +25,7 @@ PARAMURLS = parameter_urls.txt
 # OFA parameters
 OFAPARAMFILES = $(foreach param, $(OFAPARAMS), $(PARAMDIR)/$(param))
 
-all: ofa clip
+all: ofa clip dino
 
 # TODO check command wget exists, nvidia-driver version
 
@@ -41,6 +43,9 @@ ofa: $(PARAMDIR)/.download
 clip: $(PARAMDIR)/.download
 	$(BUILDIMAGE) $(CLIPPROJECT) -t $(CLIPIMAGE) -f $(CLIPPROJECT)/Dockerfile
 
+dino: $(PARAMDIR)/.download
+	$(BUILDIMAGE) $(DINOPROJECT) -t $(DINOIMAGE) -f $(DINOPROJECT)/Dockerfile
+
 # TODO add clip, glip
 clean:
 	@$(REMOVEIMAGE) $(OFAIMAGE)
@@ -48,4 +53,4 @@ clean:
 wipe: clean
 	rm -fr $(PARAMDIR)
 
-.PHONY: clean wipe ofa clip
+.PHONY: clean wipe ofa clip dino

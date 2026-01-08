@@ -113,6 +113,7 @@ add_service_files(FILES
 
 add_action_files(FILES
   VQATask.action
+  DetectionTask.action
   ClassificationTask.action
   )
 

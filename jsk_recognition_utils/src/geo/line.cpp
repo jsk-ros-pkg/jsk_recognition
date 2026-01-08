@@ -198,8 +198,50 @@ namespace jsk_recognition_utils
              origin_[0], origin_[1], origin_[2]);
   }
 
-  void Line::point(double alpha, Eigen::Vector3f& output)
+  void Line::point(double alpha, Eigen::Vector3f& output) const
   {
     output = alpha * direction_ + origin_;
+  }
+
+  void Line::nearestPoints(const Line& other, Eigen::Vector3f& output1, Eigen::Vector3f& output2) const
+  {
+    if(isParallel(other, 0.01)){
+      output1 = Eigen::Vector3f::Zero();
+      output2 = Eigen::Vector3f::Zero();
+      return;
+    }
+    Eigen::Vector3f vec12 = (other.origin_ - origin_);
+    double d12 = direction_.dot(other.direction_);
+    double alpha1 = (vec12.dot(direction_) - (vec12.dot(other.direction_) * d12)) / (1.0 - d12 * d12);
+    double alpha2 = (- vec12.dot(other.direction_) + (vec12.dot(direction_) * d12)) / (1.0 - d12 * d12);
+    point(alpha1, output1);
+    other.point(alpha2, output2);
+  }
+
+  Line::Ptr Line::commonPerpendicular(const Line& other) const
+  {
+    Eigen::Vector3f p1, p2;
+    nearestPoints(other, p1, p2);
+    Eigen::Vector3f dir = (p2 - p1).normalized();
+    Line::Ptr ret (new Line(dir, p1));
+    return ret;
+  }
+
+  void Line::intersection(const Line& other, Eigen::Vector3f& output) const
+  {
+    if(distance(other) > 0.001){
+      output = Eigen::Vector3f::Zero();
+      return;
+    }
+    Eigen::Vector3f p1, p2;
+    nearestPoints(other, p1, p2);
+    output = p1;
+  }
+
+  Eigen::Vector3f Line::intersection(const Line& other) const
+  {
+    Eigen::Vector3f intersection_point;
+    intersection(other, intersection_point);
+    return intersection_point;
   }
 }

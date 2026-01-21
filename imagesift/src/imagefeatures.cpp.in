@@ -122,7 +122,7 @@ public:
       _srvDetect = _node.advertiseService("Feature0DDetect", &SiftNode::detectCb, this);
     }
     else {
-      _subImage = _it.subscribe("image", 1, &SiftNode::imageCb, this);
+      _subImage = _it.subscribe(_node.resolveName("image"), 1, &SiftNode::imageCb, this);
       _subInfo = _node.subscribe("camera_info", 1, &SiftNode::infoCb, this);
       _srvDetect = _node.advertiseService("Feature0DDetect", &SiftNode::detectCb, this);
     }

@@ -1,0 +1,5 @@
+requests
+openai
+numpy==1.19.5
+opencv-python
+rosnumpy

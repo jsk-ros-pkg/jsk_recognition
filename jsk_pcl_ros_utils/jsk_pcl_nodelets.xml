@@ -79,19 +79,19 @@
       publish the centroid of the pointcloud to /tf
     </description>
   </class>
-  <class name="jsk_pcl_utils/PolygonArrayDistanceLikelihood" 
+  <class name="jsk_pcl_utils/PolygonArrayDistanceLikelihood"
          type="jsk_pcl_ros_utils::PolygonArrayDistanceLikelihood"
          base_class_type="nodelet::Nodelet">
   </class>
-  <class name="jsk_pcl_utils/PolygonArrayAreaLikelihood" 
+  <class name="jsk_pcl_utils/PolygonArrayAreaLikelihood"
          type="jsk_pcl_ros_utils::PolygonArrayAreaLikelihood"
          base_class_type="nodelet::Nodelet">
   </class>
-  <class name="jsk_pcl_utils/PolygonArrayAngleLikelihood" 
+  <class name="jsk_pcl_utils/PolygonArrayAngleLikelihood"
          type="jsk_pcl_ros_utils::PolygonArrayAngleLikelihood"
          base_class_type="nodelet::Nodelet">
   </class>
-  <class name="jsk_pcl_utils/PolygonArrayFootAngleLikelihood" 
+  <class name="jsk_pcl_utils/PolygonArrayFootAngleLikelihood"
          type="jsk_pcl_ros_utils::PolygonArrayFootAngleLikelihood"
          base_class_type="nodelet::Nodelet">
   </class>
@@ -99,7 +99,7 @@
          type="jsk_pcl_ros_utils::PolygonArrayLikelihoodFilter"
          base_class_type="nodelet::Nodelet">
   </class>
-  <class name="jsk_pcl_utils/PoseWithCovarianceStampedToGaussianPointCloud" 
+  <class name="jsk_pcl_utils/PoseWithCovarianceStampedToGaussianPointCloud"
          type="jsk_pcl_ros_utils::PoseWithCovarianceStampedToGaussianPointCloud"
          base_class_type="nodelet::Nodelet">
   </class>
@@ -176,6 +176,10 @@
   </class>
   <class name="jsk_pcl_utils/PointCloudXYZRGBToXYZ"
          type="jsk_pcl_ros_utils::PointCloudXYZRGBToXYZ"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl_utils/PointCloudXYZIToXYZ"
+         type="jsk_pcl_ros_utils::PointCloudXYZIToXYZ"
          base_class_type="nodelet::Nodelet">
   </class>
   <class name="jsk_pcl_utils/PointCloudToClusterPointIndices"

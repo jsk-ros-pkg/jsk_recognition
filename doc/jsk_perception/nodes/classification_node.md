@@ -2,7 +2,7 @@
 
 ![](images/clip.png)
 
-The ROS node for Classification with CLIP.
+The ROS node for Classification with CLIP or ImageBind.
 
 ## System Configuration
 ![](images/large_scale_vil_system.png)
@@ -65,19 +65,29 @@ make
   You can send multiple queries with separating semicolon.
 
 ### Run inference container on another host or another terminal
+Now you can use CLIP or ImageBind.
+
+#### If you want to use CLIP.
 In the remote GPU machine,
 ```shell
 cd jsk_recognition/jsk_perception/docker
 ./run_jsk_vil_api clip --port (Your vacant port)
 ```
 
+#### If you want to use ImageBind.
+In the remote GPU machine,
+```shell
+cd jsk_recognition/jsk_perception/docker
+./run_jsk_vil_api image-bind --port (Your vacant port)
+```
+
 In the ROS machine,
 ```shell
-roslaunch jsk_perception classification.launch port:=(Your inference container port) host:=(Your inference container host) CLASSIFICATION_INPUT_IMAGE:=(Your image topic name) gui:=true 
+roslaunch jsk_perception classification.launch port:=(Your inference container port) host:=(Your inference container host) CLASSIFICATION_INPUT_IMAGE:=(Your image topic name) model:=(Your using model's name) gui:=true 
 ```
 
 
 ### Run both inference container and ros node in single host 
 ```
-roslaunch jsk_perception classification.launch run_api:=true CLASSIFICATION_INPUT_IMAGE:=(Your image topic name) gui:=true 
+roslaunch jsk_perception classification.launch run_api:=true CLASSIFICATION_INPUT_IMAGE:=(Your image topic name) model:=(Your using model's name) gui:=true 
 ```

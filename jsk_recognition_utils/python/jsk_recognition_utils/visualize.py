@@ -62,6 +62,14 @@ def _tile_images(imgs, tile_shape, concatenated_image, margin_color=None):
     return concatenated_image
 
 
+def get_tile_shape(img_num):
+    x_num = 0
+    y_num = int(math.sqrt(img_num))
+    while x_num * y_num < img_num:
+        x_num += 1
+    return x_num, y_num
+
+
 def get_tile_image(imgs, tile_shape=None, result_img=None, margin_color=None,
                    min_size=50):
     """Concatenate images whose sizes are different.
@@ -70,13 +78,6 @@ def get_tile_image(imgs, tile_shape=None, result_img=None, margin_color=None,
     @param tile_shape: shape for which images should be concatenated
     @param result_img: numpy array to put result image
     """
-    def get_tile_shape(img_num):
-        x_num = 0
-        y_num = int(math.sqrt(img_num))
-        while x_num * y_num < img_num:
-            x_num += 1
-        return x_num, y_num
-
     imgs = [img for img in imgs if img is not None]
     if tile_shape is None:
         tile_shape = get_tile_shape(len(imgs))

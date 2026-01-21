@@ -73,6 +73,7 @@ descent_closing = mask.descent_closing
 
 centerize = visualize.centerize
 colorize_cluster_indices = visualize.colorize_cluster_indices
+get_tile_shape = visualize.get_tile_shape
 get_tile_image = visualize.get_tile_image
 
 get_overlap_of_aabb = geometry.get_overlap_of_aabb

@@ -18,6 +18,7 @@ endif()
 
 find_package(catkin REQUIRED COMPONENTS
   angles
+  catkin_virtualenv
   cmake_modules
   cv_bridge
   dynamic_reconfigure
@@ -187,6 +188,24 @@ catkin_package(
   LIBRARIES ${PROJECT_NAME} oriented_gradient
 )
 
+if("$ENV{ROS_DISTRO}" STREQUAL "indigo")
+  message(WARNING "following requirements.txt syntax is not support on 14.04")
+  message(WARNING "pytesseract==0.3.6        # via -r requirements.in")
+  message(WARNING "so we intentionally use requirements.txt")
+  message(WARNING "To use this program, we need to run")
+  message(WARNING "sed -i 's/upgrade_pip=True/upgrade_pip=False/' /opt/ros/indigo/share/catkin_virtualenv/cmake/build_venv.py")
+  message(WARNING "to prevent upgrading to latest pip, which is not Python2 compatible")
+  file(COPY requirements.txt.indigo DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+  file(RENAME ${CMAKE_CURRENT_BINARY_DIR}/requirements.txt.indigo requirements.txt)
+  catkin_generate_virtualenv(PYTHON_INTERPRETER python2)
+else()
+  catkin_generate_virtualenv(
+    INPUT_REQUIREMENTS requirements.in
+    PYTHON_INTERPRETER "python$ENV{ROS_PYTHON_VERSION}"
+    USE_SYSTEM_PACKAGES TRUE
+    ISOLATE_REQUIREMENTS FALSE
+    CHECK_VENV FALSE)
+endif()
 
 # ------------------------------------------------------------------------------------
 # Build
@@ -430,12 +449,10 @@ install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
 
-if($ENV{ROS_DISTRO} STREQUAL "indigo") # on noetic it needs catkin_install_python to support Python3 and it does not work on indigo for some reason...
-install(DIRECTORY scripts node_scripts
-   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-   USE_SOURCE_PERMISSIONS
-   )
-else()
+install(PROGRAMS scripts/setup_opencv_learning_data.sh
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/scripts/
+)
+
 install(DIRECTORY scripts node_scripts
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   USE_SOURCE_PERMISSIONS
@@ -450,8 +467,11 @@ catkin_install_python(
 )
 file(GLOB NODE_SCRIPT_PROGRAMS node_scripts/*.py)
 catkin_install_python(
-  PROGRAMS ${NODE_SCRIPT_PROGRAMS}
+  PROGRAMS ${NODE_SCRIPT_PROGRAMS} node_scripts/apply_context_to_label_probability
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/node_scripts
+)
+install(FILES requirements.txt
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 if(CATKIN_DEVEL_PREFIX)
   add_custom_target(link_dir_mkdir
@@ -462,7 +482,6 @@ if(CATKIN_DEVEL_PREFIX)
     add_dependencies(link_dir_${SUB_DIR} link_dir_mkdir)
   endforeach()
 endif(CATKIN_DEVEL_PREFIX)
-endif()
 
 # ------------------------------------------------------------------------------------
 # Test

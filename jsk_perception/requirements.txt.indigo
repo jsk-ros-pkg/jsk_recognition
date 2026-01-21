@@ -1,0 +1,6 @@
+#
+# this is only used for indigo (pr2)
+#
+# kinetic+ users will use requirements.in
+#
+pytesseract==0.3.6        # via -r requirements.in

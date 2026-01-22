@@ -165,7 +165,7 @@ if ($ENV{TRAVIS_JOB_ID})
   add_definitions("-O0")
 else ($ENV{TRAVIS_JOB_ID})
   add_definitions("-O2 -g")
-endif ($ENV{TRAVIS_JOB_ID})
+endif()
 
 # pcl_ros::Filter based class is not working...
 # https://github.com/ros-perception/perception_pcl/issues/9
@@ -249,7 +249,7 @@ if(ml_classifiers_FOUND)
     "jsk_pcl/ColorizeRandomForest" "colorize_random_forest")
   jsk_pcl_nodelet(src/colorize_random_points_RF_nodelet.cpp
     "jsk_pcl/ColorizeMapRandomForest" "colorize_map_random_forest")
-endif(ml_classifiers_FOUND)
+endif()
 jsk_pcl_nodelet(src/environment_plane_modeling_nodelet.cpp
   "jsk_pcl/EnvironmentPlaneModeling" "environment_plane_modeling")
 if(jsk_topic_tools_VERSION VERSION_LESS 2.2.4)
@@ -286,7 +286,7 @@ jsk_pcl_nodelet(src/region_growing_multiple_plane_segmentation_nodelet.cpp
 if(${PCL_VERSION} VERSION_GREATER "1.7.2")
   jsk_pcl_nodelet(src/organized_edge_detector_nodelet.cpp
     "jsk_pcl/OrganizedEdgeDetector" "organized_edge_detector")
-endif(${PCL_VERSION} VERSION_GREATER "1.7.2")
+endif()
 
 jsk_pcl_nodelet(src/edge_depth_refinement_nodelet.cpp
   "jsk_pcl/EdgeDepthRefinement" "edge_depth_refinement")
@@ -404,7 +404,7 @@ if (PCL_GPU_KINFU_LARGE_SCALE_FOUND AND jsk_rviz_plugins_FOUND)
   jsk_pcl_nodelet(src/kinfu_nodelet.cpp
     "jsk_pcl/Kinfu" "kinfu")
   include_directories(/usr/local/cuda/include)
-endif (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
+endif()
 jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PCDReaderWithPose" "pcd_reader_with_pose")
 jsk_pcl_nodelet(src/target_adaptive_tracking_nodelet.cpp
   "jsk_pcl/TargetAdaptiveTracking" "target_adaptive_tracking")
@@ -423,7 +423,7 @@ if(robot_self_filter_FOUND)
     "jsk_pcl/OctomapServerContact" "octomap_server_contact")
 else(robot_self_filter_FOUND)
   message(AUTHOR_WARNING "robot_self_filter is NOT found. some nodelet depending on robot_self_filter will not be compiled.")
-endif(robot_self_filter_FOUND)
+endif()
 
 add_library(jsk_pcl_ros_base SHARED
   src/region_adjacency_graph.cpp
@@ -438,11 +438,11 @@ else (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
   target_link_libraries(jsk_pcl_ros
     ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp
     jsk_pcl_ros_base)
-endif (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
+endif()
 if (robot_self_filter_FOUND)
   include_directories(include ${robot_self_filter_INCLUDE_DIRS})
   target_link_libraries(jsk_pcl_ros ${robot_self_filter_LIBRARIES})
-endif (robot_self_filter_FOUND)
+endif()
 
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencfg)
 add_dependencies(jsk_pcl_ros_base ${PROJECT_NAME}_gencfg)

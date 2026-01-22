@@ -71,7 +71,7 @@
       <remap from="image" to="stereo_image_proc_2/disparity" />
     </node>
   </group>
-  <group ns="quater">
+  <group ns="quarter">
     <group ns="left_1_4">
       <node pkg="nodelet" type="nodelet" args="load resized_image_transport/ImageResizer /manager"
             name="image_resizer">

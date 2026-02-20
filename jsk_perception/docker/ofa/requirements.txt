@@ -47,7 +47,7 @@ mkl-random==1.1.1
 mkl-service==2.3.0
 multidict==6.0.4
 multiprocess==0.70.14
-nltk==3.8.1
+nltk==3.9.2
 numpy==1.23.5
 oauthlib==3.2.2
 olefile==0.46

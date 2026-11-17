@@ -250,6 +250,11 @@ jobs:
           source /opt/ros/one/setup.bash
           set -x
           cd ~/ws/
+          # chainer of the venv of sound_classification (catkin_virtualenv) is an sdist whose setup.py imports
+          # pkg_resources, removed in setuptools 81: build it with setuptools<81 (PIP_BUILD_CONSTRAINT of pip 25.3 and
+          # later, PIP_CONSTRAINT before it)
+          echo "setuptools<81" > /tmp/build-constraints.txt
+          export PIP_BUILD_CONSTRAINT=/tmp/build-constraints.txt PIP_CONSTRAINT=/tmp/build-constraints.txt
           catkin build ${{ matrix.BUILD_PKGS }} ${{ matrix.DEB_DISTRO == '22.04' && '-j4' || '' }} --no-status -sv ${{ matrix.CATKIN_OPTIONS }} --cmake-args -DCATKIN_ENABLE_TESTING=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ${{ matrix.CMAKE_OPTIONS }}
         shell: bash
 

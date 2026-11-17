@@ -251,10 +251,16 @@ jobs:
           set -x
           cd ~/ws/
           # chainer of the venv of sound_classification (catkin_virtualenv) is an sdist whose setup.py imports
-          # pkg_resources, removed in setuptools 81: build it with setuptools<81 (PIP_BUILD_CONSTRAINT of pip 25.3 and
-          # later, PIP_CONSTRAINT before it)
-          echo "setuptools<81" > /tmp/build-constraints.txt
-          export PIP_BUILD_CONSTRAINT=/tmp/build-constraints.txt PIP_CONSTRAINT=/tmp/build-constraints.txt
+          # pkg_resources, removed in setuptools 81, and pip 24 of the venv cannot constrain the setuptools of its build
+          # (PIP_CONSTRAINT conflicts with setuptools==82.0.0 of the venv): build its wheel by the latest pip with
+          # setuptools<81, and let the venv find it
+          if [[ "${{ matrix.BUILD_PKGS }}" == *sound_classification* ]]; then
+            python3 -m venv /tmp/wheel-venv
+            /tmp/wheel-venv/bin/pip install -q -U pip
+            echo "setuptools<81" > /tmp/build-constraints.txt
+            /tmp/wheel-venv/bin/pip wheel -q --no-deps -w /tmp/wheels --build-constraint /tmp/build-constraints.txt "chainer>=5.0.0,<7.0.0"
+            export PIP_FIND_LINKS=/tmp/wheels
+          fi
           catkin build ${{ matrix.BUILD_PKGS }} ${{ matrix.DEB_DISTRO == '22.04' && '-j4' || '' }} --no-status -sv ${{ matrix.CATKIN_OPTIONS }} --cmake-args -DCATKIN_ENABLE_TESTING=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ${{ matrix.CMAKE_OPTIONS }}
         shell: bash
 

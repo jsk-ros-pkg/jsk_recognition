@@ -84,17 +84,22 @@
   <!-- install chainer {{ -->
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-h5py</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-h5py</exec_depend>
-  <exec_depend version_lt="7.0.0">python-chainer-pip</exec_depend>
+  <!-- the python2 keys (python-*) were removed from rosdep of rosdistro, the python3 ones are used on python3 -->
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2" version_lt="7.0.0">python-chainer-pip</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-chainer-pip</exec_depend>
   <!-- python-cahiner-pip depends: [cython, python-numpy] in rosdep/python.yaml, which is not installable on python3 environment -->
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-chainercv-pip</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-chainer-mask-rcnn-pip</exec_depend>
   <!-- }} install chainer -->
-  <exec_depend>python-dlib</exec_depend>  <!-- pip -->
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-dlib</exec_depend>  <!-- pip -->
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-dlib-pip</exec_depend>
   <!-- install fcn {{ -->
   <exec_depend>leveldb</exec_depend>
-  <exec_depend>python-fcn-pip</exec_depend>  <!-- pip -->
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-fcn-pip</exec_depend>  <!-- pip -->
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-fcn-pip</exec_depend>
   <!-- }} install fcn -->
-  <exec_depend version_lt="0.3.7">python-pytesseract-pip</exec_depend>
+  <!-- no python3 key of pytesseract in rosdep yet; pip install pytesseract for ocr_node.py on python3 -->
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2" version_lt="0.3.7">python-pytesseract-pip</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-requests</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-requests</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-sklearn</exec_depend>

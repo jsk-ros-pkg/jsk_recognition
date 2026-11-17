@@ -1,4 +1,4 @@
-Header header
+std_msgs/Header header
 # plane coefficients
 float32[4] coefficients
 # cells

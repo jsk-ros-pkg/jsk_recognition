@@ -1,4 +1,4 @@
-Header header
+std_msgs/Header header
 uint32 u
 uint32 v
 float32 center_u

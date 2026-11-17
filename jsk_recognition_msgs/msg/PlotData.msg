@@ -1,7 +1,7 @@
 uint32 SCATTER=1
 uint32 LINE=2
 
-Header header
+std_msgs/Header header
 float32[] xs
 float32[] ys
 uint32 type                     #SCATTER or LINE

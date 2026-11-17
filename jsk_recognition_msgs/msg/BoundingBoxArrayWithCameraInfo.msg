@@ -1,3 +1,3 @@
-Header header
+std_msgs/Header header
 BoundingBoxArray boxes
 sensor_msgs/CameraInfo camera_info

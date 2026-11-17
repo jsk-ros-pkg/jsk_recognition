@@ -1,4 +1,4 @@
-Header header
+std_msgs/Header header
 uint8 MODEL_PLANE=0
 uint8 MODEL_CYLINDER=1
 uint8 model_type

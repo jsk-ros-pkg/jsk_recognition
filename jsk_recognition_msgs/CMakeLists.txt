@@ -1,3 +1,46 @@
+if("$ENV{ROS_VERSION}" EQUAL 2)
+  cmake_minimum_required(VERSION 3.8)
+  project(jsk_recognition_msgs)
+
+  find_package(ament_cmake REQUIRED)
+  find_package(rosidl_default_generators REQUIRED)
+  set(_deps builtin_interfaces std_msgs sensor_msgs geometry_msgs pcl_msgs jsk_footstep_msgs)
+  foreach(_dep ${_deps})
+    find_package(${_dep} REQUIRED)
+  endforeach()
+
+  file(GLOB _msgs RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" CONFIGURE_DEPENDS msg/*.msg)
+  file(GLOB _srvs RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" CONFIGURE_DEPENDS srv/*.srv)
+  file(GLOB _actions RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" CONFIGURE_DEPENDS action/*.action)
+
+  # ExifTags.msg has a field named 'ycb_cr_Coefficients'; rosidl rejects
+  # field names containing uppercase letters and renaming it would change the
+  # ROS1 md5sum, so it is not available on ROS2.
+  list(REMOVE_ITEM _msgs msg/ExifTags.msg)
+
+  # 'time'/'duration' are ROS1 builtins; ROS2 uses builtin_interfaces/Time and
+  # builtin_interfaces/Duration. Render ROS2 copies of such files in the build
+  # directory so that the ROS1 definitions stay untouched.
+  set(_ros2_interface_dir "${CMAKE_CURRENT_BINARY_DIR}/ros2_interfaces")
+  set(_ros2_interfaces)
+  foreach(_file msg/TimeRange.msg)
+    list(REMOVE_ITEM _msgs ${_file})
+    file(READ "${CMAKE_CURRENT_SOURCE_DIR}/${_file}" _content)
+    string(REGEX REPLACE "(^|\n)([ \t]*)time([ \t\\[])" "\\1\\2builtin_interfaces/Time\\3" _content "${_content}")
+    string(REGEX REPLACE "(^|\n)([ \t]*)duration([ \t\\[])" "\\1\\2builtin_interfaces/Duration\\3" _content "${_content}")
+    file(WRITE "${_ros2_interface_dir}/${_file}" "${_content}")
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${_file}")
+    list(APPEND _ros2_interfaces "${_ros2_interface_dir}:${_file}")
+  endforeach()
+
+  rosidl_generate_interfaces(${PROJECT_NAME}
+    ${_msgs} ${_ros2_interfaces} ${_srvs} ${_actions}
+    DEPENDENCIES ${_deps}
+  )
+
+  ament_export_dependencies(rosidl_default_runtime)
+  ament_package()
+else()
 cmake_minimum_required(VERSION 2.8.3)
 project(jsk_recognition_msgs)
 find_package(catkin REQUIRED
@@ -165,4 +208,5 @@ if (CATKIN_ENABLE_TESTING)
   add_rostest(test/people_pose_array_to_pose_array.test)
   add_rostest(test/plot_data_to_csv.test)
   add_rostest(test/save_mesh_server.test)
+endif()
 endif()

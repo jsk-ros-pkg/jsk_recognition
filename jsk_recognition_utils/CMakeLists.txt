@@ -1,3 +1,127 @@
+# $ENV{ROS_VERSION} is set by ros_environment, which is missing on
+# pre-ros_environment distros (e.g. indigo) and on ROS 2 builds that do not
+# depend on it (e.g. the buildfarm's binary jobs). Guess it then: ament sets
+# AMENT_PREFIX_PATH (bloom's debian/rules passes it to cmake, setup.sh and
+# colcon set the environment variable), catkin never does.
+if("$ENV{ROS_VERSION}" STREQUAL "")
+  if(DEFINED AMENT_PREFIX_PATH OR DEFINED ENV{AMENT_PREFIX_PATH})
+    set(ENV{ROS_VERSION} 2)
+  else()
+    set(ENV{ROS_VERSION} 1)
+  endif()
+  message(WARNING "ROS_VERSION is not set, assuming ROS_VERSION=$ENV{ROS_VERSION}")
+endif()
+
+if("$ENV{ROS_VERSION}" EQUAL 2)
+  cmake_minimum_required(VERSION 3.8)
+  project(jsk_recognition_utils)
+
+  # The C++ library is shared with ROS 1 and tells the two apart with
+  # `#if ROS_VERSION_MAJOR != 1` (include/jsk_recognition_utils/ros_compat.h).
+  # On ROS 2 it is built without the parts that need ROS 1 only packages:
+  #   src/tf_listener_singleton.cpp -> tf
+  #   src/time_util.cpp             -> ros::Publisher, ros::WallTime
+  #   src/pcl_ros_util.cpp          -> ros::Publisher
+  #   rangeImageToCvMat() and tf::*TF*() of src/pcl_conversion_util.cpp
+  #                                 -> pcl/visualization, tf
+  #   jsk_recognition_utils::TimeredDiagnosticUpdater of pcl_util.h
+  #                                 -> jsk_topic_tools
+  # The python module, node_scripts/, cfg/ (dynamic_reconfigure), samples
+  # and rostests are ROS 1 only as well.
+  find_package(ament_cmake REQUIRED)
+  set(_ament_deps
+    geometry_msgs
+    image_geometry
+    jsk_recognition_msgs
+    pcl_conversions
+    pcl_msgs
+    rclcpp
+    sensor_msgs
+    std_msgs
+    visualization_msgs
+  )
+  foreach(_dep ${_ament_deps})
+    find_package(${_dep} REQUIRED)
+  endforeach()
+  find_package(Boost REQUIRED)
+  find_package(Eigen3 REQUIRED)
+  find_package(OpenCV REQUIRED COMPONENTS core imgproc)
+  find_package(PCL REQUIRED COMPONENTS common filters search surface segmentation)
+  find_package(yaml-cpp REQUIRED)
+
+  add_library(${PROJECT_NAME} SHARED
+    src/grid_index.cpp
+    src/grid_map.cpp
+    src/grid_line.cpp
+    src/geo_util.cpp
+    src/random_util.cpp
+    src/pcl_conversion_util.cpp
+    src/pcl_util.cpp
+    src/pcl/ear_clipping_patched.cpp
+    src/sensor_model_utils.cpp
+    src/cv_utils.cpp
+    src/rgb_colors.cpp
+    src/geo/line.cpp
+    src/geo/segment.cpp
+    src/geo/polyline.cpp
+    src/geo/plane.cpp
+    src/geo/polygon.cpp
+    src/geo/convex_polygon.cpp
+    src/geo/cube.cpp
+    src/geo/cylinder.cpp
+    src/geo/grid_plane.cpp
+  )
+  target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
+  target_include_directories(${PROJECT_NAME} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+  )
+  target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC
+    ${pcl_conversions_INCLUDE_DIRS}
+    ${PCL_INCLUDE_DIRS}
+  )
+  target_link_libraries(${PROJECT_NAME} PUBLIC
+    ${geometry_msgs_TARGETS}
+    ${jsk_recognition_msgs_TARGETS}
+    ${pcl_msgs_TARGETS}
+    ${sensor_msgs_TARGETS}
+    ${std_msgs_TARGETS}
+    ${visualization_msgs_TARGETS}
+    image_geometry::image_geometry
+    rclcpp::rclcpp
+    Boost::boost
+    Eigen3::Eigen
+    ${OpenCV_LIBRARIES}
+    ${PCL_LIBRARIES}
+    yaml-cpp
+  )
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_link_options(${PROJECT_NAME} PRIVATE "LINKER:-z,defs")
+  endif()
+
+  install(TARGETS ${PROJECT_NAME}
+    EXPORT export_${PROJECT_NAME}
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
+  )
+  install(DIRECTORY include/${PROJECT_NAME}/
+    DESTINATION include/${PROJECT_NAME}/${PROJECT_NAME}
+    FILES_MATCHING PATTERN "*.h" # Ignore *_version.h.in files
+  )
+
+  if(BUILD_TESTING)
+    find_package(ament_cmake_gtest REQUIRED)
+    ament_add_gtest(test_cv_utils src/tests/test_cv_utils.cpp)
+    target_link_libraries(test_cv_utils ${PROJECT_NAME})
+    ament_add_gtest(test_rgb_colors src/tests/test_rgb_colors.cpp)
+    target_link_libraries(test_rgb_colors ${PROJECT_NAME})
+  endif()
+
+  ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+  ament_export_dependencies(${_ament_deps} Boost Eigen3 OpenCV PCL yaml-cpp)
+  ament_package()
+else() # if("$ENV{ROS_VERSION}" EQUAL 2)
 cmake_minimum_required(VERSION 2.8.3)
 project(jsk_recognition_utils)
 
@@ -176,3 +300,4 @@ catkin_install_python(
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/node_scripts
 )
 endif()
+endif() # if("$ENV{ROS_VERSION}" EQUAL 2)

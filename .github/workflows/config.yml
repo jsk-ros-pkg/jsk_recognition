@@ -61,6 +61,9 @@ jobs:
             BEFORE_SCRIPT : "sudo pip uninstall -y fcn chainer chainercv decorator cupy-cuda91 pytesseract==0.3.6; sudo ln -sf /bin/echo /usr/local/bin/pip; sudo ln -sf /bin/echo /usr/local/bin/pip2"
             TEST_PKGS : "jsk_recognition_msgs"
             experimental : false
+          # on python3 (noetic), package.xml has no pip keys of rosdep (see jsk_perception/package.xml), and
+          # BEFORE_SCRIPT installs the python packages of pip; not needed once they are installed by catkin_virtualenv
+          # or uv (in the ROS2 port)
           - ROS_DISTRO: noetic
             USE_DEB: false
             NOT_TEST_INSTALL : true
@@ -247,6 +250,19 @@ jobs:
           source /opt/ros/one/setup.bash
           set -x
           cd ~/ws/
+          # chainer is not of package.xml on python3 (ROS One), and sound_classification installs it in its venv
+          # (catkin_virtualenv) by requirements.in.obase; chainer is an sdist whose setup.py imports pkg_resources,
+          # removed in setuptools 81, and pip 24 of the venv cannot constrain the setuptools of its build
+          # (PIP_CONSTRAINT conflicts with setuptools==82.0.0 of the venv): build the wheel of the chainer of
+          # requirements.in.obase by the latest pip with setuptools<81, and let the venv find it
+          if [[ "${{ matrix.BUILD_PKGS }}" == *sound_classification* ]]; then
+            python3 -m venv /tmp/wheel-venv
+            /tmp/wheel-venv/bin/pip install -q -U pip
+            echo "setuptools<81" > /tmp/build-constraints.txt
+            chainer=$(grep -m1 -oE '^chainer[^ #]*' $GITHUB_WORKSPACE/sound_classification/requirements.in.obase)
+            /tmp/wheel-venv/bin/pip wheel -q --no-deps -w /tmp/wheels --build-constraint /tmp/build-constraints.txt "$chainer"
+            export PIP_FIND_LINKS=/tmp/wheels
+          fi
           catkin build ${{ matrix.BUILD_PKGS }} ${{ matrix.DEB_DISTRO == '22.04' && '-j4' || '' }} --no-status -sv ${{ matrix.CATKIN_OPTIONS }} --cmake-args -DCATKIN_ENABLE_TESTING=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ${{ matrix.CMAKE_OPTIONS }}
         shell: bash
 

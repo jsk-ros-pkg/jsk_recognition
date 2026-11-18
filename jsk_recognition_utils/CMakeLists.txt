@@ -116,6 +116,8 @@ if("$ENV{ROS_VERSION}" EQUAL 2)
     target_link_libraries(test_cv_utils ${PROJECT_NAME})
     ament_add_gtest(test_rgb_colors src/tests/test_rgb_colors.cpp)
     target_link_libraries(test_rgb_colors ${PROJECT_NAME})
+    ament_add_gtest(test_polygon src/tests/test_polygon.cpp)
+    target_link_libraries(test_polygon ${PROJECT_NAME})
   endif()
 
   ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
@@ -241,6 +243,8 @@ if (CATKIN_ENABLE_TESTING)
   target_link_libraries(test_cv_utils ${PROJECT_NAME} ${OpenCV_LIBRARIES})
   catkin_add_gtest(test_rgb_colors src/tests/test_rgb_colors.cpp)
   target_link_libraries(test_rgb_colors ${PROJECT_NAME} ${OpenCV_LIBRARIES})
+  catkin_add_gtest(test_polygon src/tests/test_polygon.cpp)
+  target_link_libraries(test_polygon ${PROJECT_NAME})
   if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
     # FIXME: jsk_tools/test_topic_published.py does not work on hydro travis/jenkins
     # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260

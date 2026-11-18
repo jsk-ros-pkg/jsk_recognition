@@ -37,7 +37,10 @@
 
 #include "jsk_recognition_utils/geo/polygon.h"
 #include "jsk_recognition_utils/geo_util.h"
+#include "jsk_recognition_utils/ros_compat.h"
+#if ROS_VERSION_MAJOR == 1
 #include <jsk_topic_tools/log_utils.h>
+#endif
 #include "jsk_recognition_utils/pcl/ear_clipping_patched.h"
 #include "jsk_recognition_utils/sensor_model_utils.h"
 

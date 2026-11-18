@@ -34,7 +34,10 @@
  *********************************************************************/
 #ifndef JSK_RECOGNITION_UTILS_GRID_MAP_H_
 #define JSK_RECOGNITION_UTILS_GRID_MAP_H_
+#include "jsk_recognition_utils/ros_compat.h"
+#if ROS_VERSION_MAJOR == 1
 #include <jsk_recognition_msgs/SparseOccupancyGrid.h>
+#endif
 
 #include "jsk_recognition_utils/grid_index.h"
 #include "jsk_recognition_utils/grid_line.h"

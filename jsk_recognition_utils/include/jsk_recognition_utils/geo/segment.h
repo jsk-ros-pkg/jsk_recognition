@@ -38,7 +38,10 @@
 
 #include <iostream>
 #include "jsk_recognition_utils/geo/line.h"
+#include "jsk_recognition_utils/ros_compat.h"
+#if ROS_VERSION_MAJOR == 1
 #include "visualization_msgs/Marker.h"
+#endif
 
 namespace jsk_recognition_utils
 {

@@ -41,6 +41,10 @@
 #include <boost/array.hpp>
 #include <vector>
 #include "jsk_recognition_utils/types.h"
+#include "jsk_recognition_utils/ros_compat.h"
+#if ROS_VERSION_MAJOR != 1
+#include <array>
+#endif
 
 namespace jsk_recognition_utils
 {
@@ -50,6 +54,10 @@ namespace jsk_recognition_utils
     typedef boost::shared_ptr<Plane> Ptr;
     Plane(const std::vector<float>& coefficients);
     Plane(const boost::array<float, 4>& coefficients);
+#if ROS_VERSION_MAJOR != 1
+    // float32[4] of the messages, e.g. SimpleOccupancyGrid.coefficients
+    Plane(const std::array<float, 4>& coefficients);
+#endif
     Plane(Eigen::Vector3f normal, double d);
     Plane(Eigen::Vector3f normal, Eigen::Vector3f p);
     virtual ~Plane();

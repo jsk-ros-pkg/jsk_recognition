@@ -34,11 +34,15 @@
  *********************************************************************/
 
 #include "jsk_recognition_utils/pcl_conversion_util.h"
+#include "jsk_recognition_utils/ros_compat.h"
+#if ROS_VERSION_MAJOR == 1
 #include <pcl/visualization/common/float_image_utils.h>
+#endif
 
 namespace jsk_recognition_utils
 {
 
+#if ROS_VERSION_MAJOR == 1
   void rangeImageToCvMat(const pcl::RangeImage& range_image,
                          cv::Mat& image)
   {
@@ -67,6 +71,7 @@ namespace jsk_recognition_utils
     }
     return;
   }
+#endif
   
   void convertEigenAffine3(const Eigen::Affine3d& from,
                            Eigen::Affine3f& to)
@@ -166,6 +171,57 @@ namespace pcl_conversions
 
 namespace tf
 {
+#if ROS_VERSION_MAJOR != 1
+  // the same as eigen_conversions/eigen_msg.h of ROS 1
+  void poseMsgToEigen(const geometry_msgs::Pose& m, Eigen::Affine3d& e)
+  {
+    e = Eigen::Translation3d(m.position.x, m.position.y, m.position.z) *
+      Eigen::Quaterniond(m.orientation.w, m.orientation.x, m.orientation.y, m.orientation.z);
+  }
+
+  void poseEigenToMsg(const Eigen::Affine3d& e, geometry_msgs::Pose& m)
+  {
+    m.position.x = e.translation()[0];
+    m.position.y = e.translation()[1];
+    m.position.z = e.translation()[2];
+    Eigen::Quaterniond q = (Eigen::Quaterniond)e.linear();
+    m.orientation.x = q.x();
+    m.orientation.y = q.y();
+    m.orientation.z = q.z();
+    m.orientation.w = q.w();
+    if (m.orientation.w < 0) {
+      m.orientation.x *= -1;
+      m.orientation.y *= -1;
+      m.orientation.z *= -1;
+      m.orientation.w *= -1;
+    }
+  }
+
+  void transformMsgToEigen(const geometry_msgs::Transform& m, Eigen::Affine3d& e)
+  {
+    e = Eigen::Translation3d(m.translation.x, m.translation.y, m.translation.z) *
+      Eigen::Quaterniond(m.rotation.w, m.rotation.x, m.rotation.y, m.rotation.z);
+  }
+
+  void transformEigenToMsg(const Eigen::Affine3d& e, geometry_msgs::Transform& m)
+  {
+    m.translation.x = e.translation()[0];
+    m.translation.y = e.translation()[1];
+    m.translation.z = e.translation()[2];
+    Eigen::Quaterniond q = (Eigen::Quaterniond)e.linear();
+    m.rotation.x = q.x();
+    m.rotation.y = q.y();
+    m.rotation.z = q.z();
+    m.rotation.w = q.w();
+    if (m.rotation.w < 0) {
+      m.rotation.x *= -1;
+      m.rotation.y *= -1;
+      m.rotation.z *= -1;
+      m.rotation.w *= -1;
+    }
+  }
+#endif
+
   void poseMsgToEigen(const geometry_msgs::Pose& msg, Eigen::Affine3f& eigen)
   {
     Eigen::Affine3d eigen_d;
@@ -194,6 +250,7 @@ namespace tf
     transformEigenToMsg(eigen_d, msg);
   }
 
+#if ROS_VERSION_MAJOR == 1
   void transformTFToEigen(const tf::Transform& t, Eigen::Affine3f& eigen)
   {
     Eigen::Affine3d eigen_d;
@@ -222,4 +279,5 @@ namespace tf
     Eigen::Vector3d d(e[0], e[1], e[2]);
     tf::vectorEigenToTF(d, t);
   }
+#endif
 }

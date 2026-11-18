@@ -41,8 +41,11 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <boost/random.hpp>
+#include "jsk_recognition_utils/ros_compat.h"
+#if ROS_VERSION_MAJOR == 1
 #include <geometry_msgs/Polygon.h>
 #include <jsk_recognition_msgs/PolygonArray.h>
+#endif
 
 #include "jsk_recognition_utils/geo/plane.h"
 #include "jsk_recognition_utils/geo/segment.h"

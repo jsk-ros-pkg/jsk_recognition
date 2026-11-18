@@ -38,7 +38,10 @@
 
 #include "jsk_recognition_utils/geo/polygon.h"
 #include "jsk_recognition_utils/geo/convex_polygon.h"
+#include "jsk_recognition_utils/ros_compat.h"
+#if ROS_VERSION_MAJOR == 1
 #include <jsk_recognition_msgs/BoundingBoxArray.h>
+#endif
 
 namespace jsk_recognition_utils
 {

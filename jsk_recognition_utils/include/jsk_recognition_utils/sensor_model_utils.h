@@ -36,7 +36,12 @@
 #ifndef JSK_RECOGNITION_UTILS_SENSOR_MODEL_UTILS_H_
 #define JSK_RECOGNITION_UTILS_SENSOR_MODEL_UTILS_H_
 
+#include "jsk_recognition_utils/ros_compat.h"
+#if ROS_VERSION_MAJOR == 1
 #include <image_geometry/pinhole_camera_model.h>
+#else
+#include <image_geometry/pinhole_camera_model.hpp>
+#endif
 #include "jsk_recognition_utils/geo_util.h"
 
 namespace jsk_recognition_utils

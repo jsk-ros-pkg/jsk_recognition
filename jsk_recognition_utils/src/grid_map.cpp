@@ -37,11 +37,16 @@
 #include <boost/make_shared.hpp>
 #include <Eigen/Core>
 #include "jsk_recognition_utils/geo_util.h"
+#include "jsk_recognition_utils/ros_compat.h"
+#if ROS_VERSION_MAJOR == 1
 #include <eigen_conversions/eigen_msg.h>
 #include <nodelet/nodelet.h>
+#endif
 #include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <pcl/surface/convex_hull.h>
+#if ROS_VERSION_MAJOR == 1
 #include <jsk_topic_tools/log_utils.h>
+#endif
 //#define DEBUG_GRID_MAP
 
 namespace jsk_recognition_utils

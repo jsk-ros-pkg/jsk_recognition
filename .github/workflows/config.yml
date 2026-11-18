@@ -100,10 +100,8 @@ jobs:
           [ -e /etc/apt/sources.list.d/ubuntu-esm-infra-$(lsb_release -cs).list ] && sudo rm /etc/apt/sources.list.d/ubuntu-esm-infra-$(lsb_release -cs).list ## fix Err https://esm.ubuntu.com trusty-infra-security/main amd64 Packages, gnutls_handshake() failed: Handshake failed
           (apt-get update && apt-get install -y sudo) || echo "OK"
           (apt-get update && apt-get install -y sudo) || echo "OK"
-          sudo apt-get update
-          sudo apt-get install -y software-properties-common
-          sudo apt-get update
-          sudo -E add-apt-repository -y ppa:git-core/ppa
+          # git of Ubuntu 20.04 (2.25) is new enough for actions/checkout (2.18); the git-core PPA is not needed,
+          # and adding it failed now and then with "retrieving gpg key timed out"
           sudo apt-get update
           sudo apt-get install -y git
 

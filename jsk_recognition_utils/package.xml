@@ -63,6 +63,7 @@
   <build_depend condition="$ROS_VERSION == 2">libopencv-dev</build_depend>
   <build_depend condition="$ROS_VERSION == 2">libpcl-all-dev</build_depend>
   <build_depend condition="$ROS_VERSION == 2">libjsoncpp-dev</build_depend>
+  <build_export_depend condition="$ROS_VERSION == 2">libjsoncpp-dev</build_export_depend>
   <build_export_depend condition="$ROS_VERSION == 2">boost</build_export_depend>
   <build_export_depend condition="$ROS_VERSION == 2">eigen</build_export_depend>
   <build_export_depend condition="$ROS_VERSION == 2">libopencv-dev</build_export_depend>

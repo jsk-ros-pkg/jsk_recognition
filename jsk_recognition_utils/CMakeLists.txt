@@ -116,6 +116,10 @@ if("$ENV{ROS_VERSION}" EQUAL 2)
   install(DIRECTORY include/${PROJECT_NAME}/
     DESTINATION include/${PROJECT_NAME}/${PROJECT_NAME}
     FILES_MATCHING PATTERN "*.h" # Ignore *_version.h.in files
+    # ROS 1 only (tf, ros::Publisher, ros::WallTime)
+    PATTERN "pcl_ros_util.h" EXCLUDE
+    PATTERN "tf_listener_singleton.h" EXCLUDE
+    PATTERN "time_util.h" EXCLUDE
   )
 
   if(BUILD_TESTING)
@@ -129,6 +133,10 @@ if("$ENV{ROS_VERSION}" EQUAL 2)
   endif()
 
   ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+  # jsoncpp first, for the VTK of Ubuntu 26.04 which PCL finds (see above)
+  if(jsoncpp_FOUND)
+    ament_export_dependencies(jsoncpp)
+  endif()
   ament_export_dependencies(${_ament_deps} Boost Eigen3 OpenCV PCL yaml-cpp)
   ament_package()
 else() # if("$ENV{ROS_VERSION}" EQUAL 2)

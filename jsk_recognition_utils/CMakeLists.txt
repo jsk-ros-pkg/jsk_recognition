@@ -77,9 +77,14 @@ if("$ENV{ROS_VERSION}" EQUAL 2)
     $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
   )
   target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC
-    ${pcl_conversions_INCLUDE_DIRS}
     ${PCL_INCLUDE_DIRS}
   )
+  # pcl_conversions exports a target since kilted (no pcl_conversions_INCLUDE_DIRS there)
+  if(TARGET pcl_conversions::pcl_conversions)
+    target_link_libraries(${PROJECT_NAME} PUBLIC pcl_conversions::pcl_conversions)
+  else()
+    target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${pcl_conversions_INCLUDE_DIRS})
+  endif()
   target_link_libraries(${PROJECT_NAME} PUBLIC
     ${geometry_msgs_TARGETS}
     ${jsk_recognition_msgs_TARGETS}

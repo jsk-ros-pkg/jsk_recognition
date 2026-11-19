@@ -16,9 +16,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       # Only the packages below are ported to ROS 2; the others are of ROS 1 only. They are skipped
-      # here by an AMENT_IGNORE of this workspace only (colcon and rosdep skip such packages), not by one
-      # in the repository, where rosdep of ROS 1 would skip them as well. Add a package here once it
-      # builds on ROS 2.
+      # here by an AMENT_IGNORE (rosdep) and a COLCON_IGNORE (colcon of rolling no longer honors
+      # AMENT_IGNORE) of this workspace only, not in the repository, where rosdep of ROS 1 would skip
+      # them as well. Add a package here once it builds on ROS 2.
       - name: Skip the packages of ROS 1 only
         env:
           ROS2_PACKAGES: jsk_recognition_msgs jsk_recognition_utils
@@ -27,7 +27,7 @@ jobs:
             pkg=$(dirname "$pkg_xml")
             case " $ROS2_PACKAGES " in
               *" $pkg "*) echo "build $pkg" ;;
-              *) touch "$pkg/AMENT_IGNORE" ;;
+              *) touch "$pkg/AMENT_IGNORE" "$pkg/COLCON_IGNORE" ;;
             esac
           done
       # ccache of the compiler and the .deb files rosdep downloads, per distribution

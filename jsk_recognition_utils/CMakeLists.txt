@@ -29,6 +29,9 @@ if("$ENV{ROS_VERSION}" EQUAL 2)
   # The python module, node_scripts/, cfg/ (dynamic_reconfigure), samples
   # and rostests are ROS 1 only as well.
   find_package(ament_cmake REQUIRED)
+  # VTK 9.5 of Ubuntu 26.04 (lyrical, rolling), which find_package(PCL) of pcl_conversions finds, links
+  # JsonCpp::JsonCpp without finding jsoncpp itself; jsoncpp's CMake config defines that target
+  find_package(jsoncpp QUIET)
   set(_ament_deps
     geometry_msgs
     image_geometry

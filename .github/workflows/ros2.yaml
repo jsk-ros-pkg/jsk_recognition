@@ -1,0 +1,38 @@
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # the distributions of ROS 2 which are released, and rolling for the APIs of the next ones
+        ROS_DISTRO: [jazzy, kilted, lyrical, rolling]
+    name: build_and_test (${{ matrix.ROS_DISTRO }})
+    steps:
+      - uses: actions/checkout@v4
+      # Only the packages below are ported to ROS 2; the others are of ROS 1 only. They are skipped
+      # here by an AMENT_IGNORE of this workspace only (colcon and rosdep skip such packages), not by one
+      # in the repository, where rosdep of ROS 1 would skip them as well. Add a package here once it
+      # builds on ROS 2.
+      - name: Skip the packages of ROS 1 only
+        env:
+          ROS2_PACKAGES: jsk_recognition_msgs jsk_recognition_utils
+        run: |
+          for pkg_xml in */package.xml; do
+            pkg=$(dirname "$pkg_xml")
+            case " $ROS2_PACKAGES " in
+              *" $pkg "*) echo "build $pkg" ;;
+              *) touch "$pkg/AMENT_IGNORE" ;;
+            esac
+          done
+      - uses: ros-industrial/industrial_ci@master
+        env:
+          ROS_DISTRO: ${{ matrix.ROS_DISTRO }}
+          # rosdep's `pip:` installer refuses to install globally on
+          # Python >= 3.11 (PEP 668) unless explicitly told to.
+          PIP_BREAK_SYSTEM_PACKAGES: '1'

@@ -11,84 +11,62 @@
 
   <license>BSD</license>
 
-  <buildtool_depend condition="$ROS_VERSION != 2 and $ROS_PYTHON_VERSION == 2">python-setuptools</buildtool_depend>
-  <buildtool_depend condition="$ROS_VERSION != 2 and $ROS_PYTHON_VERSION == 3">python3-setuptools</buildtool_depend>
-
   <buildtool_depend condition="$ROS_VERSION != 2">catkin</buildtool_depend>
   <buildtool_depend condition="$ROS_VERSION == 2">ament_cmake</buildtool_depend>
+  <buildtool_depend condition="$ROS_PYTHON_VERSION == 2">python-setuptools</buildtool_depend>
+  <buildtool_depend condition="$ROS_PYTHON_VERSION == 3">python3-setuptools</buildtool_depend>
   <build_depend>ros_environment</build_depend>
-  <build_depend condition="$ROS_VERSION != 2">cv_bridge</build_depend>
-  <build_depend condition="$ROS_VERSION != 2 and $ROS_PYTHON_VERSION==2">cython</build_depend>
-  <build_depend condition="$ROS_VERSION != 2 and $ROS_PYTHON_VERSION==3">cython3</build_depend>
-  <build_depend condition="$ROS_VERSION != 2">eigen_conversions</build_depend>
-  <build_depend condition="$ROS_VERSION != 2">dynamic_reconfigure</build_depend>
-  <build_depend>geometry_msgs</build_depend>
-  <build_depend>image_geometry</build_depend>
-  <build_depend condition="$ROS_VERSION != 2">jsk_data</build_depend>
-  <build_depend>jsk_recognition_msgs</build_depend>
-  <build_depend condition="$ROS_VERSION != 2">jsk_topic_tools</build_depend>
-  <build_depend>pcl_msgs</build_depend>
-  <build_depend condition="$ROS_VERSION != 2">pcl_ros</build_depend>
-  <build_depend condition="$ROS_VERSION != 2">qtbase5-dev</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>std_msgs</build_depend>
-  <build_depend condition="$ROS_VERSION != 2">tf2_ros</build_depend>
-  <build_depend condition="$ROS_VERSION != 2">tf</build_depend>
-  <build_depend condition="$ROS_VERSION != 2">tf_conversions</build_depend>
-  <build_depend>visualization_msgs</build_depend>
-  <build_depend>yaml-cpp</build_depend>
-  <build_depend condition="$ROS_VERSION != 2">message_generation</build_depend>
-  <exec_depend condition="$ROS_VERSION != 2">cv_bridge</exec_depend>
-  <exec_depend condition="$ROS_VERSION != 2">eigen_conversions</exec_depend>
-  <exec_depend>geometry_msgs</exec_depend>
-  <exec_depend>image_geometry</exec_depend>
-  <exec_depend condition="$ROS_VERSION != 2">image_view</exec_depend>
-  <exec_depend>jsk_recognition_msgs</exec_depend>
-  <exec_depend condition="$ROS_VERSION != 2">jsk_topic_tools</exec_depend>
-  <exec_depend>pcl_msgs</exec_depend>
-  <exec_depend condition="$ROS_VERSION != 2">pcl_ros</exec_depend>
+
+  <!-- ROS 1 and ROS 2 -->
+  <depend>geometry_msgs</depend>
+  <depend>image_geometry</depend>
+  <depend>jsk_recognition_msgs</depend>
+  <depend>pcl_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>visualization_msgs</depend>
+  <depend>yaml-cpp</depend>
+  <build_depend condition="$ROS_PYTHON_VERSION == 2">cython</build_depend>
+  <build_depend condition="$ROS_PYTHON_VERSION == 3">cython3</build_depend>
   <!-- the python packages of pip (chainer, fcn, dlib, pytesseract) are of python2 only: on python3, pip keys of
        rosdep are not dependencies of the binary packages, and need PIP_BREAK_SYSTEM_PACKAGES (PEP 668); they will
        be installed by a venv (uv) of the ROS2 port. Install them by pip for the nodes which use them on python3 -->
-  <exec_depend condition="$ROS_VERSION != 2 and $ROS_PYTHON_VERSION == 2" version_lt="7.0.0">python-chainer-pip</exec_depend>
-  <exec_depend condition="$ROS_VERSION != 2 and $ROS_PYTHON_VERSION == 2">python-chainercv-pip</exec_depend>
-  <exec_depend condition="$ROS_VERSION != 2 and $ROS_PYTHON_VERSION == 2">python-skimage</exec_depend>
-  <exec_depend condition="$ROS_VERSION != 2 and $ROS_PYTHON_VERSION == 3">python3-skimage</exec_depend>
-  <exec_depend condition="$ROS_VERSION != 2 and $ROS_PYTHON_VERSION == 2">python-fcn-pip</exec_depend>
-  <exec_depend condition="$ROS_VERSION != 2 and $ROS_PYTHON_VERSION == 2">python-shapely</exec_depend>
-  <exec_depend condition="$ROS_VERSION != 2 and $ROS_PYTHON_VERSION == 3">python3-shapely</exec_depend>
-  <exec_depend>sensor_msgs</exec_depend>
-  <exec_depend>std_msgs</exec_depend>
-  <exec_depend condition="$ROS_VERSION != 2">tf2_ros</exec_depend>
-  <exec_depend condition="$ROS_VERSION != 2">tf_conversions</exec_depend>
-  <exec_depend condition="$ROS_VERSION != 2">tf</exec_depend>
-  <exec_depend>visualization_msgs</exec_depend>
-  <exec_depend>yaml-cpp</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2" version_lt="7.0.0">python-chainer-pip</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-chainercv-pip</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-skimage</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-skimage</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-fcn-pip</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-shapely</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-shapely</exec_depend>
+
+  <!-- ROS 1 only: the nodes, nodelets and python modules -->
+  <depend condition="$ROS_VERSION != 2">cv_bridge</depend>
+  <depend condition="$ROS_VERSION != 2">eigen_conversions</depend>
+  <depend condition="$ROS_VERSION != 2">jsk_topic_tools</depend>
+  <depend condition="$ROS_VERSION != 2">pcl_ros</depend>
+  <depend condition="$ROS_VERSION != 2">tf</depend>
+  <depend condition="$ROS_VERSION != 2">tf2_ros</depend>
+  <depend condition="$ROS_VERSION != 2">tf_conversions</depend>
+  <build_depend condition="$ROS_VERSION != 2">dynamic_reconfigure</build_depend>
+  <build_depend condition="$ROS_VERSION != 2">jsk_data</build_depend>
+  <build_depend condition="$ROS_VERSION != 2">message_generation</build_depend>
+  <build_depend condition="$ROS_VERSION != 2">qtbase5-dev</build_depend>
+  <exec_depend condition="$ROS_VERSION != 2">image_view</exec_depend>
   <exec_depend condition="$ROS_VERSION != 2">message_runtime</exec_depend>
+  <test_depend condition="$ROS_VERSION != 2">jsk_tools</test_depend>
+
+  <!-- ROS 2: the C++ library (geo/, pcl_util, cv_utils, ...) -->
+  <depend condition="$ROS_VERSION == 2">pcl_conversions</depend>
+  <depend condition="$ROS_VERSION == 2">rclcpp</depend>
   <build_depend condition="$ROS_VERSION == 2">boost</build_depend>
   <build_depend condition="$ROS_VERSION == 2">eigen</build_depend>
   <build_depend condition="$ROS_VERSION == 2">libopencv-dev</build_depend>
   <build_depend condition="$ROS_VERSION == 2">libpcl-all-dev</build_depend>
-  <build_depend condition="$ROS_VERSION == 2">pcl_conversions</build_depend>
-  <build_depend condition="$ROS_VERSION == 2">rclcpp</build_depend>
   <build_export_depend condition="$ROS_VERSION == 2">boost</build_export_depend>
   <build_export_depend condition="$ROS_VERSION == 2">eigen</build_export_depend>
-  <build_export_depend condition="$ROS_VERSION == 2">geometry_msgs</build_export_depend>
-  <build_export_depend condition="$ROS_VERSION == 2">image_geometry</build_export_depend>
-  <build_export_depend condition="$ROS_VERSION == 2">jsk_recognition_msgs</build_export_depend>
   <build_export_depend condition="$ROS_VERSION == 2">libopencv-dev</build_export_depend>
   <build_export_depend condition="$ROS_VERSION == 2">libpcl-all-dev</build_export_depend>
-  <build_export_depend condition="$ROS_VERSION == 2">pcl_conversions</build_export_depend>
-  <build_export_depend condition="$ROS_VERSION == 2">pcl_msgs</build_export_depend>
-  <build_export_depend condition="$ROS_VERSION == 2">rclcpp</build_export_depend>
-  <build_export_depend condition="$ROS_VERSION == 2">sensor_msgs</build_export_depend>
-  <build_export_depend condition="$ROS_VERSION == 2">std_msgs</build_export_depend>
-  <build_export_depend condition="$ROS_VERSION == 2">visualization_msgs</build_export_depend>
-  <build_export_depend condition="$ROS_VERSION == 2">yaml-cpp</build_export_depend>
   <exec_depend condition="$ROS_VERSION == 2">libpcl-all</exec_depend>
-  <exec_depend condition="$ROS_VERSION == 2">pcl_conversions</exec_depend>
-  <exec_depend condition="$ROS_VERSION == 2">rclcpp</exec_depend>
-  <test_depend condition="$ROS_VERSION != 2">jsk_tools</test_depend>
   <test_depend condition="$ROS_VERSION == 2">ament_cmake_gtest</test_depend>
   <export>
     <build_type condition="$ROS_VERSION != 2">catkin</build_type>

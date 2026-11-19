@@ -30,9 +30,21 @@ jobs:
               *) touch "$pkg/AMENT_IGNORE" ;;
             esac
           done
+      # ccache of the compiler and the .deb files rosdep downloads, per distribution
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ${{ runner.temp }}/ccache
+            ${{ runner.temp }}/apt-archives
+          key: ros2-${{ matrix.ROS_DISTRO }}-${{ github.sha }}
+          restore-keys: ros2-${{ matrix.ROS_DISTRO }}-
       - uses: ros-industrial/industrial_ci@master
         env:
           ROS_DISTRO: ${{ matrix.ROS_DISTRO }}
+          CCACHE_DIR: ${{ runner.temp }}/ccache
+          # keep the downloaded .deb files (the docker images of ROS delete them by docker-clean)
+          DOCKER_RUN_OPTS: -v ${{ runner.temp }}/apt-archives:/var/cache/apt/archives
+          BEFORE_INIT: rm -f /etc/apt/apt.conf.d/docker-clean
           # rosdep's `pip:` installer refuses to install globally on
           # Python >= 3.11 (PEP 668) unless explicitly told to.
           PIP_BREAK_SYSTEM_PACKAGES: '1'

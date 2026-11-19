@@ -1,5 +1,5 @@
 # information about frame and timestamp
-Header header
+std_msgs/Header header
 
 # prediction results
 uint32[] labels          # numerical labels

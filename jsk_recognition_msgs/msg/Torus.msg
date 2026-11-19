@@ -1,4 +1,4 @@
-Header header
+std_msgs/Header header
 bool failure
 geometry_msgs/Pose pose
 float64 large_radius

@@ -1,5 +1,5 @@
 # Header
-Header header
+std_msgs/Header header
 
 # Whether sensor detects contact or not
 bool contact

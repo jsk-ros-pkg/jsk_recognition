@@ -309,4 +309,8 @@
          type="jsk_perception::SplitImage"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_perception/SkeletonWithDepth"
+         type="jsk_perception::SkeletonWithDepth"
+         base_class_type="nodelet::Nodelet">
+  </class>
 </library>

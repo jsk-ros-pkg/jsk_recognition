@@ -23,8 +23,10 @@ jobs:
         env:
           ROS2_PACKAGES: jsk_recognition_msgs jsk_recognition_utils
         run: |
-          for pkg_xml in */package.xml; do
-            pkg=$(dirname "$pkg_xml")
+          # every directory, not only the ones with a package.xml: newer colcon (lyrical, rolling) also
+          # builds plain CMake projects such as cr_calibration
+          for dir in */; do
+            pkg=${dir%/}
             case " $ROS2_PACKAGES " in
               *" $pkg "*) echo "build $pkg" ;;
               *) touch "$pkg/AMENT_IGNORE" "$pkg/COLCON_IGNORE" ;;

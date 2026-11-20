@@ -26,9 +26,11 @@ if("$ENV{ROS_VERSION}" EQUAL 2)
   #                                 -> pcl/visualization, tf
   #   jsk_recognition_utils::TimeredDiagnosticUpdater of pcl_util.h
   #                                 -> jsk_topic_tools
-  # cfg/ (dynamic_reconfigure), samples and rostests are ROS 1 only as well.
+  # node_scripts/static_virtual_camera.py (scipy.misc.face, removed from SciPy), cfg/ (dynamic_reconfigure; the
+  # node_scripts declare its parameters on ROS 2), samples and rostests are ROS 1 only as well.
   find_package(ament_cmake REQUIRED)
   find_package(ament_cmake_python REQUIRED)
+  find_package(jsk_ros1_ros2_compat REQUIRED)
   # VTK 9.5 of Ubuntu 26.04 (lyrical, rolling), which find_package(PCL) of pcl_conversions finds, links
   # JsonCpp::JsonCpp without finding jsoncpp itself; jsoncpp's CMake config defines that target
   find_package(jsoncpp QUIET)
@@ -132,6 +134,18 @@ if("$ENV{ROS_VERSION}" EQUAL 2)
   set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
   include(UseCython)
   add_subdirectory(python/${PROJECT_NAME})
+  jsk_ros1_ros2_compat_install_python(PROGRAMS
+    node_scripts/add_bounding_box_array.py
+    node_scripts/add_cluster_indices.py
+    node_scripts/bounding_box_array_publisher.py
+    node_scripts/image_16uc1_to_32fc1.py
+    node_scripts/polygon_array_publisher.py
+    node_scripts/polygon_array_to_box_array.py
+    node_scripts/polygon_array_to_polygon.py
+    node_scripts/pose_array_to_pose.py
+    node_scripts/rect_array_to_cluster_point_indices.py
+    node_scripts/rect_array_to_polygon_array.py
+  )
 
   if(BUILD_TESTING)
     find_package(ament_cmake_gtest REQUIRED)

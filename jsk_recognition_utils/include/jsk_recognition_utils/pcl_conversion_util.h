@@ -38,11 +38,20 @@
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include "jsk_recognition_utils/ros_compat.h"
+#if ROS_VERSION_MAJOR == 1
 #include <geometry_msgs/Point32.h>
 #include <eigen_conversions/eigen_msg.h>
 #include <tf_conversions/tf_eigen.h>
+#endif
 #include <pcl/range_image/range_image_planar.h>
+#if ROS_VERSION_MAJOR == 1
 #include <visualization_msgs/Marker.h>
+#endif
+#if ROS_VERSION_MAJOR != 1
+typedef pcl_msgs::PointIndices PCLIndicesMsg;
+typedef pcl_msgs::ModelCoefficients PCLModelCoefficientMsg;
+#else
 #if ROS_VERSION_MINIMUM(1, 10, 0)
 // hydro and later
 typedef pcl_msgs::PointIndices PCLIndicesMsg;
@@ -52,12 +61,15 @@ typedef pcl_msgs::ModelCoefficients PCLModelCoefficientMsg;
 typedef pcl::PointIndices PCLIndicesMsg;
 typedef pcl::ModelCoefficients PCLModelCoefficientMsg;
 #endif
+#endif
 
 #include <opencv2/opencv.hpp>
 
 namespace jsk_recognition_utils
 {
 
+  // pcl/visualization (FloatImageUtils) is not used on ROS 2
+#if ROS_VERSION_MAJOR == 1
   /** @brief
    * Convert pcl::RangeImage to cv::Mat. Distance is normalized
    * to 0-1 and colorized.
@@ -68,6 +80,7 @@ namespace jsk_recognition_utils
    */
   void rangeImageToCvMat(const pcl::RangeImage& range_image,
                          cv::Mat& mat);
+#endif
   
   template<class FromT, class ToT>
   void pointFromXYZToVector(const FromT& msg,
@@ -238,10 +251,19 @@ namespace tf
   void poseEigenToMsg(Eigen::Affine3f& eigen, geometry_msgs::Pose& msg);
   void transformMsgToEigen(const geometry_msgs::Transform& msg, Eigen::Affine3f& eigen);
   void transformEigenToMsg(Eigen::Affine3f& eigen, geometry_msgs::Transform& msg);
+#if ROS_VERSION_MAJOR == 1
   void transformTFToEigen(const tf::Transform& t, Eigen::Affine3f& eigen);
   void transformEigenToTF(Eigen::Affine3f& eigen , tf::Transform& t);
   void vectorTFToEigen(const tf::Vector3& t, Eigen::Vector3f& e);
   void vectorEigenToTF(const Eigen::Vector3f& e, tf::Vector3& t);
+#else
+  // eigen_conversions and tf are ROS 1 only: the double versions of
+  // eigen_conversions, which the float versions above use
+  void poseMsgToEigen(const geometry_msgs::Pose& msg, Eigen::Affine3d& eigen);
+  void poseEigenToMsg(const Eigen::Affine3d& eigen, geometry_msgs::Pose& msg);
+  void transformMsgToEigen(const geometry_msgs::Transform& msg, Eigen::Affine3d& eigen);
+  void transformEigenToMsg(const Eigen::Affine3d& eigen, geometry_msgs::Transform& msg);
+#endif
 }
 
 #endif

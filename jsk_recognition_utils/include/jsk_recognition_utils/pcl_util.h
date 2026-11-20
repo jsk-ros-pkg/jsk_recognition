@@ -47,16 +47,25 @@
 #include <set>
 #include <map>
 
+#include "jsk_recognition_utils/ros_compat.h"
+#if ROS_VERSION_MAJOR == 1
 #include <sensor_msgs/PointCloud2.h>
 #include <ros/ros.h>
+#endif
 #include <pcl/PointIndices.h>
+#if ROS_VERSION_MAJOR == 1
 #include <std_msgs/ColorRGBA.h>
+#endif
 
+#if ROS_VERSION_MAJOR == 1
 #include <jsk_topic_tools/time_accumulator.h>
 #include <jsk_topic_tools/timered_diagnostic_updater.h>
+#endif
 
 #include <boost/circular_buffer.hpp>
+#if ROS_VERSION_MAJOR == 1
 #include <jsk_topic_tools/vital_checker.h>
+#endif
 
 #include <pcl/filters/extract_indices.h>
 #include <yaml-cpp/yaml.h>
@@ -218,7 +227,9 @@ namespace jsk_recognition_utils
   // TimeredDiagnosticUpdater
   //   useful wrapper of DiagnosticUpdater.
   ////////////////////////////////////////////////////////
+#if ROS_VERSION_MAJOR == 1
   typedef jsk_topic_tools::TimeredDiagnosticUpdater TimeredDiagnosticUpdater;
+#endif
 
   extern boost::mutex global_chull_mutex;
   

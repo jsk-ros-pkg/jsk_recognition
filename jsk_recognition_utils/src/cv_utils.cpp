@@ -35,7 +35,12 @@
 
 #include "jsk_recognition_utils/cv_utils.h"
 #include "jsk_recognition_utils/rgb_colors.h"
+#include "jsk_recognition_utils/ros_compat.h"
+#if ROS_VERSION_MAJOR == 1
 #include <sensor_msgs/image_encodings.h>
+#else
+#include <sensor_msgs/image_encodings.hpp>
+#endif
 
 namespace enc = sensor_msgs::image_encodings;
 

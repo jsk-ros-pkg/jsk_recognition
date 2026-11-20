@@ -35,7 +35,10 @@
 
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_recognition_utils/geo/polyline.h"
+#include "jsk_recognition_utils/ros_compat.h"
+#if ROS_VERSION_MAJOR == 1
 #include <jsk_topic_tools/log_utils.h>
+#endif
 #include <cfloat>
 
 namespace jsk_recognition_utils

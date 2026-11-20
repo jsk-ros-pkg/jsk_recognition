@@ -36,7 +36,10 @@
 #ifndef JSK_RECOGNITION_UTILS_COLOR_UTILS_H_
 #define JSK_RECOGNITION_UTILS_COLOR_UTILS_H_
 
+#include "jsk_recognition_utils/ros_compat.h"
+#if ROS_VERSION_MAJOR == 1
 #include <std_msgs/ColorRGBA.h>
+#endif
 
 namespace jsk_recognition_utils
 {

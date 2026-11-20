@@ -36,9 +36,14 @@
 #ifndef JSK_RECOGNITION_UTILS_CAMERA_DEPTH_SENSOR_H_
 #define JSK_RECOGNITION_UTILS_CAMERA_DEPTH_SENSOR_H_
 
+#include "jsk_recognition_utils/ros_compat.h"
 #include "jsk_recognition_utils/sensor_model/pointcloud_sensor_model.h"
+#if ROS_VERSION_MAJOR == 1
 #include <sensor_msgs/CameraInfo.h>
 #include <image_geometry/pinhole_camera_model.h>
+#else
+#include <image_geometry/pinhole_camera_model.hpp>
+#endif
 
 namespace jsk_recognition_utils
 {

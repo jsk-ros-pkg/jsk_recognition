@@ -45,6 +45,7 @@
 #include <vector>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include "jsk_recognition_utils/ros_compat.h"
 
 namespace jsk_recognition_utils {
   enum HistogramPolicy {

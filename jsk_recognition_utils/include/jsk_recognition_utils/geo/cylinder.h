@@ -40,7 +40,10 @@
 #include <pcl/point_cloud.h>
 #include <pcl/PointIndices.h>
 #include <pcl/point_types.h>
+#include "jsk_recognition_utils/ros_compat.h"
+#if ROS_VERSION_MAJOR == 1
 #include <visualization_msgs/Marker.h>
+#endif
 
 namespace jsk_recognition_utils
 {

@@ -57,6 +57,16 @@ namespace jsk_recognition_utils
     initializeCoordinates();
   }
 
+#if ROS_VERSION_MAJOR != 1
+  Plane::Plane(const std::array<float, 4>& coefficients)
+  {
+    normal_ = Eigen::Vector3f(coefficients[0], coefficients[1], coefficients[2]);
+    d_ = coefficients[3] / normal_.norm();
+    normal_.normalize();
+    initializeCoordinates();
+  }
+#endif
+
   Plane::Plane(Eigen::Vector3f normal, double d) :
     normal_(normal.normalized()), d_(d / normal.norm())
   {

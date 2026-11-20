@@ -45,9 +45,12 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
+#include "jsk_recognition_utils/ros_compat.h"
+#if ROS_VERSION_MAJOR == 1
 #include <geometry_msgs/Polygon.h>
 #include <jsk_recognition_msgs/BoundingBox.h>
 #include <jsk_recognition_msgs/SimpleOccupancyGrid.h>
+#endif
 #include <boost/tuple/tuple.hpp>
 
 ////////////////////////////////////////////////////////
@@ -61,12 +64,16 @@
 #include <pcl/ModelCoefficients.h>
 #include <pcl/filters/project_inliers.h>
 #include <pcl/surface/concave_hull.h>
+#if ROS_VERSION_MAJOR == 1
 #include <visualization_msgs/Marker.h>
+#endif
 
 #include "jsk_recognition_utils/pcl_util.h"
 #include "jsk_recognition_utils/random_util.h"
 
+#if ROS_VERSION_MAJOR == 1
 #include <jsk_recognition_msgs/PolygonArray.h>
+#endif
 #include "jsk_recognition_utils/sensor_model/camera_depth_sensor.h"
 #include "jsk_recognition_utils/types.h"
 #include "jsk_recognition_utils/geo/line.h"

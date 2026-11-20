@@ -26,9 +26,9 @@ if("$ENV{ROS_VERSION}" EQUAL 2)
   #                                 -> pcl/visualization, tf
   #   jsk_recognition_utils::TimeredDiagnosticUpdater of pcl_util.h
   #                                 -> jsk_topic_tools
-  # The python module, node_scripts/, cfg/ (dynamic_reconfigure), samples
-  # and rostests are ROS 1 only as well.
+  # cfg/ (dynamic_reconfigure), samples and rostests are ROS 1 only as well.
   find_package(ament_cmake REQUIRED)
+  find_package(ament_cmake_python REQUIRED)
   # VTK 9.5 of Ubuntu 26.04 (lyrical, rolling), which find_package(PCL) of pcl_conversions finds, links
   # JsonCpp::JsonCpp without finding jsoncpp itself; jsoncpp's CMake config defines that target
   find_package(jsoncpp QUIET)
@@ -123,6 +123,15 @@ if("$ENV{ROS_VERSION}" EQUAL 2)
     # does not compile (laser_freq_ is not a member, spindle_velocity is not declared) and nothing includes it
     PATTERN "spindle_laser_sensor.h" EXCLUDE
   )
+
+  # the python module, and its nms.pyx built by python/jsk_recognition_utils/CMakeLists.txt as on ROS 1,
+  # into the install directory of the module
+  ament_python_install_package(${PROJECT_NAME} PACKAGE_DIR python/${PROJECT_NAME})
+  set(CATKIN_DEVEL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
+  set(CATKIN_PACKAGE_PYTHON_DESTINATION ${PYTHON_INSTALL_DIR}/${PROJECT_NAME})
+  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+  include(UseCython)
+  add_subdirectory(python/${PROJECT_NAME})
 
   if(BUILD_TESTING)
     find_package(ament_cmake_gtest REQUIRED)

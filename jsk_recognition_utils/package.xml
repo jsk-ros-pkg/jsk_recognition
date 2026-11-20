@@ -55,7 +55,8 @@
   <exec_depend condition="$ROS_VERSION != 2">message_runtime</exec_depend>
   <test_depend condition="$ROS_VERSION != 2">jsk_tools</test_depend>
 
-  <!-- ROS 2: the C++ library (geo/, pcl_util, cv_utils, ...) -->
+  <!-- ROS 2: the C++ library (geo/, pcl_util, cv_utils, ...) and the python module -->
+  <buildtool_depend condition="$ROS_VERSION == 2">ament_cmake_python</buildtool_depend>
   <depend condition="$ROS_VERSION == 2">pcl_conversions</depend>
   <depend condition="$ROS_VERSION == 2">rclcpp</depend>
   <build_depend condition="$ROS_VERSION == 2">boost</build_depend>
@@ -69,6 +70,12 @@
   <build_export_depend condition="$ROS_VERSION == 2">libopencv-dev</build_export_depend>
   <build_export_depend condition="$ROS_VERSION == 2">libpcl-all-dev</build_export_depend>
   <exec_depend condition="$ROS_VERSION == 2">libpcl-all</exec_depend>
+  <build_depend condition="$ROS_VERSION == 2">python3-dev</build_depend>
+  <build_depend condition="$ROS_VERSION == 2">python3-numpy</build_depend>
+  <exec_depend condition="$ROS_VERSION == 2">python3-numpy</exec_depend>
+  <exec_depend condition="$ROS_VERSION == 2">python3-opencv</exec_depend>
+  <exec_depend condition="$ROS_VERSION == 2">python3-pil</exec_depend>
+  <exec_depend condition="$ROS_VERSION == 2">python3-sklearn</exec_depend>
   <test_depend condition="$ROS_VERSION == 2">ament_cmake_gtest</test_depend>
   <export>
     <build_type condition="$ROS_VERSION != 2">catkin</build_type>

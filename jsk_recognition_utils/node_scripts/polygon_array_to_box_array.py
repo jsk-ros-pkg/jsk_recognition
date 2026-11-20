@@ -26,8 +26,8 @@ def cross_product(a, b):
 
 # minimum_rotated_rectangle is available since 1.6.0 (melodic)
 # https://github.com/shapely/shapely/pull/361
-from distutils.version import LooseVersion
-if LooseVersion(shapely.__version__) < LooseVersion('1.6.0'):
+# (not by distutils.version, which python 3.12 does not have)
+if not hasattr(shapely.geometry.Polygon, 'minimum_rotated_rectangle'):
     import math
     from itertools import islice
     from shapely.affinity import affine_transform

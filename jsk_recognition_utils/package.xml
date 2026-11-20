@@ -42,9 +42,13 @@
   <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-shapely</exec_depend>
 
   <!-- ROS 1 only: the nodes, nodelets and python modules -->
-  <depend condition="$ROS_VERSION != 2">cv_bridge</depend>
+  <build_depend condition="$ROS_VERSION != 2">cv_bridge</build_depend>
+  <build_export_depend condition="$ROS_VERSION != 2">cv_bridge</build_export_depend>
+  <exec_depend condition="$ROS_VERSION != 2">cv_bridge</exec_depend>
   <depend condition="$ROS_VERSION != 2">eigen_conversions</depend>
-  <depend condition="$ROS_VERSION != 2">jsk_topic_tools</depend>
+  <build_depend condition="$ROS_VERSION != 2">jsk_topic_tools</build_depend>
+  <build_export_depend condition="$ROS_VERSION != 2">jsk_topic_tools</build_export_depend>
+  <exec_depend condition="$ROS_VERSION != 2">jsk_topic_tools</exec_depend>
   <depend condition="$ROS_VERSION != 2">pcl_ros</depend>
   <depend condition="$ROS_VERSION != 2">tf</depend>
   <depend condition="$ROS_VERSION != 2">tf2_ros</depend>

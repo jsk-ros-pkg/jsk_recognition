@@ -219,6 +219,10 @@ jobs:
           mkdir -p ~/ws/src
           cd ~/ws/src
           ln -sf $GITHUB_WORKSPACE .
+          # TODO: remove once jsk_common 3.0.6 is released: jsk_topic_tools (and jsk_ros1_ros2_compat, which it
+          # depends on) of jsk-ros-pkg/jsk_common#1849, for jsk_recognition_utils' node_scripts of ROS 1 and ROS 2
+          git clone -q --depth 1 -b connection-based-transport-ros2 https://github.com/k-okada/jsk_common.git /tmp/jsk_common
+          ln -sf /tmp/jsk_common/jsk_topic_tools /tmp/jsk_common/jsk_ros1_ros2_compat .
           rosdep install -qq -r -y --from-path . --ignore-src || echo "OK"
           # check all system packages are able to install, because ROS-O build deb files that needs all packages
           PIP_BREAK_SYSTEM_PACKAGES=1 rosdep install -qq --simulate -y --from-path . --ignore-src -t exec -t buildtool_export -t buildtool -t build -t build_export | tee rosdep-install.sh

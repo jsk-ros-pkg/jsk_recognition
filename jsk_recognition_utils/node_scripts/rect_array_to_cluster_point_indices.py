@@ -58,7 +58,8 @@ class RectArrayToClusterPointIndices(ConnectionBasedTransport):
             ymax = min(H, int(np.ceil(rect.y + rect.height)))
             xmax = min(W, int(np.ceil(rect.x + rect.width)))
             indices = [list(range(W*y+xmin, W*y+xmax)) for y in range(ymin, ymax)]
-            indices_msg.indices = np.array(indices, dtype=np.int32).flatten()
+            indices_msg.indices = np.array(
+                indices, dtype=np.int32).flatten().tolist()
             cpi_msg.cluster_indices.append(indices_msg)
         self.pub.publish(cpi_msg)
 

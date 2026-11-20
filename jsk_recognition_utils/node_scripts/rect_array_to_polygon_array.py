@@ -26,10 +26,12 @@ class RectArrayToPolygonArray(ConnectionBasedTransport):
         for rect in msg.rects:
             poly_msg = PolygonStamped()
             poly_msg.header = msg.header
-            pt0 = Point32(x=rect.x, y=rect.y)
-            pt1 = Point32(x=rect.x, y=rect.y + rect.height)
-            pt2 = Point32(x=rect.x + rect.width, y=rect.y + rect.height)
-            pt3 = Point32(x=rect.x + rect.width, y=rect.y)
+            x0, y0 = float(rect.x), float(rect.y)
+            x1, y1 = float(rect.x + rect.width), float(rect.y + rect.height)
+            pt0 = Point32(x=x0, y=y0)
+            pt1 = Point32(x=x0, y=y1)
+            pt2 = Point32(x=x1, y=y1)
+            pt3 = Point32(x=x1, y=y0)
             poly_msg.polygon.points.append(pt0)
             poly_msg.polygon.points.append(pt1)
             poly_msg.polygon.points.append(pt2)

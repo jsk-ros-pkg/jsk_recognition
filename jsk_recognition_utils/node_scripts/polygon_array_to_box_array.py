@@ -198,7 +198,8 @@ class PolygonArrayToRectBoxArray(ConnectionBasedTransport):
                 header=polygon.header)
             for x, y, z in rect_polygon:
                 polygon.polygon.points.append(
-                    geometry_msgs.msg.Point32(x, y, z))
+                    geometry_msgs.msg.Point32(
+                        x=float(x), y=float(y), z=float(z)))
             new_polygons_msg.polygons.append(polygon)
 
             center_x, center_y, center_z = rect_polygon[:4].mean(axis=0)
@@ -214,16 +215,16 @@ class PolygonArrayToRectBoxArray(ConnectionBasedTransport):
             q_x, q_y, q_z, q_w = matrix2quaternion(base_matrix)
             dim_x = np.linalg.norm(rect_polygon[1] - rect_polygon[0])
             dim_y = np.linalg.norm(rect_polygon[2] - rect_polygon[1])
-            box_msg.pose.position.x = center_x
-            box_msg.pose.position.y = center_y
-            box_msg.pose.position.z = center_z
-            box_msg.pose.orientation.w = q_w
-            box_msg.pose.orientation.x = q_x
-            box_msg.pose.orientation.y = q_y
-            box_msg.pose.orientation.z = q_z
-            box_msg.dimensions.x = dim_x
-            box_msg.dimensions.y = dim_y
-            box_msg.dimensions.z = self.thickness
+            box_msg.pose.position.x = float(center_x)
+            box_msg.pose.position.y = float(center_y)
+            box_msg.pose.position.z = float(center_z)
+            box_msg.pose.orientation.w = float(q_w)
+            box_msg.pose.orientation.x = float(q_x)
+            box_msg.pose.orientation.y = float(q_y)
+            box_msg.pose.orientation.z = float(q_z)
+            box_msg.dimensions.x = float(dim_x)
+            box_msg.dimensions.y = float(dim_y)
+            box_msg.dimensions.z = float(self.thickness)
             boxes_msg.boxes.append(box_msg)
         self.polygons_pub.publish(new_polygons_msg)
         self.coeffs_pub.publish(coeffs_msg)

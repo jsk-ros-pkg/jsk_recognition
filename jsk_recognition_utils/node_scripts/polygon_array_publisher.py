@@ -90,18 +90,20 @@ class PolygonArrayPublisher(object):
         for polygon in param:
             ps = PolygonStamped()
             ps.header.frame_id = frame_id
-            ps.polygon.points = [Point32(*v) for v in polygon["points"]]
+            ps.polygon.points = [
+                Point32(x=float(v[0]), y=float(v[1]), z=float(v[2]))
+                for v in polygon["points"]]
 
             coeffs_msg = ModelCoefficients(header=ps.header)
             planar, coeffs = is_planar(polygon["points"])
-            coeffs_msg.values = coeffs
+            coeffs_msg.values = coeffs.tolist()
             self.are_polygons_in_planar &= planar
             coeffs_array_msg.coefficients.append(coeffs_msg)
             msg.polygons.append(ps)
             if has_label:
                 msg.labels.append(polygon["label"])
             if has_likelihood:
-                msg.likelihood.append(polygon["likelihood"])
+                msg.likelihood.append(float(polygon["likelihood"]))
         return msg, coeffs_array_msg
 
     def publish(self, event):

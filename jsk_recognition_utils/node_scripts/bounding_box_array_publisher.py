@@ -65,9 +65,13 @@ class BoundingBoxArrayPublisher(object):
             bbox_msg.header.seq = self.seq
             bbox_msg.header.frame_id = self.frame_id
             bbox_msg.header.stamp = event.current_real
-            bbox_msg.pose.position = Point(*pos)
-            bbox_msg.pose.orientation = Quaternion(*qua)
-            bbox_msg.dimensions = Vector3(*dim)
+            bbox_msg.pose.position = Point(
+                x=float(pos[0]), y=float(pos[1]), z=float(pos[2]))
+            bbox_msg.pose.orientation = Quaternion(
+                x=float(qua[0]), y=float(qua[1]), z=float(qua[2]),
+                w=float(qua[3]))
+            bbox_msg.dimensions = Vector3(
+                x=float(dim[0]), y=float(dim[1]), z=float(dim[2]))
             bbox_msg.label = label
 
             bbox_array_msg.boxes.append(bbox_msg)

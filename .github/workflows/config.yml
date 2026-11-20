@@ -212,6 +212,10 @@ jobs:
         shell: bash
 
       - name: Setup Workspace
+        # 5 - 11 minutes on 22.04 but 36 - 138 minutes on 24.04 (rosdep installs the dependencies one by one); it
+        # hung for hours when apt or pip did not answer, so it fails instead and can be rerun (the job timeout of
+        # GitHub is 6 hours)
+        timeout-minutes: 180
         run: |
           source /opt/ros/one/setup.bash
           set -x

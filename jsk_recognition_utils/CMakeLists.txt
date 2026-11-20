@@ -155,6 +155,8 @@ if("$ENV{ROS_VERSION}" EQUAL 2)
     target_link_libraries(test_rgb_colors ${PROJECT_NAME})
     ament_add_gtest(test_polygon src/tests/test_polygon.cpp)
     target_link_libraries(test_polygon ${PROJECT_NAME})
+    find_package(ament_cmake_pytest REQUIRED)
+    ament_add_pytest_test(test_node_scripts_ros2 test/test_node_scripts_ros2.py TIMEOUT 180)
   endif()
 
   ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)

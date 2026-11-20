@@ -120,6 +120,8 @@ if("$ENV{ROS_VERSION}" EQUAL 2)
     PATTERN "pcl_ros_util.h" EXCLUDE
     PATTERN "tf_listener_singleton.h" EXCLUDE
     PATTERN "time_util.h" EXCLUDE
+    # does not compile (laser_freq_ is not a member, spindle_velocity is not declared) and nothing includes it
+    PATTERN "spindle_laser_sensor.h" EXCLUDE
   )
 
   if(BUILD_TESTING)

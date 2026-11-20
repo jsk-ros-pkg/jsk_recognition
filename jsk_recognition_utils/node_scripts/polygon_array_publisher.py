@@ -15,6 +15,7 @@ if ROS_VERSION == 1:
     import rospy
 else:
     from jsk_ros1_ros2_compat import rospy_rclpy_compat as ros
+    import yaml
 
 
 def is_planar(points):
@@ -66,6 +67,9 @@ class PolygonArrayPublisher(object):
 
             frame_id = ros.get_param(self.node, "~frame_id")
             param = ros.get_param(self.node, "~polygons")
+            # a YAML string, as a parameter of ROS 2 cannot be a list of dicts
+            if isinstance(param, str):
+                param = yaml.safe_load(param)
         self.are_polygons_in_planar = True
         self.msg, self.coeffs_array_msg = self.parse_params(param, frame_id)
 

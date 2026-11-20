@@ -86,6 +86,7 @@
   <exec_depend condition="$ROS_VERSION == 2">message_filters</exec_depend>
   <exec_depend condition="$ROS_VERSION == 2">rclpy</exec_depend>
   <exec_depend condition="$ROS_VERSION == 2">tf_transformations</exec_depend>
+  <exec_depend condition="$ROS_VERSION == 2">python3-yaml</exec_depend>
   <test_depend condition="$ROS_VERSION == 2">ament_cmake_gtest</test_depend>
   <export>
     <build_type condition="$ROS_VERSION != 2">catkin</build_type>

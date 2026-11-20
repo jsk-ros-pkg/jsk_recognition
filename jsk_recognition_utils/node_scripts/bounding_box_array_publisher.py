@@ -17,6 +17,7 @@ if ROS_VERSION == 1:
 else:
     from jsk_ros1_ros2_compat import rospy_rclpy_compat as ros
     from tf_transformations import quaternion_from_euler
+    import yaml
 
 
 class BoundingBoxArrayPublisher(object):
@@ -68,6 +69,9 @@ class BoundingBoxArrayPublisher(object):
         # lists, which a parameter of ROS 2 cannot be) are of ROS 1 only
         self.frame_id = ros.get_param(self.node, '~frame_id')
         self.boxes = ros.get_param(self.node, '~boxes')
+        # a YAML string, as a parameter of ROS 2 cannot be a list of dicts
+        if isinstance(self.boxes, str):
+            self.boxes = yaml.safe_load(self.boxes)
         self.pub = ros.create_publisher(
             self.node, '~output', BoundingBoxArray, queue_size=1)
 

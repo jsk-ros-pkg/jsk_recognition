@@ -2,6 +2,51 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge pull request `#2902 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2902>`_ from k-okada/rosdep-python3-keys
+  jsk_recognition_utils, jsk_perception: pip packages for python2 only (python2 rosdep keys removed)
+* jsk_perception: the tests of the DNN nodes only on ROS-O
+  The tests of the DNN nodes failed on noetic (craft_node, face_pose_estimation,
+  human_mesh_recovery, ocr_node, people_pose_estimation_2d; a model of HTTP Error 404 ...): on the
+  distributions of the end of life (indigo..noetic), their python packages (chainer, pytorch)
+  and models are not maintained. The tests of the DNN nodes (alexnet_object_recognition,
+  craft_node, deep_sort_tracker, ocr_node, face_pose_estimation, fcn_object_segmentation,
+  people_pose_estimation_2d, human_mesh_recovery, regional_feature_based_object_recognition,
+  vgg16_object_recognition, ssd_object_detector) are added only on ROS-O (ROS_DISTRO one).
+  Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+* jsk_recognition_utils, jsk_perception: no pip keys of rosdep on python3
+  The python packages of pip (chainer, fcn, dlib, pytesseract) are of python2 only: on
+  python3, the pip keys of rosdep are not the dependencies of the binary packages (e.g.
+  ROS One), rosdep needs PIP_BREAK_SYSTEM_PACKAGES to install them (PEP 668), and
+  python3-dlib-pip breaks the dependency graph of rosdep; they will be installed by a venv
+  (uv) of the ROS2 port. So python3-chainer-pip and python3-fcn-pip are not depended on.
+  Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+* jsk_perception: no python3-dlib-pip, which breaks the dependency graph of rosdep
+  python3-dlib-pip depends on the rosdep key cmake, with which rosdep fails in the CI of
+  ROS-O ("KeyError: 'Invalid Graph Structure: rosdep key `cmake` does not exist in the
+  dictionary of resolutions.'"); dlib is used only by selective_search.py, so it is of
+  python2 only as pytesseract, and pip install dlib for it on python3.
+  Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+* jsk_recognition_utils, jsk_perception: the python3 rosdep keys on python3
+  rosdistro removed the legacy python2 keys from rosdep (`ros/rosdistro#51719 <https://github.com/ros/rosdistro/issues/51719>`_, `#51720 <https://github.com/ros/rosdistro/issues/51720>`_), so
+  that bloom-generate of ROS One (python3) fails with "Cannot locate rosdep definition for
+  [python-fcn-pip]" (jsk_recognition_utils) and [python-pytesseract-pip] (jsk_perception)
+  (`ubi-agni/ros-builder-action#118 <https://github.com/ubi-agni/ros-builder-action/issues/118>`_). On python3, depend on the python3 keys:
+  python3-chainer-pip, python3-fcn-pip and python3-dlib-pip; the python2 keys are kept
+  for python2. pytesseract has no python3 key in rosdep yet, so python-pytesseract-pip is
+  of python2 only.
+  Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+* Merge pull request `#2893 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2893>`_ from mqcmd196/point-pose-extractor-add-pixel
+  [jsk_perception][point_pose_extractor] Publish template pixel in image
+* [jsk_perception][point_pose_extractor] Publish template pixel in image
+* Merge pull request `#2890 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2890>`_ from mqcmd196/point-pose-extractor-qt5
+  [jsk_perception][point_pose_extactor] separate gui thread from callbacks for Qt5 OpenCV Highgui
+* [jsk_perception][point_pose_extractor] fix undefined variables in old distributions
+* [jsk_perception][point_pose_extractor] make compilable in older C++
+* [jsk_perception][point_pose_extactor] separate gui thread from callback group for Qt5
+* Contributors: Kei Okada, Yoshiki Obinata
+
 1.2.19 (2025-05-14)
 -------------------
 * Merge pull request `#2879 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2879>`_ from jsk-ros-pkg/add_license

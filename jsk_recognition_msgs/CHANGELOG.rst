@@ -2,6 +2,41 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge pull request `#2906 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2906>`_ from k-okada/recognition-utils-ros2
+  [jsk_recognition_utils] build the C++ library on ROS 2 alongside ROS 1
+* [jsk_recognition_msgs] guess ROS_VERSION when it is not set, as jsk_recognition_utils
+  On the buildfarm's ROS 2 binary jobs ros_environment is not a dependency,
+  so $ROS_VERSION is empty and the catkin branch was taken.
+  Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+* Merge pull request `#2903 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2903>`_ from k-okada/recognition-msgs-ros2
+  [jsk_recognition_msgs] build on ROS 1 and ROS 2 from one package.xml/CMakeLists.txt
+* [jsk_recognition_msgs] use std_msgs/Header instead of Header
+  rosidl resolves a package-less type to the own package, so 'Header'
+  becomes jsk_recognition_msgs/Header and fails on ROS2. Spell it as
+  std_msgs/Header as jsk_common_msgs does. On ROS1 'Header' is resolved to
+  std_msgs/Header, so the generated md5sums are unchanged (checked for all
+  messages, services and action messages).
+  Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+* [jsk_recognition_msgs] support ROS2 (ament_cmake/rosidl) alongside ROS1
+  Build the same package on ROS1 (catkin) and ROS2 (ament_cmake + rosidl),
+  in the jsk_common_msgs 5.0 style.
+  - package.xml: format 3 with $ROS_VERSION conditions, member of
+  rosidl_interface_packages.
+  - CMakeLists.txt: the ROS2 part is prepended inside
+  if("$ENV{ROS_VERSION}" EQUAL 2) ... else(); the ROS1 part is unchanged.
+  - ROS2 generates msg/srv/action from the same files, except:
+  - msg/ExifTags.msg is not built on ROS2: its field 'ycb_cr_Coefficients'
+  is rejected by rosidl (uppercase in field name) and renaming it would
+  change the ROS1 md5sum.
+  - msg/TimeRange.msg uses the ROS1 builtin 'time'; a copy with
+  builtin_interfaces/Time is rendered into the build directory at
+  configure time, so the ROS1 file stays untouched.
+  - Scripts, samples and rostests remain ROS1 only.
+  Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+* Contributors: Kei Okada
+
 1.2.19 (2025-05-14)
 -------------------
 * Merge pull request `#2879 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2879>`_ from jsk-ros-pkg/add_license

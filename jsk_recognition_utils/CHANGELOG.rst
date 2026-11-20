@@ -2,6 +2,102 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge pull request `#2906 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2906>`_ from k-okada/recognition-utils-ros2
+  [jsk_recognition_utils] build the C++ library on ROS 2 alongside ROS 1
+* [jsk_recognition_utils] ROS 2: do not install sensor_model/spindle_laser_sensor.h
+  It does not compile (laser_freq\_ is not a member, setSpindleVelocity
+  uses an undeclared spindle_velocity) and nothing includes it.
+  Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+* [jsk_recognition_utils] camera_depth_sensor.h: include ros_compat.h first
+  pointcloud_sensor_model.h uses boost::shared_ptr, which ros_compat.h
+  brings on ROS 2.
+  Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+* [jsk_recognition_utils] ROS 2: export jsoncpp before PCL, install no ROS 1 only header
+  A consumer's find_package(jsk_recognition_utils) reaches the VTK of Ubuntu
+  26.04 through PCL as well, so jsoncpp is exported first (with a
+  build_export_depend on libjsoncpp-dev). pcl_ros_util.h,
+  tf_listener_singleton.h and time_util.h, of ROS 1 only, are not installed.
+  Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+* [jsk_recognition_utils] color_utils.h: std_msgs/ColorRGBA through ros_compat.h
+  It included <std_msgs/ColorRGBA.h>, which ROS 2 does not have.
+  Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+* [jsk_recognition_utils] find jsoncpp for the VTK of Ubuntu 26.04
+  lyrical and rolling failed at find_package(pcl_conversions): the VTK 9.5
+  which PCL finds links JsonCpp::JsonCpp, which is not defined unless
+  jsoncpp is found first.
+  Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+* [jsk_recognition_utils] link pcl_conversions by its target on kilted and later
+  pcl_conversions exports pcl_conversions::pcl_conversions and no
+  pcl_conversions_INCLUDE_DIRS since kilted, so pcl_conversions.h was not
+  found there; jazzy still uses the include directories.
+  Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+* [jsk_recognition_utils] package.xml: group the depends of ROS 1 and ROS 2, ROS 1 only and ROS 2 only
+  The python depends are back to $ROS_PYTHON_VERSION only, as before the
+  ROS 2 port; the ROS 1 only and the ROS 2 only depends are grouped with
+  one condition each, and the ones of both use <depend>. Compared with
+  master, ROS 1 only gains build_export_depend of the <depend> ones.
+  Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+* [jsk_recognition_utils] ROS 1 depends with $ROS_VERSION != 2, for indigo
+  indigo has no ros_environment, so $ROS_VERSION is empty there and the
+  $ROS_VERSION == 1 conditions were false: rosdep did not install
+  python-shapely and test_polygon_array_to_box_array timed out on indigo.
+  Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+* [jsk_recognition_utils] add test_polygon for Polygon::decomposeToTriangles
+  Builds a square and an L shape from geometry_msgs/Polygon and checks the
+  normal, the number of triangles of the ear clipping, their normals and
+  areas, and Polygon::fromROSMsg of jsk_recognition_msgs/PolygonArray.
+  It runs on ROS 1 (catkin_add_gtest) and ROS 2 (ament_add_gtest).
+  Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+* [jsk_recognition_utils] share the C++ sources between ROS 1 and ROS 2
+  include/jsk_recognition_utils/ros_compat.h tells ROS 1 and ROS 2 apart
+  (ROS_VERSION_MAJOR of ros/common.h), and on ROS 2 provides the message
+  headers with aliases of the ROS 1 type names (geometry_msgs::Polygon,
+  jsk_recognition_msgs::PolygonArray, ...), the boost headers that ros/ros.h
+  pulled in, and ROS_DEBUG/INFO/WARN/ERROR on the "jsk_recognition_utils"
+  rclcpp logger. The ROS 1 only includes are wrapped in
+  `#if ROS_VERSION_MAJOR == 1`, so the ROS 1 code is unchanged.
+  On ROS 2:
+  - eigen_conversions is replaced by the same Affine3d conversions in
+  namespace tf (pcl_conversion_util), the tf::Transform ones are left out.
+  - rangeImageToCvMat() is left out (pcl/visualization).
+  - jsk_recognition_utils::TimeredDiagnosticUpdater is left out (jsk_topic_tools).
+  - Plane also takes std::array<float, 4>, the float32[4] of ROS 2 messages.
+  Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+* [jsk_recognition_utils] build the C++ library on ROS 2 (ament_cmake) alongside ROS 1
+  - package.xml: $ROS_VERSION conditions; the ROS 1 only dependencies
+  (catkin, tf, pcl_ros, jsk_topic_tools, dynamic_reconfigure, the python
+  ones, ...) get $ROS_VERSION == 1, and ament_cmake, rclcpp,
+  pcl_conversions, libpcl-all-dev, eigen, boost, libopencv-dev and
+  ament_cmake_gtest are added for ROS 2.
+  - CMakeLists.txt: the ROS 2 part is prepended inside
+  if("$ENV{ROS_VERSION}" EQUAL 2) ... else(); the ROS 1 part is unchanged.
+  On ROS 2 the library is built without tf_listener_singleton, time_util
+  and pcl_ros_util (ROS 1 APIs), and exported with ament_export_targets.
+  The python module, node_scripts, cfg, samples and rostests stay ROS 1
+  only. test_cv_utils and test_rgb_colors run on ROS 2 as well.
+  Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+* Merge pull request `#2902 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2902>`_ from k-okada/rosdep-python3-keys
+  jsk_recognition_utils, jsk_perception: pip packages for python2 only (python2 rosdep keys removed)
+* jsk_recognition_utils, jsk_perception: no pip keys of rosdep on python3
+  The python packages of pip (chainer, fcn, dlib, pytesseract) are of python2 only: on
+  python3, the pip keys of rosdep are not the dependencies of the binary packages (e.g.
+  ROS One), rosdep needs PIP_BREAK_SYSTEM_PACKAGES to install them (PEP 668), and
+  python3-dlib-pip breaks the dependency graph of rosdep; they will be installed by a venv
+  (uv) of the ROS2 port. So python3-chainer-pip and python3-fcn-pip are not depended on.
+  Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+* jsk_recognition_utils, jsk_perception: the python3 rosdep keys on python3
+  rosdistro removed the legacy python2 keys from rosdep (`ros/rosdistro#51719 <https://github.com/ros/rosdistro/issues/51719>`_, `#51720 <https://github.com/ros/rosdistro/issues/51720>`_), so
+  that bloom-generate of ROS One (python3) fails with "Cannot locate rosdep definition for
+  [python-fcn-pip]" (jsk_recognition_utils) and [python-pytesseract-pip] (jsk_perception)
+  (`ubi-agni/ros-builder-action#118 <https://github.com/ubi-agni/ros-builder-action/issues/118>`_). On python3, depend on the python3 keys:
+  python3-chainer-pip, python3-fcn-pip and python3-dlib-pip; the python2 keys are kept
+  for python2. pytesseract has no python3 key in rosdep yet, so python-pytesseract-pip is
+  of python2 only.
+  Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+* Contributors: Kei Okada
+
 1.2.19 (2025-05-14)
 -------------------
 * Merge pull request `#2879 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2879>`_ from jsk-ros-pkg/add_license

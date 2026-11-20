@@ -17,28 +17,37 @@ ROS_VERSION = int(os.environ.get('ROS_VERSION', '1'))
 if ROS_VERSION == 1:
     import rospy
 
-    def mf_subscriber(node, topic, msg_type, **kwargs):
-        """message_filters.Subscriber of topic"""
-        return message_filters.Subscriber(topic, msg_type, **kwargs)
+    # message_filters.Subscriber(node, msg_type, topic, ...) as on ROS 2; the
+    # node is not used on ROS 1
+    if not hasattr(message_filters.Subscriber, '__init_orig__'):
+        message_filters.Subscriber.__init_orig__ = \
+            message_filters.Subscriber.__init__
 
-    def mf_unregister(node, sub):
-        sub.unregister()
+        def _subscriber_init(self, node, msg_type, topic, *args, **kwargs):
+            self.__init_orig__(topic, msg_type, *args, **kwargs)
+        message_filters.Subscriber.__init__ = _subscriber_init
 else:
     import rclpy
     from rclpy.executors import ExternalShutdownException
     from rclpy.parameter import Parameter
 
-    def mf_subscriber(node, topic, msg_type, queue_size=10):
-        """message_filters.Subscriber of topic: ROS 2 takes the node first,
-        and '~/' for '~'"""
-        if topic.startswith('~') and not topic.startswith('~/'):
-            topic = '~/' + topic[1:]
-        return message_filters.Subscriber(
-            node, msg_type, topic, qos_profile=queue_size)
+    # message_filters.Subscriber: '~' and queue_size as on ROS 1 (ROS 2 has
+    # '~/' and qos_profile), and unregister() as on ROS 1
+    if not hasattr(message_filters.Subscriber, '__init_orig__'):
+        message_filters.Subscriber.__init_orig__ = \
+            message_filters.Subscriber.__init__
 
-    def mf_unregister(node, sub):
-        """ROS 2 has no unregister(): destroy the subscription"""
-        node.destroy_subscription(sub.sub)
+        def _subscriber_init(self, node, msg_type, topic, *args, **kwargs):
+            if topic.startswith('~') and not topic.startswith('~/'):
+                topic = '~/' + topic[1:]
+            if 'queue_size' in kwargs:
+                kwargs['qos_profile'] = kwargs.pop('queue_size')
+            self.__init_orig__(node, msg_type, topic, *args, **kwargs)
+
+        def _subscriber_unregister(self):
+            self.node.destroy_subscription(self.sub)
+        message_filters.Subscriber.__init__ = _subscriber_init
+        message_filters.Subscriber.unregister = _subscriber_unregister
 
 
 class RectArrayToClusterPointIndices(ConnectionBasedTransport):
@@ -66,8 +75,9 @@ class RectArrayToClusterPointIndices(ConnectionBasedTransport):
         else:
             use_info = self.get_parameter('use_info').value
         if use_info:
-            sub_rects = mf_subscriber(self, '~input', RectArray)
-            sub_info = mf_subscriber(self, '~input/info', CameraInfo)
+            sub_rects = message_filters.Subscriber(self, RectArray, '~input')
+            sub_info = message_filters.Subscriber(
+                self, CameraInfo, '~input/info')
             if ROS_VERSION == 1:
                 queue_size = rospy.get_param('~queue_size', 10)
                 approximate_sync = rospy.get_param('~approximate_sync', False)
@@ -100,7 +110,7 @@ class RectArrayToClusterPointIndices(ConnectionBasedTransport):
     def unsubscribe(self):
         for sub in self.subs:
             if ROS_VERSION == 1 or isinstance(sub, message_filters.Subscriber):
-                mf_unregister(self, sub)
+                sub.unregister()
             else:
                 self.destroy_subscription(sub)
 

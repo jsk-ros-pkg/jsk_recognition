@@ -19,12 +19,15 @@ if ROS_VERSION == 1:
     from tf.transformations import quaternion_from_matrix as matrix2quaternion
     from tf.transformations import unit_vector as normalize_vector
 
-    def mf_subscriber(node, topic, msg_type, **kwargs):
-        """message_filters.Subscriber of topic"""
-        return message_filters.Subscriber(topic, msg_type, **kwargs)
+    # message_filters.Subscriber(node, msg_type, topic, ...) as on ROS 2; the
+    # node is not used on ROS 1
+    if not hasattr(message_filters.Subscriber, '__init_orig__'):
+        message_filters.Subscriber.__init_orig__ = \
+            message_filters.Subscriber.__init__
 
-    def mf_unregister(node, sub):
-        sub.unregister()
+        def _subscriber_init(self, node, msg_type, topic, *args, **kwargs):
+            self.__init_orig__(topic, msg_type, *args, **kwargs)
+        message_filters.Subscriber.__init__ = _subscriber_init
 else:
     from rcl_interfaces.msg import SetParametersResult
     import rclpy
@@ -33,17 +36,23 @@ else:
     from tf_transformations import unit_vector as normalize_vector
     from types import SimpleNamespace
 
-    def mf_subscriber(node, topic, msg_type, queue_size=10):
-        """message_filters.Subscriber of topic: ROS 2 takes the node first,
-        and '~/' for '~'"""
-        if topic.startswith('~') and not topic.startswith('~/'):
-            topic = '~/' + topic[1:]
-        return message_filters.Subscriber(
-            node, msg_type, topic, qos_profile=queue_size)
+    # message_filters.Subscriber: '~' and queue_size as on ROS 1 (ROS 2 has
+    # '~/' and qos_profile), and unregister() as on ROS 1
+    if not hasattr(message_filters.Subscriber, '__init_orig__'):
+        message_filters.Subscriber.__init_orig__ = \
+            message_filters.Subscriber.__init__
 
-    def mf_unregister(node, sub):
-        """ROS 2 has no unregister(): destroy the subscription"""
-        node.destroy_subscription(sub.sub)
+        def _subscriber_init(self, node, msg_type, topic, *args, **kwargs):
+            if topic.startswith('~') and not topic.startswith('~/'):
+                topic = '~/' + topic[1:]
+            if 'queue_size' in kwargs:
+                kwargs['qos_profile'] = kwargs.pop('queue_size')
+            self.__init_orig__(node, msg_type, topic, *args, **kwargs)
+
+        def _subscriber_unregister(self):
+            self.node.destroy_subscription(self.sub)
+        message_filters.Subscriber.__init__ = _subscriber_init
+        message_filters.Subscriber.unregister = _subscriber_unregister
 
 
 def outer_product_matrix(v):
@@ -192,13 +201,15 @@ class PolygonArrayToRectBoxArray(ConnectionBasedTransport):
         return SetParametersResult(successful=True)
 
     def subscribe(self):
-        sub_polygon = mf_subscriber(
-            self, '~input/polygons',
+        sub_polygon = message_filters.Subscriber(
+            self,
             jsk_recognition_msgs.msg.PolygonArray,
+            '~input/polygons',
             queue_size=1)
-        sub_coefficients = mf_subscriber(
-            self, '~input/coefficients',
+        sub_coefficients = message_filters.Subscriber(
+            self,
             jsk_recognition_msgs.msg.ModelCoefficientsArray,
+            '~input/coefficients',
             queue_size=1)
         if ROS_VERSION == 1:
             queue_size = rospy.get_param('~queue_size', 10)
@@ -219,7 +230,7 @@ class PolygonArrayToRectBoxArray(ConnectionBasedTransport):
 
     def unsubscribe(self):
         for s in self.subs:
-            mf_unregister(self, s)
+            s.unregister()
 
     def _cb(self, polygons_msg, coeffs_msg):
         new_polygons_msg = jsk_recognition_msgs.msg.PolygonArray()

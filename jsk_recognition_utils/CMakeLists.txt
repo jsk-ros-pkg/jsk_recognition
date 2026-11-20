@@ -75,6 +75,8 @@ if("$ENV{ROS_VERSION}" EQUAL 2)
     src/geo/grid_plane.cpp
   )
   target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
+  # ros_compat.h: ROS 2, whatever ROS 1 headers are on the include path
+  target_compile_definitions(${PROJECT_NAME} PUBLIC JSK_RECOGNITION_UTILS_ROS2)
   target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include/${PROJECT_NAME}>

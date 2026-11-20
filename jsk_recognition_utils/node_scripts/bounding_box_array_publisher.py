@@ -9,13 +9,15 @@ from geometry_msgs.msg import Vector3
 from jsk_recognition_msgs.msg import BoundingBox
 from jsk_recognition_msgs.msg import BoundingBoxArray
 
-# ROS 1: rospy, as before; ROS 2: rclpy through jsk_ros1_ros2_compat
+# ROS 1: rospy, as before; ROS 2: rclpy
 ROS_VERSION = int(os.environ.get('ROS_VERSION', '1'))
 if ROS_VERSION == 1:
     import rospy
     from tf.transformations import quaternion_from_euler
 else:
-    from jsk_ros1_ros2_compat import rospy_rclpy_compat as ros
+    import rclpy
+    from rclpy.executors import ExternalShutdownException
+    from rclpy.parameter import Parameter
     from tf_transformations import quaternion_from_euler
     import yaml
 
@@ -67,22 +69,26 @@ class BoundingBoxArrayPublisher(object):
     def _init_ros2(self):
         # the deprecated ~positions, ~rotations and ~dimensions (lists of
         # lists, which a parameter of ROS 2 cannot be) are of ROS 1 only
-        self.frame_id = ros.get_param(self.node, '~frame_id')
-        self.boxes = ros.get_param(self.node, '~boxes')
-        # a YAML string, as a parameter of ROS 2 cannot be a list of dicts
-        if isinstance(self.boxes, str):
-            self.boxes = yaml.safe_load(self.boxes)
-        self.pub = ros.create_publisher(
-            self.node, '~output', BoundingBoxArray, queue_size=1)
+        # ~boxes: a YAML string, as a parameter of ROS 2 cannot be a list
+        # of dicts
+        self.node.declare_parameters('', [
+            ('frame_id', Parameter.Type.STRING),
+            ('boxes', Parameter.Type.STRING),
+            ('rate', 1.0),
+        ])
+        self.frame_id = self.node.get_parameter('frame_id').value
+        self.boxes = yaml.safe_load(self.node.get_parameter('boxes').value)
+        self.pub = self.node.create_publisher(
+            BoundingBoxArray, '~/output', 1)
 
-        rate = ros.get_param(self.node, '~rate', 1)
-        self.timer = ros.create_timer(self.node, 1. / rate, self.publish)
+        rate = self.node.get_parameter('rate').value
+        self.timer = self.node.create_timer(1. / rate, self.publish)
 
-    def publish(self, event):
+    def publish(self, event=None):
         if ROS_VERSION == 1:
             stamp = event.current_real
         else:
-            stamp = ros.stamp_now(self.node)
+            stamp = self.node.get_clock().now().to_msg()
         bbox_array_msg = BoundingBoxArray()
         if ROS_VERSION == 1:
             bbox_array_msg.header.seq = self.seq
@@ -120,6 +126,10 @@ if __name__ == '__main__':
         BoundingBoxArrayPublisher()
         rospy.spin()
     else:
-        node = ros.init_node('bounding_box_array_publisher')
+        rclpy.init()
+        node = rclpy.create_node('bounding_box_array_publisher')
         BoundingBoxArrayPublisher(node)
-        ros.spin(node)
+        try:
+            rclpy.spin(node)
+        except (KeyboardInterrupt, ExternalShutdownException):
+            pass

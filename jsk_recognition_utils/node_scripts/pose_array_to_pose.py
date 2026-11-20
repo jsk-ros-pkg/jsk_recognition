@@ -10,7 +10,7 @@ from geometry_msgs.msg import PoseArray
 from geometry_msgs.msg import PoseStamped
 from jsk_topic_tools import ConnectionBasedTransport
 
-# ROS 1: rospy, as before; ROS 2: rclpy through jsk_ros1_ros2_compat
+# ROS 1: rospy, as before; ROS 2: rclpy
 ROS_VERSION = int(os.environ.get('ROS_VERSION', '1'))
 if ROS_VERSION == 1:
     import dynamic_reconfigure.server
@@ -18,7 +18,10 @@ if ROS_VERSION == 1:
     from jsk_topic_tools.log_utils import logerr_throttle
     import rospy
 else:
-    from jsk_ros1_ros2_compat import rospy_rclpy_compat as ros
+    import rclpy
+    from rclpy.executors import ExternalShutdownException
+    from rcl_interfaces.msg import SetParametersResult
+    from types import SimpleNamespace
 
 
 class PoseArrayToPose(ConnectionBasedTransport):
@@ -35,16 +38,18 @@ class PoseArrayToPose(ConnectionBasedTransport):
             dynamic_reconfigure.server.Server(PoseArrayToPoseConfig,
                                               self._config_callback)
         else:
-            # the parameters of cfg/PoseArrayToPose.cfg, its defaults
-            self._srv = ros.create_reconfigure_server(
-                self, None, self._config_callback, defaults={'index': -1})
+            # the parameter of cfg/PoseArrayToPose.cfg, with its default
+            self.declare_parameter('index', -1)
+            self._config_callback(
+                SimpleNamespace(index=self.get_parameter('index').value), 0)
+            self.add_on_set_parameters_callback(self._set_parameters_cb)
 
     def subscribe(self):
         if ROS_VERSION == 1:
             self.sub = rospy.Subscriber('~input', PoseArray, self._convert)
         else:
-            self.sub = ros.create_subscription(
-                self, '~input', PoseArray, self._convert)
+            self.sub = self.create_subscription(
+                PoseArray, '~/input', self._convert, 1)
 
     def unsubscribe(self):
         if ROS_VERSION == 1:
@@ -55,6 +60,13 @@ class PoseArrayToPose(ConnectionBasedTransport):
     def _config_callback(self, config, level):
         self.index = config.index
         return config
+
+    def _set_parameters_cb(self, params):
+        """ROS 2: `ros2 param set` of the parameter of cfg/"""
+        for param in params:
+            if param.name == 'index':
+                self._config_callback(SimpleNamespace(index=param.value), 0)
+        return SetParametersResult(successful=True)
 
     def _convert(self, msg):
         pose_msg = PoseStamped()
@@ -71,7 +83,7 @@ class PoseArrayToPose(ConnectionBasedTransport):
             if ROS_VERSION == 1:
                 logerr_throttle(10, text)
             else:
-                ros.logerr_throttle(self, 10, text)
+                self.get_logger().error(text, throttle_duration_sec=10)
 
 
 if __name__ == '__main__':
@@ -80,5 +92,8 @@ if __name__ == '__main__':
         PoseArrayToPose()
         rospy.spin()
     else:
-        ros.rclpy.init()
-        ros.spin(PoseArrayToPose())
+        rclpy.init()
+        try:
+            rclpy.spin(PoseArrayToPose())
+        except (KeyboardInterrupt, ExternalShutdownException):
+            pass

@@ -7,12 +7,33 @@ from jsk_recognition_msgs.msg import ClusterPointIndices
 from jsk_topic_tools import ConnectionBasedTransport
 import message_filters
 
-# ROS 1: rospy, as before; ROS 2: rclpy through jsk_ros1_ros2_compat
+# ROS 1: rospy, as before; ROS 2: rclpy
 ROS_VERSION = int(os.environ.get('ROS_VERSION', '1'))
 if ROS_VERSION == 1:
     import rospy
+
+    def mf_subscriber(node, topic, msg_type, **kwargs):
+        """message_filters.Subscriber of topic"""
+        return message_filters.Subscriber(topic, msg_type, **kwargs)
+
+    def mf_unregister(node, sub):
+        sub.unregister()
 else:
-    from jsk_ros1_ros2_compat import rospy_rclpy_compat as ros
+    import rclpy
+    from rclpy.executors import ExternalShutdownException
+    from rclpy.parameter import Parameter
+
+    def mf_subscriber(node, topic, msg_type, queue_size=10):
+        """message_filters.Subscriber of topic: ROS 2 takes the node first,
+        and '~/' for '~'"""
+        if topic.startswith('~') and not topic.startswith('~/'):
+            topic = '~/' + topic[1:]
+        return message_filters.Subscriber(
+            node, msg_type, topic, qos_profile=queue_size)
+
+    def mf_unregister(node, sub):
+        """ROS 2 has no unregister(): destroy the subscription"""
+        node.destroy_subscription(sub.sub)
 
 
 class AddClusterIndices(ConnectionBasedTransport):
@@ -23,6 +44,12 @@ class AddClusterIndices(ConnectionBasedTransport):
             # the transport is the node on ROS 2
             super(AddClusterIndices, self).__init__(
                 'add_cluster_indices', **kwargs)
+            self.declare_parameters('', [
+                ('topics', Parameter.Type.STRING_ARRAY),
+                ('approximate_sync', False),
+                ('queue_size', 100),
+                ('slop', 0.1),
+            ])
         self._pub = self.advertise('~output', ClusterPointIndices,
                                    queue_size=1)
 
@@ -33,16 +60,13 @@ class AddClusterIndices(ConnectionBasedTransport):
             queue_size = rospy.get_param('~queue_size', 100)
             slop = rospy.get_param('~slop', 0.1)
         else:
-            topics = ros.get_param(self, '~topics')
-            use_async = ros.get_param(self, '~approximate_sync', False)
-            queue_size = ros.get_param(self, '~queue_size', 100)
-            slop = ros.get_param(self, '~slop', 0.1)
+            topics = self.get_parameter('topics').value
+            use_async = self.get_parameter('approximate_sync').value
+            queue_size = self.get_parameter('queue_size').value
+            slop = self.get_parameter('slop').value
         self.subs = []
         for tp in topics:
-            if ROS_VERSION == 1:
-                sub = message_filters.Subscriber(tp, ClusterPointIndices)
-            else:
-                sub = message_filters.Subscriber(self, ClusterPointIndices, tp)
+            sub = mf_subscriber(self, tp, ClusterPointIndices)
             self.subs.append(sub)
         if use_async:
             sync = message_filters.ApproximateTimeSynchronizer(
@@ -53,10 +77,7 @@ class AddClusterIndices(ConnectionBasedTransport):
 
     def unsubscribe(self):
         for sub in self.subs:
-            if ROS_VERSION == 1:
-                sub.unregister()
-            else:
-                self.destroy_subscription(sub.sub)
+            mf_unregister(self, sub)
 
     def _decompose(self, *cpi_msgs):
         out_msg = ClusterPointIndices()
@@ -72,5 +93,8 @@ if __name__ == '__main__':
         app = AddClusterIndices()
         rospy.spin()
     else:
-        ros.rclpy.init()
-        ros.spin(AddClusterIndices())
+        rclpy.init()
+        try:
+            rclpy.spin(AddClusterIndices())
+        except (KeyboardInterrupt, ExternalShutdownException):
+            pass

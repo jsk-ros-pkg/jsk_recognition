@@ -8,12 +8,13 @@ from jsk_recognition_msgs.msg import PolygonArray
 from jsk_recognition_msgs.msg import RectArray
 from jsk_topic_tools import ConnectionBasedTransport
 
-# ROS 1: rospy, as before; ROS 2: rclpy through jsk_ros1_ros2_compat
+# ROS 1: rospy, as before; ROS 2: rclpy
 ROS_VERSION = int(os.environ.get('ROS_VERSION', '1'))
 if ROS_VERSION == 1:
     import rospy
 else:
-    from jsk_ros1_ros2_compat import rospy_rclpy_compat as ros
+    import rclpy
+    from rclpy.executors import ExternalShutdownException
 
 
 class RectArrayToPolygonArray(ConnectionBasedTransport):
@@ -31,8 +32,8 @@ class RectArrayToPolygonArray(ConnectionBasedTransport):
         if ROS_VERSION == 1:
             self.sub = rospy.Subscriber('~input', RectArray, self._convert)
         else:
-            self.sub = ros.create_subscription(
-                self, '~input', RectArray, self._convert)
+            self.sub = self.create_subscription(
+                RectArray, '~/input', self._convert, 1)
 
     def unsubscribe(self):
         if ROS_VERSION == 1:
@@ -66,5 +67,8 @@ if __name__ == '__main__':
         RectArrayToPolygonArray()
         rospy.spin()
     else:
-        ros.rclpy.init()
-        ros.spin(RectArrayToPolygonArray())
+        rclpy.init()
+        try:
+            rclpy.spin(RectArrayToPolygonArray())
+        except (KeyboardInterrupt, ExternalShutdownException):
+            pass

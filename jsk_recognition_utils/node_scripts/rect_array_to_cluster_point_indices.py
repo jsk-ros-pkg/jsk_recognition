@@ -12,12 +12,33 @@ from jsk_topic_tools import ConnectionBasedTransport
 from pcl_msgs.msg import PointIndices
 from sensor_msgs.msg import CameraInfo
 
-# ROS 1: rospy, as before; ROS 2: rclpy through jsk_ros1_ros2_compat
+# ROS 1: rospy, as before; ROS 2: rclpy
 ROS_VERSION = int(os.environ.get('ROS_VERSION', '1'))
 if ROS_VERSION == 1:
     import rospy
+
+    def mf_subscriber(node, topic, msg_type, **kwargs):
+        """message_filters.Subscriber of topic"""
+        return message_filters.Subscriber(topic, msg_type, **kwargs)
+
+    def mf_unregister(node, sub):
+        sub.unregister()
 else:
-    from jsk_ros1_ros2_compat import rospy_rclpy_compat as ros
+    import rclpy
+    from rclpy.executors import ExternalShutdownException
+    from rclpy.parameter import Parameter
+
+    def mf_subscriber(node, topic, msg_type, queue_size=10):
+        """message_filters.Subscriber of topic: ROS 2 takes the node first,
+        and '~/' for '~'"""
+        if topic.startswith('~') and not topic.startswith('~/'):
+            topic = '~/' + topic[1:]
+        return message_filters.Subscriber(
+            node, msg_type, topic, qos_profile=queue_size)
+
+    def mf_unregister(node, sub):
+        """ROS 2 has no unregister(): destroy the subscription"""
+        node.destroy_subscription(sub.sub)
 
 
 class RectArrayToClusterPointIndices(ConnectionBasedTransport):
@@ -29,30 +50,32 @@ class RectArrayToClusterPointIndices(ConnectionBasedTransport):
             # the transport is the node on ROS 2
             super(RectArrayToClusterPointIndices, self).__init__(
                 'rect_array_to_cluster_point_indices', **kwargs)
+            self.declare_parameters('', [
+                ('use_info', False),
+                ('queue_size', 10),
+                ('approximate_sync', False),
+                ('slop', 0.1),
+                ('img_height', Parameter.Type.INTEGER),
+                ('img_width', Parameter.Type.INTEGER),
+            ])
         self.pub = self.advertise('~output', ClusterPointIndices, queue_size=1)
 
     def subscribe(self):
         if ROS_VERSION == 1:
             use_info = rospy.get_param('~use_info', False)
         else:
-            use_info = ros.get_param(self, '~use_info', False)
+            use_info = self.get_parameter('use_info').value
         if use_info:
+            sub_rects = mf_subscriber(self, '~input', RectArray)
+            sub_info = mf_subscriber(self, '~input/info', CameraInfo)
             if ROS_VERSION == 1:
-                sub_rects = message_filters.Subscriber('~input', RectArray)
-                sub_info = message_filters.Subscriber(
-                    '~input/info', CameraInfo)
                 queue_size = rospy.get_param('~queue_size', 10)
                 approximate_sync = rospy.get_param('~approximate_sync', False)
                 slop = rospy.get_param('~slop', 0.1)
             else:
-                sub_rects = message_filters.Subscriber(
-                    self, RectArray, '~/input')
-                sub_info = message_filters.Subscriber(
-                    self, CameraInfo, '~/input/info')
-                queue_size = ros.get_param(self, '~queue_size', 10)
-                approximate_sync = ros.get_param(
-                    self, '~approximate_sync', False)
-                slop = ros.get_param(self, '~slop', 0.1)
+                queue_size = self.get_parameter('queue_size').value
+                approximate_sync = self.get_parameter('approximate_sync').value
+                slop = self.get_parameter('slop').value
             self.subs = [sub_rects, sub_info]
             if approximate_sync:
                 sync = message_filters.ApproximateTimeSynchronizer(
@@ -68,18 +91,16 @@ class RectArrayToClusterPointIndices(ConnectionBasedTransport):
                 sub_rects = rospy.Subscriber(
                     '~input', RectArray, self._convert)
             else:
-                self.img_height = ros.get_param(self, '~img_height')
-                self.img_width = ros.get_param(self, '~img_width')
-                sub_rects = ros.create_subscription(
-                    self, '~input', RectArray, self._convert)
+                self.img_height = self.get_parameter('img_height').value
+                self.img_width = self.get_parameter('img_width').value
+                sub_rects = self.create_subscription(
+                    RectArray, '~/input', self._convert, 1)
             self.subs = [sub_rects]
 
     def unsubscribe(self):
         for sub in self.subs:
-            if ROS_VERSION == 1:
-                sub.unregister()
-            elif isinstance(sub, message_filters.Subscriber):
-                self.destroy_subscription(sub.sub)
+            if ROS_VERSION == 1 or isinstance(sub, message_filters.Subscriber):
+                mf_unregister(self, sub)
             else:
                 self.destroy_subscription(sub)
 
@@ -111,5 +132,8 @@ if __name__ == '__main__':
         RectArrayToClusterPointIndices()
         rospy.spin()
     else:
-        ros.rclpy.init()
-        ros.spin(RectArrayToClusterPointIndices())
+        rclpy.init()
+        try:
+            rclpy.spin(RectArrayToClusterPointIndices())
+        except (KeyboardInterrupt, ExternalShutdownException):
+            pass

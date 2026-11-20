@@ -12,12 +12,13 @@ import cv_bridge
 from jsk_topic_tools import ConnectionBasedTransport
 from sensor_msgs.msg import Image
 
-# ROS 1: rospy, as before; ROS 2: rclpy through jsk_ros1_ros2_compat
+# ROS 1: rospy, as before; ROS 2: rclpy
 ROS_VERSION = int(os.environ.get('ROS_VERSION', '1'))
 if ROS_VERSION == 1:
     import rospy
 else:
-    from jsk_ros1_ros2_compat import rospy_rclpy_compat as ros
+    import rclpy
+    from rclpy.executors import ExternalShutdownException
 
 
 class Image16UC1To32FC1(ConnectionBasedTransport):
@@ -35,8 +36,8 @@ class Image16UC1To32FC1(ConnectionBasedTransport):
         if ROS_VERSION == 1:
             self.sub = rospy.Subscriber('~input', Image, self.transport)
         else:
-            self.sub = ros.create_subscription(
-                self, '~input', Image, self.transport)
+            self.sub = self.create_subscription(
+                Image, '~/input', self.transport, 1)
 
     def unsubscribe(self):
         if ROS_VERSION == 1:
@@ -61,5 +62,8 @@ if __name__ == '__main__':
         Image16UC1To32FC1()
         rospy.spin()
     else:
-        ros.rclpy.init()
-        ros.spin(Image16UC1To32FC1())
+        rclpy.init()
+        try:
+            rclpy.spin(Image16UC1To32FC1())
+        except (KeyboardInterrupt, ExternalShutdownException):
+            pass

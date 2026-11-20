@@ -1,24 +1,44 @@
 #!/usr/bin/env python
 
+import os
+
 from geometry_msgs.msg import Point32
 from geometry_msgs.msg import PolygonStamped
 from jsk_recognition_msgs.msg import PolygonArray
 from jsk_recognition_msgs.msg import RectArray
 from jsk_topic_tools import ConnectionBasedTransport
-import rospy
+
+# ROS 1: rospy, as before; ROS 2: rclpy through jsk_ros1_ros2_compat
+ROS_VERSION = int(os.environ.get('ROS_VERSION', '1'))
+if ROS_VERSION == 1:
+    import rospy
+else:
+    from jsk_ros1_ros2_compat import rospy_rclpy_compat as ros
 
 
 class RectArrayToPolygonArray(ConnectionBasedTransport):
 
-    def __init__(self):
-        super(RectArrayToPolygonArray, self).__init__()
+    def __init__(self, **kwargs):
+        if ROS_VERSION == 1:
+            super(RectArrayToPolygonArray, self).__init__()
+        else:
+            # the transport is the node on ROS 2
+            super(RectArrayToPolygonArray, self).__init__(
+                'rect_array_to_polygon_array', **kwargs)
         self.pub = self.advertise('~output', PolygonArray, queue_size=1)
 
     def subscribe(self):
-        self.sub = rospy.Subscriber('~input', RectArray, self._convert)
+        if ROS_VERSION == 1:
+            self.sub = rospy.Subscriber('~input', RectArray, self._convert)
+        else:
+            self.sub = ros.create_subscription(
+                self, '~input', RectArray, self._convert)
 
     def unsubscribe(self):
-        self.sub.unregister()
+        if ROS_VERSION == 1:
+            self.sub.unregister()
+        else:
+            self.destroy_subscription(self.sub)
 
     def _convert(self, msg):
         polys_msg = PolygonArray()
@@ -41,6 +61,10 @@ class RectArrayToPolygonArray(ConnectionBasedTransport):
 
 
 if __name__ == '__main__':
-    rospy.init_node('rect_array_to_polygon_array')
-    RectArrayToPolygonArray()
-    rospy.spin()
+    if ROS_VERSION == 1:
+        rospy.init_node('rect_array_to_polygon_array')
+        RectArrayToPolygonArray()
+        rospy.spin()
+    else:
+        ros.rclpy.init()
+        ros.spin(RectArrayToPolygonArray())

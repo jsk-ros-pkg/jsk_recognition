@@ -1,17 +1,27 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-import dynamic_reconfigure.server
+import os
+
 import geometry_msgs.msg
 import jsk_recognition_msgs.msg
 import message_filters
 import numpy as np
-import rospy
 import shapely.geometry
-from jsk_recognition_utils.cfg import PolygonArrayToBoxArrayConfig
 from jsk_topic_tools import ConnectionBasedTransport
-from tf.transformations import quaternion_from_matrix as matrix2quaternion
-from tf.transformations import unit_vector as normalize_vector
+
+# ROS 1: rospy, as before; ROS 2: rclpy through jsk_ros1_ros2_compat
+ROS_VERSION = int(os.environ.get('ROS_VERSION', '1'))
+if ROS_VERSION == 1:
+    import dynamic_reconfigure.server
+    from jsk_recognition_utils.cfg import PolygonArrayToBoxArrayConfig
+    import rospy
+    from tf.transformations import quaternion_from_matrix as matrix2quaternion
+    from tf.transformations import unit_vector as normalize_vector
+else:
+    from jsk_ros1_ros2_compat import rospy_rclpy_compat as ros
+    from tf_transformations import quaternion_from_matrix as matrix2quaternion
+    from tf_transformations import unit_vector as normalize_vector
 
 
 def outer_product_matrix(v):
@@ -114,11 +124,21 @@ def rotate_points(points, a, b):
 
 class PolygonArrayToRectBoxArray(ConnectionBasedTransport):
 
-    def __init__(self):
-        super(PolygonArrayToRectBoxArray, self).__init__()
-        dynamic_reconfigure.server.Server(
-            PolygonArrayToBoxArrayConfig,
-            self._config_callback)
+    def __init__(self, **kwargs):
+        if ROS_VERSION == 1:
+            super(PolygonArrayToRectBoxArray, self).__init__()
+            dynamic_reconfigure.server.Server(
+                PolygonArrayToBoxArrayConfig,
+                self._config_callback)
+        else:
+            # the transport is the node on ROS 2
+            super(PolygonArrayToRectBoxArray, self).__init__(
+                'polygon_array_to_box_array', **kwargs)
+            # the parameters of cfg/PolygonArrayToBoxArray.cfg, with its
+            # defaults
+            self._srv = ros.create_reconfigure_server(
+                self, None, self._config_callback,
+                defaults={'thickness': 0.0001})
         self.polygons_pub = self.advertise(
             '~output/polygons',
             jsk_recognition_msgs.msg.PolygonArray,
@@ -137,18 +157,30 @@ class PolygonArrayToRectBoxArray(ConnectionBasedTransport):
         return config
 
     def subscribe(self):
-        queue_size = rospy.get_param('~queue_size', 10)
-        sub_polygon = message_filters.Subscriber(
-            '~input/polygons',
-            jsk_recognition_msgs.msg.PolygonArray,
-            queue_size=1)
-        sub_coefficients = message_filters.Subscriber(
-            '~input/coefficients',
-            jsk_recognition_msgs.msg.ModelCoefficientsArray,
-            queue_size=1)
-        self.subs = [sub_polygon, sub_coefficients]
-        if rospy.get_param('~approximate_sync', False):
+        if ROS_VERSION == 1:
+            queue_size = rospy.get_param('~queue_size', 10)
+            sub_polygon = message_filters.Subscriber(
+                '~input/polygons',
+                jsk_recognition_msgs.msg.PolygonArray,
+                queue_size=1)
+            sub_coefficients = message_filters.Subscriber(
+                '~input/coefficients',
+                jsk_recognition_msgs.msg.ModelCoefficientsArray,
+                queue_size=1)
+            approximate_sync = rospy.get_param('~approximate_sync', False)
             slop = rospy.get_param('~slop', 0.1)
+        else:
+            queue_size = ros.get_param(self, '~queue_size', 10)
+            sub_polygon = message_filters.Subscriber(
+                self, jsk_recognition_msgs.msg.PolygonArray,
+                '~/input/polygons', qos_profile=1)
+            sub_coefficients = message_filters.Subscriber(
+                self, jsk_recognition_msgs.msg.ModelCoefficientsArray,
+                '~/input/coefficients', qos_profile=1)
+            approximate_sync = ros.get_param(self, '~approximate_sync', False)
+            slop = ros.get_param(self, '~slop', 0.1)
+        self.subs = [sub_polygon, sub_coefficients]
+        if approximate_sync:
             sync = message_filters.ApproximateTimeSynchronizer(
                 fs=self.subs, queue_size=queue_size, slop=slop)
         else:
@@ -158,7 +190,10 @@ class PolygonArrayToRectBoxArray(ConnectionBasedTransport):
 
     def unsubscribe(self):
         for s in self.subs:
-            s.unregister()
+            if ROS_VERSION == 1:
+                s.unregister()
+            else:
+                self.destroy_subscription(s.sub)
 
     def _cb(self, polygons_msg, coeffs_msg):
         new_polygons_msg = jsk_recognition_msgs.msg.PolygonArray()
@@ -232,6 +267,10 @@ class PolygonArrayToRectBoxArray(ConnectionBasedTransport):
 
 
 if __name__ == '__main__':
-    rospy.init_node('polygon_array_to_box_array')
-    act = PolygonArrayToRectBoxArray()
-    rospy.spin()
+    if ROS_VERSION == 1:
+        rospy.init_node('polygon_array_to_box_array')
+        act = PolygonArrayToRectBoxArray()
+        rospy.spin()
+    else:
+        ros.rclpy.init()
+        ros.spin(PolygonArrayToRectBoxArray())

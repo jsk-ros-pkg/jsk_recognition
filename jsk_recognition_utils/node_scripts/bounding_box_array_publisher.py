@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import sys
 
 from geometry_msgs.msg import Point
@@ -7,14 +8,27 @@ from geometry_msgs.msg import Quaternion
 from geometry_msgs.msg import Vector3
 from jsk_recognition_msgs.msg import BoundingBox
 from jsk_recognition_msgs.msg import BoundingBoxArray
-import rospy
-from tf.transformations import quaternion_from_euler
+
+# ROS 1: rospy, as before; ROS 2: rclpy through jsk_ros1_ros2_compat
+ROS_VERSION = int(os.environ.get('ROS_VERSION', '1'))
+if ROS_VERSION == 1:
+    import rospy
+    from tf.transformations import quaternion_from_euler
+else:
+    from jsk_ros1_ros2_compat import rospy_rclpy_compat as ros
+    from tf_transformations import quaternion_from_euler
 
 
 class BoundingBoxArrayPublisher(object):
 
-    def __init__(self):
+    def __init__(self, node=None):
+        # node: the node of ROS 2 (None on ROS 1)
+        self.node = node
         self.seq = 0
+
+        if ROS_VERSION != 1:
+            self._init_ros2()
+            return
 
         self.frame_id = rospy.get_param('~frame_id')
         if (rospy.has_param('~positions') or
@@ -49,11 +63,27 @@ class BoundingBoxArrayPublisher(object):
         rate = rospy.get_param('~rate', 1)
         self.timer = rospy.Timer(rospy.Duration(1. / rate), self.publish)
 
+    def _init_ros2(self):
+        # the deprecated ~positions, ~rotations and ~dimensions (lists of
+        # lists, which a parameter of ROS 2 cannot be) are of ROS 1 only
+        self.frame_id = ros.get_param(self.node, '~frame_id')
+        self.boxes = ros.get_param(self.node, '~boxes')
+        self.pub = ros.create_publisher(
+            self.node, '~output', BoundingBoxArray, queue_size=1)
+
+        rate = ros.get_param(self.node, '~rate', 1)
+        self.timer = ros.create_timer(self.node, 1. / rate, self.publish)
+
     def publish(self, event):
+        if ROS_VERSION == 1:
+            stamp = event.current_real
+        else:
+            stamp = ros.stamp_now(self.node)
         bbox_array_msg = BoundingBoxArray()
-        bbox_array_msg.header.seq = self.seq
+        if ROS_VERSION == 1:
+            bbox_array_msg.header.seq = self.seq
         bbox_array_msg.header.frame_id = self.frame_id
-        bbox_array_msg.header.stamp = event.current_real
+        bbox_array_msg.header.stamp = stamp
         for box in self.boxes:
             pos = box['position']
             rot = box.get('rotation', [0, 0, 0])
@@ -62,9 +92,10 @@ class BoundingBoxArrayPublisher(object):
             label = box.get('label', 0)
 
             bbox_msg = BoundingBox()
-            bbox_msg.header.seq = self.seq
+            if ROS_VERSION == 1:
+                bbox_msg.header.seq = self.seq
             bbox_msg.header.frame_id = self.frame_id
-            bbox_msg.header.stamp = event.current_real
+            bbox_msg.header.stamp = stamp
             bbox_msg.pose.position = Point(
                 x=float(pos[0]), y=float(pos[1]), z=float(pos[2]))
             bbox_msg.pose.orientation = Quaternion(
@@ -80,6 +111,11 @@ class BoundingBoxArrayPublisher(object):
 
 
 if __name__ == '__main__':
-    rospy.init_node('bounding_box_array_publisher')
-    BoundingBoxArrayPublisher()
-    rospy.spin()
+    if ROS_VERSION == 1:
+        rospy.init_node('bounding_box_array_publisher')
+        BoundingBoxArrayPublisher()
+        rospy.spin()
+    else:
+        node = ros.init_node('bounding_box_array_publisher')
+        BoundingBoxArrayPublisher(node)
+        ros.spin(node)

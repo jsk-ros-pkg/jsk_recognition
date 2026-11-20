@@ -1,12 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
+
 import numpy as np
-import rospy
 from geometry_msgs.msg import Point32, PolygonStamped
 from jsk_recognition_msgs.msg import ModelCoefficientsArray
 from jsk_recognition_msgs.msg import PolygonArray
 from pcl_msgs.msg import ModelCoefficients
+
+# ROS 1: rospy, as before; ROS 2: rclpy through jsk_ros1_ros2_compat
+ROS_VERSION = int(os.environ.get('ROS_VERSION', '1'))
+if ROS_VERSION == 1:
+    import rospy
+else:
+    from jsk_ros1_ros2_compat import rospy_rclpy_compat as ros
 
 
 def is_planar(points):
@@ -42,28 +50,53 @@ def is_planar(points):
 
 
 class PolygonArrayPublisher(object):
-    def __init__(self):
-        publish_rate = rospy.get_param("~publish_rate", 1.0)
-        self.publish_coeffs = rospy.get_param("~publish_coeffs", False)
+    def __init__(self, node=None):
+        # node: the node of ROS 2 (None on ROS 1)
+        self.node = node
+        if ROS_VERSION == 1:
+            publish_rate = rospy.get_param("~publish_rate", 1.0)
+            self.publish_coeffs = rospy.get_param("~publish_coeffs", False)
 
-        frame_id = rospy.get_param("~frame_id")
-        param = rospy.get_param("~polygons")
+            frame_id = rospy.get_param("~frame_id")
+            param = rospy.get_param("~polygons")
+        else:
+            publish_rate = ros.get_param(self.node, "~publish_rate", 1.0)
+            self.publish_coeffs = ros.get_param(
+                self.node, "~publish_coeffs", False)
+
+            frame_id = ros.get_param(self.node, "~frame_id")
+            param = ros.get_param(self.node, "~polygons")
         self.are_polygons_in_planar = True
         self.msg, self.coeffs_array_msg = self.parse_params(param, frame_id)
 
-        self.pub_polygons = rospy.Publisher("~output", PolygonArray, queue_size=1)
+        if ROS_VERSION == 1:
+            self.pub_polygons = rospy.Publisher("~output", PolygonArray, queue_size=1)
+        else:
+            self.pub_polygons = ros.create_publisher(
+                self.node, "~output", PolygonArray, queue_size=1)
         if self.publish_coeffs:
             if self.are_polygons_in_planar is False:
                 self.publish_coeffs = False
-                rospy.logwarn(
-                    '~publish_coeffs is True,'
-                    ' but ModelCoefficientsArray is not published'
-                    ' because each polygon is not in planar.')
-            else:
+                text = ('~publish_coeffs is True,'
+                        ' but ModelCoefficientsArray is not published'
+                        ' because each polygon is not in planar.')
+                if ROS_VERSION == 1:
+                    rospy.logwarn(text)
+                else:
+                    ros.logwarn(self.node, text)
+            elif ROS_VERSION == 1:
                 self.pub_coeffs = rospy.Publisher(
                     '~output/coefficients',
                     ModelCoefficientsArray, queue_size=1)
-        self.timer = rospy.Timer(rospy.Duration(1. / publish_rate), self.publish)
+            else:
+                self.pub_coeffs = ros.create_publisher(
+                    self.node, '~output/coefficients',
+                    ModelCoefficientsArray, queue_size=1)
+        if ROS_VERSION == 1:
+            self.timer = rospy.Timer(rospy.Duration(1. / publish_rate), self.publish)
+        else:
+            self.timer = ros.create_timer(
+                self.node, 1. / publish_rate, self.publish)
 
     def parse_params(self, param, frame_id):
         # validate params
@@ -108,19 +141,28 @@ class PolygonArrayPublisher(object):
 
     def publish(self, event):
         # update timestamp
-        self.msg.header.stamp = event.current_real
+        if ROS_VERSION == 1:
+            stamp = event.current_real
+        else:
+            stamp = ros.stamp_now(self.node)
+        self.msg.header.stamp = stamp
         for p in self.msg.polygons:
-            p.header.stamp = event.current_real
+            p.header.stamp = stamp
 
         self.pub_polygons.publish(self.msg)
         if self.publish_coeffs:
-            self.coeffs_array_msg.header.stamp = event.current_real
+            self.coeffs_array_msg.header.stamp = stamp
             for p in self.coeffs_array_msg.coefficients:
-                p.header.stamp = event.current_real
+                p.header.stamp = stamp
             self.pub_coeffs.publish(self.coeffs_array_msg)
 
 
 if __name__ == '__main__':
-    rospy.init_node("polygon_array_publisher")
-    p = PolygonArrayPublisher()
-    rospy.spin()
+    if ROS_VERSION == 1:
+        rospy.init_node('polygon_array_publisher')
+        p = PolygonArrayPublisher()
+        rospy.spin()
+    else:
+        node = ros.init_node('polygon_array_publisher')
+        p = PolygonArrayPublisher(node)
+        ros.spin(node)

@@ -35,7 +35,11 @@
 
 // The sources of jsk_recognition_utils are shared by ROS 1 and ROS 2 and
 // tell them apart with `#if ROS_VERSION_MAJOR != 1`. ROS_VERSION_MAJOR is
-// defined by ros/common.h on ROS 1 and undefined (so 0) on ROS 2.
+// defined by ros/common.h on ROS 1 and undefined (so 0) on ROS 2. The ROS 2
+// build defines JSK_RECOGNITION_UTILS_ROS2 (a public compile definition of the
+// library target, so its users get it too) and then never looks at
+// ros/common.h, which may be on the include path anyway (e.g. ROS 1 installed
+// on the same machine).
 //
 // On ROS 2 this header provides what the ROS 1 headers did for the part of
 // the library that is built there:
@@ -47,12 +51,14 @@
 #ifndef JSK_RECOGNITION_UTILS_ROS_COMPAT_H_
 #define JSK_RECOGNITION_UTILS_ROS_COMPAT_H_
 
+#if !defined(JSK_RECOGNITION_UTILS_ROS2)
 #if defined(__has_include)
 #if __has_include(<ros/common.h>)
 #include <ros/common.h>
 #endif
 #else
 #include <ros/common.h>
+#endif
 #endif
 
 #if ROS_VERSION_MAJOR != 1

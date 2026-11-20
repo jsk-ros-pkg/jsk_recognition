@@ -35,6 +35,8 @@
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-chainercv-pip</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-skimage</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-skimage</exec_depend>
+  <!-- feature.py, imported by __init__.py -->
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-sklearn</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-fcn-pip</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-shapely</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-shapely</exec_depend>
@@ -75,7 +77,6 @@
   <exec_depend condition="$ROS_VERSION == 2">python3-numpy</exec_depend>
   <exec_depend condition="$ROS_VERSION == 2">python3-opencv</exec_depend>
   <exec_depend condition="$ROS_VERSION == 2">python3-pil</exec_depend>
-  <exec_depend condition="$ROS_VERSION == 2">python3-sklearn</exec_depend>
   <test_depend condition="$ROS_VERSION == 2">ament_cmake_gtest</test_depend>
   <export>
     <build_type condition="$ROS_VERSION != 2">catkin</build_type>

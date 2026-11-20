@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.0 (2026-11-20)
+------------------
 * Merge pull request `#2906 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2906>`_ from k-okada/recognition-utils-ros2
   [jsk_recognition_utils] build the C++ library on ROS 2 alongside ROS 1
 * [jsk_recognition_msgs] guess ROS_VERSION when it is not set, as jsk_recognition_utils

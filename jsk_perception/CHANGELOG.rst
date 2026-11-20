@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.0 (2026-11-20)
+------------------
 * Merge pull request `#2902 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2902>`_ from k-okada/rosdep-python3-keys
   jsk_recognition_utils, jsk_perception: pip packages for python2 only (python2 rosdep keys removed)
 * jsk_perception: the tests of the DNN nodes only on ROS-O

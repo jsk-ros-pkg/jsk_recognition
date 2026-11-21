@@ -18,16 +18,6 @@ if ROS_VERSION == 1:
     import rospy
     from tf.transformations import quaternion_from_matrix as matrix2quaternion
     from tf.transformations import unit_vector as normalize_vector
-
-    # message_filters.Subscriber(node, msg_type, topic, ...) as on ROS 2; the
-    # node is not used on ROS 1
-    if not hasattr(message_filters.Subscriber, '__init_orig__'):
-        message_filters.Subscriber.__init_orig__ = \
-            message_filters.Subscriber.__init__
-
-        def _subscriber_init(self, node, msg_type, topic, *args, **kwargs):
-            self.__init_orig__(topic, msg_type, *args, **kwargs)
-        message_filters.Subscriber.__init__ = _subscriber_init
 else:
     from rcl_interfaces.msg import SetParametersResult
     import rclpy
@@ -35,24 +25,6 @@ else:
     from tf_transformations import quaternion_from_matrix as matrix2quaternion
     from tf_transformations import unit_vector as normalize_vector
     from types import SimpleNamespace
-
-    # message_filters.Subscriber: '~' and queue_size as on ROS 1 (ROS 2 has
-    # '~/' and qos_profile), and unregister() as on ROS 1
-    if not hasattr(message_filters.Subscriber, '__init_orig__'):
-        message_filters.Subscriber.__init_orig__ = \
-            message_filters.Subscriber.__init__
-
-        def _subscriber_init(self, node, msg_type, topic, *args, **kwargs):
-            if topic.startswith('~') and not topic.startswith('~/'):
-                topic = '~/' + topic[1:]
-            if 'queue_size' in kwargs:
-                kwargs['qos_profile'] = kwargs.pop('queue_size')
-            self.__init_orig__(node, msg_type, topic, *args, **kwargs)
-
-        def _subscriber_unregister(self):
-            self.node.destroy_subscription(self.sub)
-        message_filters.Subscriber.__init__ = _subscriber_init
-        message_filters.Subscriber.unregister = _subscriber_unregister
 
 
 def outer_product_matrix(v):
@@ -202,14 +174,12 @@ class PolygonArrayToRectBoxArray(ConnectionBasedTransport):
 
     def subscribe(self):
         sub_polygon = message_filters.Subscriber(
-            self,
-            jsk_recognition_msgs.msg.PolygonArray,
             '~input/polygons',
+            jsk_recognition_msgs.msg.PolygonArray,
             queue_size=1)
         sub_coefficients = message_filters.Subscriber(
-            self,
-            jsk_recognition_msgs.msg.ModelCoefficientsArray,
             '~input/coefficients',
+            jsk_recognition_msgs.msg.ModelCoefficientsArray,
             queue_size=1)
         if ROS_VERSION == 1:
             queue_size = rospy.get_param('~queue_size', 10)

@@ -16,38 +16,10 @@ from sensor_msgs.msg import CameraInfo
 ROS_VERSION = int(os.environ.get('ROS_VERSION', '1'))
 if ROS_VERSION == 1:
     import rospy
-
-    # message_filters.Subscriber(node, msg_type, topic, ...) as on ROS 2; the
-    # node is not used on ROS 1
-    if not hasattr(message_filters.Subscriber, '__init_orig__'):
-        message_filters.Subscriber.__init_orig__ = \
-            message_filters.Subscriber.__init__
-
-        def _subscriber_init(self, node, msg_type, topic, *args, **kwargs):
-            self.__init_orig__(topic, msg_type, *args, **kwargs)
-        message_filters.Subscriber.__init__ = _subscriber_init
 else:
     import rclpy
     from rclpy.executors import ExternalShutdownException
     from rclpy.parameter import Parameter
-
-    # message_filters.Subscriber: '~' and queue_size as on ROS 1 (ROS 2 has
-    # '~/' and qos_profile), and unregister() as on ROS 1
-    if not hasattr(message_filters.Subscriber, '__init_orig__'):
-        message_filters.Subscriber.__init_orig__ = \
-            message_filters.Subscriber.__init__
-
-        def _subscriber_init(self, node, msg_type, topic, *args, **kwargs):
-            if topic.startswith('~') and not topic.startswith('~/'):
-                topic = '~/' + topic[1:]
-            if 'queue_size' in kwargs:
-                kwargs['qos_profile'] = kwargs.pop('queue_size')
-            self.__init_orig__(node, msg_type, topic, *args, **kwargs)
-
-        def _subscriber_unregister(self):
-            self.node.destroy_subscription(self.sub)
-        message_filters.Subscriber.__init__ = _subscriber_init
-        message_filters.Subscriber.unregister = _subscriber_unregister
 
 
 class RectArrayToClusterPointIndices(ConnectionBasedTransport):
@@ -75,9 +47,8 @@ class RectArrayToClusterPointIndices(ConnectionBasedTransport):
         else:
             use_info = self.get_parameter('use_info').value
         if use_info:
-            sub_rects = message_filters.Subscriber(self, RectArray, '~input')
-            sub_info = message_filters.Subscriber(
-                self, CameraInfo, '~input/info')
+            sub_rects = message_filters.Subscriber('~input', RectArray)
+            sub_info = message_filters.Subscriber('~input/info', CameraInfo)
             if ROS_VERSION == 1:
                 queue_size = rospy.get_param('~queue_size', 10)
                 approximate_sync = rospy.get_param('~approximate_sync', False)

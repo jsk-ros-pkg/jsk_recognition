@@ -81,9 +81,11 @@
   <exec_depend condition="$ROS_VERSION == 2">python3-numpy</exec_depend>
   <exec_depend condition="$ROS_VERSION == 2">python3-opencv</exec_depend>
   <exec_depend condition="$ROS_VERSION == 2">python3-pil</exec_depend>
-  <!-- the node_scripts: ConnectionBasedTransport of ROS 2 is of jsk_topic_tools >= 3.0.6
-       (jsk-ros-pkg/jsk_common#1849); jsk_ros1_ros2_compat_install_python() in CMakeLists.txt -->
+  <!-- the node_scripts: ConnectionBasedTransport of ROS 2 (jsk_topic_tools >= 3.0.6), and
+       message_filters.Subscriber of the arguments of ROS 1 on ROS 2 (jsk_ros1_ros2_compat >= 3.0.6),
+       jsk-ros-pkg/jsk_common#1849; jsk_ros1_ros2_compat_install_python() in CMakeLists.txt -->
   <buildtool_depend condition="$ROS_VERSION == 2" version_gte="3.0.2">jsk_ros1_ros2_compat</buildtool_depend>
+  <exec_depend condition="$ROS_VERSION == 2" version_gte="3.0.6">jsk_ros1_ros2_compat</exec_depend>
   <exec_depend condition="$ROS_VERSION == 2" version_gte="3.0.6">jsk_topic_tools</exec_depend>
   <exec_depend condition="$ROS_VERSION == 2">rcl_interfaces</exec_depend>
   <exec_depend condition="$ROS_VERSION == 2">cv_bridge</exec_depend>

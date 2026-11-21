@@ -10,7 +10,8 @@ import subprocess
 import sys
 
 CONTAINERS = {"ofa": "jsk-ofa-server",
-              "clip": "jsk-clip-server"}
+              "clip": "jsk-clip-server",
+              "dino": "jsk-dino-server"}
 OFA_MODEL_SCALES = ["base", "large", "huge"]
 
 parser = argparse.ArgumentParser(description="JSK Vision and Language API runner")

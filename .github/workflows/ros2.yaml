@@ -50,3 +50,6 @@ jobs:
           # rosdep's `pip:` installer refuses to install globally on
           # Python >= 3.11 (PEP 668) unless explicitly told to.
           PIP_BREAK_SYSTEM_PACKAGES: '1'
+          # TODO: remove once jsk_common 3.0.6 is released: the node_scripts of jsk_recognition_utils need
+          # ConnectionBasedTransport of ROS 2 (jsk_topic_tools, jsk-ros-pkg/jsk_common#1849)
+          UPSTREAM_WORKSPACE: 'github:k-okada/jsk_common#connection-based-transport-ros2'

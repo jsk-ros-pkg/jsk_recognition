@@ -1,28 +1,55 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
+
 from jsk_recognition_msgs.msg import ClusterPointIndices
 from jsk_topic_tools import ConnectionBasedTransport
 import message_filters
-import rospy
+
+# ROS 1: rospy, as before; ROS 2: rclpy
+ROS_VERSION = int(os.environ.get('ROS_VERSION', '1'))
+if ROS_VERSION == 1:
+    import rospy
+else:
+    import rclpy
+    from rclpy.executors import ExternalShutdownException
+    from rclpy.parameter import Parameter
 
 
 class AddClusterIndices(ConnectionBasedTransport):
-    def __init__(self):
-        super(AddClusterIndices, self).__init__()
+    def __init__(self, **kwargs):
+        if ROS_VERSION == 1:
+            super(AddClusterIndices, self).__init__()
+        else:
+            # the transport is the node on ROS 2
+            super(AddClusterIndices, self).__init__(
+                'add_cluster_indices', **kwargs)
+            self.declare_parameters('', [
+                ('topics', Parameter.Type.STRING_ARRAY),
+                ('approximate_sync', False),
+                ('queue_size', 100),
+                ('slop', 0.1),
+            ])
         self._pub = self.advertise('~output', ClusterPointIndices,
                                    queue_size=1)
 
     def subscribe(self):
-        topics = rospy.get_param('~topics')
+        if ROS_VERSION == 1:
+            topics = rospy.get_param('~topics')
+            use_async = rospy.get_param('~approximate_sync', False)
+            queue_size = rospy.get_param('~queue_size', 100)
+            slop = rospy.get_param('~slop', 0.1)
+        else:
+            topics = self.get_parameter('topics').value
+            use_async = self.get_parameter('approximate_sync').value
+            queue_size = self.get_parameter('queue_size').value
+            slop = self.get_parameter('slop').value
         self.subs = []
         for tp in topics:
             sub = message_filters.Subscriber(tp, ClusterPointIndices)
             self.subs.append(sub)
-        use_async = rospy.get_param('~approximate_sync', False)
-        queue_size = rospy.get_param('~queue_size', 100)
         if use_async:
-            slop = rospy.get_param('~slop', 0.1)
             sync = message_filters.ApproximateTimeSynchronizer(
                 self.subs, queue_size, slop)
         else:
@@ -42,6 +69,13 @@ class AddClusterIndices(ConnectionBasedTransport):
 
 
 if __name__ == '__main__':
-    rospy.init_node('add_cluster_indices')
-    app = AddClusterIndices()
-    rospy.spin()
+    if ROS_VERSION == 1:
+        rospy.init_node('add_cluster_indices')
+        app = AddClusterIndices()
+        rospy.spin()
+    else:
+        rclpy.init()
+        try:
+            rclpy.spin(AddClusterIndices())
+        except (KeyboardInterrupt, ExternalShutdownException):
+            pass

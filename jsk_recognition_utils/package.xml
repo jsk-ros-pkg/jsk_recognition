@@ -35,14 +35,20 @@
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-chainercv-pip</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-skimage</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-skimage</exec_depend>
+  <!-- feature.py, imported by __init__.py -->
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-sklearn</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-fcn-pip</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-shapely</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-shapely</exec_depend>
 
   <!-- ROS 1 only: the nodes, nodelets and python modules -->
-  <depend condition="$ROS_VERSION != 2">cv_bridge</depend>
+  <build_depend condition="$ROS_VERSION != 2">cv_bridge</build_depend>
+  <build_export_depend condition="$ROS_VERSION != 2">cv_bridge</build_export_depend>
+  <exec_depend condition="$ROS_VERSION != 2">cv_bridge</exec_depend>
   <depend condition="$ROS_VERSION != 2">eigen_conversions</depend>
-  <depend condition="$ROS_VERSION != 2">jsk_topic_tools</depend>
+  <build_depend condition="$ROS_VERSION != 2">jsk_topic_tools</build_depend>
+  <build_export_depend condition="$ROS_VERSION != 2">jsk_topic_tools</build_export_depend>
+  <exec_depend condition="$ROS_VERSION != 2">jsk_topic_tools</exec_depend>
   <depend condition="$ROS_VERSION != 2">pcl_ros</depend>
   <depend condition="$ROS_VERSION != 2">tf</depend>
   <depend condition="$ROS_VERSION != 2">tf2_ros</depend>
@@ -55,7 +61,8 @@
   <exec_depend condition="$ROS_VERSION != 2">message_runtime</exec_depend>
   <test_depend condition="$ROS_VERSION != 2">jsk_tools</test_depend>
 
-  <!-- ROS 2: the C++ library (geo/, pcl_util, cv_utils, ...) -->
+  <!-- ROS 2: the C++ library (geo/, pcl_util, cv_utils, ...) and the python module -->
+  <buildtool_depend condition="$ROS_VERSION == 2">ament_cmake_python</buildtool_depend>
   <depend condition="$ROS_VERSION == 2">pcl_conversions</depend>
   <depend condition="$ROS_VERSION == 2">rclcpp</depend>
   <build_depend condition="$ROS_VERSION == 2">boost</build_depend>
@@ -69,7 +76,25 @@
   <build_export_depend condition="$ROS_VERSION == 2">libopencv-dev</build_export_depend>
   <build_export_depend condition="$ROS_VERSION == 2">libpcl-all-dev</build_export_depend>
   <exec_depend condition="$ROS_VERSION == 2">libpcl-all</exec_depend>
+  <build_depend condition="$ROS_VERSION == 2">python3-dev</build_depend>
+  <build_depend condition="$ROS_VERSION == 2">python3-numpy</build_depend>
+  <exec_depend condition="$ROS_VERSION == 2">python3-numpy</exec_depend>
+  <exec_depend condition="$ROS_VERSION == 2">python3-opencv</exec_depend>
+  <exec_depend condition="$ROS_VERSION == 2">python3-pil</exec_depend>
+  <!-- the node_scripts: ConnectionBasedTransport of ROS 2 (jsk_topic_tools >= 3.0.6), and
+       message_filters.Subscriber of the arguments of ROS 1 on ROS 2 (jsk_ros1_ros2_compat >= 3.0.6),
+       jsk-ros-pkg/jsk_common#1849; jsk_ros1_ros2_compat_install_python() in CMakeLists.txt -->
+  <buildtool_depend condition="$ROS_VERSION == 2" version_gte="3.0.2">jsk_ros1_ros2_compat</buildtool_depend>
+  <exec_depend condition="$ROS_VERSION == 2" version_gte="3.0.6">jsk_ros1_ros2_compat</exec_depend>
+  <exec_depend condition="$ROS_VERSION == 2" version_gte="3.0.6">jsk_topic_tools</exec_depend>
+  <exec_depend condition="$ROS_VERSION == 2">rcl_interfaces</exec_depend>
+  <exec_depend condition="$ROS_VERSION == 2">cv_bridge</exec_depend>
+  <exec_depend condition="$ROS_VERSION == 2">message_filters</exec_depend>
+  <exec_depend condition="$ROS_VERSION == 2">rclpy</exec_depend>
+  <exec_depend condition="$ROS_VERSION == 2">tf_transformations</exec_depend>
+  <exec_depend condition="$ROS_VERSION == 2">python3-yaml</exec_depend>
   <test_depend condition="$ROS_VERSION == 2">ament_cmake_gtest</test_depend>
+  <test_depend condition="$ROS_VERSION == 2">ament_cmake_pytest</test_depend>
   <export>
     <build_type condition="$ROS_VERSION != 2">catkin</build_type>
     <build_type condition="$ROS_VERSION == 2">ament_cmake</build_type>

@@ -4,25 +4,46 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
+
 import numpy as np
 
 import cv_bridge
 from jsk_topic_tools import ConnectionBasedTransport
-import rospy
 from sensor_msgs.msg import Image
+
+# ROS 1: rospy, as before; ROS 2: rclpy
+ROS_VERSION = int(os.environ.get('ROS_VERSION', '1'))
+if ROS_VERSION == 1:
+    import rospy
+else:
+    import rclpy
+    from rclpy.executors import ExternalShutdownException
 
 
 class Image16UC1To32FC1(ConnectionBasedTransport):
 
-    def __init__(self):
-        super(self.__class__, self).__init__()
+    def __init__(self, **kwargs):
+        if ROS_VERSION == 1:
+            super(self.__class__, self).__init__()
+        else:
+            # the transport is the node on ROS 2
+            super(self.__class__, self).__init__(
+                'image_16uc1_to_32fc1', **kwargs)
         self.pub = self.advertise('~output', Image, queue_size=1)
 
     def subscribe(self):
-        self.sub = rospy.Subscriber('~input', Image, self.transport)
+        if ROS_VERSION == 1:
+            self.sub = rospy.Subscriber('~input', Image, self.transport)
+        else:
+            self.sub = self.create_subscription(
+                Image, '~/input', self.transport, 1)
 
     def unsubscribe(self):
-        self.sub.unregister()
+        if ROS_VERSION == 1:
+            self.sub.unregister()
+        else:
+            self.destroy_subscription(self.sub)
 
     def transport(self, msg):
         if msg.height * msg.width == 0:
@@ -36,6 +57,13 @@ class Image16UC1To32FC1(ConnectionBasedTransport):
 
 
 if __name__ == '__main__':
-    rospy.init_node('image_16uc1_to_32fc1')
-    Image16UC1To32FC1()
-    rospy.spin()
+    if ROS_VERSION == 1:
+        rospy.init_node('image_16uc1_to_32fc1')
+        Image16UC1To32FC1()
+        rospy.spin()
+    else:
+        rclpy.init()
+        try:
+            rclpy.spin(Image16UC1To32FC1())
+        except (KeyboardInterrupt, ExternalShutdownException):
+            pass

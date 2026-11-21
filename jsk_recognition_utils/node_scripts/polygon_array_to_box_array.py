@@ -1,17 +1,30 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-import dynamic_reconfigure.server
+import os
+
 import geometry_msgs.msg
 import jsk_recognition_msgs.msg
 import message_filters
 import numpy as np
-import rospy
 import shapely.geometry
-from jsk_recognition_utils.cfg import PolygonArrayToBoxArrayConfig
 from jsk_topic_tools import ConnectionBasedTransport
-from tf.transformations import quaternion_from_matrix as matrix2quaternion
-from tf.transformations import unit_vector as normalize_vector
+
+# ROS 1: rospy, as before; ROS 2: rclpy
+ROS_VERSION = int(os.environ.get('ROS_VERSION', '1'))
+if ROS_VERSION == 1:
+    import dynamic_reconfigure.server
+    from jsk_recognition_utils.cfg import PolygonArrayToBoxArrayConfig
+    import rospy
+    from tf.transformations import quaternion_from_matrix as matrix2quaternion
+    from tf.transformations import unit_vector as normalize_vector
+else:
+    from rcl_interfaces.msg import SetParametersResult
+    import rclpy
+    from rclpy.executors import ExternalShutdownException
+    from tf_transformations import quaternion_from_matrix as matrix2quaternion
+    from tf_transformations import unit_vector as normalize_vector
+    from types import SimpleNamespace
 
 
 def outer_product_matrix(v):
@@ -26,8 +39,8 @@ def cross_product(a, b):
 
 # minimum_rotated_rectangle is available since 1.6.0 (melodic)
 # https://github.com/shapely/shapely/pull/361
-from distutils.version import LooseVersion
-if LooseVersion(shapely.__version__) < LooseVersion('1.6.0'):
+# (not by distutils.version, which python 3.12 does not have)
+if not hasattr(shapely.geometry.Polygon, 'minimum_rotated_rectangle'):
     import math
     from itertools import islice
     from shapely.affinity import affine_transform
@@ -114,11 +127,27 @@ def rotate_points(points, a, b):
 
 class PolygonArrayToRectBoxArray(ConnectionBasedTransport):
 
-    def __init__(self):
-        super(PolygonArrayToRectBoxArray, self).__init__()
-        dynamic_reconfigure.server.Server(
-            PolygonArrayToBoxArrayConfig,
-            self._config_callback)
+    def __init__(self, **kwargs):
+        if ROS_VERSION == 1:
+            super(PolygonArrayToRectBoxArray, self).__init__()
+            dynamic_reconfigure.server.Server(
+                PolygonArrayToBoxArrayConfig,
+                self._config_callback)
+        else:
+            # the transport is the node on ROS 2
+            super(PolygonArrayToRectBoxArray, self).__init__(
+                'polygon_array_to_box_array', **kwargs)
+            # the parameter of cfg/PolygonArrayToBoxArray.cfg, with its
+            # default
+            self.declare_parameters('', [
+                ('thickness', 0.0001),
+                ('queue_size', 10),
+                ('approximate_sync', False),
+                ('slop', 0.1),
+            ])
+            self._config_callback(SimpleNamespace(
+                thickness=self.get_parameter('thickness').value), 0)
+            self.add_on_set_parameters_callback(self._set_parameters_cb)
         self.polygons_pub = self.advertise(
             '~output/polygons',
             jsk_recognition_msgs.msg.PolygonArray,
@@ -136,8 +165,14 @@ class PolygonArrayToRectBoxArray(ConnectionBasedTransport):
         self.thickness = config.thickness
         return config
 
+    def _set_parameters_cb(self, params):
+        """ROS 2: `ros2 param set` of the parameter of cfg/"""
+        for param in params:
+            if param.name == 'thickness':
+                self._config_callback(SimpleNamespace(thickness=param.value), 0)
+        return SetParametersResult(successful=True)
+
     def subscribe(self):
-        queue_size = rospy.get_param('~queue_size', 10)
         sub_polygon = message_filters.Subscriber(
             '~input/polygons',
             jsk_recognition_msgs.msg.PolygonArray,
@@ -146,9 +181,16 @@ class PolygonArrayToRectBoxArray(ConnectionBasedTransport):
             '~input/coefficients',
             jsk_recognition_msgs.msg.ModelCoefficientsArray,
             queue_size=1)
-        self.subs = [sub_polygon, sub_coefficients]
-        if rospy.get_param('~approximate_sync', False):
+        if ROS_VERSION == 1:
+            queue_size = rospy.get_param('~queue_size', 10)
+            approximate_sync = rospy.get_param('~approximate_sync', False)
             slop = rospy.get_param('~slop', 0.1)
+        else:
+            queue_size = self.get_parameter('queue_size').value
+            approximate_sync = self.get_parameter('approximate_sync').value
+            slop = self.get_parameter('slop').value
+        self.subs = [sub_polygon, sub_coefficients]
+        if approximate_sync:
             sync = message_filters.ApproximateTimeSynchronizer(
                 fs=self.subs, queue_size=queue_size, slop=slop)
         else:
@@ -198,7 +240,8 @@ class PolygonArrayToRectBoxArray(ConnectionBasedTransport):
                 header=polygon.header)
             for x, y, z in rect_polygon:
                 polygon.polygon.points.append(
-                    geometry_msgs.msg.Point32(x, y, z))
+                    geometry_msgs.msg.Point32(
+                        x=float(x), y=float(y), z=float(z)))
             new_polygons_msg.polygons.append(polygon)
 
             center_x, center_y, center_z = rect_polygon[:4].mean(axis=0)
@@ -214,16 +257,16 @@ class PolygonArrayToRectBoxArray(ConnectionBasedTransport):
             q_x, q_y, q_z, q_w = matrix2quaternion(base_matrix)
             dim_x = np.linalg.norm(rect_polygon[1] - rect_polygon[0])
             dim_y = np.linalg.norm(rect_polygon[2] - rect_polygon[1])
-            box_msg.pose.position.x = center_x
-            box_msg.pose.position.y = center_y
-            box_msg.pose.position.z = center_z
-            box_msg.pose.orientation.w = q_w
-            box_msg.pose.orientation.x = q_x
-            box_msg.pose.orientation.y = q_y
-            box_msg.pose.orientation.z = q_z
-            box_msg.dimensions.x = dim_x
-            box_msg.dimensions.y = dim_y
-            box_msg.dimensions.z = self.thickness
+            box_msg.pose.position.x = float(center_x)
+            box_msg.pose.position.y = float(center_y)
+            box_msg.pose.position.z = float(center_z)
+            box_msg.pose.orientation.w = float(q_w)
+            box_msg.pose.orientation.x = float(q_x)
+            box_msg.pose.orientation.y = float(q_y)
+            box_msg.pose.orientation.z = float(q_z)
+            box_msg.dimensions.x = float(dim_x)
+            box_msg.dimensions.y = float(dim_y)
+            box_msg.dimensions.z = float(self.thickness)
             boxes_msg.boxes.append(box_msg)
         self.polygons_pub.publish(new_polygons_msg)
         self.coeffs_pub.publish(coeffs_msg)
@@ -231,6 +274,13 @@ class PolygonArrayToRectBoxArray(ConnectionBasedTransport):
 
 
 if __name__ == '__main__':
-    rospy.init_node('polygon_array_to_box_array')
-    act = PolygonArrayToRectBoxArray()
-    rospy.spin()
+    if ROS_VERSION == 1:
+        rospy.init_node('polygon_array_to_box_array')
+        act = PolygonArrayToRectBoxArray()
+        rospy.spin()
+    else:
+        rclpy.init()
+        try:
+            rclpy.spin(PolygonArrayToRectBoxArray())
+        except (KeyboardInterrupt, ExternalShutdownException):
+            pass

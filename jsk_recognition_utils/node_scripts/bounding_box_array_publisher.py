@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import sys
 
 from geometry_msgs.msg import Point
@@ -7,14 +8,30 @@ from geometry_msgs.msg import Quaternion
 from geometry_msgs.msg import Vector3
 from jsk_recognition_msgs.msg import BoundingBox
 from jsk_recognition_msgs.msg import BoundingBoxArray
-import rospy
-from tf.transformations import quaternion_from_euler
+
+# ROS 1: rospy, as before; ROS 2: rclpy
+ROS_VERSION = int(os.environ.get('ROS_VERSION', '1'))
+if ROS_VERSION == 1:
+    import rospy
+    from tf.transformations import quaternion_from_euler
+else:
+    import rclpy
+    from rclpy.executors import ExternalShutdownException
+    from rclpy.parameter import Parameter
+    from tf_transformations import quaternion_from_euler
+    import yaml
 
 
 class BoundingBoxArrayPublisher(object):
 
-    def __init__(self):
+    def __init__(self, node=None):
+        # node: the node of ROS 2 (None on ROS 1)
+        self.node = node
         self.seq = 0
+
+        if ROS_VERSION != 1:
+            self._init_ros2()
+            return
 
         self.frame_id = rospy.get_param('~frame_id')
         if (rospy.has_param('~positions') or
@@ -49,11 +66,34 @@ class BoundingBoxArrayPublisher(object):
         rate = rospy.get_param('~rate', 1)
         self.timer = rospy.Timer(rospy.Duration(1. / rate), self.publish)
 
-    def publish(self, event):
+    def _init_ros2(self):
+        # the deprecated ~positions, ~rotations and ~dimensions (lists of
+        # lists, which a parameter of ROS 2 cannot be) are of ROS 1 only
+        # ~boxes: a YAML string, as a parameter of ROS 2 cannot be a list
+        # of dicts
+        self.node.declare_parameters('', [
+            ('frame_id', Parameter.Type.STRING),
+            ('boxes', Parameter.Type.STRING),
+            ('rate', 1.0),
+        ])
+        self.frame_id = self.node.get_parameter('frame_id').value
+        self.boxes = yaml.safe_load(self.node.get_parameter('boxes').value)
+        self.pub = self.node.create_publisher(
+            BoundingBoxArray, '~/output', 1)
+
+        rate = self.node.get_parameter('rate').value
+        self.timer = self.node.create_timer(1. / rate, self.publish)
+
+    def publish(self, event=None):
+        if ROS_VERSION == 1:
+            stamp = event.current_real
+        else:
+            stamp = self.node.get_clock().now().to_msg()
         bbox_array_msg = BoundingBoxArray()
-        bbox_array_msg.header.seq = self.seq
+        if ROS_VERSION == 1:
+            bbox_array_msg.header.seq = self.seq
         bbox_array_msg.header.frame_id = self.frame_id
-        bbox_array_msg.header.stamp = event.current_real
+        bbox_array_msg.header.stamp = stamp
         for box in self.boxes:
             pos = box['position']
             rot = box.get('rotation', [0, 0, 0])
@@ -62,12 +102,17 @@ class BoundingBoxArrayPublisher(object):
             label = box.get('label', 0)
 
             bbox_msg = BoundingBox()
-            bbox_msg.header.seq = self.seq
+            if ROS_VERSION == 1:
+                bbox_msg.header.seq = self.seq
             bbox_msg.header.frame_id = self.frame_id
-            bbox_msg.header.stamp = event.current_real
-            bbox_msg.pose.position = Point(*pos)
-            bbox_msg.pose.orientation = Quaternion(*qua)
-            bbox_msg.dimensions = Vector3(*dim)
+            bbox_msg.header.stamp = stamp
+            bbox_msg.pose.position = Point(
+                x=float(pos[0]), y=float(pos[1]), z=float(pos[2]))
+            bbox_msg.pose.orientation = Quaternion(
+                x=float(qua[0]), y=float(qua[1]), z=float(qua[2]),
+                w=float(qua[3]))
+            bbox_msg.dimensions = Vector3(
+                x=float(dim[0]), y=float(dim[1]), z=float(dim[2]))
             bbox_msg.label = label
 
             bbox_array_msg.boxes.append(bbox_msg)
@@ -76,6 +121,15 @@ class BoundingBoxArrayPublisher(object):
 
 
 if __name__ == '__main__':
-    rospy.init_node('bounding_box_array_publisher')
-    BoundingBoxArrayPublisher()
-    rospy.spin()
+    if ROS_VERSION == 1:
+        rospy.init_node('bounding_box_array_publisher')
+        BoundingBoxArrayPublisher()
+        rospy.spin()
+    else:
+        rclpy.init()
+        node = rclpy.create_node('bounding_box_array_publisher')
+        BoundingBoxArrayPublisher(node)
+        try:
+            rclpy.spin(node)
+        except (KeyboardInterrupt, ExternalShutdownException):
+            pass

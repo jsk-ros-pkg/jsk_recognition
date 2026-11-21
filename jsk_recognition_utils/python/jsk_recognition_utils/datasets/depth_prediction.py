@@ -178,7 +178,7 @@ class DepthPredictionDataset(chainer.dataset.DatasetMixin):
             src=ones, M=rot_mat,
             dsize=(in_img.shape[1], in_img.shape[0]),
             flags=cv2.INTER_NEAREST)
-        rot_keep = rot_keep.astype(np.bool)
+        rot_keep = rot_keep.astype(bool)
         rot_img = cv2.warpAffine(
             src=in_img, M=rot_mat,
             dsize=(in_img.shape[1], in_img.shape[0]), flags=flags)

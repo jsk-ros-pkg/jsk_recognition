@@ -38,6 +38,7 @@
 #define JSK_RECOGNITION_UTILS_TF_LISTENER_SINGLETON_H_
 
 #include <tf/transform_listener.h>
+#include <tf2_ros/transform_listener.h>
 
 namespace jsk_recognition_utils
 {

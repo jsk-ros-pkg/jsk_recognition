@@ -8,6 +8,14 @@ retrieves `sensor_msgs/PointCloud2` and publish `pcl_msgs/PointIndices`.
 You can specify the pose and size of the interest bounding box and jsk\_pcl/AttentionClipper returns ROI
 to see the object.
 
+This node is convenient because it can be used to extract the point cloud in the bounding box array. The following image is an example.
+
+![](images/attention_clipper_with_boxes.jpg)
+
+The border shows the `jsk_recognition_msgs/BoundingBoxArray`, and the red point cloud shows the point cloud extracted by the attention clipper.
+
+You can learn how to use it like this by looking at the [sample_attention_clipper.launch](https://github.com/jsk-ros-pkg/jsk_recognition/blob/master/jsk_pcl_ros/sample/sample_attention_clipper.launch).
+
 ## Note
 
 AttentionClipper does not work properly on Kinetic + PCL 1.8.0, and you can avoid the problem with SSE disabled PCL.

@@ -141,8 +141,17 @@ pcl::EarClippingPatched::isEar (int u, int v, int w, const Vertices& vertices)
 
   // 1: Avoid flat triangles and concave vertex
   Eigen::Vector3f cross = p_vu.cross(p_vw);
-  if ((cross[2] > 0) || (cross.norm() < eps))
-    return (false);
+
+  // Concave vertex condition:
+  // If the z component of the cross product is less than or equal to zero,
+  // the triangle is concave, meaning the angle between the vectors is greater than 180 degrees.
+  if (cross[2] <= 0) {
+    // Not an ear: concave vertex
+    return false;
+  } else if (cross.norm() < eps) {
+    // Not an ear: flat triangle
+    return false;
+  }
 
   Eigen::Vector3f p;
   // 2: Check if any other vertex is inside the triangle.

@@ -1,0 +1,8 @@
+# we need to install catkin_virtualenv 0.2.2
+# https://github.com/locusrobotics/catkin_virtualenv/pull/32
+# we need to avoid pip upgrade
+# see https://github.com/jsk-ros-pkg/jsk_3rdparty/pull/419 for more info
+- git:
+    local-name: locusrobotics/catkin_virtualenv
+    uri: https://github.com/locusrobotics/catkin_virtualenv
+    version: 0.2.2

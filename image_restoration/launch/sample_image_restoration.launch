@@ -1,0 +1,9 @@
+<launch>
+  <arg name="input_topic" default="/camera/image_raw" />
+  <arg name="output_topic" default="/camera/restoration_image" />
+
+  <node pkg="image_restoration" type="image_restoration.py" name="image_restoration_node" output="screen">
+    <param name="input_topic" value="$(arg input_topic)" />
+    <param name="output_topic" value="$(arg output_topic)" />
+  </node>
+</launch>

@@ -1,0 +1,6 @@
+torch==2.0.1
+torchvision==0.15.2
+realesrgan==0.3.0
+basicsr==1.4.2
+opencv-python==4.11.0.86
+numpy==1.21.5

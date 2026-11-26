@@ -47,6 +47,9 @@ LICENSE.Apache-2.0.
   Copyright 2014 Nervana Systems Inc., under the Apache License, Version 2.0;
   forward_gpu and backward_gpu on Fast R-CNN, Copyright (c) 2015 Microsoft,
   under the MIT License.
+* python/jsk_recognition_utils/color.py (labelcolormap)
+  Taken from imgviz (https://github.com/wkentaro/imgviz),
+  Copyright (c) 2018-2020 Kentaro Wada, under the MIT License.
 * cmake/FindCython.cmake, cmake/UseCython.cmake
   Copyright 2011 Kitware, Inc., under the Apache License, Version 2.0.
 

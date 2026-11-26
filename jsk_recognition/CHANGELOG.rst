@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.1 (2026-11-26)
+------------------
 * Use SPDX license identifiers matching the LICENSE files in package.xml (`#2909 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2909>`_)
 * Add a top-level LICENSE of the repository (`#2909 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2909>`_)
 * Contributors: Kei Okada

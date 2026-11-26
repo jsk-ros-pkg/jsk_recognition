@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.1 (2026-11-26)
+------------------
 * Use SPDX license identifiers matching the LICENSE files in package.xml (`#2909 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2909>`_)
 * Declare the licenses of the third-party code (Fast R-CNN, Chainer, neon, imgviz, Kitware CMake modules) in LICENSE, LICENSE.MIT and LICENSE.Apache-2.0, and install them (`#2909 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2909>`_)
 * Do not export ResNet of chainermodels, whose original work has no license (`#2909 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2909>`_)

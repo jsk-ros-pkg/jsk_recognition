@@ -2,6 +2,11 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use SPDX license identifiers matching the LICENSE files in package.xml (`#2909 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2909>`_)
+* Contributors: Kei Okada
+
 2.0.0 (2026-11-20)
 ------------------
 * Merge pull request `#2902 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2902>`_ from k-okada/rosdep-python3-keys

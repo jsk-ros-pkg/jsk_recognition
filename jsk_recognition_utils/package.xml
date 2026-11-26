@@ -9,7 +9,7 @@
   <url type="bugtracker">http://github.com/jsk-ros-pkg/jsk_recognition/issues</url>
   <url type="website">https://jsk-docs.readthedocs.io/projects/jsk_recognition/en/latest/jsk_recognition_utils</url>
 
-  <license>BSD</license>
+  <license>BSD-3-Clause</license>
 
   <buildtool_depend condition="$ROS_VERSION != 2">catkin</buildtool_depend>
   <buildtool_depend condition="$ROS_VERSION == 2">ament_cmake</buildtool_depend>

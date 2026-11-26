@@ -9,7 +9,7 @@
   </description>
   <author>Shingo Kitagawa</author>
   <maintainer email="shingogo.5511@gmail.com">Shingo Kitagawa</maintainer>
-  <license>BSD</license>
+  <license>BSD-3-Clause</license>
   <url>http://ros.org/wiki/depth_image_publisher</url>
 
   <buildtool_depend>catkin</buildtool_depend>

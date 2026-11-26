@@ -27,3 +27,20 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+--------------------------------------------------------------------------------
+
+Third-party code
+
+The BSD 3-Clause License above does not apply to the following files, which
+keep the licenses written in their headers.
+
+* python/jsk_recognition_utils/nms.pyx
+  Based on Fast R-CNN (https://github.com/rbgirshick/fast-rcnn),
+  Copyright (c) 2015 Microsoft, under the MIT License.
+* python/jsk_recognition_utils/chainermodels/roi_pooling_2d.py
+  Based on Chainer, Copyright (c) 2015 Preferred Infrastructure, Inc. and
+  Preferred Networks, Inc., under the MIT License, and on neon,
+  Copyright 2014 Nervana Systems Inc., under the Apache License, Version 2.0.
+* cmake/FindCython.cmake, cmake/UseCython.cmake
+  Copyright 2011 Kitware, Inc., under the Apache License, Version 2.0.

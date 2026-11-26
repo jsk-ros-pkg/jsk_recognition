@@ -33,14 +33,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Third-party code
 
 The BSD 3-Clause License above does not apply to the following files, which
-keep the licenses written in their headers.
+keep the licenses written in their headers. The MIT License notices are in
+LICENSE.MIT, and the text of the Apache License, Version 2.0 is in
+LICENSE.Apache-2.0.
 
 * python/jsk_recognition_utils/nms.pyx
   Based on Fast R-CNN (https://github.com/rbgirshick/fast-rcnn),
   Copyright (c) 2015 Microsoft, under the MIT License.
 * python/jsk_recognition_utils/chainermodels/roi_pooling_2d.py
-  Based on Chainer, Copyright (c) 2015 Preferred Infrastructure, Inc. and
-  Preferred Networks, Inc., under the MIT License, and on neon,
-  Copyright 2014 Nervana Systems Inc., under the Apache License, Version 2.0.
+  Based on Chainer (https://github.com/chainer/chainer), Copyright (c) 2015
+  Preferred Infrastructure, Inc. and Preferred Networks, Inc., under the MIT
+  License; _roi_pooling_slice, forward_cpu and backward_cpu on neon,
+  Copyright 2014 Nervana Systems Inc., under the Apache License, Version 2.0;
+  forward_gpu and backward_gpu on Fast R-CNN, Copyright (c) 2015 Microsoft,
+  under the MIT License.
 * cmake/FindCython.cmake, cmake/UseCython.cmake
   Copyright 2011 Kitware, Inc., under the Apache License, Version 2.0.

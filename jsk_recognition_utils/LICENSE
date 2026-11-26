@@ -49,3 +49,8 @@ LICENSE.Apache-2.0.
   under the MIT License.
 * cmake/FindCython.cmake, cmake/UseCython.cmake
   Copyright 2011 Kitware, Inc., under the Apache License, Version 2.0.
+
+python/jsk_recognition_utils/chainermodels/resnet/ is a modified work of
+https://github.com/yasunorikudo/chainer-ResNet, which has no license, so
+its license is not known. It is not imported by jsk_recognition_utils
+(chainermodels does not export it).

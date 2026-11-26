@@ -12,7 +12,7 @@
     </ul><br />    
     There can be more than one grid%d declared, the numbers should grow consecutively starting at 0.</description>
 
-  <license>BSD</license>
+  <license>BSD-3-Clause</license>
 
   <url type="repository">http://github.com/jsk-ros-pkg/jsk_recognition</url>
   <url type="bugtracker">http://github.com/jsk-ros-pkg/jsk_recognition/issues</url>

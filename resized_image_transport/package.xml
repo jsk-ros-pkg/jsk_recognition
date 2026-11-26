@@ -5,7 +5,7 @@
 
   <maintainer email="youhei@jsk.t.u-tokyo.ac.jp">Yohei Kakiuchi</maintainer>
 
-  <license>BSD</license>
+  <license>BSD-3-Clause</license>
 
   <url type="repository">http://github.com/jsk-ros-pkg/jsk_recognition</url>
   <url type="bugtracker">http://github.com/jsk-ros-pkg/jsk_recognition/issues</url>

@@ -8,7 +8,7 @@
   </description>
   <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
   <author>Rosen Diankov (rdiankov@cs.cmu.edu), Kei Okada</author>
-  <license>LGPL</license>
+  <license>LGPL-3.0-or-later</license>
 
   <url type="repository">http://github.com/jsk-ros-pkg/jsk_recognition</url>
   <url type="bugtracker">http://github.com/jsk-ros-pkg/jsk_recognition/issues</url>

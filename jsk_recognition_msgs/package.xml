@@ -10,7 +10,7 @@
 
 
   <maintainer email="ueda@jsk.t.u-tokyo.ac.jp">Ryohei Ueda</maintainer>
-  <license>BSD</license>
+  <license>BSD-3-Clause</license>
   <buildtool_depend condition="$ROS_VERSION == 1">catkin</buildtool_depend>
   <buildtool_depend condition="$ROS_VERSION == 2">ament_cmake</buildtool_depend>
   <buildtool_depend condition="$ROS_VERSION == 2">rosidl_default_generators</buildtool_depend>

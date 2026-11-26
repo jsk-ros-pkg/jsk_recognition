@@ -142,6 +142,10 @@ if("$ENV{ROS_VERSION}" EQUAL 2)
     ament_export_dependencies(jsoncpp)
   endif()
   ament_export_dependencies(${_ament_deps} Boost Eigen3 OpenCV PCL yaml-cpp)
+  # the notices of the third-party code
+  install(FILES LICENSE LICENSE.MIT LICENSE.Apache-2.0
+    DESTINATION share/${PROJECT_NAME})
+
   ament_package()
 else() # if("$ENV{ROS_VERSION}" EQUAL 2)
 cmake_minimum_required(VERSION 2.8.3)
@@ -301,6 +305,9 @@ install(DIRECTORY include/${PROJECT_NAME}/
   FILES_MATCHING PATTERN "*.h" # Ignore *_version.h.in files
 )
 
+# the notices of the third-party code
+install(FILES LICENSE LICENSE.MIT LICENSE.Apache-2.0
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 install(DIRECTORY sample test
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   USE_SOURCE_PERMISSIONS
